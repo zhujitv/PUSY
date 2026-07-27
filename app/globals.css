@@ -83,6 +83,127 @@ footer { background: #0a0a0a; color: #fff; padding: 62px 3.5vw 35px; display: gr
 .footer-contact { align-items: flex-start; padding-top: 8px; }
 .footer-contact span { margin-top: auto; color: #8b8b8b; }
 
+/* Catalog */
+.catalog-page { padding: 52px 2.5vw 100px; }
+.catalog-title p, .breadcrumbs { margin: 0 0 22px; color: #777; font-size: 11px; text-transform: uppercase; }
+.catalog-title h1 { margin: 0 0 34px; font-size: clamp(48px, 7vw, 108px); line-height: .92; font-weight: 400; letter-spacing: -.065em; }
+.category-pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 24px; scrollbar-width: none; }
+.category-pills a { flex: 0 0 auto; padding: 10px 17px; border: 1px solid #d8d8d8; border-radius: 30px; font-size: 12px; }
+.category-pills a.active, .category-pills a:hover { color: #fff; background: #000; border-color: #000; }
+.catalog-tools { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-top: 1px solid #ddd; font-size: 12px; }
+.catalog-tools label { display: flex; align-items: center; gap: 10px; }
+.catalog-tools select { border: 0; background: transparent; padding: 7px 28px 7px 5px; }
+.catalog-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.catalog-card { min-width: 0; }
+.catalog-image { display: block; height: 37vw; max-height: 570px; position: relative; overflow: hidden; background: #f5f5f5; }
+.catalog-image img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; }
+.catalog-card:hover .catalog-image img { transform: scale(1.02); }
+.catalog-card-copy { padding: 13px 2px 28px; font-size: 13px; }
+.catalog-card-copy > a { display: block; min-height: 34px; }
+.catalog-card-copy p { margin: 7px 0 12px; }
+.catalog-card-copy del { color: #999; margin-left: 5px; }
+.catalog-card-copy button { width: 100%; padding: 12px 10px; border: 1px solid #000; background: #000; color: #fff; text-transform: uppercase; font-size: 11px; }
+
+/* Product */
+.product-page { display: grid; grid-template-columns: 1.55fr .82fr; gap: 3.5vw; padding: 22px 2.5vw 95px; }
+.product-gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-content: start; }
+.product-gallery img { width: 100%; height: 58vw; max-height: 850px; object-fit: cover; background: #f4f4f4; }
+.product-info { position: sticky; top: 20px; align-self: start; padding: 26px 2vw 0 0; }
+.product-new { display: inline-block; margin-bottom: 20px; padding: 7px 12px; border-radius: 22px; background: #f2f2f2; font-size: 11px; text-transform: uppercase; }
+.product-info h1 { margin: 0 0 18px; font-size: clamp(36px, 4.1vw, 66px); line-height: .98; font-weight: 400; letter-spacing: -.05em; }
+.product-price { font-size: 17px; }
+.product-price del { color: #999; margin-left: 8px; }
+.product-desc { margin: 30px 0; font-size: 15px; line-height: 1.65; }
+.product-actions { display: grid; grid-template-columns: 120px 1fr; gap: 8px; margin-bottom: 28px; }
+.quantity { display: grid; grid-template-columns: 1fr 1fr 1fr; border: 1px solid #000; }
+.quantity button { border: 0; background: transparent; }
+.quantity span { display: grid; place-items: center; }
+.add-main, .gift-add { min-height: 52px; border: 1px solid #000; background: #000; color: #fff; text-transform: uppercase; font-size: 12px; }
+.product-notes details, .gift-copy details { border-top: 1px solid #ddd; padding: 17px 0; }
+.product-notes details:last-child, .gift-copy details:last-child { border-bottom: 1px solid #ddd; }
+.product-notes summary, .gift-copy summary { cursor: pointer; font-size: 13px; text-transform: uppercase; }
+.product-notes p, .gift-copy details p { color: #555; line-height: 1.55; font-size: 13px; }
+.related { padding: 0 2.5vw 100px; }
+.related h2 { margin: 0 0 25px; font-size: clamp(34px, 4vw, 60px); font-weight: 400; letter-spacing: -.045em; }
+.related > div { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.related a { display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+.related img { width: 100%; height: 32vw; max-height: 490px; object-fit: cover; background: #f4f4f4; }
+.related b { font-weight: 400; }
+
+/* About */
+.about-page { padding: 20px 2.5vw 100px; }
+.about-hero { min-height: 650px; display: grid; grid-template-columns: .8fr 1.2fr; align-items: end; gap: 4vw; padding-bottom: 80px; }
+.about-hero p { text-transform: uppercase; font-size: 12px; }
+.about-hero h1 { margin: 8px 0; font-size: clamp(64px, 9vw, 145px); line-height: .85; font-weight: 400; letter-spacing: -.075em; }
+.about-hero img { width: 100%; height: 650px; object-fit: cover; }
+.timeline { border-top: 1px solid #bbb; }
+.timeline article { display: grid; grid-template-columns: 1fr 1fr; gap: 8vw; align-items: center; padding: 72px 0; border-bottom: 1px solid #bbb; }
+.timeline article:nth-child(even) > div { order: 2; }
+.timeline article:nth-child(even) img { order: 1; }
+.timeline article > div { padding: 0 4vw; }
+.timeline span { color: var(--pink); font-size: 15px; }
+.timeline h2 { margin: 16px 0; font-size: clamp(36px, 4.5vw, 70px); line-height: 1; font-weight: 400; letter-spacing: -.05em; }
+.timeline p { max-width: 560px; line-height: 1.7; }
+.timeline img { width: 100%; height: 48vw; max-height: 680px; object-fit: cover; }
+.about-page blockquote { margin: 100px auto 20px; max-width: 1300px; text-align: center; font-size: clamp(40px, 6vw, 92px); line-height: 1; letter-spacing: -.055em; }
+
+/* Information pages */
+.info-page { padding: 65px 5vw 120px; }
+.info-page > header { display: grid; grid-template-columns: .4fr 1.1fr 1fr; gap: 4vw; align-items: start; padding-bottom: 75px; border-bottom: 1px solid #aaa; }
+.info-page > header > p { margin: 8px 0; font-size: 11px; text-transform: uppercase; }
+.info-page h1, .stores-page h1, .blog-page h1 { margin: 0; font-size: clamp(58px, 8vw, 130px); line-height: .87; font-weight: 400; letter-spacing: -.07em; }
+.info-page > header > div { font-size: 18px; line-height: 1.55; }
+.info-body { max-width: 900px; margin: 0 4vw 0 auto; padding-top: 70px; }
+.info-body h2 { margin: 65px 0 18px; font-size: clamp(30px, 3vw, 47px); font-weight: 400; letter-spacing: -.035em; }
+.info-body h2:first-child { margin-top: 0; }
+.info-body p, .info-body li { line-height: 1.75; color: #333; }
+.info-body ol { padding-left: 22px; }
+.delivery-table { border-top: 1px solid #aaa; }
+.delivery-table div { display: grid; grid-template-columns: 1.5fr .7fr .7fr; padding: 18px 0; border-bottom: 1px solid #ddd; }
+.delivery-table b { font-weight: 400; }
+.delivery-table em { font-style: normal; color: #777; }
+.payment-cards { display: flex; flex-wrap: wrap; gap: 8px; }
+.payment-cards span { min-width: 120px; padding: 28px 20px; border: 1px solid #ccc; text-align: center; font-weight: 600; }
+.info-callout { margin-top: 55px; padding: 28px; background: #f3f3f3; }
+.faq-item { border-top: 1px solid #aaa; padding: 22px 0; }
+.faq-item:last-child { border-bottom: 1px solid #aaa; }
+.faq-item summary { display: flex; justify-content: space-between; cursor: pointer; font-size: 18px; }
+.faq-item p { max-width: 680px; }
+
+/* Stores, gift, blog */
+.stores-page, .blog-page { padding: 70px 3vw 110px; }
+.stores-page header, .blog-page header { margin-bottom: 65px; }
+.stores-page header p, .blog-page header p { text-transform: uppercase; font-size: 12px; }
+.stores-page > section { display: grid; grid-template-columns: .8fr 1.2fr .8fr; min-height: 600px; }
+.stores-page article { padding: 42px; border: 1px solid #aaa; display: flex; flex-direction: column; justify-content: flex-end; }
+.stores-page article + article { border-left: 0; }
+.stores-page article span { color: var(--pink); font-size: 12px; text-transform: uppercase; }
+.stores-page h2 { font-size: 36px; font-weight: 400; letter-spacing: -.04em; }
+.stores-page p { line-height: 1.6; color: #444; }
+.stores-page a { margin-top: 25px; text-transform: uppercase; font-size: 12px; }
+.stores-page .store-visual { padding: 0; }
+.store-visual img { width: 100%; height: 100%; object-fit: cover; }
+.gift-page { display: grid; grid-template-columns: 1.25fr .75fr; min-height: 760px; }
+.gift-visual { min-height: 720px; display: grid; place-items: center; padding: 6vw; background: #f6b0d2; }
+.gift-card-art { width: min(100%, 700px); aspect-ratio: 1.58; padding: 45px; display: flex; flex-direction: column; border-radius: 20px; background: linear-gradient(135deg, #f52b89, #ff8ec0); box-shadow: 0 35px 70px rgba(118,0,52,.2); color: #fff; }
+.gift-card-art span { font-size: clamp(70px, 8vw, 130px); font-weight: 600; letter-spacing: -.08em; }
+.gift-card-art small { font-size: 14px; letter-spacing: .18em; }
+.gift-card-art b { margin-top: auto; font-size: 26px; font-weight: 400; }
+.gift-copy { padding: 7vw 4vw; }
+.gift-copy > p:first-child { text-transform: uppercase; font-size: 11px; }
+.gift-copy h1 { margin: 12px 0 35px; font-size: clamp(52px, 6vw, 90px); line-height: .9; font-weight: 400; letter-spacing: -.06em; }
+.gift-amounts { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.gift-amounts button { padding: 14px 8px; border: 1px solid #aaa; background: #fff; }
+.gift-amounts button.active { border-color: #000; background: #000; color: #fff; }
+.gift-desc { margin: 30px 0; line-height: 1.65; }
+.gift-add { width: 100%; margin-bottom: 35px; }
+.blog-page > section { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.blog-page article img { width: 100%; height: 45vw; max-height: 660px; object-fit: cover; }
+.blog-page article p { margin: 15px 0 10px; color: #777; font-size: 11px; text-transform: uppercase; }
+.blog-page article h2 { margin: 0 0 18px; font-size: 28px; font-weight: 400; line-height: 1.05; letter-spacing: -.035em; }
+.blog-page article a { text-transform: uppercase; font-size: 11px; }
+.compact-newsletter { min-height: 300px; }
+
 @media (max-width: 900px) {
   .site-header { height: 68px; padding: 0 18px; }
   .brand { font-size: 37px; letter-spacing: -3px; }
@@ -115,6 +236,48 @@ footer { background: #0a0a0a; color: #fff; padding: 62px 3.5vw 35px; display: gr
   footer { grid-template-columns: 1fr; gap: 42px; padding: 46px 22px 30px; }
   .footer-logo { font-size: 100px; }
   .footer-contact span { margin-top: 25px; }
+  .catalog-page { padding: 35px 8px 65px; }
+  .catalog-title { padding: 0 10px; }
+  .catalog-title h1 { font-size: 56px; }
+  .category-pills, .catalog-tools { margin: 0 10px; }
+  .catalog-grid { grid-template-columns: repeat(2, 1fr); }
+  .catalog-image { height: 67vw; }
+  .catalog-card-copy { font-size: 12px; }
+  .product-page { grid-template-columns: 1fr; padding: 8px 8px 60px; }
+  .product-gallery { overflow-x: auto; grid-auto-flow: column; grid-auto-columns: 90vw; grid-template-columns: none; scrollbar-width: none; }
+  .product-gallery img { height: 122vw; }
+  .product-info { position: static; padding: 25px 12px 0; }
+  .product-info h1 { font-size: 47px; }
+  .product-actions { grid-template-columns: 105px 1fr; }
+  .related { padding: 0 8px 65px; }
+  .related > div { grid-template-columns: repeat(2, 1fr); }
+  .related img { height: 64vw; }
+  .about-page { padding: 8px 8px 70px; }
+  .about-hero { grid-template-columns: 1fr; min-height: 0; padding-bottom: 55px; }
+  .about-hero h1 { font-size: 73px; }
+  .about-hero img { height: 118vw; }
+  .timeline article { grid-template-columns: 1fr; gap: 35px; padding: 50px 0; }
+  .timeline article:nth-child(even) > div, .timeline article:nth-child(even) img { order: initial; }
+  .timeline img { height: 115vw; }
+  .about-page blockquote { margin-top: 70px; font-size: 43px; }
+  .info-page { padding: 46px 20px 75px; }
+  .info-page > header { grid-template-columns: 1fr; gap: 20px; padding-bottom: 45px; }
+  .info-page h1, .stores-page h1, .blog-page h1 { font-size: 63px; }
+  .info-body { margin: 0; padding-top: 45px; }
+  .delivery-table div { grid-template-columns: 1fr; gap: 8px; }
+  .stores-page, .blog-page { padding: 45px 8px 70px; }
+  .stores-page header, .blog-page header { padding: 0 12px; }
+  .stores-page > section { grid-template-columns: 1fr; }
+  .stores-page article { min-height: 350px; }
+  .stores-page article + article { border-left: 1px solid #aaa; border-top: 0; }
+  .stores-page .store-visual { min-height: 520px; }
+  .gift-page { grid-template-columns: 1fr; }
+  .gift-visual { min-height: 500px; padding: 35px 18px; }
+  .gift-card-art { padding: 27px; }
+  .gift-card-art span { font-size: 75px; }
+  .gift-copy { padding: 55px 22px; }
+  .blog-page > section { grid-template-columns: 1fr; gap: 50px; }
+  .blog-page article img { height: 120vw; }
 }
 
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }

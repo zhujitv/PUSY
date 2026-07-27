@@ -1,0 +1,2 @@
+import { InfoPage } from "../components/InfoPage";
+export default function ReturnPage() { return <InfoPage eyebrow="客户服务" title="退换货"><h2>退货条件</h2><p>商品退货按照适用的远程销售规则与消费者权益保护要求处理。商品须保持完整外观、原有功能和工厂包装，并确认未被开启或使用。</p><h2>如何申请</h2><ol><li>通过客户服务渠道提供订单号与申请原因。</li><li>等待工作人员确认商品状态与寄回方式。</li><li>商品检查通过后，退款将原路退回。</li></ol><div className="info-callout"><b>需要帮助？</b><p>请发送邮件至 help@pusy.beauty，或在 Telegram 联系我们的客户服务团队。</p></div></InfoPage>; }

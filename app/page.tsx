@@ -18,7 +18,9 @@ const stories = [
   { image: "/assets/31.webp", title: "FLOWER 奶油腮红", price: "910 ₽" },
 ];
 
-const navItems = ["神秘礼盒", "全部商品", "套装", "新品", "畅销", "眉妆", "彩妆", "护肤", "身体护理", "头发护理", "家居", "配件", "礼品卡"];
+const navItems = [
+  ["神秘礼盒", "/catalog/sekretnye-boksy"], ["全部商品", "/catalog/products"], ["套装", "/catalog/nabory"], ["新品", "/collections/novinki"], ["畅销", "/catalog/hity"], ["眉妆", "/catalog/brows"], ["彩妆", "/catalog/makiyazh"], ["护肤", "/catalog/uhod"], ["身体护理", "/catalog/uhod-1"], ["头发护理", "/catalog/hair"], ["家居", "/catalog/dlya-doma"], ["配件", "/catalog/accessories"], ["礼品卡", "/gift-card"],
+];
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -48,7 +50,7 @@ export default function Home() {
       </header>
 
       <nav className={`nav-row ${menuOpen ? "is-open" : ""}`} aria-label="商品分类">
-        {navItems.map((item) => <a href="#products" key={item} onClick={() => setMenuOpen(false)}>{item}</a>)}
+        {navItems.map(([item, href]) => <a href={href} key={href} onClick={() => setMenuOpen(false)}>{item}</a>)}
       </nav>
 
       <section className="hero" id="top">
@@ -64,7 +66,7 @@ export default function Home() {
       <section className="product-section" id="products">
         <div className="section-heading">
           <h2>新品</h2>
-          <a href="#products">查看全部</a>
+          <a href="/catalog/products">查看全部</a>
         </div>
         <div className="product-grid">
           {products.map((product) => (
@@ -82,15 +84,15 @@ export default function Home() {
       </section>
 
       <section className="category-grid" aria-label="热门分类">
-        <a className="category-card" href="#products">
+        <a className="category-card" href="/catalog/makiyazh">
           <img src="/assets/04.webp" alt="彩妆" />
           <span>彩妆</span>
         </a>
-        <a className="category-card" href="#products">
+        <a className="category-card" href="/catalog/uhod">
           <img src="/assets/01.webp" alt="护肤" />
           <span>护肤</span>
         </a>
-        <a className="category-card" href="#products">
+        <a className="category-card" href="/catalog/dlya-doma">
           <img src="/assets/13.webp" alt="家居护理" />
           <span>家居</span>
         </a>
@@ -128,8 +130,8 @@ export default function Home() {
       <footer>
         <div className="footer-logo">púsy</div>
         <div className="footer-links">
-          <div><a href="#products">商品目录</a><a href="#top">关于我们</a><a href="#top">配送说明</a><a href="#top">退换货</a><a href="#top">支付方式</a></div>
-          <div><a href="https://t.me/pusy_beauty">客户服务</a><a href="#top">线下门店</a><a href="#top">合作申请</a><a href="#top">隐私政策</a></div>
+          <div><a href="/catalog/products">商品目录</a><a href="/about">关于我们</a><a href="/delivery">配送说明</a><a href="/return">退换货</a><a href="/payment">支付方式</a></div>
+          <div><a href="https://t.me/pusy_beauty">客户服务</a><a href="/stores-china">线下门店</a><a href="mailto:help@pusy.beauty">合作申请</a><a href="/faq">常见问题</a></div>
         </div>
         <div className="footer-contact">
           <a href="tel:+79266740938">+7 (926) 674-09-38</a>

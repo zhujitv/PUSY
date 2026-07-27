@@ -10,6 +10,15 @@ export type Product = {
   description: string;
 };
 
+export const RUB_TO_CNY = 0.09;
+
+export function formatCnyFromRub(rubles: number) {
+  return `${(rubles * RUB_TO_CNY).toLocaleString("zh-CN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })} 元`;
+}
+
 export const products: Product[] = [
   { slug: "karandash-dlya-broveiy-s-refilom-medium-brown-100758", name: "可替换芯眉笔 Dark Brown", price: 890, image: "/assets/16.webp", imageAlt: "/assets/18.webp", category: "眉妆", description: "纤细笔芯轻松勾勒自然眉形，顺滑显色，适合日常快速打造精致眉妆。" },
   { slug: "gidrofilnoe-maslo-dlya-lica-pusy-110-ml-100733", name: "轻盈面部卸妆油", price: 990, image: "/assets/21.webp", imageAlt: "/assets/33.webp", badge: "新品", category: "护肤", description: "轻盈油感配方，遇水迅速乳化，温和卸除彩妆与日常污垢，洗后清爽不紧绷。" },

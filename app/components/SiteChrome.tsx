@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { formatCnyFromRub } from "../data/products";
 
 const nav = [
   ["神秘礼盒", "/catalog/sekretnye-boksy"], ["全部商品", "/catalog/products"], ["套装", "/catalog/nabory"], ["新品", "/collections/novinki"], ["畅销", "/catalog/hity"], ["眉妆", "/catalog/brows"], ["彩妆", "/catalog/makiyazh"], ["护肤", "/catalog/uhod"], ["身体护理", "/catalog/uhod-1"], ["头发护理", "/catalog/hair"], ["家居", "/catalog/dlya-doma"], ["配件", "/catalog/accessories"], ["礼品卡", "/gift-card"],
@@ -9,7 +10,7 @@ const nav = [
 export function SiteHeader({ cartCount = 0 }: { cartCount?: number }) {
   const [open, setOpen] = useState(false);
   return <>
-    <div className="shipping-bar">俄罗斯境内订单满 5 000 ₽ 免费配送</div>
+    <div className="shipping-bar">订单满 {formatCnyFromRub(5000)} 免费配送</div>
     <header className="site-header subpage-header">
       <button className="icon-button menu-button" aria-label="打开菜单" onClick={() => setOpen(!open)}><span /><span /></button>
       <a className="brand" href="/" aria-label="PÚSY 首页">púsy</a>

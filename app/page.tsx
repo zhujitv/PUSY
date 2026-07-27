@@ -1,21 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { formatCnyFromRub } from "./data/products";
 
 const products = [
-  { name: "轻盈卸妆油", price: "990 ₽", image: "/assets/21.webp", badge: "新品" },
-  { name: "Ice Baby 慕斯高光", price: "990 ₽", image: "/assets/20.webp", badge: "新品" },
-  { name: "「美丽随身」限定套装", price: "5 490 ₽", oldPrice: "6 050 ₽", image: "/assets/32.webp", badge: "新品" },
-  { name: "晨间焕肤护理套装", price: "2 590 ₽", oldPrice: "3 070 ₽", image: "/assets/37.webp", badge: "新品" },
+  { name: "轻盈卸妆油", price: 990, image: "/assets/21.webp", badge: "新品" },
+  { name: "Ice Baby 慕斯高光", price: 990, image: "/assets/20.webp", badge: "新品" },
+  { name: "「美丽随身」限定套装", price: 5490, oldPrice: 6050, image: "/assets/32.webp", badge: "新品" },
+  { name: "晨间焕肤护理套装", price: 2590, oldPrice: 3070, image: "/assets/37.webp", badge: "新品" },
 ];
 
 const stories = [
-  { image: "/assets/18.webp", title: "奶油唇线笔", price: "490 ₽" },
-  { image: "/assets/07.webp", title: "透明眉毛定型啫喱", price: "810 ₽" },
-  { image: "/assets/02.webp", title: "面部美黑水", price: "1 010 ₽" },
-  { image: "/assets/34.webp", title: "ICE BABY 慕斯高光", price: "990 ₽" },
-  { image: "/assets/15.webp", title: "BASE HAIR 洗发水", price: "590 ₽" },
-  { image: "/assets/31.webp", title: "FLOWER 奶油腮红", price: "910 ₽" },
+  { image: "/assets/18.webp", title: "奶油唇线笔", price: 490 },
+  { image: "/assets/07.webp", title: "透明眉毛定型啫喱", price: 810 },
+  { image: "/assets/02.webp", title: "面部美黑水", price: 1010 },
+  { image: "/assets/34.webp", title: "ICE BABY 慕斯高光", price: 990 },
+  { image: "/assets/15.webp", title: "BASE HAIR 洗发水", price: 590 },
+  { image: "/assets/31.webp", title: "FLOWER 奶油腮红", price: 910 },
 ];
 
 const navItems = [
@@ -44,7 +45,7 @@ export default function Home() {
 
   return (
     <main>
-      <div className="shipping-bar">俄罗斯境内订单满 5 000 ₽ 免费配送</div>
+      <div className="shipping-bar">订单满 {formatCnyFromRub(5000)} 免费配送</div>
 
       <header className={`site-header home-header ${scrolled ? "is-scrolled" : ""}`}>
         <button className="icon-button menu-button" aria-label="打开菜单" onClick={() => setMenuOpen(!menuOpen)}>
@@ -82,7 +83,7 @@ export default function Home() {
                 <button onClick={() => setCartCount((n) => n + 1)}>加入购物袋</button>
               </div>
               <h3>{product.name}</h3>
-              <p className="price">{product.price} {product.oldPrice && <del>{product.oldPrice}</del>}</p>
+              <p className="price">{formatCnyFromRub(product.price)} {product.oldPrice && <del>{formatCnyFromRub(product.oldPrice)}</del>}</p>
             </article>
           ))}
         </div>
@@ -110,7 +111,7 @@ export default function Home() {
             <a className="story-card" href="#products" key={story.title}>
               <img src={story.image} alt={story.title} />
               <span className="play-dot">▶</span>
-              <div><b>{story.title}</b><em>{story.price}</em></div>
+              <div><b>{story.title}</b><em>{formatCnyFromRub(story.price)}</em></div>
             </a>
           ))}
         </div>

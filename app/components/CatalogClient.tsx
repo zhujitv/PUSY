@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { Product } from "../data/products";
+import { formatCnyFromRub } from "../data/products";
 
 export function CatalogClient({ initialProducts }: { initialProducts: Product[] }) {
   const [sort, setSort] = useState("popular");
@@ -13,7 +14,7 @@ export function CatalogClient({ initialProducts }: { initialProducts: Product[] 
     <div className="catalog-grid">
       {sorted.map((product) => <article className="catalog-card" key={product.slug}>
         <a href={`/products/${product.slug}`} className="catalog-image">{product.badge && <span className="badge">{product.badge}</span>}<img src={product.image} alt={product.name} /></a>
-        <div className="catalog-card-copy"><a href={`/products/${product.slug}`}>{product.name}</a><p>{product.price.toLocaleString("ru-RU")} ₽ {product.oldPrice && <del>{product.oldPrice.toLocaleString("ru-RU")} ₽</del>}</p><button onClick={() => setAdded((current) => ({ ...current, [product.slug]: true }))}>{added[product.slug] ? "已加入" : "加入购物袋"}</button></div>
+        <div className="catalog-card-copy"><a href={`/products/${product.slug}`}>{product.name}</a><p>{formatCnyFromRub(product.price)} {product.oldPrice && <del>{formatCnyFromRub(product.oldPrice)}</del>}</p><button onClick={() => setAdded((current) => ({ ...current, [product.slug]: true }))}>{added[product.slug] ? "已加入" : "加入购物袋"}</button></div>
       </article>)}
     </div>
   </>;

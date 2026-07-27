@@ -10,7 +10,7 @@ export type Product = {
   description: string;
 };
 
-export const RUB_TO_CNY = 0.09;
+export const RUB_TO_CNY = 0.12;
 
 export function formatCnyFromRub(rubles: number) {
   return `${(rubles * RUB_TO_CNY).toLocaleString("zh-CN", {

@@ -64,7 +64,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   return <PageShell>
     <main className="product-page">
-      <div className="product-gallery">{gallery.slice(0, 6).map((image, index) => <img src={image} alt={index === 0 ? product.name : `${product.name} 商品图 ${index + 1}`} key={`${image}-${index}`} />)}</div>
+      <div className="product-gallery">{gallery.slice(0, 6).map((image, index) => <img src={image} alt={index === 0 ? product.name : `${product.name} 商品图 ${index + 1}`} key={`${image}-${index}`} loading={index === 0 ? "eager" : "lazy"} fetchPriority={index === 0 ? "high" : "auto"} decoding="async" />)}</div>
       <section className="product-info">
         <p className="breadcrumbs"><a href="/">首页</a> / <a href="/catalog/products">{product.category}</a></p>
         {product.badge && <span className="product-new">{product.badge}</span>}
@@ -83,6 +83,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         </div>
       </section>
     </main>
-    {related.length > 0 && <section className="related"><h2>你可能也喜欢</h2><div>{related.map((item) => <a href={`/products/${item.slug}`} key={item.slug}><img src={item.image} alt={item.name} /><span>{item.name}</span><b>{formatCnyFromRub(item.price)}</b></a>)}</div></section>}
+    {related.length > 0 && <section className="related"><h2>你可能也喜欢</h2><div>{related.map((item) => <a href={`/products/${item.slug}`} key={item.slug}><img src={item.image} alt={item.name} loading="lazy" decoding="async" /><span>{item.name}</span><b>{formatCnyFromRub(item.price)}</b></a>)}</div></section>}
   </PageShell>;
 }

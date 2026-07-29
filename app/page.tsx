@@ -6,6 +6,7 @@ import { useStore } from "./components/StoreProvider";
 import { HeaderIcon } from "./components/HeaderIcons";
 
 const featuredProducts = products.slice(1, 9);
+const defaultHomeContent = { announcement: `订单满 ${formatCnyFromRub(5000)} 免费配送`, hero_eyebrow: "púsy × Ü", hero_title: "礼物飞进\n你的订单", hero_subtitle: "猜猜你会收到哪一份？", featured_title: "新品" };
 
 const reels = [
   { player: "vplvbx7qwc3dhtviylip", slug: "karandash-dlya-gub-pusy-cream-100460", title: "奶油唇线笔" },
@@ -27,6 +28,7 @@ export default function Home() {
   const [heroPaused, setHeroPaused] = useState(false);
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [homeContent, setHomeContent] = useState(defaultHomeContent);
   const heroTouchStart = useRef<number | null>(null);
   const { cartCount, addToCart, setCartOpen, setSearchOpen } = useStore();
 
@@ -35,6 +37,10 @@ export default function Home() {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/content").then((response) => response.ok ? response.json() : null).then((body) => { if (body?.content) setHomeContent((current) => ({ ...current, ...body.content })); }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -56,7 +62,7 @@ export default function Home() {
 
   return (
     <main>
-      <div className="shipping-bar">订单满 {formatCnyFromRub(5000)} 免费配送</div>
+      <div className="shipping-bar">{homeContent.announcement}</div>
 
       <header className={`site-header home-header ${scrolled ? "is-scrolled" : ""}`}>
         <button className="icon-button menu-button" aria-label="打开菜单" onClick={() => setMenuOpen(!menuOpen)}>
@@ -76,9 +82,9 @@ export default function Home() {
           <div className={`hero-slide hero-slide--box ${heroIndex === 1 ? "is-active" : ""}`} aria-hidden={heroIndex !== 1}><img src="/assets/35.webp" alt="PÚSY 海滩神秘礼盒" loading="lazy" decoding="async" /></div>
         </div>
         {heroIndex === 0 ? <div className="hero-copy">
-          <div className="campaign-mark">púsy <span>×</span> Ü</div>
-          <h1>礼物飞进<br />你的订单</h1>
-          <p>猜猜你会收到哪一份？</p>
+          <div className="campaign-mark">{homeContent.hero_eyebrow}</div>
+          <h1 className="multiline-title">{homeContent.hero_title}</h1>
+          <p>{homeContent.hero_subtitle}</p>
           <div className="prize-panel"><div><small>随机赢取</small><b>9 款礼物<br />中的 1 款</b></div><div><small>重磅好礼</small><b>Dyson、Paper Shoot、<br />Apple 等惊喜</b></div></div>
         </div> : <div className="hero-copy hero-copy--box">
           <p>PÚSY 神秘礼盒</p>
@@ -92,7 +98,7 @@ export default function Home() {
 
       <section className="product-section" id="products">
         <div className="section-heading">
-          <h2>新品</h2>
+          <h2>{homeContent.featured_title}</h2>
           <a href="/catalog/products">查看全部</a>
         </div>
         <div className="product-grid">

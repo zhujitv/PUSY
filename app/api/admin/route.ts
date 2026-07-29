@@ -5,6 +5,7 @@ import type { PaymentProviderName } from "../../../lib/payments/types";
 import { notifyOrderShipped } from "../../../lib/notifications/business";
 import { notificationChannelState, processDueNotifications, processNotificationJob } from "../../../lib/notifications/service";
 import { chinaComplianceReady, chinaRegion } from "../../../lib/china-region";
+import { ensureCommerceFeatureSchema, getSiteContent } from "../../../db/commerce-features";
 
 const orderStatuses = ["待付款", "支付失败", "待处理", "已确认", "配货中", "已发货", "已完成", "退款中", "部分退款", "已退款", "已取消"];
 const memberStatuses = ["active", "vip", "blocked"];
@@ -17,8 +18,9 @@ async function allowAdmin() { return process.env.NODE_ENV !== "production" || Bo
 export async function GET() {
   try {
     if (!await allowAdmin()) return Response.json({ error: "请先登录管理后台" }, { status: 401 });
+    await ensureCommerceFeatureSchema();
     const db = await getStoreDb();
-    const [products, orders, orderItems, members, subscribers, returns, retailPartnerships, coupons, giftCards, stats, revenueTrend, providers, payments, refunds, paymentEvents, notificationSettings, notificationTemplates, notificationJobs] = await Promise.all([
+    const [products, orders, orderItems, members, subscribers, returns, retailPartnerships, coupons, giftCards, stats, revenueTrend, providers, payments, refunds, paymentEvents, notificationSettings, notificationTemplates, notificationJobs, reviews, content] = await Promise.all([
       db.prepare("SELECT * FROM products ORDER BY id DESC").all(),
       db.prepare("SELECT o.*, COUNT(oi.id) AS item_count FROM orders o LEFT JOIN order_items oi ON oi.order_id = o.id GROUP BY o.id ORDER BY o.created_at DESC LIMIT 200").all(),
       db.prepare("SELECT * FROM order_items ORDER BY id DESC LIMIT 1000").all(),
@@ -37,8 +39,10 @@ export async function GET() {
       notificationChannelState(),
       db.prepare("SELECT * FROM notification_templates ORDER BY key").all(),
       db.prepare("SELECT * FROM notification_jobs ORDER BY created_at DESC LIMIT 500").all(),
+      db.prepare("SELECT * FROM product_reviews ORDER BY created_at DESC LIMIT 500").all(),
+      getSiteContent(),
     ]);
-    return Response.json({ products: products.results, orders: orders.results, orderItems: orderItems.results, members: members.results, subscribers: subscribers.results, returns: returns.results, retailPartnerships: retailPartnerships.results, coupons: coupons.results, giftCards: giftCards.results, stats, revenueTrend: revenueTrend.results, providers, payments: payments.results, refunds: refunds.results, paymentEvents: paymentEvents.results, notificationSettings, notificationTemplates: notificationTemplates.results, notificationJobs: notificationJobs.results, region: { ...chinaRegion, complianceReady: chinaComplianceReady } });
+    return Response.json({ products: products.results, orders: orders.results, orderItems: orderItems.results, members: members.results, subscribers: subscribers.results, returns: returns.results, retailPartnerships: retailPartnerships.results, coupons: coupons.results, giftCards: giftCards.results, stats, revenueTrend: revenueTrend.results, providers, payments: payments.results, refunds: refunds.results, paymentEvents: paymentEvents.results, notificationSettings, notificationTemplates: notificationTemplates.results, notificationJobs: notificationJobs.results, reviews: reviews.results, content, region: { ...chinaRegion, complianceReady: chinaComplianceReady } });
   } catch (error) {
     return Response.json({ error: error instanceof Error ? error.message : "读取后台数据失败" }, { status: 500 });
   }
@@ -49,6 +53,7 @@ export async function POST(request: Request) {
     if (!await allowAdmin()) return Response.json({ error: "请先登录管理后台" }, { status: 401 });
     const payload = await request.json() as Record<string, unknown>;
     const action = String(payload.action ?? "");
+    await ensureCommerceFeatureSchema();
     const db = await getStoreDb();
     if (action === "bulk-import-products") {
       const items = Array.isArray(payload.products) ? payload.products.slice(0, 200) as Record<string, unknown>[] : [];
@@ -149,6 +154,15 @@ export async function POST(request: Request) {
       await processNotificationJob(id);
     } else if (action === "process-notifications") {
       await processDueNotifications();
+    } else if (action === "update-review-status") {
+      const status = String(payload.status ?? "");
+      if (!["pending", "approved", "rejected"].includes(status)) return Response.json({ error: "评价状态无效" }, { status: 400 });
+      await db.prepare("UPDATE product_reviews SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(status, Number(payload.id)).run();
+    } else if (action === "update-site-content") {
+      const content = payload.content && typeof payload.content === "object" ? payload.content as Record<string, unknown> : {};
+      const allowed = ["announcement", "hero_eyebrow", "hero_title", "hero_subtitle", "featured_title"];
+      const statements = allowed.map((key) => db.prepare("INSERT INTO site_content (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP").bind(key, String(content[key] ?? "").trim().slice(0, 180)));
+      await db.batch(statements);
     } else return Response.json({ error: "未知操作" }, { status: 400 });
     return Response.json({ ok: true });
   } catch (error) {

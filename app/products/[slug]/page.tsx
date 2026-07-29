@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { PageShell } from "../../components/SiteChrome";
 import { formatCnyFromRub, products, type Product, type ProductVariantGroup } from "../../data/products";
 import { ProductActions } from "./ProductActions";
+import { ProductGallery } from "./ProductGallery";
+import { ProductReviews } from "./ProductReviews";
 import { getStoreDb, type DbProduct } from "../../../db/store";
 
 const siteUrl = "https://pusy.cn";
@@ -40,7 +42,7 @@ function hasLegacyYandexMedia(product: Product) {
     .some((image) => image?.startsWith("https://avatars.mds.yandex.net/get-yastore/"));
 }
 
-function useLocalizedMedia(product: Product, catalogProduct: Product): Product {
+function withLocalizedMedia(product: Product, catalogProduct: Product): Product {
   if (!hasLegacyYandexMedia(product)) return product;
   return {
     ...product,
@@ -71,7 +73,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   try {
     const db = await getStoreDb();
     const row = await db.prepare("SELECT * FROM products WHERE slug = ? LIMIT 1").bind(slug).first<DbProduct>();
-    if (row) product = useLocalizedMedia(productFromRow(row), catalogProduct);
+    if (row) product = withLocalizedMedia(productFromRow(row), catalogProduct);
   } catch {}
 
   const gallery = Array.from(new Set([product.image, ...(product.images ?? []), product.imageAlt].filter(Boolean))) as string[];
@@ -80,7 +82,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   return <PageShell>
     <main className="product-page">
-      <div className="product-gallery">{gallery.slice(0, 6).map((image, index) => <img src={image} alt={index === 0 ? product.name : `${product.name} 商品图 ${index + 1}`} key={`${image}-${index}`} loading={index < 3 ? "eager" : "lazy"} fetchPriority={index === 0 ? "high" : "auto"} decoding="async" />)}</div>
+      <ProductGallery images={gallery.slice(0, 8)} name={product.name} />
       <section className="product-info">
         <p className="breadcrumbs"><a href="/">首页</a> / <a href="/catalog/products">{product.category}</a></p>
         {product.badge && <span className="product-new">{product.badge}</span>}
@@ -99,6 +101,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         </div>
       </section>
     </main>
+    <ProductReviews slug={product.slug} />
     {related.length > 0 && <section className="related"><h2>你可能也喜欢</h2><div>{related.map((item) => <a href={`/products/${item.slug}`} key={item.slug}><img src={item.image} alt={item.name} loading="lazy" decoding="async" /><span>{item.name}</span><b>{formatCnyFromRub(item.price)}</b></a>)}</div></section>}
   </PageShell>;
 }

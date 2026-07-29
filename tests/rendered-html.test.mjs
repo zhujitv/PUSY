@@ -104,12 +104,48 @@ test("homepage videos require manual playback", async () => {
   const homepage = await read("app/page.tsx");
   assert.match(homepage, /runtime\.strm\.yandex\.ru\/player\/video/);
   assert.doesNotMatch(homepage, /allow="[^"]*autoplay/);
-  assert.match(homepage, /hero-clean-v2\.png/);
+  assert.match(homepage, /hero-clean-v2-42a264aa\.webp/);
   assert.match(homepage, /35\.webp/);
   assert.match(homepage, /hero-copy--box/);
   assert.match(homepage, /setInterval\(\(\) => setHeroIndex/);
   assert.match(homepage, /aria-label="上一张"/);
   assert.match(homepage, /aria-label="下一张"/);
+});
+
+test("commerce feature set covers discovery, cart, membership, reviews and content operations", async () => {
+  const [catalog, cart, account, productPage, gallery, reviews, reviewsApi, admin, adminApi, contentApi, schema, css] = await Promise.all([
+    read("app/components/CatalogClient.tsx"),
+    read("app/cart/page.tsx"),
+    read("app/account/AccountClient.tsx"),
+    read("app/products/[slug]/page.tsx"),
+    read("app/products/[slug]/ProductGallery.tsx"),
+    read("app/products/[slug]/ProductReviews.tsx"),
+    read("app/api/reviews/route.ts"),
+    read("app/admin/AdminClient.tsx"),
+    read("app/api/admin/route.ts"),
+    read("app/api/content/route.ts"),
+    read("db/railway-postgres.sql"),
+    read("app/globals.css"),
+  ]);
+  assert.match(catalog, /只看有货/);
+  assert.match(catalog, /最低价（元）/);
+  assert.match(catalog, /商品标签/);
+  assert.match(cart, /shipping-progress/);
+  assert.match(cart, /顺手带上/);
+  assert.match(account, /我的收藏/);
+  assert.match(productPage, /ProductGallery/);
+  assert.match(productPage, /ProductReviews/);
+  assert.match(gallery, /product-gallery-thumbs/);
+  assert.match(reviews, /写下你的评价/);
+  assert.match(reviewsApi, /verified_purchase/);
+  assert.match(admin, /评价审核/);
+  assert.match(admin, /内容运营/);
+  assert.match(adminApi, /update-review-status/);
+  assert.match(adminApi, /update-site-content/);
+  assert.match(contentApi, /getSiteContent/);
+  assert.match(schema, /CREATE TABLE IF NOT EXISTS product_reviews/);
+  assert.match(schema, /CREATE TABLE IF NOT EXISTS site_content/);
+  assert.match(css, /product-gallery-stage img[^}]*object-fit: contain/);
 });
 
 test("member center always exposes a working sign-out entry", async () => {

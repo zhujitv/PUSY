@@ -3,6 +3,7 @@ import { paymentAdapter } from "./index";
 import { sha256 } from "./crypto";
 import type { PaymentProviderName, PaymentStatus, ProviderConfig, RefundStatus } from "./types";
 import { notifyGiftCards, notifyOrderConfirmed, notifyRefundCompleted } from "../notifications/business";
+import { commitPaidOrder, releaseExpiredOrderReservations } from "../orders/reservations";
 
 type DbPayment = { id: string; order_id: string; provider: PaymentProviderName; merchant_trade_no: string; provider_transaction_id: string | null; amount_fen: number; status: PaymentStatus; checkout_url: string | null; code_url: string | null; attempts: number };
 type DbRefund = { id: string; payment_id: string; order_id: string; provider: PaymentProviderName; merchant_refund_no: string; provider_refund_id: string | null; amount_fen: number; reason: string; status: RefundStatus; attempts: number };
@@ -28,11 +29,12 @@ function tradeNo(orderId: string, provider: PaymentProviderName) {
 function paymentId() { return `PAY-${crypto.randomUUID().slice(0, 12).toUpperCase()}`; }
 function refundId() { return `REF-${crypto.randomUUID().slice(0, 12).toUpperCase()}`; }
 
-export async function createPayment(orderId: string, provider: PaymentProviderName, origin: string, accessToken = "") {
+export async function createPayment(orderId: string, provider: PaymentProviderName, origin: string) {
+  await releaseExpiredOrderReservations();
   const db = await getStoreDb();
-  const order = await db.prepare("SELECT id, total, status FROM orders WHERE id = ?").bind(orderId).first<{ id: string; total: number; status: string }>();
+  const order = await db.prepare("SELECT id, total, status, reservation_expires_at, resources_released FROM orders WHERE id = ?").bind(orderId).first<{ id: string; total: number; status: string; reservation_expires_at: string | null; resources_released: number }>();
   if (!order) throw new Error("订单不存在");
-  if (["已取消", "已退款"].includes(order.status)) throw new Error("当前订单不能发起支付");
+  if (["已取消", "已退款"].includes(order.status) || order.resources_released || (order.reservation_expires_at && new Date(order.reservation_expires_at).getTime() <= Date.now())) throw new Error("订单支付时限已过，请重新下单");
   const config = await providerConfig(provider);
   const adapter = paymentAdapter(provider);
   if (!config.enabled) throw new Error(`${provider === "wechat" ? "微信支付" : "支付宝"}尚未启用`);
@@ -48,7 +50,6 @@ export async function createPayment(orderId: string, provider: PaymentProviderNa
   if (!payment) throw new Error("支付记录创建失败");
   try {
     const returnParams = new URLSearchParams({ orderId: order.id, provider });
-    if (accessToken) returnParams.set("token", accessToken);
     const result = await adapter.create(config, { orderId: order.id, tradeNo: payment.merchant_trade_no, amountFen: payment.amount_fen, description: `PUSY.CN 订单 ${order.id}`, notifyUrl: `${origin}/api/payments/webhooks/${provider}`, returnUrl: `${origin}/checkout/payment?${returnParams.toString()}` });
     await db.batch([
       db.prepare("UPDATE payments SET status = ?, checkout_url = ?, code_url = ?, attempts = attempts + 1, last_error = NULL, next_retry_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(result.status, result.checkoutUrl ?? null, result.codeUrl ?? null, payment.id),
@@ -93,6 +94,7 @@ export async function applyPaymentStatus(payment: DbPayment, status: PaymentStat
     db.prepare("UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(orderStatus, payment.order_id),
   ]);
   if (resolvedStatus === "paid" && payment.status !== "paid") {
+    await commitPaidOrder(payment.order_id);
     await Promise.all([notifyOrderConfirmed(payment.order_id), notifyGiftCards(payment.order_id)]).catch(() => undefined);
   }
 }

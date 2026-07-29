@@ -1,19 +1,22 @@
 import { getStoreDb } from "../../../db/store";
-import { getChatGPTUser } from "../../chatgpt-auth";
+import { getAdminIdentity } from "../../../lib/admin-auth";
 import { createPayment, createRefund, paymentProviderState, retryRefund, syncPayment, syncRefund } from "../../../lib/payments/service";
 import type { PaymentProviderName } from "../../../lib/payments/types";
 import { notifyOrderShipped } from "../../../lib/notifications/business";
 import { notificationChannelState, processDueNotifications, processNotificationJob } from "../../../lib/notifications/service";
 import { chinaComplianceReady, chinaRegion } from "../../../lib/china-region";
 import { ensureCommerceFeatureSchema, getSiteContent } from "../../../db/commerce-features";
+import { hasTrustedOrigin, safeServerError } from "../../../lib/request-security";
+import { releaseOrderReservation } from "../../../lib/orders/reservations";
 
 const orderStatuses = ["待付款", "支付失败", "待处理", "已确认", "配货中", "已发货", "已完成", "退款中", "部分退款", "已退款", "已取消"];
 const memberStatuses = ["active", "vip", "blocked"];
 const returnStatuses = ["待审核", "已批准", "已拒绝", "已退款", "已关闭"];
 const partnershipStatuses = ["待联系", "洽谈中", "已合作", "已拒绝", "已关闭"];
 const yuanToStored = (value: unknown) => Math.round(Number(value) / 0.12);
+const validImagePath = (value: string) => /^\/(assets|products)\/[A-Za-z0-9_./-]+$/.test(value) || /^https:\/\/avatars\.mds\.yandex\.net\/get-yastore\//.test(value);
 
-async function allowAdmin() { return process.env.NODE_ENV !== "production" || Boolean(await getChatGPTUser()); }
+async function allowAdmin() { return Boolean(await getAdminIdentity()); }
 
 export async function GET() {
   try {
@@ -30,8 +33,8 @@ export async function GET() {
       db.prepare("SELECT * FROM retail_partnerships ORDER BY created_at DESC LIMIT 1000").all(),
       db.prepare("SELECT * FROM coupons ORDER BY created_at DESC LIMIT 500").all(),
       db.prepare("SELECT * FROM gift_cards ORDER BY created_at DESC LIMIT 500").all(),
-      db.prepare("SELECT COUNT(*) AS order_count, COALESCE(SUM(total), 0) AS revenue, COALESCE(SUM(CASE WHEN status NOT IN ('已完成','已取消') THEN 1 ELSE 0 END), 0) AS pending_count, COALESCE(AVG(total), 0) AS avg_order_value, (SELECT COUNT(*) FROM products WHERE status = 'active' AND inventory_verified = 1 AND stock < 10) AS low_stock_count, (SELECT COUNT(*) FROM products WHERE status = 'active' AND inventory_verified = 0) AS unverified_inventory_count, (SELECT COUNT(*) FROM subscribers WHERE status = 'active') AS active_subscribers, (SELECT COUNT(*) FROM returns WHERE status = '待审核') AS pending_returns, (SELECT COUNT(*) FROM retail_partnerships WHERE status = '待联系') AS pending_partnerships FROM orders").first(),
-      db.prepare("SELECT substr(created_at, 1, 10) AS day, COALESCE(SUM(total), 0) AS revenue, COUNT(*) AS orders FROM orders WHERE created_at::timestamp >= CURRENT_TIMESTAMP - INTERVAL '29 days' AND status != '已取消' GROUP BY substr(created_at, 1, 10) ORDER BY day").all(),
+      db.prepare("SELECT COUNT(*) AS order_count, COALESCE(SUM(CASE WHEN status NOT IN ('待付款','支付失败','已取消') THEN total ELSE 0 END), 0) AS revenue, COALESCE(SUM(CASE WHEN status NOT IN ('已完成','已取消') THEN 1 ELSE 0 END), 0) AS pending_count, COALESCE(AVG(CASE WHEN status NOT IN ('待付款','支付失败','已取消') THEN total END), 0) AS avg_order_value, (SELECT COUNT(*) FROM products WHERE status = 'active' AND inventory_verified = 1 AND stock < 10) AS low_stock_count, (SELECT COUNT(*) FROM products WHERE status = 'active' AND inventory_verified = 0) AS unverified_inventory_count, (SELECT COUNT(*) FROM subscribers WHERE status = 'active') AS active_subscribers, (SELECT COUNT(*) FROM returns WHERE status = '待审核') AS pending_returns, (SELECT COUNT(*) FROM retail_partnerships WHERE status = '待联系') AS pending_partnerships FROM orders").first(),
+      db.prepare("SELECT substr(created_at, 1, 10) AS day, COALESCE(SUM(total), 0) AS revenue, COUNT(*) AS orders FROM orders WHERE created_at::timestamp >= CURRENT_TIMESTAMP - INTERVAL '29 days' AND status NOT IN ('待付款','支付失败','已取消') GROUP BY substr(created_at, 1, 10) ORDER BY day").all(),
       paymentProviderState(),
       db.prepare("SELECT p.*, o.customer, o.email FROM payments p JOIN orders o ON o.id = p.order_id ORDER BY p.created_at DESC LIMIT 500").all(),
       db.prepare("SELECT r.*, p.merchant_trade_no FROM refunds r JOIN payments p ON p.id = r.payment_id ORDER BY r.created_at DESC LIMIT 500").all(),
@@ -43,14 +46,15 @@ export async function GET() {
       getSiteContent(),
     ]);
     return Response.json({ products: products.results, orders: orders.results, orderItems: orderItems.results, members: members.results, subscribers: subscribers.results, returns: returns.results, retailPartnerships: retailPartnerships.results, coupons: coupons.results, giftCards: giftCards.results, stats, revenueTrend: revenueTrend.results, providers, payments: payments.results, refunds: refunds.results, paymentEvents: paymentEvents.results, notificationSettings, notificationTemplates: notificationTemplates.results, notificationJobs: notificationJobs.results, reviews: reviews.results, content, region: { ...chinaRegion, complianceReady: chinaComplianceReady } });
-  } catch (error) {
-    return Response.json({ error: error instanceof Error ? error.message : "读取后台数据失败" }, { status: 500 });
+  } catch {
+    return safeServerError("读取后台数据失败，请稍后再试");
   }
 }
 
 export async function POST(request: Request) {
   try {
     if (!await allowAdmin()) return Response.json({ error: "请先登录管理后台" }, { status: 401 });
+    if (!hasTrustedOrigin(request)) return Response.json({ error: "请求来源无效" }, { status: 403 });
     const payload = await request.json() as Record<string, unknown>;
     const action = String(payload.action ?? "");
     await ensureCommerceFeatureSchema();
@@ -65,7 +69,7 @@ export async function POST(request: Request) {
         const category = String(item.category ?? "").trim();
         const image = String(item.image ?? "").trim();
         const price = yuanToStored(item.price);
-        if (!slug || !name || !category || !image || !Number.isFinite(price)) return Response.json({ error: `商品 ${name || slug || "未知"} 的必填信息不完整` }, { status: 400 });
+        if (!slug || !name || !category || !validImagePath(image) || !Number.isFinite(price)) return Response.json({ error: `商品 ${name || slug || "未知"} 的必填信息或图片地址无效` }, { status: 400 });
         statements.push(db.prepare("INSERT INTO products (slug, name, category, description, image, image_alt, badge, price, old_price, stock, inventory_verified, sku, volume, ingredients, usage, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(slug) DO UPDATE SET name = excluded.name, category = excluded.category, description = excluded.description, image = excluded.image, image_alt = excluded.image_alt, badge = excluded.badge, price = excluded.price, old_price = excluded.old_price, stock = excluded.stock, inventory_verified = excluded.inventory_verified, sku = excluded.sku, volume = excluded.volume, ingredients = excluded.ingredients, usage = excluded.usage, status = excluded.status, updated_at = CURRENT_TIMESTAMP").bind(slug, name, category, String(item.description ?? ""), image, String(item.imageAlt ?? "") || null, String(item.badge ?? "") || null, price, item.oldPrice ? yuanToStored(item.oldPrice) : null, Math.max(0, Math.round(Number(item.stock ?? 0))), item.inventoryVerified ? 1 : 0, String(item.sku ?? "") || null, String(item.volume ?? "") || null, String(item.ingredients ?? "") || null, String(item.usage ?? "") || null, String(item.status ?? "active")));
       }
       await db.batch(statements);
@@ -76,7 +80,7 @@ export async function POST(request: Request) {
       const category = String(payload.category ?? "").trim();
       const image = String(payload.image ?? "").trim();
       const price = yuanToStored(payload.price);
-      if (!name || !slug || !category || !image || !Number.isFinite(price) || price < 0) return Response.json({ error: "请完整填写商品名称、链接标识、分类、图片和价格" }, { status: 400 });
+      if (!name || !slug || !category || !validImagePath(image) || !Number.isFinite(price) || price < 0) return Response.json({ error: "请完整填写商品信息，并使用站内图片或允许的历史图片地址" }, { status: 400 });
       const values = [slug, name, category, String(payload.description ?? ""), image, String(payload.imageAlt ?? "") || null, String(payload.badge ?? "") || null, price, payload.oldPrice ? yuanToStored(payload.oldPrice) : null, Math.max(0, Math.round(Number(payload.stock ?? 0))), payload.inventoryVerified ? 1 : 0, String(payload.sku ?? "") || null, String(payload.volume ?? "") || null, String(payload.ingredients ?? "") || null, String(payload.usage ?? "") || null, String(payload.status ?? "active")];
       if (action === "create-product") await db.prepare("INSERT INTO products (slug, name, category, description, image, image_alt, badge, price, old_price, stock, inventory_verified, sku, volume, ingredients, usage, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").bind(...values).run();
       else await db.prepare("UPDATE products SET slug = ?, name = ?, category = ?, description = ?, image = ?, image_alt = ?, badge = ?, price = ?, old_price = ?, stock = ?, inventory_verified = ?, sku = ?, volume = ?, ingredients = ?, usage = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(...values, Number(payload.id)).run();
@@ -85,6 +89,7 @@ export async function POST(request: Request) {
     } else if (action === "update-order-status") {
       const status = String(payload.status ?? "");
       if (!orderStatuses.includes(status)) return Response.json({ error: "订单状态无效" }, { status: 400 });
+      if (status === "已取消" && await releaseOrderReservation(String(payload.id))) return Response.json({ ok: true });
       await db.prepare("UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(status, String(payload.id)).run();
       if (status === "已发货") await notifyOrderShipped(String(payload.id)).catch(() => undefined);
     } else if (action === "update-member-status") {
@@ -166,7 +171,7 @@ export async function POST(request: Request) {
     } else return Response.json({ error: "未知操作" }, { status: 400 });
     return Response.json({ ok: true });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "保存失败";
-    return Response.json({ error: message.includes("UNIQUE") ? "链接标识或邮箱已经存在" : message }, { status: 500 });
+    const conflict = error instanceof Error && /unique/i.test(error.message);
+    return safeServerError(conflict ? "链接标识或邮箱已经存在" : "后台操作失败，请稍后再试", conflict ? 409 : 500);
   }
 }

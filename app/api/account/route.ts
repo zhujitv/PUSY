@@ -1,8 +1,8 @@
-import { getChatGPTUser } from "../../chatgpt-auth";
 import { ensureMember } from "../../../db/member-account";
 import { getStoreDb } from "../../../db/store";
 import { getPreviewMemberIdentity } from "../../../lib/preview-member-auth";
 import { ensureMemberProfile } from "../../../db/member-profile";
+import { hasTrustedOrigin, safeServerError } from "../../../lib/request-security";
 
 const genderValues = new Set(["", "female", "male", "undisclosed"]);
 const skinTypeValues = new Set(["", "normal", "dry", "oily", "combination", "sensitive"]);
@@ -26,8 +26,6 @@ function validBirthday(value: string) {
 }
 
 async function identity() {
-  const user = await getChatGPTUser();
-  if (user) return { email: user.email, displayName: user.displayName };
   return getPreviewMemberIdentity();
 }
 
@@ -46,13 +44,14 @@ export async function GET() {
       db.prepare("SELECT r.* FROM returns r JOIN orders o ON o.id = r.order_id WHERE o.member_id = ? ORDER BY r.created_at DESC").bind(member.id).all(),
     ]);
     return Response.json({ member, profile, addresses: addresses.results, orders: orders.results, orderItems: orderItems.results, returns: returns.results, canSignOut: true });
-  } catch (error) {
-    return Response.json({ error: error instanceof Error ? error.message : "读取会员资料失败" }, { status: 500 });
+  } catch {
+    return safeServerError("读取会员资料失败，请稍后再试");
   }
 }
 
 export async function POST(request: Request) {
   try {
+    if (!hasTrustedOrigin(request)) return Response.json({ error: "请求来源无效" }, { status: 403 });
     const viewer = await identity();
     if (!viewer) return Response.json({ error: "请先登录会员账户" }, { status: 401 });
     const member = await ensureMember(viewer);
@@ -103,7 +102,7 @@ export async function POST(request: Request) {
       if (address.is_default) await db.prepare("UPDATE member_addresses SET is_default = 1 WHERE id = (SELECT id FROM member_addresses WHERE member_id = ? ORDER BY id DESC LIMIT 1)").bind(member.id).run();
     } else return Response.json({ error: "未知操作" }, { status: 400 });
     return Response.json({ ok: true });
-  } catch (error) {
-    return Response.json({ error: error instanceof Error ? error.message : "保存会员资料失败" }, { status: 500 });
+  } catch {
+    return safeServerError("保存会员资料失败，请稍后再试");
   }
 }

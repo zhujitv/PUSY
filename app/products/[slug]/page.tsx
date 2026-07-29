@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { PageShell } from "../../components/SiteChrome";
 import { formatCnyFromRub, products, type Product, type ProductVariantGroup } from "../../data/products";
@@ -101,6 +102,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       </section>
     </main>
     <ProductReviews slug={product.slug} />
-    {related.length > 0 && <section className="related"><h2>你可能也喜欢</h2><div>{related.map((item) => <a href={`/products/${item.slug}`} key={item.slug}><img src={item.image} alt={item.name} loading="lazy" decoding="async" /><span>{item.name}</span><b>{formatCnyFromRub(item.price)}</b></a>)}</div></section>}
+    {related.length > 0 && <section className="related"><h2>你可能也喜欢</h2><div>{related.map((item) => <a href={`/products/${item.slug}`} key={item.slug}><Image src={item.image} alt={item.name} width={700} height={727} sizes="(max-width: 700px) 50vw, 25vw" /><span>{item.name}</span><b>{formatCnyFromRub(item.price)}</b></a>)}</div></section>}
   </PageShell>;
 }

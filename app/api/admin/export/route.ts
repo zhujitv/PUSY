@@ -1,7 +1,7 @@
 import { getStoreDb } from "../../../../db/store";
-import { getChatGPTUser } from "../../../chatgpt-auth";
+import { getAdminIdentity } from "../../../../lib/admin-auth";
 
-async function allowAdmin() { return process.env.NODE_ENV !== "production" || Boolean(await getChatGPTUser()); }
+async function allowAdmin() { return Boolean(await getAdminIdentity()); }
 const exports: Record<string, { query: string; headers: string[] }> = {
   orders: { query: "SELECT id AS 订单号, customer AS 客户, email AS 邮箱, phone AS 手机, address AS 地址, delivery AS 配送, payment AS 支付, ROUND(total * 0.12, 2) AS 金额元, ROUND(discount * 0.12, 2) AS 优惠元, coupon_code AS 优惠码, status AS 状态, created_at AS 创建时间 FROM orders ORDER BY created_at DESC", headers: ["订单号","客户","邮箱","手机","地址","配送","支付","金额元","优惠元","优惠码","状态","创建时间"] },
   members: { query: "SELECT id AS 会员编号, name AS 姓名, email AS 邮箱, phone AS 手机, status AS 状态, total_orders AS 订单数, ROUND(total_spent * 0.12, 2) AS 累计消费元, joined_at AS 加入时间 FROM members ORDER BY joined_at DESC", headers: ["会员编号","姓名","邮箱","手机","状态","订单数","累计消费元","加入时间"] },
@@ -11,7 +11,11 @@ const exports: Record<string, { query: string; headers: string[] }> = {
   partnerships: { query: "SELECT id AS 受理编号, contact_name AS 联系人, phone AS 手机, company AS 公司门店, city AS 城市, cooperation_type AS 合作类型, wechat AS 微信号, email AS 邮箱, proposal AS 合作方案, status AS 状态, created_at AS 提交时间, updated_at AS 更新时间 FROM retail_partnerships ORDER BY created_at DESC", headers: ["受理编号","联系人","手机","公司门店","城市","合作类型","微信号","邮箱","合作方案","状态","提交时间","更新时间"] },
 };
 
-function cell(value: unknown) { return `"${String(value ?? "").replaceAll('"', '""')}"`; }
+function cell(value: unknown) {
+  const raw = String(value ?? "");
+  const safe = /^[=+\-@]/.test(raw) ? `'${raw}` : raw;
+  return `"${safe.replaceAll('"', '""')}"`;
+}
 
 export async function GET(request: Request) {
   if (!await allowAdmin()) return Response.json({ error: "请先登录管理后台" }, { status: 401 });

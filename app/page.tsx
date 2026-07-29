@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { formatCnyFromRub, products } from "./data/products";
 import { useStore } from "./components/StoreProvider";
 import { HeaderIcon } from "./components/HeaderIcons";
@@ -78,8 +79,8 @@ export default function Home() {
 
       <section className="hero hero-carousel" id="top" aria-roledescription="轮播图" aria-label="PÚSY 首页活动" onMouseEnter={() => setHeroPaused(true)} onMouseLeave={() => setHeroPaused(false)} onFocus={() => setHeroPaused(true)} onBlur={() => setHeroPaused(false)} onTouchStart={(event) => { heroTouchStart.current = event.touches[0]?.clientX ?? null; }} onTouchEnd={(event) => { if (heroTouchStart.current === null) return; const distance = (event.changedTouches[0]?.clientX ?? heroTouchStart.current) - heroTouchStart.current; if (Math.abs(distance) > 45) moveHero(distance > 0 ? -1 : 1); heroTouchStart.current = null; }}>
         <div className="hero-slides">
-          <div className={`hero-slide ${heroIndex === 0 ? "is-active" : ""}`} aria-hidden={heroIndex !== 0}><img src="/assets/hero-clean-v2-42a264aa.webp" alt="PÚSY 夏日礼物活动" fetchPriority="high" decoding="async" /></div>
-          <div className={`hero-slide hero-slide--box ${heroIndex === 1 ? "is-active" : ""}`} aria-hidden={heroIndex !== 1}><img src="/assets/35.webp" alt="PÚSY 海滩神秘礼盒" loading="lazy" decoding="async" /></div>
+          <div className={`hero-slide ${heroIndex === 0 ? "is-active" : ""}`} aria-hidden={heroIndex !== 0}><Image src="/assets/hero-clean-v2-42a264aa.webp" alt="PÚSY 夏日礼物活动" fill sizes="100vw" priority /></div>
+          <div className={`hero-slide hero-slide--box ${heroIndex === 1 ? "is-active" : ""}`} aria-hidden={heroIndex !== 1}><Image src="/assets/35.webp" alt="PÚSY 海滩神秘礼盒" fill sizes="100vw" /></div>
         </div>
         {heroIndex === 0 ? <div className="hero-copy">
           <div className="campaign-mark">{homeContent.hero_eyebrow}</div>
@@ -106,7 +107,7 @@ export default function Home() {
             <article className="product-card" key={product.slug}>
               <div className="product-image-wrap">
                 <span className="badge">{product.badge}</span>
-                <a href={`/products/${product.slug}`}><img src={product.image} alt={product.name} loading="eager" decoding="async" /></a>
+                <a href={`/products/${product.slug}`}><Image src={product.image} alt={product.name} width={700} height={727} sizes="(max-width: 700px) 50vw, 25vw" /></a>
                 <button disabled={!product.inventoryVerified || (product.stock ?? 0) < 1} onClick={() => addToCart(product)}>{!product.inventoryVerified || (product.stock ?? 0) < 1 ? "暂时缺货" : "加入购物袋"}</button>
               </div>
               <h3><a href={`/products/${product.slug}`}>{product.name}</a></h3>
@@ -118,15 +119,15 @@ export default function Home() {
 
       <section className="category-grid" aria-label="热门分类">
         <a className="category-card" href="/catalog/makiyazh">
-          <img src="/assets/04.webp" alt="彩妆" loading="lazy" decoding="async" />
+          <Image src="/assets/04.webp" alt="彩妆" width={960} height={1280} sizes="(max-width: 700px) 100vw, 33vw" />
           <span>彩妆</span>
         </a>
         <a className="category-card" href="/catalog/uhod">
-          <img src="/assets/01.webp" alt="护肤" loading="lazy" decoding="async" />
+          <Image src="/assets/01.webp" alt="护肤" width={960} height={1439} sizes="(max-width: 700px) 100vw, 33vw" />
           <span>护肤</span>
         </a>
         <a className="category-card" href="/catalog/dlya-doma">
-          <img src="/assets/13.webp" alt="家居护理" loading="lazy" decoding="async" />
+          <Image src="/assets/13.webp" alt="家居护理" width={960} height={960} sizes="(max-width: 700px) 100vw, 33vw" />
           <span>家居</span>
         </a>
       </section>
@@ -137,7 +138,7 @@ export default function Home() {
           {reels.map((reel) => <article className="reel-card" key={reel.player}>
             <div className="reel-video"><iframe src={`https://runtime.strm.yandex.ru/player/video/${reel.player}`} title={`${reel.title} 视频`} loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowFullScreen /></div>
             <a className="reel-product" href={`/products/${reel.slug}`}>
-              {reel.product && <img src={reel.product.image} alt="" loading="lazy" decoding="async" />}
+              {reel.product && <Image src={reel.product.image} alt="" width={700} height={727} sizes="(max-width: 700px) 80vw, 20vw" />}
               <span><b>{reel.title}</b><em>{reel.product ? formatCnyFromRub(reel.product.price) : "查看商品"}</em></span>
             </a>
           </article>)}

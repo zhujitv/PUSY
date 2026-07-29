@@ -83,9 +83,44 @@ CREATE TABLE IF NOT EXISTS orders (
   discount INTEGER NOT NULL DEFAULT 0,
   coupon_code TEXT,
   payment_token_hash TEXT NOT NULL DEFAULT '',
+  reservation_expires_at TEXT,
+  resources_released INTEGER NOT NULL DEFAULT 0,
+  resources_committed INTEGER NOT NULL DEFAULT 0,
   status TEXT NOT NULL DEFAULT '待付款',
   created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP::TEXT),
   updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP::TEXT)
+);
+
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS reservation_expires_at TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS resources_released INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS resources_committed INTEGER NOT NULL DEFAULT 0;
+
+CREATE TABLE IF NOT EXISTS member_verification_codes (
+  id TEXT PRIMARY KEY,
+  target TEXT NOT NULL,
+  purpose TEXT NOT NULL,
+  code_hash TEXT NOT NULL,
+  attempts INTEGER NOT NULL DEFAULT 0,
+  expires_at TEXT NOT NULL,
+  consumed_at TEXT,
+  created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP::TEXT)
+);
+
+CREATE INDEX IF NOT EXISTS member_verification_target_idx ON member_verification_codes (target, created_at);
+
+CREATE TABLE IF NOT EXISTS member_sessions (
+  token_hash TEXT PRIMARY KEY,
+  member_id INTEGER NOT NULL REFERENCES members(id) ON DELETE CASCADE,
+  expires_at TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP::TEXT)
+);
+
+CREATE INDEX IF NOT EXISTS member_sessions_member_idx ON member_sessions (member_id);
+
+CREATE TABLE IF NOT EXISTS rate_limits (
+  key TEXT PRIMARY KEY,
+  request_count INTEGER NOT NULL DEFAULT 0,
+  window_started_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP::TEXT)
 );
 
 CREATE TABLE IF NOT EXISTS order_items (

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import test from "node:test";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
@@ -185,7 +185,9 @@ test("member center always exposes a working sign-out entry", async () => {
   assert.match(login, /会员登录/);
   assert.match(login, /注册会员/);
   assert.match(login, /手机号或邮箱/);
-  assert.match(authApi, /PREVIEW_VERIFICATION_CODE/);
+  assert.match(authApi, /member_verification_codes/);
+  assert.match(authApi, /crypto\.getRandomValues/);
+  assert.doesNotMatch(authApi, /123456|MEMBER_VERIFICATION_CODE/);
 });
 
 test("member profile supports complete personal and beauty preferences", async () => {
@@ -204,9 +206,73 @@ test("member profile supports complete personal and beauty preferences", async (
   assert.match(accountApi, /validBirthday/);
   assert.match(accountApi, /skinConcernValues/);
   assert.match(accountApi, /preferred_categories/);
-  assert.match(profileSchema, /CREATE TABLE IF NOT EXISTS member_profiles/);
+  assert.match(profileSchema, /INSERT INTO member_profiles/);
+  assert.doesNotMatch(profileSchema, /CREATE TABLE/);
   assert.match(railwaySchema, /CREATE TABLE IF NOT EXISTS member_profiles/);
   assert.match(css, /profile-completion/);
+});
+
+test("protects admin and member sessions from spoofed identity headers", async () => {
+  const [adminApi, adminPage, adminAuth, memberAuth, accountApi, reviewsApi] = await Promise.all([
+    read("app/api/admin/route.ts"),
+    read("app/admin/page.tsx"),
+    read("lib/admin-auth.ts"),
+    read("lib/preview-member-auth.ts"),
+    read("app/api/account/route.ts"),
+    read("app/api/reviews/route.ts"),
+  ]);
+  const combined = [adminApi, adminPage, accountApi, reviewsApi].join("\n");
+  assert.doesNotMatch(combined, /oai-authenticated-user-email|getChatGPTUser/);
+  assert.match(adminApi, /getAdminIdentity/);
+  assert.match(adminAuth, /HMAC/);
+  assert.match(memberAuth, /member_sessions/);
+  assert.match(memberAuth, /sha256\(token\)/);
+  assert.match(memberAuth, /HttpOnly; SameSite=Lax/);
+});
+
+test("reserves order resources atomically and commits them only after payment", async () => {
+  const [orders, reservations, paymentService, checkout, paymentApi, success] = await Promise.all([
+    read("app/api/orders/route.ts"),
+    read("lib/orders/reservations.ts"),
+    read("lib/payments/service.ts"),
+    read("app/checkout/page.tsx"),
+    read("app/api/payments/route.ts"),
+    read("app/checkout/success/page.tsx"),
+  ]);
+  assert.match(orders, /stock >= \?/);
+  assert.match(orders, /requireChanges/);
+  assert.match(orders, /reservationExpiresAt/);
+  assert.match(orders, /'pending'/);
+  assert.doesNotMatch(orders, /total_orders = total_orders \+ 1/);
+  assert.match(paymentService, /commitPaidOrder/);
+  assert.match(reservations, /resources_committed/);
+  assert.match(reservations, /status = 'void'/);
+  assert.doesNotMatch(checkout, /Date\.now\(\)\.toString\(\)\.slice/);
+  assert.doesNotMatch(checkout, /token=\$\{/);
+  assert.match(paymentApi, /HttpOnly; SameSite=Lax/);
+  assert.match(success, /payment_token_hash/);
+});
+
+test("uses real WebP assets and applies baseline response hardening", async () => {
+  const [config, exportApi, commerceSchema, profileSchema] = await Promise.all([
+    read("next.config.ts"),
+    read("app/api/admin/export/route.ts"),
+    read("db/commerce-features.ts"),
+    read("db/member-profile.ts"),
+  ]);
+  assert.match(config, /Content-Security-Policy/);
+  assert.match(config, /X-Content-Type-Options/);
+  assert.match(exportApi, /\^\[=\+\\-@\]/);
+  assert.doesNotMatch(commerceSchema, /CREATE TABLE/);
+  assert.doesNotMatch(profileSchema, /CREATE TABLE/);
+  const assetDir = new URL("../public/assets/", import.meta.url);
+  const numbered = (await readdir(assetDir)).filter((name) => /^\d{2}\.webp$/.test(name));
+  assert.equal(numbered.length, 42);
+  for (const name of numbered) {
+    const bytes = await readFile(new URL(name, assetDir));
+    assert.equal(bytes.subarray(0, 4).toString(), "RIFF");
+    assert.equal(bytes.subarray(8, 12).toString(), "WEBP");
+  }
 });
 
 test("retail partnership requests use an online form, admin workflow and notifications", async () => {

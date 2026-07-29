@@ -9,6 +9,22 @@ export function MemberAuthClient() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [requestingCode, setRequestingCode] = useState(false);
+  const [challengeId, setChallengeId] = useState("");
+
+  async function requestCode(event: React.MouseEvent<HTMLButtonElement>) {
+    const form = event.currentTarget.form;
+    if (!form || !form.reportValidity()) return;
+    setRequestingCode(true);
+    setError("");
+    setMessage("");
+    const payload = Object.fromEntries(new FormData(form).entries());
+    const response = await fetch("/api/account/auth", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "request-code", mode, ...payload }) });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) setError(body.error || "验证码发送失败");
+    else { setChallengeId(body.challengeId || ""); setMessage(body.message || "验证码已发送"); }
+    setRequestingCode(false);
+  }
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -19,7 +35,7 @@ export function MemberAuthClient() {
     const response = await fetch("/api/account/auth", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ action: mode, ...payload }),
+      body: JSON.stringify({ action: mode, challengeId, ...payload }),
     });
     const body = await response.json();
     if (!response.ok) {
@@ -35,6 +51,7 @@ export function MemberAuthClient() {
     setMode(nextMode);
     setError("");
     setMessage("");
+    setChallengeId("");
   }
 
   return <main className="member-auth-page">
@@ -68,14 +85,13 @@ export function MemberAuthClient() {
         <label>验证码
           <div className="member-code-field">
             <input name="code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="6 位验证码" required />
-            <button type="button" onClick={() => setMessage("测试验证码：123456")}>获取验证码</button>
+            <button type="button" disabled={requestingCode} onClick={requestCode}>{requestingCode ? "正在发送…" : "获取验证码"}</button>
           </div>
         </label>
         {mode === "register" && <label className="member-auth-consent"><input name="consent" type="checkbox" required /> <span>我已阅读并同意<a href="/oferta">用户服务协议</a>和<a href="/privacy">隐私政策</a>。</span></label>}
-        <div className="member-preview-code">测试验证码：<b>123456</b></div>
         {error && <p className="member-auth-error" role="alert">{error}</p>}
         {message && <p className="member-auth-message">{message}</p>}
-        <button className="member-auth-submit" disabled={submitting}>{submitting ? "正在处理…" : mode === "login" ? "登录" : "注册并登录"}</button>
+        <button className="member-auth-submit" disabled={submitting || !challengeId}>{submitting ? "正在处理…" : mode === "login" ? "登录" : "注册并登录"}</button>
       </form>
       <button className="member-auth-switch" type="button" onClick={() => switchMode(mode === "login" ? "register" : "login")}>
         {mode === "login" ? "还不是会员？立即注册 →" : "已经是会员？返回登录 →"}

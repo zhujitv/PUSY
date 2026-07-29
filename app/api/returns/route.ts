@@ -1,7 +1,10 @@
 import { getStoreDb } from "../../../db/store";
+import { allowRequest, hasTrustedOrigin, rateLimitResponse, safeServerError } from "../../../lib/request-security";
 
 export async function POST(request: Request) {
   try {
+    if (!hasTrustedOrigin(request)) return Response.json({ error: "请求来源无效" }, { status: 403 });
+    if (!await allowRequest(request, "returns", 8, 3600)) return rateLimitResponse();
     const payload = await request.json() as Record<string, unknown>;
     const orderId = String(payload.orderId ?? "").trim().toUpperCase();
     const email = String(payload.email ?? "").trim().toLowerCase();
@@ -18,7 +21,7 @@ export async function POST(request: Request) {
     const id = `RET-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
     await db.prepare("INSERT INTO returns (id, order_id, email, reason, details, status) VALUES (?, ?, ?, ?, ?, '待审核')").bind(id, order.id, email, reason, details).run();
     return Response.json({ ok: true, id, status: "待审核" });
-  } catch (error) {
-    return Response.json({ error: error instanceof Error ? error.message : "提交售后申请失败" }, { status: 500 });
+  } catch {
+    return safeServerError("提交售后申请失败，请稍后再试");
   }
 }

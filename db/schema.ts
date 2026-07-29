@@ -37,6 +37,30 @@ export const members = sqliteTable("members", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
+export const memberVerificationCodes = sqliteTable("member_verification_codes", {
+  id: text("id").primaryKey(),
+  target: text("target").notNull(),
+  purpose: text("purpose").notNull(),
+  codeHash: text("code_hash").notNull(),
+  attempts: integer("attempts").notNull().default(0),
+  expiresAt: text("expires_at").notNull(),
+  consumedAt: text("consumed_at"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const memberSessions = sqliteTable("member_sessions", {
+  tokenHash: text("token_hash").primaryKey(),
+  memberId: integer("member_id").notNull().references(() => members.id),
+  expiresAt: text("expires_at").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const rateLimits = sqliteTable("rate_limits", {
+  key: text("key").primaryKey(),
+  requestCount: integer("request_count").notNull().default(0),
+  windowStartedAt: text("window_started_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
 export const memberProfiles = sqliteTable("member_profiles", {
   memberId: integer("member_id").primaryKey().references(() => members.id),
   nickname: text("nickname").notNull().default(""),
@@ -84,6 +108,9 @@ export const orders = sqliteTable("orders", {
   discount: integer("discount").notNull().default(0),
   couponCode: text("coupon_code"),
   paymentTokenHash: text("payment_token_hash").notNull().default(""),
+  reservationExpiresAt: text("reservation_expires_at"),
+  resourcesReleased: integer("resources_released", { mode: "boolean" }).notNull().default(false),
+  resourcesCommitted: integer("resources_committed", { mode: "boolean" }).notNull().default(false),
   status: text("status").notNull().default("待付款"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),

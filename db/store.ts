@@ -44,6 +44,7 @@ function postgresSql(sql: string) {
 
 class PostgresStatement {
   private values: unknown[] = [];
+  private requiredChangeMessage: string | null = null;
 
   constructor(
     private readonly pool: Pool,
@@ -55,8 +56,15 @@ class PostgresStatement {
     return this;
   }
 
+  requireChanges(message: string) {
+    this.requiredChangeMessage = message;
+    return this;
+  }
+
   async execute(queryable: Queryable = this.pool): Promise<QueryResult> {
-    return queryable.query(postgresSql(this.sql), this.values);
+    const result = await queryable.query(postgresSql(this.sql), this.values);
+    if (this.requiredChangeMessage && !result.rowCount) throw new Error(this.requiredChangeMessage);
+    return result;
   }
 
   async all<T>(): Promise<DbResult<T>> {

@@ -1,11 +1,14 @@
 import { getStoreDb } from "../../../db/store";
 import { chinaRegion } from "../../../lib/china-region";
 import { enqueueNotification } from "../../../lib/notifications/service";
+import { allowRequest, hasTrustedOrigin, rateLimitResponse, safeServerError } from "../../../lib/request-security";
 
 const cooperationTypes = ["线下门店", "电商平台", "区域经销", "企业采购", "其他合作"];
 
 export async function POST(request: Request) {
   try {
+    if (!hasTrustedOrigin(request)) return Response.json({ error: "请求来源无效" }, { status: 403 });
+    if (!await allowRequest(request, "retail-partnership", 5, 3600)) return rateLimitResponse();
     const payload = await request.json() as Record<string, unknown>;
     if (String(payload.website ?? "").trim()) return Response.json({ ok: true }, { status: 201 });
 
@@ -51,7 +54,7 @@ export async function POST(request: Request) {
       }),
     ]).catch(() => undefined);
     return Response.json({ ok: true, id, message: "合作申请已提交，我们会通过手机或微信与您联系。" }, { status: 201 });
-  } catch (error) {
-    return Response.json({ error: error instanceof Error ? error.message : "提交失败，请稍后再试" }, { status: 500 });
+  } catch {
+    return safeServerError("提交失败，请稍后再试");
   }
 }

@@ -2,11 +2,9 @@ import { ensureCommerceFeatureSchema } from "../../../db/commerce-features";
 import { ensureMember } from "../../../db/member-account";
 import { getStoreDb } from "../../../db/store";
 import { getPreviewMemberIdentity } from "../../../lib/preview-member-auth";
-import { getChatGPTUser } from "../../chatgpt-auth";
+import { allowRequest, hasTrustedOrigin, rateLimitResponse, safeServerError } from "../../../lib/request-security";
 
 async function identity() {
-  const user = await getChatGPTUser();
-  if (user) return { email: user.email, displayName: user.displayName };
   return getPreviewMemberIdentity();
 }
 
@@ -21,13 +19,15 @@ export async function GET(request: Request) {
       db.prepare("SELECT COUNT(*) AS count, COALESCE(AVG(rating), 0) AS average FROM product_reviews WHERE product_slug = ? AND status = 'approved'").bind(slug).first<{ count: number; average: number }>(),
     ]);
     return Response.json({ reviews: reviews.results, summary: { count: Number(summary?.count ?? 0), average: Number(summary?.average ?? 0) } });
-  } catch (error) {
-    return Response.json({ error: error instanceof Error ? error.message : "读取评价失败" }, { status: 500 });
+  } catch {
+    return safeServerError("读取评价失败，请稍后再试");
   }
 }
 
 export async function POST(request: Request) {
   try {
+    if (!hasTrustedOrigin(request)) return Response.json({ error: "请求来源无效" }, { status: 403 });
+    if (!await allowRequest(request, "reviews", 10, 3600)) return rateLimitResponse();
     const viewer = await identity();
     if (!viewer) return Response.json({ error: "请先登录会员账户后评价" }, { status: 401 });
     const payload = await request.json() as Record<string, unknown>;
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     const purchase = await db.prepare("SELECT oi.id FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.member_id = ? AND oi.product_slug = ? AND o.status NOT IN ('已取消','待付款','支付失败') LIMIT 1").bind(member.id, slug).first();
     await db.prepare("INSERT INTO product_reviews (product_slug, member_id, reviewer_name, rating, title, body, verified_purchase, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')").bind(slug, member.id, member.name, rating, title, body, purchase ? 1 : 0).run();
     return Response.json({ ok: true, message: "评价已提交，审核通过后会公开显示" }, { status: 201 });
-  } catch (error) {
-    return Response.json({ error: error instanceof Error ? error.message : "提交评价失败" }, { status: 500 });
+  } catch {
+    return safeServerError("提交评价失败，请稍后再试");
   }
 }

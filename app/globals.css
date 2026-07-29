@@ -420,7 +420,7 @@ footer.pusy-footer .footer-links a { font-size: 16px; font-weight: 600; }
   .catalog-card-copy { font-size: 12px; }
   .product-page { grid-template-columns: 1fr; padding: 8px 8px 60px; }
   .product-gallery { overflow-x: auto; grid-auto-flow: column; grid-auto-columns: 90vw; grid-template-columns: none; scrollbar-width: none; }
-  .product-gallery img { height: 122vw; }
+  .product-gallery img { height: auto; aspect-ratio: 3 / 4; object-fit: contain; background: #fff; }
   .product-info { position: static; padding: 25px 12px 0; }
   .product-info h1 { font-size: 47px; }
   .product-actions { grid-template-columns: 105px 1fr; }

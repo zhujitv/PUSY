@@ -34,6 +34,22 @@ function productFromRow(row: DbProduct): Product {
   };
 }
 
+function hasLegacyYandexMedia(product: Product) {
+  return [product.image, ...(product.images ?? []), product.imageAlt]
+    .filter(Boolean)
+    .some((image) => image?.startsWith("https://avatars.mds.yandex.net/get-yastore/"));
+}
+
+function useLocalizedMedia(product: Product, catalogProduct: Product): Product {
+  if (!hasLegacyYandexMedia(product)) return product;
+  return {
+    ...product,
+    image: catalogProduct.image,
+    imageAlt: catalogProduct.imageAlt,
+    images: catalogProduct.images,
+  };
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const product = products.find((item) => item.slug === slug);
@@ -55,7 +71,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   try {
     const db = await getStoreDb();
     const row = await db.prepare("SELECT * FROM products WHERE slug = ? LIMIT 1").bind(slug).first<DbProduct>();
-    if (row) product = productFromRow(row);
+    if (row) product = useLocalizedMedia(productFromRow(row), catalogProduct);
   } catch {}
 
   const gallery = Array.from(new Set([product.image, ...(product.images ?? []), product.imageAlt].filter(Boolean))) as string[];
@@ -64,7 +80,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   return <PageShell>
     <main className="product-page">
-      <div className="product-gallery">{gallery.slice(0, 6).map((image, index) => <img src={image} alt={index === 0 ? product.name : `${product.name} 商品图 ${index + 1}`} key={`${image}-${index}`} loading={index === 0 ? "eager" : "lazy"} fetchPriority={index === 0 ? "high" : "auto"} decoding="async" />)}</div>
+      <div className="product-gallery">{gallery.slice(0, 6).map((image, index) => <img src={image} alt={index === 0 ? product.name : `${product.name} 商品图 ${index + 1}`} key={`${image}-${index}`} loading={index < 3 ? "eager" : "lazy"} fetchPriority={index === 0 ? "high" : "auto"} decoding="async" />)}</div>
       <section className="product-info">
         <p className="breadcrumbs"><a href="/">首页</a> / <a href="/catalog/products">{product.category}</a></p>
         {product.badge && <span className="product-new">{product.badge}</span>}

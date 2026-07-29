@@ -348,3 +348,21 @@ test("customer inbox links verified order replies, returns and protected attachm
   assert.match(env, /RESEND_RECEIVING_API_KEY/);
   assert.match(env, /RESEND_INBOUND_DOMAIN/);
 });
+
+test("admin workspace uses grouped navigation and responsive branded UI", async () => {
+  const [admin, login, css] = await Promise.all([
+    read("app/admin/AdminClient.tsx"),
+    read("app/admin/login/AdminLoginClient.tsx"),
+    read("app/globals.css"),
+  ]);
+  assert.match(admin, /adminNavGroups/);
+  assert.match(admin, /经营/);
+  assert.match(admin, /商品与内容/);
+  assert.match(admin, /searchPlaceholders/);
+  assert.match(admin, /掌握销售、订单、库存和客户服务/);
+  assert.match(login, /统一经营工作台/);
+  assert.match(login, /客服邮件与售后联动/);
+  assert.match(css, /admin-nav-group/);
+  assert.match(css, /admin-login-intro/);
+  assert.match(css, /admin-loading i/);
+});

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "PÚSY中国商城",
+  "usingComponents": {
+    "product-card": "/components/product-card/index"
+  }
+}

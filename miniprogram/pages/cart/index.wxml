@@ -1,0 +1,49 @@
+<view class="page-shell cart-page">
+  <view class="cart-head">
+    <text class="eyebrow">SHOPPING BAG</text>
+    <text class="cart-title">购物袋</text>
+    <text class="cart-count">{{cart.count}}件商品</text>
+  </view>
+
+  <view wx:if="{{cart.items.length}}">
+    <view class="shipping-progress">
+      <text>{{shippingText}}</text>
+      <view class="progress-track"><view class="progress-value" style="width: {{progressWidth}}%;"></view></view>
+    </view>
+
+    <view class="cart-list">
+      <view wx:for="{{cart.items}}" wx:key="productId" class="cart-item">
+        <image class="cart-image" src="{{item.product.image}}" mode="aspectFill" bindtap="openProduct" data-id="{{item.productId}}" />
+        <view class="cart-copy">
+          <text class="cart-category">{{item.product.category}}</text>
+          <text class="cart-name" bindtap="openProduct" data-id="{{item.productId}}">{{item.product.name}}</text>
+          <text class="cart-unit">{{item.product.priceText}}</text>
+          <view class="cart-row">
+            <view class="cart-quantity">
+              <button bindtap="changeQuantity" data-id="{{item.productId}}" data-quantity="{{item.quantity - 1}}">−</button>
+              <text>{{item.quantity}}</text>
+              <button bindtap="changeQuantity" data-id="{{item.productId}}" data-quantity="{{item.quantity + 1}}">＋</button>
+            </view>
+            <text class="cart-subtotal">{{item.subtotalText}}</text>
+          </view>
+          <text class="cart-remove" bindtap="remove" data-id="{{item.productId}}">移除</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="cart-summary">
+      <view><text>商品小计</text><text>{{cart.totalText}}</text></view>
+      <view><text>配送费</text><text>{{cart.totalFen >= 59900 ? '免费' : '结算时计算'}}</text></view>
+      <view class="cart-total"><text>合计</text><text>{{cart.totalText}}</text></view>
+      <text class="cart-tax">最终金额将在服务端校验商品、库存、优惠和配送方式后确定。</text>
+      <button class="primary-button" bindtap="checkout">去结算</button>
+    </view>
+  </view>
+
+  <view wx:else class="empty-state cart-empty">
+    <text class="empty-symbol">púsy</text>
+    <text class="empty-title">购物袋还是空的</text>
+    <text class="empty-copy">从今天的精选单品开始，装进一点新鲜感。</text>
+    <button class="primary-button" bindtap="browse">去逛逛</button>
+  </view>
+</view>

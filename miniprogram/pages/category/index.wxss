@@ -1,0 +1,17 @@
+.catalog-page { padding-bottom: 50rpx; }
+.catalog-head { padding: 52rpx 28rpx 28rpx; }
+.catalog-title { display: block; margin: 16rpx 0 38rpx; white-space: pre-line; font-size: 66rpx; line-height: .98; letter-spacing: -5rpx; }
+.search-box { height: 88rpx; display: flex; align-items: center; gap: 16rpx; padding: 0 22rpx; background: #f3f2f0; }
+.search-symbol { font-size: 40rpx; transform: rotate(-20deg); }
+.search-box input { flex: 1; height: 100%; font-size: 25rpx; }
+.search-clear { color: #777; font-size: 22rpx; }
+.category-tabs { width: 100%; white-space: nowrap; border-bottom: 1rpx solid #e6e3e0; }
+.category-tabs-inner { display: inline-flex; padding: 0 28rpx; }
+.category-tab { position: relative; min-height: 76rpx; padding: 0 25rpx; background: #fff; color: #777; font-size: 24rpx; }
+.category-tab:first-child { padding-left: 0; }
+.category-tab.active { color: #111; font-weight: 600; }
+.category-tab.active::after { content: ""; position: absolute; left: 22rpx; right: 22rpx; bottom: 0; height: 4rpx; background: var(--pink); }
+.category-tab:first-child.active::after { left: 0; }
+.catalog-meta { display: flex; justify-content: space-between; padding: 34rpx 28rpx 22rpx; color: #777; font-size: 22rpx; }
+.catalog-meta text:first-child { color: #111; font-size: 30rpx; }
+.catalog-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14rpx; padding: 0 28rpx; }

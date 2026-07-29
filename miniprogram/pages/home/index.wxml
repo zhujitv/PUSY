@@ -1,0 +1,64 @@
+<view class="page-shell">
+  <view class="shipping">订单满 ¥599 享免费配送</view>
+  <view class="home-head">
+    <text class="brand-word">púsy</text>
+    <view class="home-head-copy">
+      <text>中国官方商城</text>
+      <text class="preview-pill">开发预览</text>
+    </view>
+  </view>
+
+  <swiper class="hero" indicator-dots="true" indicator-color="rgba(255,255,255,.55)" indicator-active-color="#ffffff" autoplay="true" interval="5500" circular="true">
+    <swiper-item wx:for="{{banners}}" wx:key="image">
+      <view class="hero-slide" bindtap="openBanner" data-index="{{index}}">
+        <image class="hero-image" src="{{item.image}}" mode="aspectFill" />
+        <view class="hero-overlay"></view>
+        <view class="hero-copy">
+          <text class="hero-kicker">{{item.kicker}}</text>
+          <text class="hero-title">{{item.title}}</text>
+          <text class="hero-action">{{item.action}} →</text>
+        </view>
+      </view>
+    </swiper-item>
+  </swiper>
+
+  <scroll-view class="category-strip" scroll-x="true" enhanced="true" show-scrollbar="false">
+    <view class="category-strip-inner">
+      <button wx:for="{{categories}}" wx:key="*this" class="category-pill" bindtap="openCategory" data-category="{{item}}">{{item}}</button>
+    </view>
+  </scroll-view>
+
+  <view class="page-pad">
+    <view class="section-head">
+      <text class="section-head-title">本周精选</text>
+      <text class="section-link" bindtap="openAll">查看全部</text>
+    </view>
+    <view class="product-grid">
+      <product-card wx:for="{{featured}}" wx:key="id" product="{{item}}" />
+    </view>
+
+    <view class="editorial">
+      <image class="editorial-image" src="/assets/01.jpg" mode="aspectFill" />
+      <view class="editorial-copy">
+        <text class="eyebrow">SKIN FIRST</text>
+        <text class="editorial-title">先照顾肌肤，\n再完成妆容</text>
+        <text class="editorial-text">清爽补水与轻盈色彩，构成每天都愿意重复的护理步骤。</text>
+        <button class="editorial-button" bindtap="openCategory" data-category="护肤">探索护肤</button>
+      </view>
+    </view>
+
+    <view class="section-head">
+      <text class="section-head-title">新品抵达</text>
+      <text class="section-link" bindtap="openCategory" data-category="全部">更多新品</text>
+    </view>
+    <view class="product-grid">
+      <product-card wx:for="{{newArrivals}}" wx:key="id" product="{{item}}" />
+    </view>
+
+    <view class="service-row">
+      <view><text class="service-no">01</text><text class="service-title">官方正品</text><text class="service-copy">中国官方渠道商品</text></view>
+      <view><text class="service-no">02</text><text class="service-title">安心配送</text><text class="service-copy">物流状态持续可查</text></view>
+      <view><text class="service-no">03</text><text class="service-title">售后支持</text><text class="service-copy">清晰透明的退换流程</text></view>
+    </view>
+  </view>
+</view>

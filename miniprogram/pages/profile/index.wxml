@@ -1,0 +1,35 @@
+<view class="page-shell profile-page">
+  <view class="profile-hero">
+    <text class="brand-word profile-brand">púsy</text>
+    <text class="profile-kicker">PÚSY CLUB</text>
+    <text class="profile-title">你的美，\n由你定义</text>
+    <text class="profile-copy">登录后可在网站与小程序之间共享会员、订单、地址和售后记录。</text>
+    <button class="profile-login" bindtap="login">{{loggedIn ? loginStatus : '微信快捷登录'}}</button>
+  </view>
+
+  <view class="member-card">
+    <view>
+      <text class="member-label">当前状态</text>
+      <text class="member-value">{{loginStatus}}</text>
+    </view>
+    <view bindtap="openCart">
+      <text class="member-label">购物袋</text>
+      <text class="member-value">{{cartCount}}件商品 →</text>
+    </view>
+  </view>
+
+  <view class="profile-services">
+    <view wx:for="{{services}}" wx:key="key" class="service-item" bindtap="openService" data-key="{{item.key}}">
+      <view>
+        <text class="service-label">{{item.label}}</text>
+        <text class="service-caption">{{item.caption}}</text>
+      </view>
+      <text class="service-arrow">→</text>
+    </view>
+  </view>
+
+  <view class="preview-note">
+    <text class="preview-title">第一阶段开发预览</text>
+    <text>当前版本使用本地商品数据和本地购物袋。微信登录、PostgreSQL、正式库存、订单与支付将在后续通过统一API接入。</text>
+  </view>
+</view>

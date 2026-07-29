@@ -1,0 +1,31 @@
+<view class="page-shell catalog-page">
+  <view class="catalog-head">
+    <text class="eyebrow">PÚSY CATALOG</text>
+    <text class="catalog-title">找到今天的\n心动单品</text>
+    <view class="search-box">
+      <text class="search-symbol">⌕</text>
+      <input value="{{query}}" bindinput="updateQuery" placeholder="搜索商品、功效或分类" confirm-type="search" />
+      <text wx:if="{{query}}" class="search-clear" bindtap="clearQuery">清除</text>
+    </view>
+  </view>
+
+  <scroll-view class="category-tabs" scroll-x="true" enhanced="true" show-scrollbar="false">
+    <view class="category-tabs-inner">
+      <button wx:for="{{categories}}" wx:key="*this" class="category-tab {{activeCategory === item ? 'active' : ''}}" bindtap="chooseCategory" data-category="{{item}}">{{item}}</button>
+    </view>
+  </scroll-view>
+
+  <view class="catalog-meta">
+    <text>{{activeCategory}}</text>
+    <text>{{resultText}}</text>
+  </view>
+
+  <view wx:if="{{visibleProducts.length}}" class="catalog-grid">
+    <product-card wx:for="{{visibleProducts}}" wx:key="id" product="{{item}}" />
+  </view>
+  <view wx:else class="empty-state">
+    <text class="empty-title">没有找到商品</text>
+    <text class="empty-copy">换一个关键词或分类试试看。</text>
+    <button class="secondary-button" bindtap="clearQuery">清除搜索</button>
+  </view>
+</view>

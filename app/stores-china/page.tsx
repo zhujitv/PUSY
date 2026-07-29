@@ -1,2 +1,6 @@
 import { PageShell } from "../components/SiteChrome";
-export default function StoresChinaPage() { return <PageShell><main className="stores-page"><header><p>中国</p><h1>门店与线上平台</h1></header><section><article><span>线上</span><h2>PÚSY 官方渠道</h2><p>通过品牌官方合作平台选购 PÚSY 产品。购买前请确认店铺认证信息，以获得完整的产品与售后保障。</p><a href="mailto:help@pusy.beauty">咨询中国购买渠道 →</a></article><article className="store-visual"><img src="/assets/10.webp" alt="PÚSY 彩妆产品" /></article><article><span>合作</span><h2>成为零售合作伙伴</h2><p>如果你希望在中国地区销售 PÚSY，欢迎联系我们了解合作要求、产品目录与品牌支持。</p><a href="mailto:help@pusy.beauty">提交合作咨询 →</a></article></section></main></PageShell>; }
+import { RetailPartnershipForm } from "./RetailPartnershipForm";
+
+export default function StoresChinaPage() {
+  return <PageShell><main className="stores-page"><header><p>中国大陆 · PUSY.CN</p><h1>中国官方渠道</h1></header><section><article><span>官方商城</span><h2>PUSY.CN</h2><p>中国订单以人民币结算，支持微信支付和支付宝，并适用本网站公布的中国配送、退换货与隐私政策。</p><a href="/catalog/products">进入商品目录 →</a></article><article className="store-visual"><img src="/assets/10.webp" alt="PÚSY 中国彩妆产品" /></article><article className="retail-partnership-card"><span>渠道合作</span><h2>中国零售合作</h2><p>第三方平台或线下门店只有在本页正式公示后，才视为中国授权渠道。请直接填写以下资料，无需打开邮箱。</p><RetailPartnershipForm /></article></section></main></PageShell>;
+}

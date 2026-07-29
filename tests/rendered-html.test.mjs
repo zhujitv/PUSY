@@ -1,91 +1,158 @@
 import assert from "node:assert/strict";
-import { access, readFile, readdir } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const developmentPreviewMeta =
-  /<meta(?=[^>]*\bname=["']codex-preview["'])(?=[^>]*\bcontent=["']development["'])[^>]*>/i;
-const templateRoot = new URL("../", import.meta.url);
-const previewRoot = new URL("../app/_sites-preview/", import.meta.url);
+const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-async function render() {
-  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
-  const { default: worker } = await import(workerUrl.href);
-
-  return worker.fetch(
-    new Request("http://localhost/", {
-      headers: { accept: "text/html" },
-    }),
-    {
-      ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
-      },
-    },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
-  );
-}
-
-test("server-renders the starter loading skeleton", async () => {
-  const response = await render();
-  assert.equal(response.status, 200);
-  assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
-
-  const html = await response.text();
-  assert.match(html, developmentPreviewMeta);
-  assert.match(html, /<title>Your site is taking shape<\/title>/i);
-  assert.match(html, /Building your site/);
-  assert.match(html, /Your site is taking shape/);
-  assert.match(
-    html,
-    /Your first version will appear here automatically when it’s ready\./,
-  );
-  assert.doesNotMatch(html, /Codex/);
-  assert.match(html, /react-loading-skeleton/);
-  assert.match(html, /role="status"/);
-});
-
-test("keeps the loading skeleton scoped and disposable", async () => {
-  const [preview, css, page, layout, packageJson, files] = await Promise.all([
-    readFile(new URL("SkeletonPreview.tsx", previewRoot), "utf8"),
-    readFile(new URL("preview.css", previewRoot), "utf8"),
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../package.json", import.meta.url), "utf8"),
-    readdir(previewRoot),
+test("uses China-region identity, payment, delivery and legal copy", async () => {
+  const [layout, payment, delivery, returns, privacy, details, terms] = await Promise.all([
+    read("app/layout.tsx"),
+    read("app/payment/page.tsx"),
+    read("app/delivery/page.tsx"),
+    read("app/return/page.tsx"),
+    read("app/privacy/page.tsx"),
+    read("app/details/page.tsx"),
+    read("app/oferta/page.tsx"),
   ]);
 
-  assert.deepEqual(files.sort(), ["SkeletonPreview.tsx", "preview.css"]);
-  assert.match(preview, /from "react-loading-skeleton"/);
-  assert.match(preview, /baseColor="#eceae7"/);
-  assert.match(preview, /highlightColor="#f9f8f6"/);
-  assert.match(preview, /duration=\{2\.8\}/);
-  assert.match(preview, /sites-skeleton-search-placeholder/);
-  assert.match(packageJson, /"react-loading-skeleton": "3\.5\.0"/);
+  assert.match(layout, /PÚSY 中国官方网站/);
+  assert.match(layout, /locale: "zh_CN"/);
+  assert.match(payment, /微信支付/);
+  assert.match(payment, /支付宝/);
+  assert.doesNotMatch(payment, /МИР|СБП|CDEK|Yandex/);
+  assert.match(delivery, /中国大陆订单/);
+  assert.match(delivery, /顺丰速运/);
+  assert.match(returns, /七日无理由退货/);
+  assert.match(returns, /一次性密封包装/);
+  assert.match(privacy, /中华人民共和国个人信息保护法/);
+  assert.match(details, /统一社会信用代码/);
+  assert.match(terms, /人民币元/);
+});
 
-  const shellIndex = preview.indexOf('className="sites-skeleton-shell"');
-  const statusIndex = preview.indexOf('className="sites-skeleton-status"');
-  assert.ok(shellIndex >= 0 && statusIndex > shellIndex);
-  assert.match(css, /position:\s*fixed/);
-  assert.match(css, /inset:\s*0/);
-  assert.match(css, /opacity:\s*0\.52/);
-  assert.match(css, /prefers-reduced-motion:\s*reduce/);
-  assert.doesNotMatch(css, /#020617|canvas|pets|progress/i);
-  assert.doesNotMatch(
-    preview,
-    /loading-spinner|status-mark|status-progress|canvas|cookie|random/i,
-  );
+test("requires checkout consent and exposes China compliance settings", async () => {
+  const [checkout, admin, adminApi, region, env, sitemap, giftCard] = await Promise.all([
+    read("app/checkout/page.tsx"),
+    read("app/admin/AdminClient.tsx"),
+    read("app/api/admin/route.ts"),
+    read("lib/china-region.ts"),
+    read(".env.example"),
+    read("app/sitemap.ts"),
+    read("app/gift-card/page.tsx"),
+  ]);
 
-  assert.match(page, /export const metadata:\s*Metadata/);
-  assert.match(page, /"codex-preview": "development"/);
-  assert.match(page, /<SkeletonPreview \/>/);
-  assert.match(layout, /title:\s*"Starter Project"/);
-  assert.doesNotMatch(layout, /codex-preview|_sites-preview|themeColor|\bViewport\b/);
-  assert.doesNotMatch(css, /(^|\s)(html|body)\s*\{/m);
+  assert.match(checkout, /用户服务与销售条款/);
+  assert.match(checkout, /一次性密封包装拆除或损坏后/);
+  assert.match(checkout, /type="checkbox" required/);
+  assert.match(admin, /中国区设置/);
+  assert.match(adminApi, /chinaComplianceReady/);
+  assert.match(region, /CHINA_OPERATOR_NAME/);
+  assert.match(env, /CHINA_UNIFIED_SOCIAL_CREDIT_CODE/);
+  assert.doesNotMatch(sitemap, /stores-russia|stores-sng|stores-oae/);
+  assert.match(giftCard, /记名电子礼品卡不设有效期/);
+});
 
-  await assert.rejects(
-    access(new URL("public/_sites-preview", templateRoot)),
-  );
+test("matches the catalog scope while keeping inventory independently managed", async () => {
+  const [catalogJson, productPage, productActions, catalogClient, orderApi, sitemap, mobileCss] = await Promise.all([
+    read("app/data/products.generated.json"),
+    read("app/products/[slug]/page.tsx"),
+    read("app/products/[slug]/ProductActions.tsx"),
+    read("app/components/CatalogClient.tsx"),
+    read("app/api/orders/route.ts"),
+    read("app/sitemap.ts"),
+    read("app/globals.css"),
+  ]);
+  const products = JSON.parse(catalogJson);
+  assert.equal(products.length, 83);
+  assert.equal(new Set(products.map((product) => product.slug)).size, 83);
+  assert.ok(products.every((product) => product.stock === 0 && product.inventoryVerified === false));
+  assert.ok(products.filter((product) => product.variants?.length).length >= 39);
+  assert.ok(products.every((product) => product.images?.length >= 1));
+  assert.equal(products.find((product) => product.slug === "pusy-home-sol-dlya-vanny-bath-salt-400g-100160")?.price, 810);
+  assert.deepEqual(products.find((product) => product.slug === "nabor-hodovoiy-letniiy-vaiyb-100687") && {
+    price: products.find((product) => product.slug === "nabor-hodovoiy-letniiy-vaiyb-100687").price,
+    oldPrice: products.find((product) => product.slug === "nabor-hodovoiy-letniiy-vaiyb-100687").oldPrice,
+  }, { price: 2390, oldPrice: 2860 });
+  assert.doesNotMatch(products.map((product) => `${product.name} ${product.description} ${product.usage ?? ""}`).join("\n"), /[\u0400-\u04ff]/);
+  assert.match(productPage, /generateMetadata/);
+  assert.match(productPage, /product\.variants/);
+  assert.match(productActions, /inventoryVerified/);
+  assert.doesNotMatch(catalogClient, /中国仓|原站库存|原站快照/);
+  assert.match(orderApi, /inventory_verified/);
+  assert.match(orderApi, /商品不存在或已下架/);
+  assert.match(sitemap, /collectionNames/);
+  assert.match(mobileCss, /\.hero \{ height: 430px; min-height: 430px/);
+});
+
+test("preserves original blog URLs with Chinese content and unique metadata", async () => {
+  const [blogData, blogPage, articlePage, sitemap] = await Promise.all([
+    read("app/data/blog.ts"),
+    read("app/blog/page.tsx"),
+    read("app/blog/[slug]/page.tsx"),
+    read("app/sitemap.ts"),
+  ]);
+  assert.match(blogData, /01981b2b-ea79-77ad-80e6-8b2f1f808928/);
+  assert.match(blogData, /01981b2d-54d8-765e-8906-afec86d506ad/);
+  assert.match(blogData, /01981b32-12e9-7a71-929d-fb7801521ff9/);
+  assert.doesNotMatch(blogData, /[\u0400-\u04ff]/);
+  assert.match(blogPage, /PUSY\.CN/);
+  assert.match(articlePage, /generateMetadata/);
+  assert.match(articlePage, /notFound/);
+  assert.match(sitemap, /post\.aliases/);
+});
+
+test("homepage videos require manual playback", async () => {
+  const homepage = await read("app/page.tsx");
+  assert.match(homepage, /runtime\.strm\.yandex\.ru\/player\/video/);
+  assert.doesNotMatch(homepage, /allow="[^"]*autoplay/);
+  assert.match(homepage, /hero-clean-v2\.png/);
+  assert.match(homepage, /35\.webp/);
+  assert.match(homepage, /hero-copy--box/);
+  assert.match(homepage, /setInterval\(\(\) => setHeroIndex/);
+  assert.match(homepage, /aria-label="上一张"/);
+  assert.match(homepage, /aria-label="下一张"/);
+});
+
+test("member center always exposes a working sign-out entry", async () => {
+  const [account, accountClient, logout, login, authApi] = await Promise.all([
+    read("app/account/page.tsx"),
+    read("app/account/AccountClient.tsx"),
+    read("app/account/logout/route.ts"),
+    read("app/account/login/MemberAuthClient.tsx"),
+    read("app/api/account/auth/route.ts"),
+  ]);
+  assert.doesNotMatch(account, /canSignOut/);
+  assert.match(account, /redirect\("\/account\/login"\)/);
+  assert.match(accountClient, /href="\/account\/logout">退出登录/);
+  assert.match(logout, /chatGPTSignOutPath/);
+  assert.match(logout, /clearPreviewMemberCookie/);
+  assert.match(login, /会员登录/);
+  assert.match(login, /注册会员/);
+  assert.match(login, /手机号或邮箱/);
+  assert.match(authApi, /PREVIEW_VERIFICATION_CODE/);
+});
+
+test("retail partnership requests use an online form, admin workflow and notifications", async () => {
+  const [page, form, api, admin, adminApi, exportApi, store] = await Promise.all([
+    read("app/stores-china/page.tsx"),
+    read("app/stores-china/RetailPartnershipForm.tsx"),
+    read("app/api/retail-partnerships/route.ts"),
+    read("app/admin/AdminClient.tsx"),
+    read("app/api/admin/route.ts"),
+    read("app/api/admin/export/route.ts"),
+    read("db/store.ts"),
+  ]);
+  assert.doesNotMatch(page, /mailto:/);
+  assert.match(page, /RetailPartnershipForm/);
+  assert.match(form, /手机号码/);
+  assert.match(form, /电子邮箱（选填）/);
+  assert.match(form, /没有设置邮箱可留空/);
+  assert.match(api, /retail_partnerships/);
+  assert.match(api, /retail_partnership_internal/);
+  assert.match(api, /retail_partnership_confirmation/);
+  assert.match(admin, /零售合作/);
+  assert.match(admin, /update-retail-partnership-status/);
+  assert.match(adminApi, /partnershipStatuses/);
+  assert.match(exportApi, /partnerships/);
+  assert.match(store, /零售合作申请提醒/);
+  assert.match(store, /零售合作申请确认/);
 });

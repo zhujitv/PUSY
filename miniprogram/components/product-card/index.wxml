@@ -1,0 +1,12 @@
+<view class="card" bindtap="openProduct">
+  <view class="image-wrap">
+    <image class="image" src="{{product.image}}" mode="aspectFill" lazy-load="true" />
+    <text wx:if="{{product.badge}}" class="badge">{{product.badge}}</text>
+    <button class="quick-add" catchtap="add" aria-label="加入购物袋">＋</button>
+  </view>
+  <view class="copy">
+    <text class="category">{{product.category}}</text>
+    <text class="name">{{product.name}}</text>
+    <text class="price">{{product.priceText}}</text>
+  </view>
+</view>

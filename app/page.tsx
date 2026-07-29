@@ -1,23 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { formatCnyFromRub } from "./data/products";
+import { useEffect, useRef, useState } from "react";
+import { formatCnyFromRub, products } from "./data/products";
+import { useStore } from "./components/StoreProvider";
+import { HeaderIcon } from "./components/HeaderIcons";
 
-const products = [
-  { name: "轻盈卸妆油", price: 990, image: "/assets/21.webp", badge: "新品" },
-  { name: "Ice Baby 慕斯高光", price: 990, image: "/assets/20.webp", badge: "新品" },
-  { name: "「美丽随身」限定套装", price: 5490, oldPrice: 6050, image: "/assets/32.webp", badge: "新品" },
-  { name: "晨间焕肤护理套装", price: 2590, oldPrice: 3070, image: "/assets/37.webp", badge: "新品" },
-];
+const featuredProducts = products.slice(1, 9);
 
-const stories = [
-  { image: "/assets/18.webp", title: "奶油唇线笔", price: 490 },
-  { image: "/assets/07.webp", title: "透明眉毛定型啫喱", price: 810 },
-  { image: "/assets/02.webp", title: "面部美黑水", price: 1010 },
-  { image: "/assets/34.webp", title: "ICE BABY 慕斯高光", price: 990 },
-  { image: "/assets/15.webp", title: "BASE HAIR 洗发水", price: 590 },
-  { image: "/assets/31.webp", title: "FLOWER 奶油腮红", price: 910 },
-];
+const reels = [
+  { player: "vplvbx7qwc3dhtviylip", slug: "karandash-dlya-gub-pusy-cream-100460", title: "奶油唇线笔" },
+  { player: "vplvxcyfckgdw6cs2ewu", slug: "rebrending-prozrachnyiy-gel-fiksator-dlya-broveiy-pusy-5ml-1-100347", title: "透明眉毛定型啫喱" },
+  { player: "vplvcp63gpa52inkdmqy", slug: "avtozagar-dlya-lica-pusy-magic-water-face-self-tanner-pusy-magic-water-100-ml-25-100566", title: "面部美黑水" },
+  { player: "vplv6qg7qx2yvzt6kudb", slug: "haiylaiyter-sufle-pusy-ice-baby-4-g-1-100693", title: "ICE BABY 慕斯高光" },
+  { player: "vplv3xtmkw2btxrxqlnb", slug: "shampun-dlya-volos-pusy-base-hair-750-ml-3-100595", title: "BASE HAIR 洗发水" },
+  { player: "vplvtyznzou7usg76z5w", slug: "kremovye-rumyana-pusy-flower-25-gr-9-100359", title: "FLOWER 奶油腮红" },
+].map((reel) => ({ ...reel, product: products.find((product) => product.slug === reel.slug) }));
 
 const navItems = [
   ["神秘礼盒", "/catalog/sekretnye-boksy"], ["全部商品", "/catalog/products"], ["套装", "/catalog/nabory"], ["新品", "/collections/novinki"], ["畅销", "/catalog/hity"], ["眉妆", "/catalog/brows"], ["彩妆", "/catalog/makiyazh"], ["护肤", "/catalog/uhod"], ["身体护理", "/catalog/uhod-1"], ["头发护理", "/catalog/hair"], ["家居", "/catalog/dlya-doma"], ["配件", "/catalog/accessories"], ["礼品卡", "/gift-card"],
@@ -25,10 +22,13 @@ const navItems = [
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
   const [scrolled, setScrolled] = useState(false);
+  const [heroIndex, setHeroIndex] = useState(0);
+  const [heroPaused, setHeroPaused] = useState(false);
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const heroTouchStart = useRef<number | null>(null);
+  const { cartCount, addToCart, setCartOpen, setSearchOpen } = useStore();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 560);
@@ -37,10 +37,21 @@ export default function Home() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  function subscribe(event: React.FormEvent) {
+  useEffect(() => {
+    if (heroPaused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const timer = window.setInterval(() => setHeroIndex((current) => (current + 1) % 2), 6000);
+    return () => window.clearInterval(timer);
+  }, [heroPaused]);
+
+  function moveHero(direction: number) {
+    setHeroIndex((current) => (current + direction + 2) % 2);
+  }
+
+  async function subscribe(event: React.FormEvent) {
     event.preventDefault();
     if (!email.trim()) return;
-    setSubscribed(true);
+    const response = await fetch("/api/newsletter", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, source: "homepage" }) });
+    if (response.ok) setSubscribed(true);
   }
 
   return (
@@ -52,21 +63,31 @@ export default function Home() {
           <span /><span />
         </button>
         <a className="brand" href="#top" aria-label="PÚSY 首页">púsy</a>
-        <div className="header-actions"><button className="header-symbol" aria-label="搜索">⌕</button><button className="header-symbol" aria-label="收藏">♡</button><button className="header-symbol account-symbol" aria-label="账户">♙</button><button className="bag-button" aria-label={`购物袋，${cartCount} 件商品`}>▢<b>{cartCount}</b></button></div>
+        <div className="header-actions"><button className="header-symbol" onClick={() => setSearchOpen(true)} aria-label="搜索"><HeaderIcon name="search" /></button><a className="header-symbol" href="/wishlist" aria-label="收藏"><HeaderIcon name="heart" /></a><a className="header-symbol account-symbol" href="/account" aria-label="账户"><HeaderIcon name="account" /></a><button className="bag-button" onClick={() => setCartOpen(true)} aria-label={`购物袋，${cartCount} 件商品`}><HeaderIcon name="bag" /><b>{cartCount}</b></button></div>
       </header>
 
       <nav className={`nav-row ${menuOpen ? "is-open" : ""}`} aria-label="商品分类">
         {navItems.map(([item, href]) => <a href={href} key={href} onClick={() => setMenuOpen(false)}>{item}</a>)}
       </nav>
 
-      <section className="hero" id="top">
-        <img src="/assets/hero-clean-v2.png" alt="PÚSY 夏日礼物活动" />
-        <div className="hero-copy">
+      <section className="hero hero-carousel" id="top" aria-roledescription="轮播图" aria-label="PÚSY 首页活动" onMouseEnter={() => setHeroPaused(true)} onMouseLeave={() => setHeroPaused(false)} onFocus={() => setHeroPaused(true)} onBlur={() => setHeroPaused(false)} onTouchStart={(event) => { heroTouchStart.current = event.touches[0]?.clientX ?? null; }} onTouchEnd={(event) => { if (heroTouchStart.current === null) return; const distance = (event.changedTouches[0]?.clientX ?? heroTouchStart.current) - heroTouchStart.current; if (Math.abs(distance) > 45) moveHero(distance > 0 ? -1 : 1); heroTouchStart.current = null; }}>
+        <div className="hero-slides">
+          <div className={`hero-slide ${heroIndex === 0 ? "is-active" : ""}`} aria-hidden={heroIndex !== 0}><img src="/assets/hero-clean-v2.png" alt="PÚSY 夏日礼物活动" /></div>
+          <div className={`hero-slide hero-slide--box ${heroIndex === 1 ? "is-active" : ""}`} aria-hidden={heroIndex !== 1}><img src="/assets/35.webp" alt="PÚSY 海滩神秘礼盒" /></div>
+        </div>
+        {heroIndex === 0 ? <div className="hero-copy">
           <div className="campaign-mark">púsy <span>×</span> Ü</div>
           <h1>礼物飞进<br />你的订单</h1>
           <p>猜猜你会收到哪一份？</p>
           <div className="prize-panel"><div><small>随机赢取</small><b>9 款礼物<br />中的 1 款</b></div><div><small>重磅好礼</small><b>Dyson、Paper Shoot、<br />Apple 等惊喜</b></div></div>
-        </div>
+        </div> : <div className="hero-copy hero-copy--box">
+          <p>PÚSY 神秘礼盒</p>
+          <h1>装下这个夏天<br />需要的一切</h1>
+          <a className="outline-button" href="/catalog/sekretnye-boksy">了解更多</a>
+        </div>}
+        <button className="hero-arrow hero-arrow--prev" type="button" aria-label="上一张" onClick={() => moveHero(-1)}>‹</button>
+        <button className="hero-arrow hero-arrow--next" type="button" aria-label="下一张" onClick={() => moveHero(1)}>›</button>
+        <div className="hero-dots" aria-label="选择轮播图">{[0, 1].map((index) => <button key={index} type="button" className={heroIndex === index ? "active" : ""} aria-label={`第 ${index + 1} 张`} aria-current={heroIndex === index ? "true" : undefined} onClick={() => setHeroIndex(index)} />)}</div>
       </section>
 
       <section className="product-section" id="products">
@@ -75,14 +96,14 @@ export default function Home() {
           <a href="/catalog/products">查看全部</a>
         </div>
         <div className="product-grid">
-          {products.map((product) => (
-            <article className="product-card" key={product.name}>
+          {featuredProducts.map((product) => (
+            <article className="product-card" key={product.slug}>
               <div className="product-image-wrap">
                 <span className="badge">{product.badge}</span>
-                <img src={product.image} alt={product.name} />
-                <button onClick={() => setCartCount((n) => n + 1)}>加入购物袋</button>
+                <a href={`/products/${product.slug}`}><img src={product.image} alt={product.name} /></a>
+                <button disabled={!product.inventoryVerified || (product.stock ?? 0) < 1} onClick={() => addToCart(product)}>{!product.inventoryVerified || (product.stock ?? 0) < 1 ? "暂时缺货" : "加入购物袋"}</button>
               </div>
-              <h3>{product.name}</h3>
+              <h3><a href={`/products/${product.slug}`}>{product.name}</a></h3>
               <p className="price">{formatCnyFromRub(product.price)} {product.oldPrice && <del>{formatCnyFromRub(product.oldPrice)}</del>}</p>
             </article>
           ))}
@@ -104,27 +125,27 @@ export default function Home() {
         </a>
       </section>
 
-      <section className="stories-section">
-        <h2>你与 PÚSY</h2>
-        <div className="story-grid">
-          {stories.map((story) => (
-            <a className="story-card" href="#products" key={story.title}>
-              <img src={story.image} alt={story.title} />
-              <span className="play-dot">▶</span>
-              <div><b>{story.title}</b><em>{formatCnyFromRub(story.price)}</em></div>
+      <section className="reels-section" aria-labelledby="reels-title">
+        <h2 id="reels-title">你与 PÚSY</h2>
+        <div className="reels-grid">
+          {reels.map((reel) => <article className="reel-card" key={reel.player}>
+            <div className="reel-video"><iframe src={`https://runtime.strm.yandex.ru/player/video/${reel.player}`} title={`${reel.title} 视频`} loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowFullScreen /></div>
+            <a className="reel-product" href={`/products/${reel.slug}`}>
+              {reel.product && <img src={reel.product.image} alt="" />}
+              <span><b>{reel.title}</b><em>{reel.product ? formatCnyFromRub(reel.product.price) : "查看商品"}</em></span>
             </a>
-          ))}
+          </article>)}
         </div>
       </section>
 
       <footer className="pusy-footer">
-        <div className="footer-contact-line"><span>© PÚSY 2026</span><div><a href="tel:+79266740938">+7 (926) 674-09-38</a><a href="https://www.instagram.com/pusy.beauty">Instagram</a><a href="mailto:help@pusy.beauty">help@pusy.beauty</a><a href="https://t.me/pusybeautyy">Telegram</a></div></div>
+        <div className="footer-contact-line"><span>© PÚSY 2026 · <a href="https://pusy.cn">PUSY.CN</a> · 中国</span><div><a href="mailto:help@PUSY.CN">客户服务</a><a href="mailto:help@PUSY.CN?subject=PUSY.CN%20商务合作">商务合作</a><a href="/details">经营者信息</a></div></div>
         <div className="footer-logo">púsy</div>
         <div className="footer-links">
           <div><a href="/catalog/products">商品目录</a><a href="/about">关于我们</a><a href="/delivery">配送说明</a><a href="/return">退换货</a><a href="/payment">支付方式</a></div>
-          <div><a href="https://t.me/pusy_beauty">客户服务</a><a href="/stores-china">线下门店</a><a href="mailto:help@pusy.beauty">合作申请</a><a href="/faq">常见问题</a></div>
+          <div><a href="/stores-china">中国渠道</a><a href="/gift-card/questions">礼品卡问题</a><a href="/faq">常见问题</a><a href="/oferta">用户服务协议</a><a href="/privacy">隐私政策</a><a href="/cookie">Cookie 政策</a><a href="/details">经营者信息</a></div>
         </div>
-        <div className="footer-subscribe"><p>订阅邮件，立享 9 折</p>{subscribed ? <span>订阅成功，欢迎加入 PÚSY CLUB。</span> : <form onSubmit={subscribe}><label className="sr-only" htmlFor="email">电子邮箱</label><input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="电子邮箱" required /><button type="submit">➤</button></form>}</div>
+        <div className="footer-subscribe"><p>订阅邮件，立享 9 折</p>{subscribed ? <span>订阅成功，欢迎加入 PÚSY CLUB。</span> : <><form onSubmit={subscribe}><label className="sr-only" htmlFor="email">电子邮箱</label><input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="电子邮箱" required /><button type="submit">➤</button></form><small>提交即表示同意我们按照<a href="/privacy">隐私政策</a>发送品牌资讯，可随时退订。</small></>}</div>
       </footer>
     </main>
   );

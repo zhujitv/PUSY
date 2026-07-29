@@ -1,0 +1,67 @@
+<view class="page-shell product-page">
+  <swiper class="gallery" indicator-dots="true" indicator-color="rgba(0,0,0,.2)" indicator-active-color="#111">
+    <swiper-item wx:for="{{product.images}}" wx:key="*this">
+      <image class="gallery-image" src="{{item}}" mode="aspectFill" />
+    </swiper-item>
+  </swiper>
+
+  <view class="product-copy">
+    <view class="product-meta-line">
+      <text class="eyebrow">{{product.category}}</text>
+      <text class="product-badge">{{product.badge}}</text>
+    </view>
+    <text class="product-name">{{product.name}}</text>
+    <text class="product-subtitle">{{product.subtitle}}</text>
+    <text class="product-price">{{product.priceText}}</text>
+
+    <view class="stock-note">
+      <view class="stock-dot"></view>
+      <text>开发预览商品 · 正式库存将由统一接口实时返回</text>
+    </view>
+
+    <view class="highlight-row">
+      <text wx:for="{{product.highlights}}" wx:key="*this">{{item}}</text>
+    </view>
+
+    <view class="quantity-row">
+      <text>数量</text>
+      <view class="quantity-control">
+        <button bindtap="changeQuantity" data-delta="-1">−</button>
+        <text>{{quantity}}</text>
+        <button bindtap="changeQuantity" data-delta="1">＋</button>
+      </view>
+    </view>
+
+    <view class="detail-section">
+      <text class="detail-title">产品介绍</text>
+      <text class="detail-body">{{product.description}}</text>
+    </view>
+    <view class="detail-section">
+      <text class="detail-title">使用方法</text>
+      <text class="detail-body">{{product.usage}}</text>
+    </view>
+    <view class="detail-section detail-spec">
+      <text class="detail-title">规格</text>
+      <text class="detail-body">{{product.volume}}</text>
+    </view>
+  </view>
+
+  <view wx:if="{{related.length}}" class="related-section">
+    <text class="related-title">你可能也喜欢</text>
+    <scroll-view scroll-x="true" class="related-scroll" enhanced="true" show-scrollbar="false">
+      <view class="related-inner">
+        <view wx:for="{{related}}" wx:key="id" class="related-card" bindtap="openRelated" data-id="{{item.id}}">
+          <image src="{{item.image}}" mode="aspectFill" />
+          <text>{{item.name}}</text>
+          <text>{{item.priceText}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="product-actions">
+    <button class="bag-action" bindtap="add">加入购物袋</button>
+    <button class="buy-action" bindtap="buyNow">立即购买</button>
+  </view>
+  <view class="safe-bottom"></view>
+</view>

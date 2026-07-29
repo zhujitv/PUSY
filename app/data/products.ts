@@ -1,3 +1,19 @@
+import catalog from "./products.generated.json";
+
+export type ProductVariantOption = {
+  label: string;
+  sku?: string;
+  price?: number;
+  slug?: string;
+  image?: string;
+  color?: string;
+};
+
+export type ProductVariantGroup = {
+  name: string;
+  options: ProductVariantOption[];
+};
+
 export type Product = {
   slug: string;
   name: string;
@@ -5,9 +21,17 @@ export type Product = {
   oldPrice?: number;
   image: string;
   imageAlt?: string;
+  images?: string[];
   badge?: string;
   category: string;
   description: string;
+  sku?: string;
+  volume?: string;
+  ingredients?: string;
+  usage?: string;
+  stock?: number;
+  inventoryVerified?: boolean;
+  variants?: ProductVariantGroup[];
 };
 
 export const RUB_TO_CNY = 0.12;
@@ -19,26 +43,125 @@ export function formatCnyFromRub(rubles: number) {
   })} 元`;
 }
 
-export const products: Product[] = [
-  { slug: "karandash-dlya-broveiy-s-refilom-medium-brown-100758", name: "可替换芯眉笔 Dark Brown", price: 890, image: "/assets/16.webp", imageAlt: "/assets/18.webp", category: "眉妆", description: "纤细笔芯轻松勾勒自然眉形，顺滑显色，适合日常快速打造精致眉妆。" },
-  { slug: "gidrofilnoe-maslo-dlya-lica-pusy-110-ml-100733", name: "轻盈面部卸妆油", price: 990, image: "/assets/21.webp", imageAlt: "/assets/33.webp", badge: "新品", category: "护肤", description: "轻盈油感配方，遇水迅速乳化，温和卸除彩妆与日常污垢，洗后清爽不紧绷。" },
-  { slug: "haiylaiyter-sufle-pusy-ice-baby-4-g-1-100693", name: "Ice Baby 慕斯高光", price: 990, image: "/assets/20.webp", imageAlt: "/assets/34.webp", badge: "新品", category: "彩妆", description: "柔软慕斯质地与细腻珠光，为面部带来通透、自然的闪耀效果。" },
-  { slug: "nabor-dlya-vosstanovleniya-volos-pusy-prime-your-prime-era-kit-100678", name: "Prime 修护头发套装", price: 3590, image: "/assets/19.webp", imageAlt: "/assets/15.webp", badge: "新品", category: "头发护理", description: "从清洁到修护的完整组合，帮助头发保持柔顺、光泽与轻盈质感。" },
-  { slug: "sekretnyiy-boks-siyaiy-bez-sprosa-3-100738", name: "「无需许可，自在闪耀」神秘礼盒", price: 1990, oldPrice: 2660, image: "/assets/25.webp", imageAlt: "/assets/36.webp", badge: "新品", category: "神秘礼盒", description: "由 PÚSY 精心搭配的惊喜组合，打开礼盒，发现属于你的闪耀时刻。" },
-  { slug: "sekretnyiy-boks-vsye-vklycheno-m-100729", name: "「全部包含」神秘礼盒", price: 1990, oldPrice: 2560, image: "/assets/23.webp", imageAlt: "/assets/30.webp", badge: "新品", category: "神秘礼盒", description: "彩妆、护理与生活方式单品的随机惊喜搭配，适合送给自己或重要的人。" },
-  { slug: "sekretnyiy-boks-otpusk-dlya-sebya-s-100731", name: "「给自己放个假」神秘礼盒", price: 1990, oldPrice: 2560, image: "/assets/22.webp", imageAlt: "/assets/28.webp", badge: "新品", category: "神秘礼盒", description: "轻松愉悦的夏日主题礼盒，让日常护理也像一次短暂假期。" },
-  { slug: "nabor-hodovoiy-letniiy-vaiyb-100687", name: "「美丽随身」限定套装", price: 5490, oldPrice: 6050, image: "/assets/32.webp", imageAlt: "/assets/05.webp", badge: "新品", category: "套装", description: "人气彩妆与便携化妆包组合，出门在外也能快速完成精致妆容。" },
-  { slug: "kapsulnaya-tush-dlya-resnic-black-100670", name: "Black 胶囊睫毛膏", price: 990, image: "/assets/24.webp", imageAlt: "/assets/10.webp", category: "彩妆", description: "轻盈包裹每一根睫毛，打造清晰、纤长的黑色睫毛效果。" },
-  { slug: "jele-dlya-gub-autumn-1-100675", name: "Winter 唇部果冻", price: 790, image: "/assets/17.webp", imageAlt: "/assets/06.webp", category: "彩妆", description: "水润果冻质地，为双唇增添通透光泽，同时保持柔软舒适。" },
-  { slug: "shampun-dlya-volos-pusy-base-hair-750-ml-3-100595", name: "BASE HAIR 丰盈修护洗发水", price: 590, image: "/assets/19.webp", imageAlt: "/assets/15.webp", category: "头发护理", description: "温和洁净发丝与头皮，为日常护理带来轻盈蓬松的基础。" },
-  { slug: "pusy-home-sol-dlya-vanny-bath-salt-400g-100160", name: "PÚSY HOME 香氛浴盐", price: 890, image: "/assets/14.webp", imageAlt: "/assets/13.webp", category: "家居", description: "烟草、胡椒与香草交织的温暖气息，把普通沐浴变成放松仪式。" },
-];
+export const products = catalog as Product[];
 
 export const categoryNames: Record<string, string> = {
-  products: "全部商品", accessories: "配件", brows: "眉妆", "dlya-doma": "家居", face: "面部彩妆", hair: "头发护理", hity: "畅销单品", makiyazh: "彩妆", nabory: "套装", "sekretnye-boksy": "神秘礼盒", uhod: "护肤", "uhod-1": "身体护理",
-  novinki: "新品", "vse-tovary": "全部商品", hits: "畅销单品", "karandashi-dlya-gub": "唇线笔", "geli-dlya-brovej": "眉毛定型啫喱", "kremovye-rumyana": "奶油腮红", shampuni: "洗发水", kosmetichki: "化妆包", "maslo-dlya-gub": "唇油",
+  products: "全部商品",
+  accessories: "配件",
+  brows: "眉妆",
+  "dlya-doma": "家居",
+  face: "面部护理",
+  hair: "头发护理",
+  hity: "畅销单品",
+  makiyazh: "彩妆",
+  nabory: "套装",
+  "sekretnye-boksy": "神秘礼盒",
+  uhod: "护肤",
+  "uhod-1": "身体护理",
+  novinki: "新品",
+  "vse-tovary": "全部商品",
+  hits: "畅销单品",
+  "karandashi-dlya-gub": "唇线笔",
+  "geli-dlya-brovej": "眉毛定型啫喱",
+  "kremovye-rumyana": "奶油腮红",
+  shampuni: "洗发水",
+  kosmetichki: "化妆包",
+  "maslo-dlya-gub": "唇油",
 };
 
+export const collectionNames: Record<string, string> = {
+  "avtozagary-dlya-lica-i-tela": "面部与身体自助美黑",
+  "balzam-dlya-gub": "润唇膏",
+  "geli-dlya-brovej": "眉毛定型啫喱",
+  "geli-i-penki-dlya-umyvaniya": "洁面啫喱与洁面泡沫",
+  gift: "礼赠精选",
+  hits: "畅销单品",
+  "karandashi-dlya-gub": "唇线笔",
+  "karandashi-plampery": "丰唇笔",
+  "kondicionery-dlya-volos": "护发素",
+  kosmetichki: "化妆包",
+  "kremovye-rumyana": "奶油腮红",
+  "kremy-dlya-ruk": "护手霜",
+  "maski-dlya-volos": "发膜",
+  "maslo-dlya-gub": "唇油",
+  "micelyarnaya-voda": "卸妆水",
+  novinki: "新品",
+  shampuni: "洗发水",
+  "skraby-dlya-tela": "身体磨砂",
+  "skraby-slajmy": "果冻身体磨砂",
+  teni: "眼影",
+  "tushi-dlya-resnic": "睫毛膏",
+  "vse-tovary": "全部商品",
+  "zhele-dlya-gub": "唇部果冻",
+  "cleansing-oil": "卸妆油",
+  "emulsiya-dlya-lica": "面部乳液",
+  "gel-dlya-umyvaniya-lica": "面部洁面啫喱",
+  "koreiyskiiy-brend-kosmetiki": "精选彩妆品牌",
+  "koreiyskiiy-uhod-za-volosami": "专业头发护理",
+  "maslo-dlya-lica": "面部护理油",
+  "mist-dlya-lica": "面部保湿喷雾",
+  "molochko-dlya-umyvaniya": "洁面乳",
+  "ochishchayshchaya-maska-dlya-lica": "清洁面膜",
+  priority: "PÚSY 精选",
+  "rumyana-v-sharikah": "腮红",
+  "russkie-brendy-uhodovoiy-kosmetiki": "PÚSY 护理精选",
+  "seconds-salon-hair-mask": "沙龙级发膜",
+  "skrab-iz-kofe": "咖啡身体磨砂",
+  "spreiy-dlya-tela-parfymirovannyiy": "香氛身体喷雾",
+  "tush-burgundi": "酒红色睫毛膏",
+  "tush-seraya": "灰色睫毛膏",
+  "uvlajnyayshchie-maski-dlya-lica-v-domashnih-usloviyah": "居家保湿面膜",
+};
+
+const collectionMatchers: Record<string, RegExp> = {
+  "avtozagary-dlya-lica-i-tela": /avtozagar|tan-mousse/,
+  "balzam-dlya-gub": /balzam.*gub/,
+  "geli-dlya-brovej": /gel.*brov|brov.*gel/,
+  "geli-i-penki-dlya-umyvaniya": /gel.*umyv|penka.*umyv/,
+  gift: /nabor|mini|kosmetichka/,
+  "karandashi-dlya-gub": /karandash-dlya-gub/,
+  "karandashi-plampery": /plamper/,
+  "kondicionery-dlya-volos": /kondicioner/,
+  kosmetichki: /kosmetichka/,
+  "kremovye-rumyana": /kremovye-rumyana/,
+  "kremy-dlya-ruk": /krem.*ruk/,
+  "maski-dlya-volos": /maska.*volos|hair-mask/,
+  "maslo-dlya-gub": /maslo-dlya-gub/,
+  "micelyarnaya-voda": /micell|micellyar/,
+  shampuni: /shampun/,
+  "skraby-dlya-tela": /skrab.*tela|body.*scrub/,
+  "skraby-slajmy": /skrab-slaiym/,
+  teni: /teni/,
+  "tushi-dlya-resnic": /tush|termogel/,
+  "zhele-dlya-gub": /jele-dlya-gub/,
+  "cleansing-oil": /gidrofil|maslo-dlya-lica/,
+  "emulsiya-dlya-lica": /emulsiya/,
+  "gel-dlya-umyvaniya-lica": /gel.*umyv/,
+  "maslo-dlya-lica": /gidrofil|maslo-dlya-lica/,
+  "mist-dlya-lica": /mist-dlya-lica/,
+  "molochko-dlya-umyvaniya": /molochko.*umyv/,
+  "ochishchayshchaya-maska-dlya-lica": /maska.*lica/,
+  "rumyana-v-sharikah": /rumyana/,
+  "seconds-salon-hair-mask": /maska.*volos|hair-mask/,
+  "skrab-iz-kofe": /skrab/,
+  "spreiy-dlya-tela-parfymirovannyiy": /spreiy-dlya-tela/,
+  "tush-burgundi": /tush.*burgundi/,
+  "tush-seraya": /tush.*ser/,
+  "uvlajnyayshchie-maski-dlya-lica-v-domashnih-usloviyah": /maska.*lica/,
+};
+
+export function productsForCollection(slug: string) {
+  if (slug === "vse-tovary") return products;
+  if (slug === "hits") return products.filter((product) => product.badge === "畅销");
+  if (slug === "novinki") return products.filter((product) => product.badge === "新品");
+  if (["priority", "koreiyskiiy-brend-kosmetiki", "russkie-brendy-uhodovoiy-kosmetiki"].includes(slug)) return products.slice(0, 16);
+  if (slug === "koreiyskiiy-uhod-za-volosami") return products.filter((product) => product.category === "头发护理");
+  const matcher = collectionMatchers[slug];
+  return matcher ? products.filter((product) => matcher.test(product.slug)) : [];
+}
+
 export function getProduct(slug: string) {
+  const giftMatch = slug.match(/^gift-card-(\d+)(?:-.+)?$/);
+  if (giftMatch) return { slug, name: "PÚSY 电子礼品卡", price: Number(giftMatch[1]), image: "/assets/41.webp", category: "礼品卡", description: "可用于 PÚSY 中国官方商城的记名电子礼品卡。", stock: 1, inventoryVerified: true } satisfies Product;
   return products.find((product) => product.slug === slug) ?? products[0];
 }

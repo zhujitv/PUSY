@@ -1,0 +1,25 @@
+.cart-page { padding-bottom: 50rpx; }
+.cart-head { position: relative; padding: 54rpx 30rpx 34rpx; border-bottom: 1rpx solid #e8e4e1; }
+.cart-title { display: block; margin-top: 14rpx; font-size: 66rpx; letter-spacing: -5rpx; }
+.cart-count { position: absolute; right: 30rpx; bottom: 42rpx; color: #777; font-size: 23rpx; }
+.shipping-progress { margin: 28rpx 30rpx 0; padding: 26rpx; background: #fff1f7; color: #8d315d; font-size: 23rpx; }
+.progress-track { height: 5rpx; margin-top: 18rpx; overflow: hidden; background: rgba(141,49,93,.18); }
+.progress-value { height: 100%; background: var(--pink); transition: width .2s ease; }
+.cart-list { padding: 0 30rpx; }
+.cart-item { display: grid; grid-template-columns: 230rpx 1fr; gap: 24rpx; padding: 34rpx 0; border-bottom: 1rpx solid #e5e2df; }
+.cart-image { width: 230rpx; height: 280rpx; background: #f2f1ef; }
+.cart-copy { min-width: 0; display: flex; flex-direction: column; }
+.cart-category { color: #888; font-size: 20rpx; }
+.cart-name { margin-top: 8rpx; font-size: 29rpx; line-height: 1.3; }
+.cart-unit { margin-top: 12rpx; font-size: 24rpx; }
+.cart-row { display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
+.cart-quantity { display: grid; grid-template-columns: 58rpx 58rpx 58rpx; height: 58rpx; border: 1rpx solid #aaa; }
+.cart-quantity button, .cart-quantity text { display: flex; align-items: center; justify-content: center; padding: 0; background: #fff; }
+.cart-subtotal { font-weight: 600; }
+.cart-remove { align-self: flex-start; margin-top: 18rpx; color: #888; font-size: 21rpx; text-decoration: underline; }
+.cart-summary { margin: 36rpx 30rpx 0; padding: 30rpx; background: #f6f5f3; }
+.cart-summary > view { display: flex; justify-content: space-between; margin-bottom: 18rpx; color: #555; font-size: 24rpx; }
+.cart-summary .cart-total { margin-top: 28rpx; padding-top: 25rpx; border-top: 1rpx solid #d7d3cf; color: #111; font-size: 32rpx; font-weight: 600; }
+.cart-tax { display: block; margin: 24rpx 0; color: #888; font-size: 20rpx; line-height: 1.55; }
+.cart-empty { padding-top: 170rpx; }
+.empty-symbol { display: block; margin-bottom: 50rpx; color: #ffacd1; font-size: 110rpx; font-weight: 700; letter-spacing: -9rpx; }

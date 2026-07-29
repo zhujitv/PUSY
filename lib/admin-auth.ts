@@ -39,7 +39,7 @@ function cookieValue(cookieHeader: string, name: string) {
 }
 
 export function adminAuthConfigured() {
-  return Boolean(secret() && (process.env.ADMIN_PASSWORD ?? "").length >= 12);
+  return Boolean(secret() && (process.env.ADMIN_PASSWORD ?? "").length >= 8);
 }
 
 export async function verifyAdminPassword(password: string) {

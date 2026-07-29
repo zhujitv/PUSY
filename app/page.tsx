@@ -100,7 +100,7 @@ export default function Home() {
             <article className="product-card" key={product.slug}>
               <div className="product-image-wrap">
                 <span className="badge">{product.badge}</span>
-                <a href={`/products/${product.slug}`}><img src={product.image} alt={product.name} loading="lazy" decoding="async" /></a>
+                <a href={`/products/${product.slug}`}><img src={product.image} alt={product.name} loading="eager" decoding="async" /></a>
                 <button disabled={!product.inventoryVerified || (product.stock ?? 0) < 1} onClick={() => addToCart(product)}>{!product.inventoryVerified || (product.stock ?? 0) < 1 ? "暂时缺货" : "加入购物袋"}</button>
               </div>
               <h3><a href={`/products/${product.slug}`}>{product.name}</a></h3>

@@ -123,7 +123,7 @@ test("member center always exposes a working sign-out entry", async () => {
   assert.doesNotMatch(account, /canSignOut/);
   assert.match(account, /redirect\("\/account\/login"\)/);
   assert.match(accountClient, /href="\/account\/logout">退出登录/);
-  assert.match(logout, /chatGPTSignOutPath/);
+  assert.match(logout, /Response\.redirect\(new URL\("\/account\/login"/);
   assert.match(logout, /clearPreviewMemberCookie/);
   assert.match(login, /会员登录/);
   assert.match(login, /注册会员/);
@@ -132,14 +132,14 @@ test("member center always exposes a working sign-out entry", async () => {
 });
 
 test("retail partnership requests use an online form, admin workflow and notifications", async () => {
-  const [page, form, api, admin, adminApi, exportApi, store] = await Promise.all([
+  const [page, form, api, admin, adminApi, exportApi, schema] = await Promise.all([
     read("app/stores-china/page.tsx"),
     read("app/stores-china/RetailPartnershipForm.tsx"),
     read("app/api/retail-partnerships/route.ts"),
     read("app/admin/AdminClient.tsx"),
     read("app/api/admin/route.ts"),
     read("app/api/admin/export/route.ts"),
-    read("db/store.ts"),
+    read("db/railway-postgres.sql"),
   ]);
   assert.doesNotMatch(page, /mailto:/);
   assert.match(page, /RetailPartnershipForm/);
@@ -153,6 +153,6 @@ test("retail partnership requests use an online form, admin workflow and notific
   assert.match(admin, /update-retail-partnership-status/);
   assert.match(adminApi, /partnershipStatuses/);
   assert.match(exportApi, /partnerships/);
-  assert.match(store, /零售合作申请提醒/);
-  assert.match(store, /零售合作申请确认/);
+  assert.match(schema, /CREATE TABLE IF NOT EXISTS retail_partnerships/);
+  assert.match(schema, /cooperation_type TEXT NOT NULL/);
 });

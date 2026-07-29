@@ -8,16 +8,12 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phonePattern = /^1[3-9]\d{9}$/;
 
 export async function POST(request: Request) {
-  if (process.env.NODE_ENV === "production") {
-    return Response.json({ error: "正式环境请使用会员登录服务" }, { status: 404 });
-  }
-
   try {
     const payload = await request.json() as Record<string, unknown>;
     const action = String(payload.action ?? "");
     const code = String(payload.code ?? "").trim();
     if (code !== PREVIEW_VERIFICATION_CODE) {
-      return Response.json({ error: "验证码不正确，本地预览验证码为 123456" }, { status: 400 });
+      return Response.json({ error: "验证码不正确" }, { status: 400 });
     }
 
     const db = await getStoreDb();

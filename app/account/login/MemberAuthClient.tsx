@@ -68,11 +68,11 @@ export function MemberAuthClient() {
         <label>验证码
           <div className="member-code-field">
             <input name="code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="6 位验证码" required />
-            <button type="button" onClick={() => setMessage("本地预览验证码：123456")}>获取验证码</button>
+            <button type="button" onClick={() => setMessage("测试验证码：123456")}>获取验证码</button>
           </div>
         </label>
         {mode === "register" && <label className="member-auth-consent"><input name="consent" type="checkbox" required /> <span>我已阅读并同意<a href="/oferta">用户服务协议</a>和<a href="/privacy">隐私政策</a>。</span></label>}
-        <div className="member-preview-code">本地预览验证码：<b>123456</b></div>
+        <div className="member-preview-code">测试验证码：<b>123456</b></div>
         {error && <p className="member-auth-error" role="alert">{error}</p>}
         {message && <p className="member-auth-message">{message}</p>}
         <button className="member-auth-submit" disabled={submitting}>{submitting ? "正在处理…" : mode === "login" ? "登录" : "注册并登录"}</button>

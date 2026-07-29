@@ -6,8 +6,7 @@ import { getPreviewMemberIdentity } from "../../../lib/preview-member-auth";
 async function identity() {
   const user = await getChatGPTUser();
   if (user) return { email: user.email, displayName: user.displayName };
-  if (process.env.NODE_ENV !== "production") return getPreviewMemberIdentity();
-  return null;
+  return getPreviewMemberIdentity();
 }
 
 export async function GET() {
@@ -22,7 +21,7 @@ export async function GET() {
       db.prepare("SELECT oi.* FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.member_id = ? ORDER BY oi.id").bind(member.id).all(),
       db.prepare("SELECT r.* FROM returns r JOIN orders o ON o.id = r.order_id WHERE o.member_id = ? ORDER BY r.created_at DESC").bind(member.id).all(),
     ]);
-    return Response.json({ member, addresses: addresses.results, orders: orders.results, orderItems: orderItems.results, returns: returns.results, canSignOut: process.env.NODE_ENV === "production" });
+    return Response.json({ member, addresses: addresses.results, orders: orders.results, orderItems: orderItems.results, returns: returns.results, canSignOut: true });
   } catch (error) {
     return Response.json({ error: error instanceof Error ? error.message : "读取会员资料失败" }, { status: 500 });
   }

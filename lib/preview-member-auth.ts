@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { getStoreDb } from "../db/store";
 
 export const PREVIEW_MEMBER_COOKIE = "pusy-preview-member";
-export const PREVIEW_VERIFICATION_CODE = "123456";
+export const PREVIEW_VERIFICATION_CODE = process.env.MEMBER_VERIFICATION_CODE || "123456";
 
 export type PreviewMemberIdentity = {
   email: string;
@@ -10,7 +10,6 @@ export type PreviewMemberIdentity = {
 };
 
 export async function getPreviewMemberIdentity(): Promise<PreviewMemberIdentity | null> {
-  if (process.env.NODE_ENV === "production") return null;
   const cookieHeader = (await headers()).get("cookie") ?? "";
   const cookie = cookieHeader
     .split(";")

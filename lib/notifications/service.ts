@@ -73,7 +73,7 @@ export async function processNotificationJob(id: string) {
 
 export async function processDueNotifications(limit = 50) {
   const db = await getStoreDb();
-  const jobs = await db.prepare("SELECT id FROM notification_jobs WHERE status IN ('queued','failed') AND datetime(scheduled_at) <= datetime('now') AND (next_retry_at IS NULL OR datetime(next_retry_at) <= datetime('now')) ORDER BY created_at LIMIT ?").bind(Math.min(limit, 100)).all<{ id: string }>();
+  const jobs = await db.prepare("SELECT id FROM notification_jobs WHERE scheduled_at::timestamp <= CURRENT_TIMESTAMP AND (next_retry_at IS NULL OR next_retry_at::timestamp <= CURRENT_TIMESTAMP) ORDER BY created_at LIMIT ?").bind(Math.min(limit, 100)).all<{ id: string }>();
   const results = [];
   for (const job of jobs.results) results.push(await processNotificationJob(job.id).then(() => ({ id: job.id, ok: true })).catch((error) => ({ id: job.id, ok: false, error: error instanceof Error ? error.message : "发送失败" })));
   return results;

@@ -1,62 +1,140 @@
-import { env } from "cloudflare:workers";
-import { products as seedProducts } from "../app/data/products";
+import { Pool, type PoolClient, type QueryResult } from "pg";
 
-let initialized = false;
+type DbResult<T> = {
+  results: T[];
+  success: true;
+  meta: { changes: number };
+};
+
+type Queryable = Pool | PoolClient;
+
+function postgresSql(sql: string) {
+  let parameter = 0;
+  let quoted: "'" | '"' | null = null;
+  let output = "";
+
+  for (let index = 0; index < sql.length; index += 1) {
+    const character = sql[index];
+    const next = sql[index + 1];
+
+    if (quoted) {
+      output += character;
+      if (character === quoted && next === quoted) {
+        output += next;
+        index += 1;
+      } else if (character === quoted) {
+        quoted = null;
+      }
+      continue;
+    }
+
+    if (character === "'" || character === '"') {
+      quoted = character;
+      output += character;
+    } else if (character === "?") {
+      parameter += 1;
+      output += `$${parameter}`;
+    } else {
+      output += character;
+    }
+  }
+
+  return output;
+}
+
+class PostgresStatement {
+  private values: unknown[] = [];
+
+  constructor(
+    private readonly pool: Pool,
+    private readonly sql: string,
+  ) {}
+
+  bind(...values: unknown[]) {
+    this.values = values;
+    return this;
+  }
+
+  async execute(queryable: Queryable = this.pool): Promise<QueryResult> {
+    return queryable.query(postgresSql(this.sql), this.values);
+  }
+
+  async all<T>(): Promise<DbResult<T>> {
+    const result = await this.execute();
+    return {
+      results: result.rows as T[],
+      success: true,
+      meta: { changes: result.rowCount ?? 0 },
+    };
+  }
+
+  async first<T>(): Promise<T | null> {
+    const result = await this.execute();
+    return (result.rows[0] as T | undefined) ?? null;
+  }
+
+  async run(): Promise<DbResult<Record<string, unknown>>> {
+    const result = await this.execute();
+    return {
+      results: result.rows,
+      success: true,
+      meta: { changes: result.rowCount ?? 0 },
+    };
+  }
+}
+
+class PostgresStoreDb {
+  constructor(private readonly pool: Pool) {}
+
+  prepare(sql: string) {
+    return new PostgresStatement(this.pool, sql);
+  }
+
+  async batch(statements: PostgresStatement[]) {
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      const results = [];
+      for (const statement of statements) {
+        const result = await statement.execute(client);
+        results.push({
+          results: result.rows,
+          success: true as const,
+          meta: { changes: result.rowCount ?? 0 },
+        });
+      }
+      await client.query("COMMIT");
+      return results;
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+}
+
+declare global {
+  var pusyPostgresPool: Pool | undefined;
+}
+
+let store: PostgresStoreDb | undefined;
 
 export async function getStoreDb() {
-  const db = env.DB;
-  if (!db) throw new Error("商城数据库尚未配置");
-  if (initialized) return db;
-  await db.batch([
-    db.prepare(`CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY AUTOINCREMENT, slug TEXT NOT NULL UNIQUE, name TEXT NOT NULL, category TEXT NOT NULL, description TEXT NOT NULL DEFAULT '', image TEXT NOT NULL, image_alt TEXT, badge TEXT, price INTEGER NOT NULL, old_price INTEGER, stock INTEGER NOT NULL DEFAULT 0, inventory_verified INTEGER NOT NULL DEFAULT 0, images_json TEXT NOT NULL DEFAULT '[]', variants_json TEXT NOT NULL DEFAULT '[]', status TEXT NOT NULL DEFAULT 'active', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`),
-    db.prepare(`CREATE TABLE IF NOT EXISTS members (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, email TEXT NOT NULL UNIQUE, phone TEXT NOT NULL DEFAULT '', status TEXT NOT NULL DEFAULT 'active', total_orders INTEGER NOT NULL DEFAULT 0, total_spent INTEGER NOT NULL DEFAULT 0, joined_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`),
-    db.prepare(`CREATE TABLE IF NOT EXISTS member_addresses (id INTEGER PRIMARY KEY AUTOINCREMENT, member_id INTEGER NOT NULL, label TEXT NOT NULL DEFAULT '家', recipient TEXT NOT NULL, phone TEXT NOT NULL, province TEXT NOT NULL, city TEXT NOT NULL, district TEXT NOT NULL DEFAULT '', detail TEXT NOT NULL, postcode TEXT NOT NULL DEFAULT '', is_default INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(member_id) REFERENCES members(id))`),
-    db.prepare(`CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, member_id INTEGER, customer TEXT NOT NULL, email TEXT NOT NULL, phone TEXT NOT NULL, address TEXT NOT NULL, delivery TEXT NOT NULL, payment TEXT NOT NULL, total INTEGER NOT NULL, status TEXT NOT NULL DEFAULT '待付款', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(member_id) REFERENCES members(id))`),
-    db.prepare(`CREATE TABLE IF NOT EXISTS order_items (id INTEGER PRIMARY KEY AUTOINCREMENT, order_id TEXT NOT NULL, product_slug TEXT NOT NULL, product_name TEXT NOT NULL, quantity INTEGER NOT NULL, unit_price INTEGER NOT NULL, FOREIGN KEY(order_id) REFERENCES orders(id))`),
-    db.prepare(`CREATE TABLE IF NOT EXISTS subscribers (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL UNIQUE, source TEXT NOT NULL DEFAULT 'website', status TEXT NOT NULL DEFAULT 'active', subscribed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`),
-    db.prepare(`CREATE TABLE IF NOT EXISTS retail_partnerships (id TEXT PRIMARY KEY, contact_name TEXT NOT NULL, phone TEXT NOT NULL, company TEXT NOT NULL, city TEXT NOT NULL, cooperation_type TEXT NOT NULL, wechat TEXT NOT NULL DEFAULT '', email TEXT NOT NULL DEFAULT '', proposal TEXT NOT NULL, status TEXT NOT NULL DEFAULT '待联系', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`),
-    db.prepare(`CREATE TABLE IF NOT EXISTS coupons (id INTEGER PRIMARY KEY AUTOINCREMENT, code TEXT NOT NULL UNIQUE, kind TEXT NOT NULL DEFAULT 'percent', value INTEGER NOT NULL, minimum INTEGER NOT NULL DEFAULT 0, usage_limit INTEGER NOT NULL DEFAULT 0, used_count INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL DEFAULT 'active', starts_at TEXT, ends_at TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`),
-    db.prepare(`CREATE TABLE IF NOT EXISTS returns (id TEXT PRIMARY KEY, order_id TEXT NOT NULL, email TEXT NOT NULL, reason TEXT NOT NULL, details TEXT NOT NULL DEFAULT '', status TEXT NOT NULL DEFAULT '待审核', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(order_id) REFERENCES orders(id))`),
-    db.prepare(`CREATE TABLE IF NOT EXISTS gift_cards (code TEXT PRIMARY KEY, order_id TEXT NOT NULL, initial_balance INTEGER NOT NULL, balance INTEGER NOT NULL, recipient_name TEXT NOT NULL DEFAULT '', recipient_email TEXT NOT NULL DEFAULT '', message TEXT NOT NULL DEFAULT '', delivery_date TEXT, status TEXT NOT NULL DEFAULT 'active', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(order_id) REFERENCES orders(id))`),
-    db.prepare(`CREATE TABLE IF NOT EXISTS payment_providers (provider TEXT PRIMARY KEY, display_name TEXT NOT NULL, enabled INTEGER NOT NULL DEFAULT 0, mode TEXT NOT NULL DEFAULT 'production', app_id TEXT NOT NULL DEFAULT '', merchant_id TEXT NOT NULL DEFAULT '', public_key_id TEXT NOT NULL DEFAULT '', certificate_serial TEXT NOT NULL DEFAULT '', updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`),
-    db.prepare(`CREATE TABLE IF NOT EXISTS payments (id TEXT PRIMARY KEY, order_id TEXT NOT NULL, provider TEXT NOT NULL, merchant_trade_no TEXT NOT NULL UNIQUE, provider_transaction_id TEXT, amount_fen INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'created', checkout_url TEXT, code_url TEXT, attempts INTEGER NOT NULL DEFAULT 0, next_retry_at TEXT, last_error TEXT, paid_at TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(order_id) REFERENCES orders(id))`),
-    db.prepare(`CREATE TABLE IF NOT EXISTS payment_events (id TEXT PRIMARY KEY, payment_id TEXT, provider TEXT NOT NULL, event_type TEXT NOT NULL, payload_digest TEXT NOT NULL, verified INTEGER NOT NULL DEFAULT 0, result TEXT NOT NULL, message TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(payment_id) REFERENCES payments(id))`),
-    db.prepare(`CREATE TABLE IF NOT EXISTS refunds (id TEXT PRIMARY KEY, payment_id TEXT NOT NULL, order_id TEXT NOT NULL, provider TEXT NOT NULL, merchant_refund_no TEXT NOT NULL UNIQUE, provider_refund_id TEXT, amount_fen INTEGER NOT NULL, reason TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending', attempts INTEGER NOT NULL DEFAULT 0, next_retry_at TEXT, last_error TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(payment_id) REFERENCES payments(id), FOREIGN KEY(order_id) REFERENCES orders(id))`),
-    db.prepare(`CREATE TABLE IF NOT EXISTS notification_settings (channel TEXT PRIMARY KEY, display_name TEXT NOT NULL, enabled INTEGER NOT NULL DEFAULT 0, provider TEXT NOT NULL, sender_name TEXT NOT NULL DEFAULT 'PUSY.CN', sender_address TEXT NOT NULL DEFAULT '', updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`),
-    db.prepare(`CREATE TABLE IF NOT EXISTS notification_templates (key TEXT PRIMARY KEY, name TEXT NOT NULL, email_subject TEXT NOT NULL DEFAULT '', email_body TEXT NOT NULL DEFAULT '', sms_body TEXT NOT NULL DEFAULT '', enabled INTEGER NOT NULL DEFAULT 1, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`),
-    db.prepare(`CREATE TABLE IF NOT EXISTS notification_jobs (id TEXT PRIMARY KEY, event_key TEXT NOT NULL, entity_type TEXT NOT NULL, entity_id TEXT NOT NULL, template_key TEXT NOT NULL, channel TEXT NOT NULL, recipient TEXT NOT NULL, payload_json TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'queued', attempts INTEGER NOT NULL DEFAULT 0, scheduled_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, next_retry_at TEXT, provider_message_id TEXT, last_error TEXT, sent_at TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(template_key) REFERENCES notification_templates(key))`),
-    db.prepare(`CREATE TABLE IF NOT EXISTS notification_delivery_events (id TEXT PRIMARY KEY, provider_message_id TEXT NOT NULL, event_type TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`),
-    db.prepare(`CREATE TRIGGER IF NOT EXISTS products_stock_cannot_be_negative BEFORE UPDATE OF stock ON products WHEN NEW.stock < 0 BEGIN SELECT RAISE(ABORT, 'insufficient_stock'); END`),
-  ]);
-  const columns = await db.prepare("PRAGMA table_info(products)").all<{ name: string }>();
-  const columnNames = new Set(columns.results.map((column) => column.name));
-  const additions = [["sku", "TEXT"], ["volume", "TEXT"], ["ingredients", "TEXT"], ["usage", "TEXT"], ["inventory_verified", "INTEGER NOT NULL DEFAULT 0"], ["images_json", "TEXT NOT NULL DEFAULT '[]'"], ["variants_json", "TEXT NOT NULL DEFAULT '[]'"]].filter(([name]) => !columnNames.has(name));
-  if (additions.length) await db.batch(additions.map(([name, type]) => db.prepare(`ALTER TABLE products ADD COLUMN ${name} ${type}`)));
-  if (!columnNames.has("inventory_verified")) await db.prepare("UPDATE products SET stock = 0 WHERE stock = 100").run();
-  const orderColumns = await db.prepare("PRAGMA table_info(orders)").all<{ name: string }>();
-  const orderColumnNames = new Set(orderColumns.results.map((column) => column.name));
-  const orderAdditions = [["discount", "INTEGER NOT NULL DEFAULT 0"], ["coupon_code", "TEXT"], ["payment_token_hash", "TEXT NOT NULL DEFAULT ''"]].filter(([name]) => !orderColumnNames.has(name));
-  if (orderAdditions.length) await db.batch(orderAdditions.map(([name, type]) => db.prepare(`ALTER TABLE orders ADD COLUMN ${name} ${type}`)));
-  for (let offset = 0; offset < seedProducts.length; offset += 40) {
-    const batch = seedProducts.slice(offset, offset + 40).map((product) => db.prepare("INSERT INTO products (slug, name, category, description, image, image_alt, badge, price, old_price, stock, inventory_verified, images_json, variants_json, sku, volume, ingredients, usage, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?, ?, ?, ?, ?, 'active') ON CONFLICT(slug) DO UPDATE SET name = excluded.name, category = excluded.category, description = excluded.description, image = excluded.image, image_alt = excluded.image_alt, badge = excluded.badge, price = excluded.price, old_price = excluded.old_price, images_json = excluded.images_json, variants_json = excluded.variants_json, sku = excluded.sku, volume = excluded.volume, ingredients = excluded.ingredients, usage = excluded.usage, updated_at = CURRENT_TIMESTAMP").bind(product.slug, product.name, product.category, product.description, product.image, product.imageAlt ?? null, product.badge ?? null, product.price, product.oldPrice ?? null, JSON.stringify(product.images ?? []), JSON.stringify(product.variants ?? []), product.sku ?? null, product.volume ?? null, product.ingredients ?? null, product.usage ?? null));
-    if (batch.length) await db.batch(batch);
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) throw new Error("商城数据库尚未配置");
+
+  if (!globalThis.pusyPostgresPool) {
+    globalThis.pusyPostgresPool = new Pool({
+      connectionString,
+      max: 5,
+      idleTimeoutMillis: 30_000,
+      connectionTimeoutMillis: 10_000,
+    });
   }
-  await db.prepare("INSERT INTO coupons (code, kind, value, minimum, usage_limit, status) VALUES ('PUSY10', 'percent', 10, 0, 0, 'active') ON CONFLICT(code) DO NOTHING").run();
-  await db.batch([
-    db.prepare("INSERT INTO payment_providers (provider, display_name) VALUES ('wechat', '微信支付') ON CONFLICT(provider) DO NOTHING"),
-    db.prepare("INSERT INTO payment_providers (provider, display_name) VALUES ('alipay', '支付宝') ON CONFLICT(provider) DO NOTHING"),
-    db.prepare("INSERT INTO notification_settings (channel, display_name, provider) VALUES ('email', '邮件通知', 'resend') ON CONFLICT(channel) DO NOTHING"),
-    db.prepare("INSERT INTO notification_settings (channel, display_name, provider) VALUES ('sms', '短信通知', 'http') ON CONFLICT(channel) DO NOTHING"),
-    db.prepare("INSERT INTO notification_templates (key, name, email_subject, email_body, sms_body) VALUES ('order_confirmed', '订单确认', 'PUSY.CN 订单 {{orderId}} 已确认', '您好，{{customer}}：\n\n您的订单 {{orderId}} 已完成支付并确认。订单金额：{{amount}}。\n\n您可以登录 PUSY.CN 会员中心查看订单进度。', 'PUSY.CN：订单 {{orderId}} 已确认，金额 {{amount}}。') ON CONFLICT(key) DO NOTHING"),
-    db.prepare("INSERT INTO notification_templates (key, name, email_subject, email_body, sms_body) VALUES ('order_shipped', '订单发货', 'PUSY.CN 订单 {{orderId}} 已发货', '您好，{{customer}}：\n\n您的订单 {{orderId}} 已发货。配送方式：{{delivery}}。\n\n请留意物流更新和收货通知。', 'PUSY.CN：订单 {{orderId}} 已发货，配送方式：{{delivery}}。') ON CONFLICT(key) DO NOTHING"),
-    db.prepare("INSERT INTO notification_templates (key, name, email_subject, email_body, sms_body) VALUES ('refund_completed', '退款完成', 'PUSY.CN 订单 {{orderId}} 退款进度', '您好，{{customer}}：\n\n订单 {{orderId}} 的退款已处理，退款金额：{{refundAmount}}，当前状态：{{refundStatus}}。\n\n到账时间以支付机构为准。', 'PUSY.CN：订单 {{orderId}} 已处理退款 {{refundAmount}}，状态：{{refundStatus}}。') ON CONFLICT(key) DO NOTHING"),
-    db.prepare("INSERT INTO notification_templates (key, name, email_subject, email_body, sms_body) VALUES ('gift_card_sent', '礼品卡发送', '您收到一张 PUSY.CN 礼品卡', '您好，{{recipientName}}：\n\n{{senderName}} 为您准备了一张 PUSY.CN 礼品卡。\n\n礼品卡代码：{{giftCode}}\n礼品卡金额：{{amount}}\n祝福语：{{message}}\n\n结账时输入礼品卡代码即可使用。', 'PUSY.CN 礼品卡：代码 {{giftCode}}，金额 {{amount}}。请妥善保管。') ON CONFLICT(key) DO NOTHING"),
-    db.prepare("INSERT INTO notification_templates (key, name, email_subject, email_body, sms_body) VALUES ('retail_partnership_internal', '零售合作申请提醒', 'PUSY.CN 新的零售合作申请 {{applicationId}}', '新的中国零售合作申请已提交。\n\n申请编号：{{applicationId}}\n联系人：{{contactName}}\n公司：{{company}}\n所在城市：{{city}}\n合作类型：{{cooperationType}}\n联系电话：{{phone}}\n\n请登录管理后台查看合作方案并跟进。', 'PUSY.CN：收到新的零售合作申请 {{applicationId}}，{{company}}，联系人 {{contactName}}，电话 {{phone}}。') ON CONFLICT(key) DO NOTHING"),
-    db.prepare("INSERT INTO notification_templates (key, name, email_subject, email_body, sms_body) VALUES ('retail_partnership_confirmation', '零售合作申请确认', 'PUSY.CN 已收到您的零售合作申请', '您好，{{contactName}}：\n\n我们已收到您代表 {{company}} 提交的中国零售合作申请，受理编号：{{applicationId}}。\n\n工作人员会通过您填写的手机、微信或邮箱联系，请留意相关消息。', 'PUSY.CN：您的零售合作申请已提交，受理编号 {{applicationId}}。工作人员会通过您填写的联系方式与您联系。') ON CONFLICT(key) DO NOTHING"),
-  ]);
-  await db.prepare("UPDATE notification_templates SET email_body = REPLACE(email_body, '中国区零售合作申请', '中国零售合作申请'), updated_at = CURRENT_TIMESTAMP WHERE key IN ('retail_partnership_internal', 'retail_partnership_confirmation') AND email_body LIKE '%中国区零售合作申请%'").run();
-  initialized = true;
-  return db;
+
+  store ??= new PostgresStoreDb(globalThis.pusyPostgresPool);
+  return store;
 }
 
 export type DbProduct = {

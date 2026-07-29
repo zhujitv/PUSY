@@ -3,6 +3,7 @@ import { sha256 } from "../payments/crypto";
 import { emailConfigured, sendEmail } from "./email";
 import { sendSms, smsConfigured } from "./sms";
 import type { NotificationJob, NotificationSetting, NotificationTemplate } from "./types";
+import { supportReplyAddress } from "../support/service";
 
 type NotificationInput = {
   eventKey: string;
@@ -19,8 +20,9 @@ const retrySeconds = [30, 120, 600, 1800, 7200, 21600];
 const escapeHtml = (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
 const render = (source: string, payload: Record<string, string>, escape = false) => source.replace(/\{\{([A-Za-z0-9_]+)\}\}/g, (_, key: string) => escape ? escapeHtml(payload[key] ?? "") : payload[key] ?? "");
 
-function emailHtml(text: string) {
-  return `<div style="margin:0;background:#f3f1ed;padding:36px 16px;font-family:Arial,sans-serif;color:#202020"><div style="max-width:620px;margin:auto;background:#fff;padding:36px"><div style="font-size:30px;font-weight:700;color:#ef398b;margin-bottom:28px">PUSY.CN</div><div style="font-size:15px;line-height:1.8">${text.split("\n").map((line) => line ? `<p style="margin:0 0 14px">${line}</p>` : "").join("")}</div><div style="margin-top:30px;padding-top:18px;border-top:1px solid #ddd;color:#888;font-size:11px">此邮件由 PUSY.CN 订单系统自动发送，请勿直接回复。</div></div></div>`;
+function emailHtml(text: string, replyEnabled: boolean) {
+  const footer = replyEnabled ? "如需帮助，直接回复此邮件即可联系 PUSY.CN 客服。" : "此邮件由 PUSY.CN 订单系统自动发送。";
+  return `<div style="margin:0;background:#f3f1ed;padding:36px 16px;font-family:Arial,sans-serif;color:#202020"><div style="max-width:620px;margin:auto;background:#fff;padding:36px"><div style="font-size:30px;font-weight:700;color:#ef398b;margin-bottom:28px">PUSY.CN</div><div style="font-size:15px;line-height:1.8">${text.split("\n").map((line) => line ? `<p style="margin:0 0 14px">${line}</p>` : "").join("")}</div><div style="margin-top:30px;padding-top:18px;border-top:1px solid #ddd;color:#888;font-size:11px">${footer}</div></div></div>`;
 }
 
 export async function notificationChannelState() {
@@ -58,8 +60,9 @@ export async function processNotificationJob(id: string) {
   if (!setting || !template || !setting.enabled || !template.enabled) throw new Error("通知渠道或模板已停用");
   const payload = JSON.parse(job.payload_json) as Record<string, string>;
   try {
+    const replyTo = job.entity_type === "order" || payload.orderId ? supportReplyAddress({ orderId: payload.orderId || job.entity_id }) : supportReplyAddress({ mailbox: "service" });
     const providerId = job.channel === "email"
-      ? await sendEmail(setting, { to: job.recipient, subject: render(template.email_subject, payload), html: emailHtml(render(template.email_body, payload, true)), idempotencyKey: job.id })
+      ? await sendEmail(setting, { to: job.recipient, subject: render(template.email_subject, payload), html: emailHtml(render(template.email_body, payload, true), Boolean(replyTo)), idempotencyKey: job.id, replyTo: replyTo || undefined })
       : await sendSms(setting, { to: job.recipient, message: render(template.sms_body, payload), idempotencyKey: job.id });
     await db.prepare("UPDATE notification_jobs SET status = 'sent', attempts = attempts + 1, provider_message_id = ?, last_error = NULL, next_retry_at = NULL, sent_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(providerId, job.id).run();
   } catch (error) {

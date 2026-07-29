@@ -1,15 +1,18 @@
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { Pool } from "pg";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) throw new Error("DATABASE_URL 未配置，无法执行数据库迁移");
 
-const sql = await readFile(new URL("../db/migrations/2026-07-29-security-and-order-integrity.sql", import.meta.url), "utf8");
 const pool = new Pool({ connectionString, max: 1, connectionTimeoutMillis: 10_000 });
 
 try {
-  await pool.query(sql);
-  console.log("数据库安全与订单一致性迁移完成");
+  const directory = new URL("../db/migrations/", import.meta.url);
+  const files = (await readdir(directory)).filter((file) => file.endsWith(".sql")).sort();
+  for (const file of files) {
+    await pool.query(await readFile(new URL(file, directory), "utf8"));
+    console.log(`数据库迁移完成：${file}`);
+  }
 } finally {
   await pool.end();
 }

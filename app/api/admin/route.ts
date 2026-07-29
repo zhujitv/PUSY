@@ -8,10 +8,13 @@ import { chinaComplianceReady, chinaRegion } from "../../../lib/china-region";
 import { ensureCommerceFeatureSchema, getSiteContent } from "../../../db/commerce-features";
 import { hasTrustedOrigin, safeServerError } from "../../../lib/request-security";
 import { releaseOrderReservation } from "../../../lib/orders/reservations";
+import { recordReturnStatusChange, sendSupportReply, supportReceivingDomain } from "../../../lib/support/service";
 
 const orderStatuses = ["待付款", "支付失败", "待处理", "已确认", "配货中", "已发货", "已完成", "退款中", "部分退款", "已退款", "已取消"];
 const memberStatuses = ["active", "vip", "blocked"];
-const returnStatuses = ["待审核", "已批准", "已拒绝", "已退款", "已关闭"];
+const returnStatuses = ["待审核", "已批准", "补发处理中", "退款中", "已退款", "已拒绝", "已关闭"];
+const supportStatuses = ["unread", "open", "pending", "resolved"];
+const supportPriorities = ["low", "normal", "high", "urgent"];
 const partnershipStatuses = ["待联系", "洽谈中", "已合作", "已拒绝", "已关闭"];
 const yuanToStored = (value: unknown) => Math.round(Number(value) / 0.12);
 const validImagePath = (value: string) => /^\/(assets|products)\/[A-Za-z0-9_./-]+$/.test(value) || /^https:\/\/avatars\.mds\.yandex\.net\/get-yastore\//.test(value);
@@ -23,7 +26,7 @@ export async function GET() {
     if (!await allowAdmin()) return Response.json({ error: "请先登录管理后台" }, { status: 401 });
     await ensureCommerceFeatureSchema();
     const db = await getStoreDb();
-    const [products, orders, orderItems, members, subscribers, returns, retailPartnerships, coupons, giftCards, stats, revenueTrend, providers, payments, refunds, paymentEvents, notificationSettings, notificationTemplates, notificationJobs, reviews, content] = await Promise.all([
+    const [products, orders, orderItems, members, subscribers, returns, retailPartnerships, coupons, giftCards, stats, revenueTrend, providers, payments, refunds, paymentEvents, notificationSettings, notificationTemplates, notificationJobs, reviews, content, supportThreads, supportMessages, returnEvents] = await Promise.all([
       db.prepare("SELECT * FROM products ORDER BY id DESC").all(),
       db.prepare("SELECT o.*, COUNT(oi.id) AS item_count FROM orders o LEFT JOIN order_items oi ON oi.order_id = o.id GROUP BY o.id ORDER BY o.created_at DESC LIMIT 200").all(),
       db.prepare("SELECT * FROM order_items ORDER BY id DESC LIMIT 1000").all(),
@@ -44,8 +47,12 @@ export async function GET() {
       db.prepare("SELECT * FROM notification_jobs ORDER BY created_at DESC LIMIT 500").all(),
       db.prepare("SELECT * FROM product_reviews ORDER BY created_at DESC LIMIT 500").all(),
       getSiteContent(),
+      db.prepare("SELECT st.*, m.name AS member_name, o.status AS order_status, r.status AS return_status FROM support_threads st LEFT JOIN members m ON m.id = st.member_id LEFT JOIN orders o ON o.id = st.order_id LEFT JOIN returns r ON r.id = st.return_id ORDER BY st.last_message_at DESC LIMIT 500").all(),
+      db.prepare("SELECT id, thread_id, direction, source, provider_email_id, from_email, to_email, subject, text_body, attachments_json, created_at FROM support_messages ORDER BY created_at ASC LIMIT 3000").all(),
+      db.prepare("SELECT * FROM return_events ORDER BY created_at ASC LIMIT 2000").all(),
     ]);
-    return Response.json({ products: products.results, orders: orders.results, orderItems: orderItems.results, members: members.results, subscribers: subscribers.results, returns: returns.results, retailPartnerships: retailPartnerships.results, coupons: coupons.results, giftCards: giftCards.results, stats, revenueTrend: revenueTrend.results, providers, payments: payments.results, refunds: refunds.results, paymentEvents: paymentEvents.results, notificationSettings, notificationTemplates: notificationTemplates.results, notificationJobs: notificationJobs.results, reviews: reviews.results, content, region: { ...chinaRegion, complianceReady: chinaComplianceReady } });
+    const statValues = stats && typeof stats === "object" ? stats : {};
+    return Response.json({ products: products.results, orders: orders.results, orderItems: orderItems.results, members: members.results, subscribers: subscribers.results, returns: returns.results, retailPartnerships: retailPartnerships.results, coupons: coupons.results, giftCards: giftCards.results, stats: { ...statValues, unread_support: supportThreads.results.filter((item) => (item as { status?: string }).status === "unread").length }, revenueTrend: revenueTrend.results, providers, payments: payments.results, refunds: refunds.results, paymentEvents: paymentEvents.results, notificationSettings, notificationTemplates: notificationTemplates.results, notificationJobs: notificationJobs.results, reviews: reviews.results, content, supportThreads: supportThreads.results, supportMessages: supportMessages.results, returnEvents: returnEvents.results, supportReceiving: { domain: supportReceivingDomain(), configured: Boolean(supportReceivingDomain() && process.env.RESEND_API_KEY && process.env.RESEND_RECEIVING_API_KEY && process.env.RESEND_WEBHOOK_SECRET) }, region: { ...chinaRegion, complianceReady: chinaComplianceReady } });
   } catch {
     return safeServerError("读取后台数据失败，请稍后再试");
   }
@@ -103,7 +110,15 @@ export async function POST(request: Request) {
     } else if (action === "update-return-status") {
       const status = String(payload.status ?? "");
       if (!returnStatuses.includes(status)) return Response.json({ error: "售后状态无效" }, { status: 400 });
-      await db.prepare("UPDATE returns SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(status, String(payload.id)).run();
+      await recordReturnStatusChange({ returnId: String(payload.id), status, actor: (await getAdminIdentity())?.email ?? "admin", note: String(payload.note ?? "").trim().slice(0, 1000) });
+    } else if (action === "update-support-thread") {
+      const status = String(payload.status ?? "");
+      const priority = String(payload.priority ?? "normal");
+      if (!supportStatuses.includes(status) || !supportPriorities.includes(priority)) return Response.json({ error: "工单状态或优先级无效" }, { status: 400 });
+      const result = await db.prepare("UPDATE support_threads SET status = ?, priority = ?, assigned_to = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(status, priority, String(payload.assignedTo ?? "").trim().slice(0, 120) || null, String(payload.id)).run();
+      if (!result.meta.changes) return Response.json({ error: "客服工单不存在" }, { status: 404 });
+    } else if (action === "reply-support-thread") {
+      await sendSupportReply(String(payload.id), String(payload.message ?? ""), (await getAdminIdentity())?.email ?? "admin");
     } else if (action === "update-retail-partnership-status") {
       const status = String(payload.status ?? "");
       if (!partnershipStatuses.includes(status)) return Response.json({ error: "合作申请状态无效" }, { status: 400 });

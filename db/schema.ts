@@ -169,8 +169,55 @@ export const returns = sqliteTable("returns", {
   reason: text("reason").notNull(),
   details: text("details").notNull().default(""),
   status: text("status").notNull().default("待审核"),
+  supportThreadId: text("support_thread_id"),
+  attachmentsJson: text("attachments_json").notNull().default("[]"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const supportThreads = sqliteTable("support_threads", {
+  id: text("id").primaryKey(),
+  mailbox: text("mailbox").notNull().default("service"),
+  subject: text("subject").notNull(),
+  customerEmail: text("customer_email").notNull(),
+  customerName: text("customer_name").notNull().default(""),
+  memberId: integer("member_id").references(() => members.id),
+  orderId: text("order_id").references(() => orders.id),
+  returnId: text("return_id").references(() => returns.id),
+  status: text("status").notNull().default("unread"),
+  priority: text("priority").notNull().default("normal"),
+  assignedTo: text("assigned_to"),
+  lastMessageAt: text("last_message_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const supportMessages = sqliteTable("support_messages", {
+  id: text("id").primaryKey(),
+  threadId: text("thread_id").notNull().references(() => supportThreads.id),
+  direction: text("direction").notNull(),
+  source: text("source").notNull().default("email"),
+  providerEmailId: text("provider_email_id").unique(),
+  providerMessageId: text("provider_message_id"),
+  fromEmail: text("from_email").notNull(),
+  toEmail: text("to_email").notNull(),
+  subject: text("subject").notNull().default(""),
+  textBody: text("text_body").notNull().default(""),
+  htmlBody: text("html_body").notNull().default(""),
+  headersJson: text("headers_json").notNull().default("{}"),
+  attachmentsJson: text("attachments_json").notNull().default("[]"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const returnEvents = sqliteTable("return_events", {
+  id: text("id").primaryKey(),
+  returnId: text("return_id").notNull().references(() => returns.id),
+  eventType: text("event_type").notNull(),
+  fromStatus: text("from_status"),
+  toStatus: text("to_status"),
+  note: text("note").notNull().default(""),
+  actor: text("actor").notNull().default("system"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const giftCards = sqliteTable("gift_cards", {

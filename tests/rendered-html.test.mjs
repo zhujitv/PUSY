@@ -300,3 +300,36 @@ test("retail partnership requests use an online form, admin workflow and notific
   assert.match(schema, /CREATE TABLE IF NOT EXISTS retail_partnerships/);
   assert.match(schema, /cooperation_type TEXT NOT NULL/);
 });
+
+test("customer inbox links verified order replies, returns and protected attachments", async () => {
+  const [supportAdmin, admin, adminApi, webhook, attachmentApi, returnApi, supportService, email, migration, env] = await Promise.all([
+    read("app/admin/SupportAdmin.tsx"),
+    read("app/admin/AdminClient.tsx"),
+    read("app/api/admin/route.ts"),
+    read("app/api/notifications/webhooks/resend/route.ts"),
+    read("app/api/admin/support/attachment/route.ts"),
+    read("app/api/returns/route.ts"),
+    read("lib/support/service.ts"),
+    read("lib/notifications/email.ts"),
+    read("db/migrations/2026-07-30-support-inbox.sql"),
+    read(".env.example"),
+  ]);
+  assert.match(admin, /客服收件箱/);
+  assert.match(supportAdmin, /订单 .*order_status/);
+  assert.match(supportAdmin, /售后处理记录/);
+  assert.match(adminApi, /reply-support-thread/);
+  assert.match(webhook, /request\.text\(\)/);
+  assert.match(webhook, /new Webhook\(secret\)\.verify/);
+  assert.match(webhook, /email\.received/);
+  assert.match(attachmentApi, /getAdminIdentity/);
+  assert.match(attachmentApi, /attachments_json/);
+  assert.match(returnApi, /createWebsiteReturnThread/);
+  assert.match(supportService, /lower\(email\) = \?/);
+  assert.match(supportService, /In-Reply-To/);
+  assert.match(email, /reply_to/);
+  assert.match(migration, /CREATE TABLE IF NOT EXISTS support_threads/);
+  assert.match(migration, /CREATE TABLE IF NOT EXISTS support_messages/);
+  assert.match(migration, /CREATE TABLE IF NOT EXISTS return_events/);
+  assert.match(env, /RESEND_RECEIVING_API_KEY/);
+  assert.match(env, /RESEND_INBOUND_DOMAIN/);
+});

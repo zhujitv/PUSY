@@ -180,7 +180,7 @@ export async function ingestReceivedEmail(event: ResendReceivedEvent) {
 
   await db.batch([
     db.prepare("INSERT INTO support_messages (id, thread_id, direction, source, provider_email_id, provider_message_id, from_email, to_email, subject, text_body, html_body, headers_json, attachments_json, created_at) VALUES (?, ?, 'inbound', 'email', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").bind(id("MSG"), threadId, providerEmailId, bounded(email.message_id || event.data.message_id, 500) || null, from.address, route.recipient, bounded(email.subject, 300), text, html, JSON.stringify(email.headers ?? {}), JSON.stringify(email.attachments ?? []), email.created_at || new Date().toISOString()),
-    db.prepare("UPDATE support_threads SET status = 'unread', mailbox = CASE WHEN ? = 'returns' THEN 'returns' ELSE mailbox END, member_id = COALESCE(member_id, ?), order_id = COALESCE(order_id, ?), return_id = COALESCE(return_id, ?), last_message_at = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(route.mailbox, member?.id ?? order?.member_id ?? null, order?.id ?? null, returnId, email.created_at || new Date().toISOString(), threadId),
+    db.prepare("UPDATE support_threads SET status = 'unread', archived_at = NULL, deleted_at = NULL, mailbox = CASE WHEN ? = 'returns' THEN 'returns' ELSE mailbox END, member_id = COALESCE(member_id, ?), order_id = COALESCE(order_id, ?), return_id = COALESCE(return_id, ?), last_message_at = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(route.mailbox, member?.id ?? order?.member_id ?? null, order?.id ?? null, returnId, email.created_at || new Date().toISOString(), threadId),
   ]);
   return { threadId, duplicate: false };
 }
@@ -203,7 +203,7 @@ export async function sendSupportReply(threadId: string, message: string, actor:
   const text = bounded(message, 10_000);
   if (!text) throw new Error("请填写回复内容");
   const db = await getStoreDb();
-  const thread = await db.prepare("SELECT * FROM support_threads WHERE id = ? LIMIT 1").bind(threadId).first<{ id: string; subject: string; customer_email: string; order_id: string | null; return_id: string | null }>();
+  const thread = await db.prepare("SELECT * FROM support_threads WHERE id = ? AND deleted_at IS NULL LIMIT 1").bind(threadId).first<{ id: string; subject: string; customer_email: string; order_id: string | null; return_id: string | null }>();
   if (!thread) throw new Error("客服工单不存在");
   const setting = await db.prepare("SELECT * FROM notification_settings WHERE channel = 'email' LIMIT 1").first<NotificationSetting>();
   if (!setting) throw new Error("邮件渠道尚未配置");

@@ -1022,28 +1022,52 @@ body.overlay-open { overflow: hidden; }
 .support-configuration b { font-size: 13px; }
 .support-configuration p { margin: 5px 0 0; font-size: 11px; line-height: 1.55; }
 .support-configuration > span { min-width: max-content; padding: 7px 11px; border-radius: 18px; background: rgba(255,255,255,.7); font-size: 11px; }
-.support-workspace { min-height: 700px; display: grid; grid-template-columns: 340px minmax(0,1fr); border-radius: 12px; overflow: hidden; background: #fff; }
+.support-mailbox { min-height: 720px; display: grid; grid-template-columns: 190px minmax(0,1fr); border: 1px solid #e4e4e1; border-radius: 12px; overflow: hidden; background: #fff; }
+.support-folders { padding: 22px 12px; border-right: 1px solid #e4e4e1; background: #f7f7f4; }
+.support-folders > div { display: grid; gap: 4px; padding: 0 10px 18px; }
+.support-folders > div b { font-size: 15px; }
+.support-folders > div small { color: #999; font-size: 9px; }
+.support-folders > button { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 11px; border: 0; border-radius: 7px; color: #555; background: transparent; text-align: left; }
+.support-folders > button:hover, .support-folders > button.active { color: #111; background: #fff; }
+.support-folders > button.active { box-shadow: inset 3px 0 #ef398b; }
+.support-folders > button span { font-size: 11px; }
+.support-folders > button b { min-width: 25px; padding: 3px 6px; border-radius: 10px; color: #777; background: #ececea; font-size: 9px; text-align: center; }
+.support-folders > p { margin: 24px 10px 0; color: #999; font-size: 9px; line-height: 1.6; }
+.support-workspace { min-width: 0; display: flex; flex-direction: column; }
+.support-mail-toolbar { min-height: 54px; display: flex; align-items: center; gap: 14px; padding: 9px 14px; border-bottom: 1px solid #e4e4e1; background: #fff; }
+.support-mail-toolbar > label { display: flex; align-items: center; gap: 6px; color: #666; font-size: 9px; }
+.support-mail-toolbar > span { margin-right: auto; color: #999; font-size: 9px; }
+.support-mail-toolbar > div { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 5px; }
+.support-mail-toolbar button, .support-header-actions button { padding: 7px 9px; border: 1px solid #d7d7d3; border-radius: 5px; color: #555; background: #fff; font-size: 9px; }
+.support-mail-toolbar button:hover, .support-header-actions button:hover { border-color: #999; color: #111; }
+.support-mail-toolbar button.danger, .support-header-actions button.danger { color: #a33a55; }
+.support-mail-toolbar button:disabled { opacity: .45; }
+.support-mail-content { min-height: 665px; display: grid; grid-template-columns: 340px minmax(0,1fr); }
 .support-thread-list { min-width: 0; border-right: 1px solid #e3e3e3; background: #fafaf8; }
 .support-thread-list > header { height: 92px; display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #e3e3e3; }
 .support-thread-list h2, .support-conversation h2 { margin: 0; font-size: 20px; font-weight: 500; }
 .support-thread-list header p { margin: 6px 0 0; color: #888; font-size: 10px; }
 .support-live-dot { width: 9px; height: 9px; border-radius: 50%; background: #55a466; box-shadow: 0 0 0 5px #e5f1e7; }
 .support-thread-list > div { max-height: 720px; overflow-y: auto; }
-.support-thread-list button { width: 100%; display: grid; gap: 8px; padding: 18px 20px; border: 0; border-bottom: 1px solid #e8e8e8; background: transparent; text-align: left; }
-.support-thread-list button:hover, .support-thread-list button.active { background: #fff; }
-.support-thread-list button.active { box-shadow: inset 3px 0 #ef398b; }
-.support-thread-list button > span { display: flex; justify-content: space-between; gap: 10px; }
-.support-thread-list button b { max-width: 210px; overflow: hidden; text-overflow: ellipsis; font-size: 12px; font-weight: 500; white-space: nowrap; }
-.support-thread-list button.unread b::before { content: ""; width: 7px; height: 7px; display: inline-block; margin-right: 7px; border-radius: 50%; background: #ef398b; }
-.support-thread-list button time { color: #999; font-size: 9px; }
-.support-thread-list button strong { overflow: hidden; font-size: 12px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
-.support-thread-list button small { color: #888; font-size: 9px; }
+.support-thread-row { display: grid; grid-template-columns: 28px 24px minmax(0,1fr); align-items: start; border-bottom: 1px solid #e8e8e8; }
+.support-thread-row:hover, .support-thread-row.active { background: #fff; }
+.support-thread-row.active { box-shadow: inset 3px 0 #ef398b; }
+.support-thread-check { display: grid; place-items: center; padding: 21px 0 0 7px; }
+.support-star { padding: 17px 0 0; border: 0; color: #d49a22; background: transparent; font-size: 17px; }
+.support-thread-open { width: 100%; min-width: 0; display: grid; gap: 8px; padding: 18px 15px 18px 4px; border: 0; background: transparent; text-align: left; }
+.support-thread-open > span { display: flex; justify-content: space-between; gap: 10px; }
+.support-thread-open b { max-width: 175px; overflow: hidden; text-overflow: ellipsis; font-size: 12px; font-weight: 500; white-space: nowrap; }
+.support-thread-row.unread .support-thread-open b::before { content: ""; width: 7px; height: 7px; display: inline-block; margin-right: 7px; border-radius: 50%; background: #ef398b; }
+.support-thread-open time { color: #999; font-size: 9px; }
+.support-thread-open strong { overflow: hidden; font-size: 12px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+.support-thread-open small { color: #888; font-size: 9px; }
 .support-empty { padding: 50px 20px; color: #888; font-size: 12px; text-align: center; }
 .support-conversation { min-width: 0; display: flex; flex-direction: column; }
 .support-conversation-header { min-height: 92px; display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 17px 24px; border-bottom: 1px solid #e3e3e3; }
 .support-conversation-header p { margin: 0 0 4px; color: #999; font-size: 9px; }
 .support-conversation-header span { display: block; margin-top: 5px; color: #777; font-size: 10px; }
-.support-controls { display: flex; gap: 8px; }
+.support-header-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 5px; }
+.support-controls { display: flex; justify-content: flex-end; gap: 8px; padding: 10px 24px; border-bottom: 1px solid #eee; background: #fafaf8; }
 .support-controls label { display: grid; gap: 4px; color: #888; font-size: 9px; }
 .support-controls select { padding: 7px 9px; border: 1px solid #ccc; background: #fff; font-size: 11px; }
 .support-links { display: flex; flex-wrap: wrap; gap: 7px; padding: 12px 24px; border-bottom: 1px solid #eee; }
@@ -1160,10 +1184,17 @@ body.overlay-open { overflow: hidden; }
   .admin-detail-card { padding: 20px; }
   .admin-order-items > div { grid-template-columns: 1fr 40px 90px; }
   .admin-member-orders > div { grid-template-columns: 1fr 1fr; }
-  .support-workspace { grid-template-columns: 1fr; }
+  .support-mailbox { grid-template-columns: 1fr; }
+  .support-folders { display: flex; gap: 4px; overflow-x: auto; padding: 10px; border-right: 0; border-bottom: 1px solid #ddd; }
+  .support-folders > div, .support-folders > p { display: none; }
+  .support-folders > button { flex: 0 0 auto; gap: 8px; }
+  .support-mail-toolbar { align-items: flex-start; flex-wrap: wrap; }
+  .support-mail-toolbar > div { width: 100%; justify-content: flex-start; }
+  .support-mail-content { grid-template-columns: 1fr; }
   .support-thread-list { border-right: 0; border-bottom: 1px solid #ddd; }
   .support-thread-list > div { max-height: 310px; }
   .support-conversation-header { align-items: flex-start; flex-direction: column; }
+  .support-header-actions { justify-content: flex-start; }
   .support-message-list article { width: 92%; }
   .support-return-timeline p { grid-template-columns: 1fr; }
   .support-reply footer { align-items: stretch; flex-direction: column; }

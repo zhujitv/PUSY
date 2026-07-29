@@ -333,6 +333,9 @@ CREATE TABLE IF NOT EXISTS support_threads (
   status TEXT NOT NULL DEFAULT 'unread',
   priority TEXT NOT NULL DEFAULT 'normal',
   assigned_to TEXT,
+  starred SMALLINT NOT NULL DEFAULT 0,
+  archived_at TEXT,
+  deleted_at TEXT,
   last_message_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP::TEXT),
   created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP::TEXT),
   updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP::TEXT)
@@ -357,6 +360,9 @@ CREATE TABLE IF NOT EXISTS support_messages (
 
 ALTER TABLE returns ADD COLUMN IF NOT EXISTS support_thread_id TEXT REFERENCES support_threads(id) ON DELETE SET NULL;
 ALTER TABLE returns ADD COLUMN IF NOT EXISTS attachments_json TEXT NOT NULL DEFAULT '[]';
+ALTER TABLE support_threads ADD COLUMN IF NOT EXISTS starred SMALLINT NOT NULL DEFAULT 0;
+ALTER TABLE support_threads ADD COLUMN IF NOT EXISTS archived_at TEXT;
+ALTER TABLE support_threads ADD COLUMN IF NOT EXISTS deleted_at TEXT;
 
 CREATE TABLE IF NOT EXISTS return_events (
   id TEXT PRIMARY KEY,
@@ -372,6 +378,7 @@ CREATE TABLE IF NOT EXISTS return_events (
 CREATE INDEX IF NOT EXISTS support_threads_status_idx ON support_threads (status, last_message_at DESC);
 CREATE INDEX IF NOT EXISTS support_threads_customer_idx ON support_threads (customer_email, last_message_at DESC);
 CREATE INDEX IF NOT EXISTS support_threads_order_idx ON support_threads (order_id);
+CREATE INDEX IF NOT EXISTS support_threads_folder_idx ON support_threads (deleted_at, archived_at, status, last_message_at DESC);
 CREATE INDEX IF NOT EXISTS support_messages_thread_idx ON support_messages (thread_id, created_at);
 CREATE INDEX IF NOT EXISTS return_events_return_idx ON return_events (return_id, created_at);
 

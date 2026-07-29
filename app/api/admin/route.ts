@@ -15,6 +15,7 @@ const memberStatuses = ["active", "vip", "blocked"];
 const returnStatuses = ["待审核", "已批准", "补发处理中", "退款中", "已退款", "已拒绝", "已关闭"];
 const supportStatuses = ["unread", "open", "pending", "resolved"];
 const supportPriorities = ["low", "normal", "high", "urgent"];
+const supportOperations = ["mark-read", "mark-unread", "star", "unstar", "archive", "unarchive", "trash", "restore", "delete-permanent"];
 const partnershipStatuses = ["待联系", "洽谈中", "已合作", "已拒绝", "已关闭"];
 const yuanToStored = (value: unknown) => Math.round(Number(value) / 0.12);
 const validImagePath = (value: string) => /^\/(assets|products)\/[A-Za-z0-9_./-]+$/.test(value) || /^https:\/\/avatars\.mds\.yandex\.net\/get-yastore\//.test(value);
@@ -52,7 +53,7 @@ export async function GET() {
       db.prepare("SELECT * FROM return_events ORDER BY created_at ASC LIMIT 2000").all(),
     ]);
     const statValues = stats && typeof stats === "object" ? stats : {};
-    return Response.json({ products: products.results, orders: orders.results, orderItems: orderItems.results, members: members.results, subscribers: subscribers.results, returns: returns.results, retailPartnerships: retailPartnerships.results, coupons: coupons.results, giftCards: giftCards.results, stats: { ...statValues, unread_support: supportThreads.results.filter((item) => (item as { status?: string }).status === "unread").length }, revenueTrend: revenueTrend.results, providers, payments: payments.results, refunds: refunds.results, paymentEvents: paymentEvents.results, notificationSettings, notificationTemplates: notificationTemplates.results, notificationJobs: notificationJobs.results, reviews: reviews.results, content, supportThreads: supportThreads.results, supportMessages: supportMessages.results, returnEvents: returnEvents.results, supportReceiving: { domain: supportReceivingDomain(), configured: Boolean(supportReceivingDomain() && process.env.RESEND_API_KEY && process.env.RESEND_RECEIVING_API_KEY && process.env.RESEND_WEBHOOK_SECRET) }, region: { ...chinaRegion, complianceReady: chinaComplianceReady } });
+    return Response.json({ products: products.results, orders: orders.results, orderItems: orderItems.results, members: members.results, subscribers: subscribers.results, returns: returns.results, retailPartnerships: retailPartnerships.results, coupons: coupons.results, giftCards: giftCards.results, stats: { ...statValues, unread_support: supportThreads.results.filter((item) => { const thread = item as { status?: string; archived_at?: string | null; deleted_at?: string | null }; return thread.status === "unread" && !thread.archived_at && !thread.deleted_at; }).length }, revenueTrend: revenueTrend.results, providers, payments: payments.results, refunds: refunds.results, paymentEvents: paymentEvents.results, notificationSettings, notificationTemplates: notificationTemplates.results, notificationJobs: notificationJobs.results, reviews: reviews.results, content, supportThreads: supportThreads.results, supportMessages: supportMessages.results, returnEvents: returnEvents.results, supportReceiving: { domain: supportReceivingDomain(), configured: Boolean(supportReceivingDomain() && process.env.RESEND_API_KEY && process.env.RESEND_RECEIVING_API_KEY && process.env.RESEND_WEBHOOK_SECRET) }, region: { ...chinaRegion, complianceReady: chinaComplianceReady } });
   } catch {
     return safeServerError("读取后台数据失败，请稍后再试");
   }
@@ -115,8 +116,31 @@ export async function POST(request: Request) {
       const status = String(payload.status ?? "");
       const priority = String(payload.priority ?? "normal");
       if (!supportStatuses.includes(status) || !supportPriorities.includes(priority)) return Response.json({ error: "工单状态或优先级无效" }, { status: 400 });
-      const result = await db.prepare("UPDATE support_threads SET status = ?, priority = ?, assigned_to = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(status, priority, String(payload.assignedTo ?? "").trim().slice(0, 120) || null, String(payload.id)).run();
+      const result = await db.prepare("UPDATE support_threads SET status = ?, priority = ?, assigned_to = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL").bind(status, priority, String(payload.assignedTo ?? "").trim().slice(0, 120) || null, String(payload.id)).run();
       if (!result.meta.changes) return Response.json({ error: "客服工单不存在" }, { status: 404 });
+    } else if (action === "manage-support-threads") {
+      const operation = String(payload.operation ?? "");
+      const ids = [...new Set((Array.isArray(payload.ids) ? payload.ids : []).map((id) => String(id)).filter((id) => /^TKT-[A-Z0-9]{6,32}$/.test(id)))].slice(0, 200);
+      if (!supportOperations.includes(operation) || !ids.length) return Response.json({ error: "请选择有效的邮件操作和工单" }, { status: 400 });
+      if (operation === "delete-permanent" && payload.confirm !== "DELETE") return Response.json({ error: "永久删除需要再次确认" }, { status: 400 });
+      const statements = ids.map((id) => operation === "mark-read"
+        ? db.prepare("UPDATE support_threads SET status = CASE WHEN status = 'unread' THEN 'open' ELSE status END, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL").bind(id)
+        : operation === "mark-unread"
+          ? db.prepare("UPDATE support_threads SET status = 'unread', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL").bind(id)
+          : operation === "star"
+            ? db.prepare("UPDATE support_threads SET starred = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL").bind(id)
+            : operation === "unstar"
+              ? db.prepare("UPDATE support_threads SET starred = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(id)
+              : operation === "archive"
+                ? db.prepare("UPDATE support_threads SET archived_at = CURRENT_TIMESTAMP, deleted_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(id)
+                : operation === "unarchive"
+                  ? db.prepare("UPDATE support_threads SET archived_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL").bind(id)
+                  : operation === "trash"
+                    ? db.prepare("UPDATE support_threads SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(id)
+                    : operation === "restore"
+                      ? db.prepare("UPDATE support_threads SET deleted_at = NULL, archived_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(id)
+                      : db.prepare("DELETE FROM support_threads WHERE id = ? AND deleted_at IS NOT NULL").bind(id));
+      await db.batch(statements);
     } else if (action === "reply-support-thread") {
       await sendSupportReply(String(payload.id), String(payload.message ?? ""), (await getAdminIdentity())?.email ?? "admin");
     } else if (action === "update-retail-partnership-status") {

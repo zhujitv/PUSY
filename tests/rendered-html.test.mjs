@@ -302,7 +302,7 @@ test("retail partnership requests use an online form, admin workflow and notific
 });
 
 test("customer inbox links verified order replies, returns and protected attachments", async () => {
-  const [supportAdmin, admin, adminApi, webhook, attachmentApi, returnApi, supportService, email, migration, env] = await Promise.all([
+  const [supportAdmin, admin, adminApi, webhook, attachmentApi, returnApi, supportService, email, migration, managementMigration, env] = await Promise.all([
     read("app/admin/SupportAdmin.tsx"),
     read("app/admin/AdminClient.tsx"),
     read("app/api/admin/route.ts"),
@@ -312,12 +312,19 @@ test("customer inbox links verified order replies, returns and protected attachm
     read("lib/support/service.ts"),
     read("lib/notifications/email.ts"),
     read("db/migrations/2026-07-30-support-inbox.sql"),
+    read("db/migrations/2026-07-30-support-inbox-management.sql"),
     read(".env.example"),
   ]);
   assert.match(admin, /客服收件箱/);
   assert.match(supportAdmin, /订单 .*order_status/);
   assert.match(supportAdmin, /售后处理记录/);
   assert.match(adminApi, /reply-support-thread/);
+  assert.match(adminApi, /manage-support-threads/);
+  assert.match(adminApi, /delete-permanent/);
+  assert.match(supportAdmin, /收件箱/);
+  assert.match(supportAdmin, /已归档/);
+  assert.match(supportAdmin, /垃圾箱/);
+  assert.match(supportAdmin, /永久删除/);
   assert.match(webhook, /request\.text\(\)/);
   assert.match(webhook, /new Webhook\(secret\)\.verify/);
   assert.match(webhook, /email\.received/);
@@ -330,6 +337,9 @@ test("customer inbox links verified order replies, returns and protected attachm
   assert.match(migration, /CREATE TABLE IF NOT EXISTS support_threads/);
   assert.match(migration, /CREATE TABLE IF NOT EXISTS support_messages/);
   assert.match(migration, /CREATE TABLE IF NOT EXISTS return_events/);
+  assert.match(managementMigration, /ADD COLUMN IF NOT EXISTS starred/);
+  assert.match(managementMigration, /ADD COLUMN IF NOT EXISTS archived_at/);
+  assert.match(managementMigration, /ADD COLUMN IF NOT EXISTS deleted_at/);
   assert.match(env, /RESEND_RECEIVING_API_KEY/);
   assert.match(env, /RESEND_INBOUND_DOMAIN/);
 });

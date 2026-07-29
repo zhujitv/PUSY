@@ -16,7 +16,12 @@ export const metadata: Metadata = {
     title: "PÚSY 中国官方网站｜彩妆与护肤",
     description: "PÚSY 中国官方网站。人民币结算，支持微信支付与支付宝。",
   },
-  icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml", sizes: "any" }],
+    shortcut: "/favicon.svg",
+    apple: [{ url: "/favicon.svg", type: "image/svg+xml", sizes: "180x180" }],
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

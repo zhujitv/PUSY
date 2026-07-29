@@ -112,6 +112,19 @@ test("homepage videos require manual playback", async () => {
   assert.match(homepage, /aria-label="下一张"/);
 });
 
+test("uses the pink PUSY wordmark as the domain icon", async () => {
+  const [favicon, layout, manifest] = await Promise.all([
+    read("public/favicon.svg"),
+    read("app/layout.tsx"),
+    read("app/manifest.ts"),
+  ]);
+  assert.match(favicon, /#EF398B/);
+  assert.match(favicon, /viewBox="0 0 128 128"/);
+  assert.match(layout, /manifest\.webmanifest/);
+  assert.match(layout, /apple:/);
+  assert.match(manifest, /theme_color: "#ef398b"/);
+});
+
 test("commerce feature set covers discovery, cart, membership, reviews and content operations", async () => {
   const [catalog, cart, account, productPage, gallery, reviews, reviewsApi, admin, adminApi, contentApi, schema, css] = await Promise.all([
     read("app/components/CatalogClient.tsx"),

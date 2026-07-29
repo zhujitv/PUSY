@@ -12,6 +12,15 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        source: "/assets/hero-clean-v2-42a264aa.webp",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
     ];
   },
 };

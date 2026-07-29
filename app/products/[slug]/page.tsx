@@ -36,19 +36,18 @@ function productFromRow(row: DbProduct): Product {
   };
 }
 
-function hasLegacyYandexMedia(product: Product) {
-  return [product.image, ...(product.images ?? []), product.imageAlt]
+function withLocalizedMedia(product: Product, catalogProduct: Product): Product {
+  const hasLegacyGallery = [product.image, ...(product.images ?? []), product.imageAlt]
     .filter(Boolean)
     .some((image) => image?.startsWith("https://avatars.mds.yandex.net/get-yastore/"));
-}
-
-function withLocalizedMedia(product: Product, catalogProduct: Product): Product {
-  if (!hasLegacyYandexMedia(product)) return product;
+  const hasLegacyVariant = product.variants?.some((group) => group.options.some((option) => option.image?.startsWith("https://avatars.mds.yandex.net/get-yastore/")));
+  if (!hasLegacyGallery && !hasLegacyVariant) return product;
   return {
     ...product,
-    image: catalogProduct.image,
-    imageAlt: catalogProduct.imageAlt,
-    images: catalogProduct.images,
+    image: hasLegacyGallery ? catalogProduct.image : product.image,
+    imageAlt: hasLegacyGallery ? catalogProduct.imageAlt : product.imageAlt,
+    images: hasLegacyGallery ? catalogProduct.images : product.images,
+    variants: hasLegacyVariant ? catalogProduct.variants : product.variants,
   };
 }
 

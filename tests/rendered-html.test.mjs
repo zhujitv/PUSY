@@ -167,6 +167,27 @@ test("member center always exposes a working sign-out entry", async () => {
   assert.match(authApi, /PREVIEW_VERIFICATION_CODE/);
 });
 
+test("member profile supports complete personal and beauty preferences", async () => {
+  const [account, accountApi, profileSchema, railwaySchema, css] = await Promise.all([
+    read("app/account/AccountClient.tsx"),
+    read("app/api/account/route.ts"),
+    read("db/member-profile.ts"),
+    read("db/railway-postgres.sql"),
+    read("app/globals.css"),
+  ]);
+  assert.match(account, /资料完整度/);
+  assert.match(account, /美妆档案/);
+  assert.match(account, /主要护理诉求/);
+  assert.match(account, /感兴趣的品类/);
+  assert.match(account, /邮件新品通知/);
+  assert.match(accountApi, /validBirthday/);
+  assert.match(accountApi, /skinConcernValues/);
+  assert.match(accountApi, /preferred_categories/);
+  assert.match(profileSchema, /CREATE TABLE IF NOT EXISTS member_profiles/);
+  assert.match(railwaySchema, /CREATE TABLE IF NOT EXISTS member_profiles/);
+  assert.match(css, /profile-completion/);
+});
+
 test("retail partnership requests use an online form, admin workflow and notifications", async () => {
   const [page, form, api, admin, adminApi, exportApi, schema] = await Promise.all([
     read("app/stores-china/page.tsx"),

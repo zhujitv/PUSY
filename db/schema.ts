@@ -37,6 +37,24 @@ export const members = sqliteTable("members", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
+export const memberProfiles = sqliteTable("member_profiles", {
+  memberId: integer("member_id").primaryKey().references(() => members.id),
+  nickname: text("nickname").notNull().default(""),
+  gender: text("gender").notNull().default(""),
+  birthday: text("birthday").notNull().default(""),
+  wechat: text("wechat").notNull().default(""),
+  province: text("province").notNull().default(""),
+  city: text("city").notNull().default(""),
+  occupation: text("occupation").notNull().default(""),
+  skinType: text("skin_type").notNull().default(""),
+  skinConcerns: text("skin_concerns").notNull().default("[]"),
+  preferredCategories: text("preferred_categories").notNull().default("[]"),
+  bio: text("bio").notNull().default(""),
+  emailMarketing: integer("email_marketing", { mode: "boolean" }).notNull().default(false),
+  smsMarketing: integer("sms_marketing", { mode: "boolean" }).notNull().default(false),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
 export const memberAddresses = sqliteTable("member_addresses", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   memberId: integer("member_id").notNull().references(() => members.id),

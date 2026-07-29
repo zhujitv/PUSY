@@ -2,6 +2,28 @@ import { getChatGPTUser } from "../../chatgpt-auth";
 import { ensureMember } from "../../../db/member-account";
 import { getStoreDb } from "../../../db/store";
 import { getPreviewMemberIdentity } from "../../../lib/preview-member-auth";
+import { ensureMemberProfile } from "../../../db/member-profile";
+
+const genderValues = new Set(["", "female", "male", "undisclosed"]);
+const skinTypeValues = new Set(["", "normal", "dry", "oily", "combination", "sensitive"]);
+const skinConcernValues = new Set(["补水保湿", "控油净肤", "敏感修护", "提亮肤色", "抗老紧致", "痘肌护理"]);
+const categoryValues = new Set(["彩妆", "护肤", "身体护理", "头发护理", "眉妆", "配件"]);
+
+function text(value: unknown, maximum: number) {
+  return String(value ?? "").trim().slice(0, maximum);
+}
+
+function selected(value: unknown, allowed: Set<string>) {
+  return Array.isArray(value) ? value.map(String).filter((item) => allowed.has(item)) : [];
+}
+
+function validBirthday(value: string) {
+  if (!value) return true;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value) || value > new Date().toISOString().slice(0, 10)) return false;
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
+}
 
 async function identity() {
   const user = await getChatGPTUser();
@@ -14,14 +36,16 @@ export async function GET() {
     const viewer = await identity();
     if (!viewer) return Response.json({ error: "请先登录会员账户" }, { status: 401 });
     const member = await ensureMember(viewer);
+    await ensureMemberProfile(member.id);
     const db = await getStoreDb();
-    const [addresses, orders, orderItems, returns] = await Promise.all([
+    const [profile, addresses, orders, orderItems, returns] = await Promise.all([
+      db.prepare("SELECT * FROM member_profiles WHERE member_id = ?").bind(member.id).first(),
       db.prepare("SELECT * FROM member_addresses WHERE member_id = ? ORDER BY is_default DESC, id DESC").bind(member.id).all(),
       db.prepare("SELECT o.*, COUNT(oi.id) AS item_count FROM orders o LEFT JOIN order_items oi ON oi.order_id = o.id WHERE o.member_id = ? GROUP BY o.id ORDER BY o.created_at DESC").bind(member.id).all(),
       db.prepare("SELECT oi.* FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.member_id = ? ORDER BY oi.id").bind(member.id).all(),
       db.prepare("SELECT r.* FROM returns r JOIN orders o ON o.id = r.order_id WHERE o.member_id = ? ORDER BY r.created_at DESC").bind(member.id).all(),
     ]);
-    return Response.json({ member, addresses: addresses.results, orders: orders.results, orderItems: orderItems.results, returns: returns.results, canSignOut: true });
+    return Response.json({ member, profile, addresses: addresses.results, orders: orders.results, orderItems: orderItems.results, returns: returns.results, canSignOut: true });
   } catch (error) {
     return Response.json({ error: error instanceof Error ? error.message : "读取会员资料失败" }, { status: 500 });
   }
@@ -33,14 +57,26 @@ export async function POST(request: Request) {
     if (!viewer) return Response.json({ error: "请先登录会员账户" }, { status: 401 });
     const member = await ensureMember(viewer);
     if (member.status === "blocked") return Response.json({ error: "该会员账户已停用" }, { status: 403 });
+    await ensureMemberProfile(member.id);
     const payload = await request.json() as Record<string, unknown>;
     const action = String(payload.action ?? "");
     const db = await getStoreDb();
     if (action === "update-profile") {
-      const name = String(payload.name ?? "").trim();
-      const phone = String(payload.phone ?? "").trim();
+      const name = text(payload.name, 50);
+      const phone = text(payload.phone, 20);
       if (!name || !/^\+?[0-9\s-]{6,20}$/.test(phone)) return Response.json({ error: "请填写姓名和有效手机号码" }, { status: 400 });
-      await db.prepare("UPDATE members SET name = ?, phone = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(name, phone, member.id).run();
+      const nickname = text(payload.nickname, 30);
+      const gender = text(payload.gender, 20);
+      const birthday = text(payload.birthday, 10);
+      const skinType = text(payload.skinType, 20);
+      if (!genderValues.has(gender) || !skinTypeValues.has(skinType)) return Response.json({ error: "个人资料选项无效" }, { status: 400 });
+      if (!validBirthday(birthday)) return Response.json({ error: "请填写有效的出生日期" }, { status: 400 });
+      const skinConcerns = selected(payload.skinConcerns, skinConcernValues);
+      const preferredCategories = selected(payload.preferredCategories, categoryValues);
+      await db.batch([
+        db.prepare("UPDATE members SET name = ?, phone = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(name, phone, member.id),
+        db.prepare(`UPDATE member_profiles SET nickname = ?, gender = ?, birthday = ?, wechat = ?, province = ?, city = ?, occupation = ?, skin_type = ?, skin_concerns = ?, preferred_categories = ?, bio = ?, email_marketing = ?, sms_marketing = ?, updated_at = CURRENT_TIMESTAMP WHERE member_id = ?`).bind(nickname, gender, birthday, text(payload.wechat, 50), text(payload.province, 30), text(payload.city, 30), text(payload.occupation, 50), skinType, JSON.stringify(skinConcerns), JSON.stringify(preferredCategories), text(payload.bio, 200), payload.emailMarketing ? 1 : 0, payload.smsMarketing ? 1 : 0, member.id),
+      ]);
     } else if (action === "save-address") {
       const values = ["label", "recipient", "phone", "province", "city", "district", "detail", "postcode"].map((key) => String(payload[key] ?? "").trim());
       const [label, recipient, phone, province, city, district, detail, postcode] = values;

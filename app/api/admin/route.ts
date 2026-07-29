@@ -8,7 +8,7 @@ import { chinaComplianceReady, chinaRegion } from "../../../lib/china-region";
 import { ensureCommerceFeatureSchema, getSiteContent } from "../../../db/commerce-features";
 import { hasTrustedOrigin, safeServerError } from "../../../lib/request-security";
 import { releaseOrderReservation } from "../../../lib/orders/reservations";
-import { recordReturnStatusChange, sendSupportReply, supportReceivingDomain } from "../../../lib/support/service";
+import { ensureLinkedSupportThread, recordReturnStatusChange, sendSupportReply, supportReceivingDomain } from "../../../lib/support/service";
 
 const orderStatuses = ["待付款", "支付失败", "待处理", "已确认", "配货中", "已发货", "已完成", "退款中", "部分退款", "已退款", "已取消"];
 const memberStatuses = ["active", "vip", "blocked"];
@@ -143,6 +143,9 @@ export async function POST(request: Request) {
       await db.batch(statements);
     } else if (action === "reply-support-thread") {
       await sendSupportReply(String(payload.id), String(payload.message ?? ""), (await getAdminIdentity())?.email ?? "admin");
+    } else if (action === "open-linked-support-thread") {
+      const threadId = await ensureLinkedSupportThread({ orderId: String(payload.orderId ?? ""), returnId: String(payload.returnId ?? ""), actor: (await getAdminIdentity())?.email ?? "admin" });
+      return Response.json({ ok: true, threadId });
     } else if (action === "update-retail-partnership-status") {
       const status = String(payload.status ?? "");
       if (!partnershipStatuses.includes(status)) return Response.json({ error: "合作申请状态无效" }, { status: 400 });

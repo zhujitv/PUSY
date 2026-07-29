@@ -52,17 +52,19 @@ function attachments(value: string) { try { return JSON.parse(value) as Attachme
 function fileSize(value = 0) { if (!value) return ""; if (value < 1024) return `${value} B`; if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`; return `${(value / 1024 / 1024).toFixed(1)} MB`; }
 function active(thread: SupportThread) { return !thread.archived_at && !thread.deleted_at; }
 
-export function SupportAdmin({ threads, messages, returnEvents, receiving, query, viewer, onAct }: {
+export function SupportAdmin({ threads, messages, returnEvents, receiving, query, viewer, focusThreadId, onAct }: {
   threads: SupportThread[];
   messages: SupportMessage[];
   returnEvents: ReturnEvent[];
   receiving: SupportReceiving;
   query: string;
   viewer: string;
+  focusThreadId?: string;
   onAct: (payload: Record<string, unknown>) => Promise<boolean>;
 }) {
-  const [folder, setFolder] = useState<Folder>("inbox");
-  const [selectedId, setSelectedId] = useState("");
+  const focusedThread = threads.find((thread) => thread.id === focusThreadId);
+  const [folder, setFolder] = useState<Folder>(focusedThread?.deleted_at ? "trash" : focusedThread?.archived_at ? "archived" : "inbox");
+  const [selectedId, setSelectedId] = useState(focusThreadId ?? "");
   const [checked, setChecked] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const counts = useMemo(() => ({

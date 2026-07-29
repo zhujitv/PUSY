@@ -319,6 +319,7 @@ test("customer inbox links verified order replies, returns and protected attachm
   assert.match(supportAdmin, /订单 .*order_status/);
   assert.match(supportAdmin, /售后处理记录/);
   assert.match(adminApi, /reply-support-thread/);
+  assert.match(adminApi, /open-linked-support-thread/);
   assert.match(adminApi, /manage-support-threads/);
   assert.match(adminApi, /delete-permanent/);
   assert.match(supportAdmin, /收件箱/);
@@ -333,6 +334,10 @@ test("customer inbox links verified order replies, returns and protected attachm
   assert.match(returnApi, /createWebsiteReturnThread/);
   assert.match(supportService, /lower\(email\) = \?/);
   assert.match(supportService, /In-Reply-To/);
+  assert.match(supportService, /ensureLinkedSupportThread/);
+  assert.match(supportService, /订单 .*建立客户邮件沟通/);
+  assert.match(admin, /邮件联系客户/);
+  assert.match(admin, /查看并回复/);
   assert.match(email, /reply_to/);
   assert.match(migration, /CREATE TABLE IF NOT EXISTS support_threads/);
   assert.match(migration, /CREATE TABLE IF NOT EXISTS support_messages/);

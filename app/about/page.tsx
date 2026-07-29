@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { PageShell } from "../components/SiteChrome";
 
 const years = [
@@ -9,6 +10,15 @@ const years = [
   ["2026", "睫毛膏、闪耀眼影、唇部果冻、丰唇笔和 Lamination 眉胶等新品陆续登场；同时推出 Base 与 Prime 两条完整头发护理产品线。"],
 ];
 
+const timelineImages = [
+  { src: "/assets/about-03.webp", width: 627, height: 627 },
+  { src: "/assets/about-07.webp", width: 960, height: 1280 },
+  { src: "/assets/about-11.webp", width: 960, height: 960 },
+  { src: "/assets/about-14.webp", width: 960, height: 960 },
+  { src: "/assets/about-15.webp", width: 960, height: 1280 },
+  { src: "/assets/about-36.webp", width: 960, height: 997 },
+];
+
 export default function AboutPage() {
-  return <PageShell><main className="about-page"><section className="about-hero"><div><p>关于品牌</p><h1>PÚSY 的故事</h1></div><img src="/assets/30.webp" alt="PÚSY 品牌与神秘礼盒" /></section><section className="timeline">{years.map(([year, copy], index) => <article key={year}><div><span>{year}</span><h2>{index === 0 ? "一切，从第一瓶产品开始" : "继续向前"}</h2><p>{copy}</p></div><img src={`/assets/${[3,7,11,14,15,36][index].toString().padStart(2, "0")}.webp`} alt={`PÚSY ${year}`} /></article>)}</section><blockquote>我们的目标，是让每一件产品都再简化一点你的美丽步骤，让出色效果来得轻松而自然。</blockquote></main></PageShell>;
+  return <PageShell><main className="about-page"><section className="about-hero"><div><p>关于品牌</p><h1>PÚSY 的故事</h1></div><Image src="/assets/about-30.webp" width={960} height={997} sizes="(max-width: 760px) 100vw, 58vw" priority unoptimized alt="PÚSY 品牌与神秘礼盒" /></section><section className="timeline">{years.map(([year, copy], index) => { const image = timelineImages[index]; return <article key={year}><div><span>{year}</span><h2>{index === 0 ? "一切，从第一瓶产品开始" : "继续向前"}</h2><p>{copy}</p></div><Image src={image.src} width={image.width} height={image.height} sizes="(max-width: 760px) 100vw, 50vw" unoptimized alt={`PÚSY ${year}`} /></article>; })}</section><blockquote>我们的目标，是让每一件产品都再简化一点你的美丽步骤，让出色效果来得轻松而自然。</blockquote></main></PageShell>;
 }

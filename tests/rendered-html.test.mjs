@@ -125,6 +125,14 @@ test("uses the pink PUSY wordmark as the domain icon", async () => {
   assert.match(manifest, /theme_color: "#ef398b"/);
 });
 
+test("about page uses valid local WebP assets", async () => {
+  const about = await read("app/about/page.tsx");
+  assert.match(about, /from "next\/image"/);
+  assert.match(about, /about-30\.webp/);
+  assert.match(about, /about-36\.webp/);
+  assert.doesNotMatch(about, /src="\/assets\/30\.webp"/);
+});
+
 test("commerce feature set covers discovery, cart, membership, reviews and content operations", async () => {
   const [catalog, cart, account, productPage, gallery, reviews, reviewsApi, admin, adminApi, contentApi, schema, css] = await Promise.all([
     read("app/components/CatalogClient.tsx"),

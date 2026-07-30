@@ -23,5 +23,5 @@ export const fallbackNavigationCategories: NavigationCategory[] = [
 export function storefrontNavItems(categories: NavigationCategory[]) {
   const hasLiveCounts = categories.some((category) => category.product_count > 0);
   const managed = categories.filter((category) => category.parent_id === null && category.slug !== "gift-card" && (!hasLiveCounts || category.product_count > 0)).map((category) => [category.name, `/catalog/${category.slug}`] as const);
-  return [["全部商品", "/catalog/products"] as const, ...managed, ["新品", "/collections/novinki"] as const, ["畅销", "/catalog/hity"] as const, ["礼品卡", "/gift-card"] as const, ["美丽灵感", "/blog"] as const];
+  return [["全部商品", "/catalog/products"] as const, ...managed, ["新品", "/collections/novinki"] as const, ["畅销", "/catalog/hity"] as const, ["礼品卡", "/gift-card"] as const];
 }

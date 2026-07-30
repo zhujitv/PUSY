@@ -43,7 +43,8 @@ export async function POST(request: Request) {
     }
     const merchandiseTotal = resolvedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const shipping = payload.delivery === "门店自提" || merchandiseTotal >= 5000 ? 0 : payload.delivery === "顺丰速运" ? 590 : 390;
-    const coupon = payload.couponCode ? await calculateCouponDiscount(payload.couponCode, merchandiseTotal) : { valid: false, code: "", discount: 0, message: "" };
+    const coupon = payload.couponCode ? await calculateCouponDiscount(payload.couponCode, merchandiseTotal, viewer?.memberId) : { valid: false, code: "", discount: 0, message: "" };
+    if (payload.couponCode && !coupon.valid) return Response.json({ error: coupon.message || "优惠码无效" }, { status: 400 });
     const verifiedTotal = Math.max(0, merchandiseTotal + shipping - coupon.discount);
     const id = orderId();
     const paymentToken = `${crypto.randomUUID()}${crypto.randomUUID()}`;
@@ -59,6 +60,7 @@ export async function POST(request: Request) {
     }
     const statements = [db.prepare("INSERT INTO orders (id, member_id, customer, email, phone, address, delivery, payment, total, discount, coupon_code, payment_token_hash, reservation_expires_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '待付款')").bind(id, memberId, customer, memberEmail, phone, address, payload.delivery, payload.payment, verifiedTotal, coupon.discount, coupon.valid ? coupon.code : null, await sha256(paymentToken), reservationExpiresAt)];
     if (coupon.valid && coupon.couponId) statements.push(db.prepare("UPDATE coupons SET used_count = used_count + 1 WHERE id = ? AND status = 'active' AND (usage_limit = 0 OR used_count < usage_limit)").bind(coupon.couponId).requireChanges("优惠码使用次数已达上限"));
+    if (coupon.valid && coupon.assignmentId) statements.push(db.prepare("UPDATE coupon_assignments SET status = 'used', used_at = CURRENT_TIMESTAMP, order_id = ? WHERE id = ? AND member_id = ? AND status = 'available'").bind(id, coupon.assignmentId, memberId).requireChanges("专属优惠券已经使用"));
     if (coupon.valid && coupon.giftCardCode) statements.push(db.prepare("UPDATE gift_cards SET balance = balance - ?, status = CASE WHEN balance - ? <= 0 THEN 'used' ELSE status END WHERE code = ? AND status = 'active' AND balance >= ?").bind(coupon.discount, coupon.discount, coupon.giftCardCode, coupon.discount).requireChanges("礼品卡余额不足或已被使用"));
     for (const line of resolvedItems) {
       statements.push(db.prepare("INSERT INTO order_items (order_id, product_slug, product_name, quantity, unit_price) VALUES (?, ?, ?, ?, ?)").bind(id, line.slug, line.name, line.quantity, line.price));

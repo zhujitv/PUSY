@@ -29,6 +29,7 @@ export async function releaseOrderReservation(orderId: string) {
   ];
   if (order.coupon_code) {
     statements.push(db.prepare("UPDATE coupons SET used_count = GREATEST(used_count - 1, 0) WHERE code = ?").bind(order.coupon_code));
+    statements.push(db.prepare("UPDATE coupon_assignments SET status = 'available', used_at = NULL, order_id = NULL WHERE order_id = ? AND status = 'used'").bind(order.id));
     statements.push(db.prepare("UPDATE gift_cards SET balance = balance + ?, status = 'active' WHERE code = ? AND order_id != ?").bind(order.discount, order.coupon_code, order.id));
   }
   await db.batch(statements);

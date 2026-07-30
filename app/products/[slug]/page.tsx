@@ -70,14 +70,41 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const catalogProduct = products.find((item) => item.slug === slug);
   if (!catalogProduct) notFound();
   let product: Product = catalogProduct;
+  let related = products.filter((item) => item.slug !== slug && item.category === catalogProduct.category).slice(0, 4);
+  let relatedTitle = "你可能也喜欢";
   try {
     const db = await getStoreDb();
     const row = await db.prepare("SELECT * FROM products WHERE slug = ? LIMIT 1").bind(slug).first<DbProduct>();
     if (row) product = withLocalizedMedia(productFromRow(row), catalogProduct);
+    const recommendations = await db.prepare(`
+      SELECT p.*, COUNT(*)::INTEGER AS recommendation_score
+      FROM order_items selected
+      JOIN order_items companion ON companion.order_id = selected.order_id AND companion.product_slug != selected.product_slug
+      JOIN orders o ON o.id = selected.order_id AND o.status NOT IN ('待付款','支付失败','已取消','已退款')
+      JOIN products p ON p.slug = companion.product_slug AND p.status = 'active'
+      WHERE selected.product_slug = ?
+      GROUP BY p.id
+      ORDER BY recommendation_score DESC, p.updated_at DESC
+      LIMIT 4
+    `).bind(slug).all<DbProduct & { recommendation_score: number }>();
+    if (recommendations.results.length) {
+      related = recommendations.results.map((item) => {
+        const fallback = products.find((candidate) => candidate.slug === item.slug);
+        const mapped = productFromRow(item);
+        return fallback ? withLocalizedMedia(mapped, fallback) : mapped;
+      });
+      relatedTitle = "经常一起购买";
+    } else {
+      const sameCategory = await db.prepare("SELECT * FROM products WHERE slug != ? AND category = ? AND status = 'active' ORDER BY updated_at DESC LIMIT 4").bind(slug, product.category).all<DbProduct>();
+      if (sameCategory.results.length) related = sameCategory.results.map((item) => {
+        const fallback = products.find((candidate) => candidate.slug === item.slug);
+        const mapped = productFromRow(item);
+        return fallback ? withLocalizedMedia(mapped, fallback) : mapped;
+      });
+    }
   } catch {}
 
   const gallery = Array.from(new Set([product.image, ...(product.images ?? []), product.imageAlt].filter(Boolean))) as string[];
-  const related = products.filter((item) => item.slug !== product.slug && item.category === product.category).slice(0, 4);
   const inventoryText = product.inventoryVerified && (product.stock ?? 0) > 0 ? `有货 · ${product.stock} 件` : "暂时缺货";
 
   return <PageShell>
@@ -102,6 +129,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       </section>
     </main>
     <ProductReviews slug={product.slug} />
-    {related.length > 0 && <section className="related"><h2>你可能也喜欢</h2><div>{related.map((item) => <a href={`/products/${item.slug}`} key={item.slug}><Image src={item.image} alt={item.name} width={700} height={727} sizes="(max-width: 700px) 50vw, 25vw" /><span>{item.name}</span><b>{formatCnyFromRub(item.price)}</b></a>)}</div></section>}
+    {related.length > 0 && <section className="related"><h2>{relatedTitle}</h2><div>{related.map((item) => <a href={`/products/${item.slug}`} key={item.slug}><Image src={item.image} alt={item.name} width={700} height={727} sizes="(max-width: 700px) 50vw, 25vw" /><span>{item.name}</span><b>{formatCnyFromRub(item.price)}</b></a>)}</div></section>}
   </PageShell>;
 }

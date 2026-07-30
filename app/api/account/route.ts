@@ -36,15 +36,19 @@ export async function GET() {
     const member = await ensureMember(viewer);
     await ensureMemberProfile(member.id);
     const db = await getStoreDb();
-    const [profile, addresses, orders, orderItems, returns, invoices] = await Promise.all([
+    const [profile, addresses, orders, orderItems, returns, invoices, pointsLedger, coupons, productAlerts, tags] = await Promise.all([
       db.prepare("SELECT * FROM member_profiles WHERE member_id = ?").bind(member.id).first(),
       db.prepare("SELECT * FROM member_addresses WHERE member_id = ? ORDER BY is_default DESC, id DESC").bind(member.id).all(),
       db.prepare("SELECT o.*, COUNT(oi.id) AS item_count FROM orders o LEFT JOIN order_items oi ON oi.order_id = o.id WHERE o.member_id = ? GROUP BY o.id ORDER BY o.created_at DESC").bind(member.id).all(),
       db.prepare("SELECT oi.* FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.member_id = ? ORDER BY oi.id").bind(member.id).all(),
       db.prepare("SELECT r.* FROM returns r JOIN orders o ON o.id = r.order_id WHERE o.member_id = ? ORDER BY r.created_at DESC").bind(member.id).all(),
       db.prepare("SELECT id, order_id, invoice_type, title, tax_number, recipient_email, amount, status, invoice_number, file_url, rejection_reason, requested_at, issued_at, updated_at FROM invoices WHERE member_id = ? ORDER BY requested_at DESC").bind(member.id).all(),
+      db.prepare("SELECT id, points, balance_after, reason, reference_type, reference_id, created_at FROM member_points_ledger WHERE member_id = ? ORDER BY created_at DESC LIMIT 50").bind(member.id).all(),
+      db.prepare("SELECT c.id, c.code, c.kind, c.value, c.minimum, c.starts_at, c.ends_at, ca.status, ca.assigned_at FROM coupon_assignments ca JOIN coupons c ON c.id = ca.coupon_id WHERE ca.member_id = ? AND c.status = 'active' ORDER BY ca.assigned_at DESC").bind(member.id).all(),
+      db.prepare("SELECT a.id, a.product_slug, a.alert_type, a.target_price, a.last_notified_at, a.created_at, p.name AS product_name, p.image, p.price, p.stock FROM member_product_alerts a JOIN products p ON p.slug = a.product_slug WHERE a.member_id = ? AND a.status = 'active' ORDER BY a.created_at DESC").bind(member.id).all(),
+      db.prepare("SELECT t.id, t.name, t.color FROM member_tag_assignments a JOIN customer_tags t ON t.id = a.tag_id WHERE a.member_id = ? ORDER BY t.name").bind(member.id).all(),
     ]);
-    return Response.json({ member, profile, addresses: addresses.results, orders: orders.results, orderItems: orderItems.results, returns: returns.results, invoices: invoices.results, canSignOut: true }, { headers: { "cache-control": "private, no-store" } });
+    return Response.json({ member, profile, addresses: addresses.results, orders: orders.results, orderItems: orderItems.results, returns: returns.results, invoices: invoices.results, pointsLedger: pointsLedger.results, coupons: coupons.results, productAlerts: productAlerts.results, tags: tags.results, canSignOut: true }, { headers: { "cache-control": "private, no-store" } });
   } catch {
     return safeServerError("读取会员资料失败，请稍后再试");
   }
@@ -103,6 +107,10 @@ export async function POST(request: Request) {
       if (!address) return Response.json({ error: "未找到该收货地址" }, { status: 404 });
       await db.prepare("DELETE FROM member_addresses WHERE id = ? AND member_id = ?").bind(id, member.id).run();
       if (address.is_default) await db.prepare("UPDATE member_addresses SET is_default = 1 WHERE id = (SELECT id FROM member_addresses WHERE member_id = ? ORDER BY id DESC LIMIT 1)").bind(member.id).run();
+    } else if (action === "remove-product-alert") {
+      const id = Number(payload.id);
+      if (!Number.isInteger(id) || id < 1) return Response.json({ error: "商品提醒无效" }, { status: 400 });
+      await db.prepare("UPDATE member_product_alerts SET status = 'disabled' WHERE id = ? AND member_id = ?").bind(id, member.id).run();
     } else if (action === "request-invoice") {
       const orderId = text(payload.orderId, 60).toUpperCase();
       const invoiceType = text(payload.invoiceType, 20);

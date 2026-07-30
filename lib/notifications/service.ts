@@ -42,8 +42,8 @@ export async function enqueueNotification(input: NotificationInput) {
     if (!recipient) continue;
     const digest = await sha256(`${input.eventKey}:${setting.channel}:${recipient}`);
     const id = `NTF-${digest.slice(0, 24).toUpperCase()}`;
-    await db.prepare("INSERT INTO notification_jobs (id, event_key, entity_type, entity_id, template_key, channel, recipient, payload_json, scheduled_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO NOTHING").bind(id, input.eventKey, input.entityType, input.entityId, input.templateKey, setting.channel, recipient, JSON.stringify(input.payload), input.scheduledAt ?? new Date().toISOString()).run();
-    created.push(id);
+    const inserted = await db.prepare("INSERT INTO notification_jobs (id, event_key, entity_type, entity_id, template_key, channel, recipient, payload_json, scheduled_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO NOTHING").bind(id, input.eventKey, input.entityType, input.entityId, input.templateKey, setting.channel, recipient, JSON.stringify(input.payload), input.scheduledAt ?? new Date().toISOString()).run();
+    if (inserted.meta.changes) created.push(id);
   }
   for (const id of created) await processNotificationJob(id).catch(() => undefined);
   return created;

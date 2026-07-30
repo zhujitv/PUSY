@@ -745,6 +745,73 @@ body.overlay-open { overflow: hidden; }
 .member-stat-grid article { min-height: 150px; padding: 22px; display: flex; flex-direction: column; justify-content: space-between; background: #fff; }
 .member-stat-grid span { color: #777; font-size: 11px; }
 .member-stat-grid b { font-size: 28px; font-weight: 400; }
+
+.product-alert-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
+.product-alert-actions button { border: 1px solid #d8d2cd; background: #fff; padding: 10px 14px; font-size: 11px; cursor: pointer; }
+.product-alert-actions button.active { border-color: #ef398b; color: #ef398b; background: #fff4f9; }
+.product-alert-actions small { width: 100%; color: #777; }
+
+.membership-stack, .growth-admin-stack { display: grid; gap: 18px; }
+.membership-card { position: relative; min-height: 260px; padding: 34px; color: #fff; border-radius: 4px; overflow: hidden; display: grid; grid-template-columns: 1fr auto; gap: 30px; background: linear-gradient(135deg, #282322, #725d55); }
+.membership-card::after { content: "P"; position: absolute; right: -10px; top: -70px; font: 300px/1 serif; color: rgba(255,255,255,.07); }
+.membership-card.tier-silver { background: linear-gradient(135deg, #52565c, #a7adb3); }
+.membership-card.tier-gold { background: linear-gradient(135deg, #6a4b20, #c59747); }
+.membership-card.tier-diamond { background: linear-gradient(135deg, #171a27, #625d91); }
+.membership-card > div, .membership-card footer { position: relative; z-index: 1; }
+.membership-card p { margin: 0 0 16px; font-size: 11px; letter-spacing: .22em; }
+.membership-card h2 { margin: 0; font-size: 32px; font-weight: 400; }
+.membership-card > div:nth-child(2) { text-align: right; }
+.membership-card > div:nth-child(2) b { display: block; font-size: 44px; font-weight: 400; }
+.membership-card footer { grid-column: 1 / -1; align-self: end; display: grid; grid-template-columns: 1fr auto; gap: 10px; font-size: 11px; }
+.membership-card footer i { grid-column: 1 / -1; height: 3px; background: rgba(255,255,255,.25); }
+.membership-card footer em { display: block; height: 100%; background: #fff; }
+.tier-benefit-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.tier-benefit-grid article { padding: 18px; border: 1px solid #e6e1dd; opacity: .55; }
+.tier-benefit-grid article.active { opacity: 1; border-color: #ef398b; background: #fff8fb; }
+.tier-benefit-grid b, .tier-benefit-grid span { display: block; }
+.tier-benefit-grid span { margin: 6px 0 18px; color: #ef398b; font-size: 11px; }
+.tier-benefit-grid p { margin: 0; color: #666; font-size: 12px; line-height: 1.6; }
+.member-coupon-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.member-coupon-grid article { display: grid; grid-template-columns: 90px 1fr auto; align-items: center; gap: 16px; padding: 18px; border: 1px dashed #ef398b; background: #fff9fc; }
+.member-coupon-grid article.used { opacity: .5; filter: grayscale(1); }
+.member-coupon-grid strong { color: #ef398b; font-size: 24px; }
+.member-coupon-grid b, .member-coupon-grid span, .member-coupon-grid small { display: block; }
+.member-coupon-grid span, .member-coupon-grid small { margin-top: 4px; color: #777; font-size: 10px; }
+.member-coupon-grid em { font-size: 10px; font-style: normal; }
+.member-alert-list, .points-ledger { display: grid; }
+.member-alert-list article { display: grid; grid-template-columns: 72px 1fr auto; gap: 14px; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
+.member-alert-list img { width: 72px; height: 76px; object-fit: cover; }
+.member-alert-list a, .member-alert-list span { display: block; }
+.member-alert-list span { margin-top: 6px; color: #777; font-size: 11px; }
+.member-alert-list button { border: 0; background: transparent; color: #888; cursor: pointer; }
+.points-ledger > div { display: grid; grid-template-columns: 1fr 70px 90px; gap: 12px; align-items: center; padding: 13px 0; border-bottom: 1px solid #eee; }
+.points-ledger b, .points-ledger small { display: block; }
+.points-ledger small { margin-top: 4px; color: #999; }
+.points-ledger strong { color: #555; }
+.points-ledger strong.positive { color: #ef398b; }
+.points-ledger em { font-style: normal; color: #888; font-size: 11px; text-align: right; }
+
+.growth-stat-grid { margin: 0; }
+.growth-two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.growth-form { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.growth-form.compact { grid-template-columns: repeat(2, 1fr); }
+.growth-form label { display: grid; gap: 7px; color: #777; font-size: 10px; }
+.growth-form input, .growth-form select, .growth-inline-form input, .table-inline-form input, .table-inline-form select { min-width: 0; border: 1px solid #d9d5d1; background: #fff; padding: 10px; }
+.growth-form button { align-self: end; min-height: 38px; }
+.growth-form .wide { grid-column: span 2; }
+.growth-inline-form { display: grid; grid-template-columns: 1fr 46px 1.4fr auto; gap: 8px; }
+.growth-inline-form input[type="color"] { padding: 3px; }
+.growth-tag-list, .member-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 18px; }
+.growth-tag-list span, .member-tags button { display: inline-flex; gap: 6px; align-items: center; border: 1px solid; padding: 5px 8px; background: #fff; font-size: 10px; }
+.growth-tag-list i { width: 7px; height: 7px; border-radius: 50%; }
+.growth-tag-list b { margin-left: 4px; }
+.segment-list { display: grid; margin-top: 16px; }
+.segment-list > div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid #eee; }
+.segment-list span { color: #888; font-size: 11px; }
+.table-inline-form { display: flex; gap: 5px; min-width: 210px; }
+.table-inline-form input { width: 82px; }
+.table-inline-form input[name="reason"] { width: 105px; }
+.table-inline-form button { white-space: nowrap; }
 .member-section { min-height: 500px; padding: 34px; background: #fff; }
 .member-section-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
 .member-section-title p { margin: 0 0 7px; color: #888; font-size: 11px; }
@@ -1307,6 +1374,11 @@ body.overlay-open { overflow: hidden; }
   .member-layout > aside > a { margin-top: 8px; text-align: center; }
   .member-stat-grid { grid-template-columns: 1fr 1fr; }
   .member-stat-grid article { min-height: 115px; }
+  .membership-card { min-height: 230px; padding: 24px; }
+  .tier-benefit-grid, .member-coupon-grid { grid-template-columns: 1fr; }
+  .growth-two-column, .growth-form { grid-template-columns: 1fr; }
+  .growth-form.compact { grid-template-columns: 1fr; }
+  .growth-form .wide { grid-column: auto; }
   .member-section { min-height: 0; padding: 22px 16px; }
   .member-form, .address-grid { grid-template-columns: 1fr; }
   .member-form label.full { grid-column: auto; }

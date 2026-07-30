@@ -6,7 +6,7 @@ export async function ensureMember(identity: AccountIdentity) {
   const db = await getStoreDb();
   const email = identity.email.trim().toLowerCase();
   await db.prepare("INSERT INTO members (name, email, phone, email_verified) VALUES (?, ?, '', 1) ON CONFLICT(email) DO UPDATE SET name = CASE WHEN members.name = '' THEN excluded.name ELSE members.name END, email_verified = 1, updated_at = CURRENT_TIMESTAMP").bind(identity.displayName, email).run();
-  const member = await db.prepare("SELECT * FROM members WHERE email = ? LIMIT 1").bind(email).first<{ id: number; name: string; email: string; phone: string; email_verified: number; phone_verified: number; status: string; total_orders: number; total_spent: number; joined_at: string }>();
+  const member = await db.prepare("SELECT * FROM members WHERE email = ? LIMIT 1").bind(email).first<{ id: number; name: string; email: string; phone: string; email_verified: number; phone_verified: number; status: string; total_orders: number; total_spent: number; points_balance: number; lifetime_points: number; tier: string; joined_at: string }>();
   if (!member) throw new Error("无法建立会员档案");
   await db.prepare("UPDATE orders SET member_id = ? WHERE member_id IS NULL AND lower(email) = ?").bind(member.id, email).run();
   await db.prepare(`UPDATE members SET

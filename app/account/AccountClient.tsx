@@ -4,14 +4,18 @@ import Image from "next/image";
 import { formatCnyFromRub, products, type Product } from "../data/products";
 import { useStore } from "../components/StoreProvider";
 
-type Member = { id: number; name: string; email: string; phone: string; email_verified: number; phone_verified: number; status: string; total_orders: number; total_spent: number; joined_at: string };
+type Member = { id: number; name: string; email: string; phone: string; email_verified: number; phone_verified: number; status: string; total_orders: number; total_spent: number; points_balance: number; lifetime_points: number; tier: string; joined_at: string };
 type MemberProfile = { member_id: number; nickname: string; gender: string; birthday: string; wechat: string; province: string; city: string; occupation: string; skin_type: string; skin_concerns: string; preferred_categories: string; bio: string; email_marketing: number; sms_marketing: number; updated_at: string };
 type Address = { id: number; label: string; recipient: string; phone: string; province: string; city: string; district: string; detail: string; postcode: string; is_default: number };
 type Order = { id: string; total: number; discount: number; delivery: string; payment: string; address: string; status: string; item_count: number; created_at: string };
 type OrderItem = { id: number; order_id: string; product_slug: string; product_name: string; quantity: number; unit_price: number };
 type ReturnItem = { id: string; order_id: string; reason: string; details: string; status: string; created_at: string };
 type Invoice = { id: string; order_id: string; invoice_type: string; title: string; tax_number: string; recipient_email: string; amount: number; status: string; invoice_number: string; file_url: string; rejection_reason: string; requested_at: string; issued_at?: string };
-type AccountData = { member: Member; profile: MemberProfile; addresses: Address[]; orders: Order[]; orderItems: OrderItem[]; returns: ReturnItem[]; invoices: Invoice[] };
+type PointsEntry = { id: number; points: number; balance_after: number; reason: string; created_at: string };
+type MemberCoupon = { id: number; code: string; kind: string; value: number; minimum: number; ends_at?: string; status: string; assigned_at: string };
+type ProductAlert = { id: number; product_slug: string; product_name: string; image: string; alert_type: string; target_price?: number; price: number; stock: number; last_notified_at?: string; created_at: string };
+type MemberTag = { id: number; name: string; color: string };
+type AccountData = { member: Member; profile: MemberProfile; addresses: Address[]; orders: Order[]; orderItems: OrderItem[]; returns: ReturnItem[]; invoices: Invoice[]; pointsLedger: PointsEntry[]; coupons: MemberCoupon[]; productAlerts: ProductAlert[]; tags: MemberTag[] };
 
 export function AccountClient({ viewer, email }: { viewer: string; email: string }) {
   const { wishlist, toggleWishlist, addToCart } = useStore();
@@ -53,14 +57,15 @@ export function AccountClient({ viewer, email }: { viewer: string; email: string
   async function saveAddress(event: React.FormEvent<HTMLFormElement>) { event.preventDefault(); const form = new FormData(event.currentTarget); const ok = await act({ action: "save-address", id: editingAddress?.id, isDefault: form.get("isDefault") === "on", ...Object.fromEntries(form.entries()) }); if (ok) { setEditingAddress(null); setCreatingAddress(false); } }
   const firstName = useMemo(() => data?.profile.nickname || data?.member.name || viewer, [data, viewer]);
   const savedProducts = accountProducts.filter((product) => wishlist.includes(product.slug));
-  const nav = [["overview","账户总览"],["profile","个人资料"],["addresses","收货地址"],["wishlist","我的收藏"],["orders","我的订单"],["invoices","发票管理"],["returns","售后进度"]];
+  const nav = [["overview","账户总览"],["club","会员权益"],["profile","个人资料"],["addresses","收货地址"],["wishlist","我的收藏"],["orders","我的订单"],["invoices","发票管理"],["returns","售后进度"]];
 
   return <main className="member-page">
     <header className="member-hero"><div><p>PÚSY CLUB</p><h1>你好，{firstName}</h1><span>从这里管理个人资料、地址、订单和售后申请。</span></div><div className="member-identity"><i>✓</i><span>已验证账户<b>{email}</b></span><a href="/account/logout">退出登录</a></div></header>
     <div className="member-layout"><aside><nav>{nav.map(([key,label]) => <button key={key} className={tab === key ? "active" : ""} onClick={() => setTab(key)}>{label}</button>)}</nav><a href="/catalog/products">继续购物 →</a></aside><section className="member-content">
       {message && <div className="member-message">{message}</div>}
       {loading && !data ? <div className="member-loading">正在读取会员资料…</div> : data && <>
-        {tab === "overview" && <div className="member-overview"><div className="member-stat-grid"><article><span>累计订单</span><b>{data.member.total_orders}</b></article><article><span>累计消费</span><b>{formatCnyFromRub(data.member.total_spent)}</b></article><article><span>收货地址</span><b>{data.addresses.length}</b></article><article><span>进行中售后</span><b>{data.returns.filter((item) => !["已拒绝","已关闭","已退款"].includes(item.status)).length}</b></article></div><section className="member-section"><div className="member-section-title"><h2>最近订单</h2><button onClick={() => setTab("orders")}>查看全部</button></div>{data.orders.length ? <OrderList orders={data.orders.slice(0, 3)} items={data.orderItems} /> : <Empty title="还没有订单" copy="完成第一笔订单后，可在这里持续查看配送状态。" href="/catalog/products" link="浏览商品" />}</section></div>}
+        {tab === "overview" && <div className="member-overview"><div className="member-stat-grid"><article><span>可用积分</span><b>{data.member.points_balance}</b></article><article><span>会员等级</span><b>{tierName(data.member.tier)}</b></article><article><span>累计订单</span><b>{data.member.total_orders}</b></article><article><span>累计消费</span><b>{formatCnyFromRub(data.member.total_spent)}</b></article></div><section className="member-section"><div className="member-section-title"><h2>最近订单</h2><button onClick={() => setTab("orders")}>查看全部</button></div>{data.orders.length ? <OrderList orders={data.orders.slice(0, 3)} items={data.orderItems} /> : <Empty title="还没有订单" copy="完成第一笔订单后，可在这里持续查看配送状态。" href="/catalog/products" link="浏览商品" />}</section></div>}
+        {tab === "club" && <MembershipPanel data={data} onAct={act} />}
         {tab === "profile" && <ProfilePanel member={data.member} profile={data.profile} onSubmit={saveProfile} onPhoneVerified={() => void load()} />}
         {tab === "addresses" && <section className="member-section"><div className="member-section-title"><div><p>结账时可快速选择</p><h2>收货地址</h2></div><button onClick={() => { setEditingAddress(null); setCreatingAddress(true); }}>＋ 新增地址</button></div>{data.addresses.length ? <div className="address-grid">{data.addresses.map((address) => <article key={address.id} className={address.is_default ? "default" : ""}><div><span>{address.label}</span>{Boolean(address.is_default) && <em>默认</em>}</div><h3>{address.recipient}</h3><p>{address.phone}</p><p>{address.province} {address.city} {address.district}<br />{address.detail} {address.postcode}</p><footer><button onClick={() => setEditingAddress(address)}>编辑</button>{!address.is_default && <button onClick={() => act({ action:"set-default-address", id:address.id })}>设为默认</button>}<button className="danger" onClick={() => act({ action:"delete-address", id:address.id })}>删除</button></footer></article>)}</div> : <Empty title="还没有收货地址" copy="保存常用地址，结账时填写会更轻松。" onClick={() => setCreatingAddress(true)} link="新增地址" />}</section>}
         {tab === "wishlist" && <section className="member-section"><div className="member-section-title"><div><p>{savedProducts.length} 件商品</p><h2>我的收藏</h2></div><a href="/catalog/products">继续发现</a></div>{savedProducts.length ? <div className="member-wishlist-grid">{savedProducts.map((product) => <article key={product.slug}><a href={`/products/${product.slug}`}><Image src={product.image} alt={product.name} width={700} height={727} sizes="(max-width: 700px) 50vw, 25vw" /><h3>{product.name}</h3></a><p>{formatCnyFromRub(product.price)}</p><div><button disabled={!product.inventoryVerified || (product.stock ?? 0) < 1} onClick={() => addToCart(product)}>加入购物袋</button><button onClick={() => toggleWishlist(product.slug)}>移除</button></div></article>)}</div> : <Empty title="还没有收藏商品" copy="在商品卡片或详情页点击心形按钮，商品会保存在这里。" href="/catalog/products" link="浏览商品" />}</section>}
@@ -80,12 +85,30 @@ function parseSelections(value: string) {
   try { const parsed = JSON.parse(value); return Array.isArray(parsed) ? parsed.map(String) : []; } catch { return []; }
 }
 
+const tierNames: Record<string, string> = { bronze: "新锐会员", silver: "银卡会员", gold: "金卡会员", diamond: "钻石会员" };
+function tierName(value: string) { return tierNames[value] ?? "新锐会员"; }
+const tierSteps = [{ key: "bronze", minimum: 0 }, { key: "silver", minimum: 500 }, { key: "gold", minimum: 2000 }, { key: "diamond", minimum: 5000 }];
+
+function MembershipPanel({ data, onAct }: { data: AccountData; onAct: (payload: Record<string, unknown>) => Promise<boolean> }) {
+  const currentIndex = Math.max(0, tierSteps.findIndex((item) => item.key === data.member.tier));
+  const next = tierSteps[currentIndex + 1];
+  const currentMinimum = tierSteps[currentIndex].minimum;
+  const progress = next ? Math.min(100, Math.round((data.member.lifetime_points - currentMinimum) / (next.minimum - currentMinimum) * 100)) : 100;
+  return <div className="membership-stack">
+    <section className={`membership-card tier-${data.member.tier}`}><div><p>PÚSY CLUB</p><h2>{tierName(data.member.tier)}</h2><span>会员 #{data.member.id}</span></div><div><b>{data.member.points_balance}</b><small>当前可用积分</small></div><footer><span>累计积分 {data.member.lifetime_points}</span><span>{next ? `距 ${tierName(next.key)} 还需 ${Math.max(0, next.minimum - data.member.lifetime_points)} 分` : "已达到最高等级"}</span><i><em style={{ width: `${progress}%` }} /></i></footer></section>
+    <section className="member-section"><div className="member-section-title"><div><p>每消费 1 元积 1 分</p><h2>等级权益</h2></div></div><div className="tier-benefit-grid">{tierSteps.map((item) => <article className={item.minimum <= data.member.lifetime_points ? "active" : ""} key={item.key}><b>{tierName(item.key)}</b><span>{item.minimum} 积分起</span><p>{item.key === "bronze" ? "基础积分与会员服务" : item.key === "silver" ? "补货与活动优先提醒" : item.key === "gold" ? "专属优惠券与新品体验" : "最高等级专属权益"}</p></article>)}</div></section>
+    <section className="member-section"><div className="member-section-title"><div><p>{data.coupons.filter((item) => item.status === "available").length} 张可用</p><h2>我的优惠券</h2></div></div>{data.coupons.length ? <div className="member-coupon-grid">{data.coupons.map((coupon) => <article key={coupon.id} className={coupon.status}><strong>{coupon.kind === "percent" ? `${coupon.value}%` : formatCnyFromRub(coupon.value)}</strong><div><b>{coupon.code}</b><span>{coupon.minimum ? `满 ${formatCnyFromRub(coupon.minimum)} 可用` : "无门槛"}</span><small>{coupon.ends_at ? `有效期至 ${new Date(coupon.ends_at).toLocaleDateString("zh-CN")}` : "长期有效"}</small></div><em>{coupon.status === "available" ? "可使用" : "已使用"}</em></article>)}</div> : <p className="member-empty-inline">暂时没有专属优惠券</p>}</section>
+    <section className="member-section"><div className="member-section-title"><div><p>补货与降价动态</p><h2>商品提醒</h2></div></div>{data.productAlerts.length ? <div className="member-alert-list">{data.productAlerts.map((alert) => <article key={alert.id}><Image src={alert.image} alt="" width={72} height={76} /><div><a href={`/products/${alert.product_slug}`}>{alert.product_name}</a><span>{alert.alert_type === "restock" ? "补货通知" : "降价通知"} · 当前 {formatCnyFromRub(alert.price)}</span></div><button onClick={() => void onAct({ action: "remove-product-alert", id: alert.id })}>取消</button></article>)}</div> : <p className="member-empty-inline">在商品详情页可开启补货或降价提醒</p>}</section>
+    <section className="member-section"><div className="member-section-title"><div><p>最近 50 条</p><h2>积分明细</h2></div></div>{data.pointsLedger.length ? <div className="points-ledger">{data.pointsLedger.map((entry) => <div key={entry.id}><span><b>{entry.reason}</b><small>{new Date(entry.created_at).toLocaleString("zh-CN")}</small></span><strong className={entry.points > 0 ? "positive" : ""}>{entry.points > 0 ? "+" : ""}{entry.points}</strong><em>余额 {entry.balance_after}</em></div>)}</div> : <p className="member-empty-inline">完成订单后，积分明细会显示在这里</p>}</section>
+  </div>;
+}
+
 function ProfilePanel({ member, profile, onSubmit, onPhoneVerified }: { member: Member; profile: MemberProfile; onSubmit: (event: React.FormEvent<HTMLFormElement>) => void; onPhoneVerified: () => void }) {
   const selectedConcerns = parseSelections(profile.skin_concerns);
   const selectedCategories = parseSelections(profile.preferred_categories);
   const completionValues = [member.name, member.phone, profile.nickname, profile.gender, profile.birthday, profile.province, profile.city, profile.skin_type];
   const completion = Math.round((completionValues.filter(Boolean).length / completionValues.length) * 100);
-  const tier = member.status === "vip" ? "VIP 会员" : "普通会员";
+  const tier = tierName(member.tier);
   const initial = (profile.nickname || member.name || "P").slice(0, 1).toUpperCase();
 
   return <section className="member-section member-profile-section">

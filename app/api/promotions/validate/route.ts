@@ -1,5 +1,6 @@
 import { calculateCouponDiscount } from "../../../../db/promotions";
 import { allowRequest, hasTrustedOrigin, rateLimitResponse, safeServerError } from "../../../../lib/request-security";
+import { getPreviewMemberIdentity } from "../../../../lib/preview-member-auth";
 
 export async function POST(request: Request) {
   try {
@@ -7,7 +8,8 @@ export async function POST(request: Request) {
     if (!await allowRequest(request, "promotions", 30, 600)) return rateLimitResponse();
     const payload = await request.json() as { code?: string; subtotal?: number };
     const subtotal = Math.max(0, Number(payload.subtotal) || 0);
-    const result = await calculateCouponDiscount(payload.code ?? "", subtotal);
+    const viewer = await getPreviewMemberIdentity();
+    const result = await calculateCouponDiscount(payload.code ?? "", subtotal, viewer?.memberId);
     return Response.json({
       valid: result.valid,
       code: result.promotionType === "gift-card" ? "" : result.code,

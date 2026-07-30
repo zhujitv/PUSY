@@ -1,23 +1,26 @@
-[
+-- Curated Simplified Chinese catalog translations reviewed against https://pusy.beauty on 2026-07-30.
+-- This migration intentionally leaves prices, SKU values, media, and all inventory fields unchanged.
+
+CREATE TEMP TABLE catalog_translation_overrides (
+  slug TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  category TEXT NOT NULL,
+  description TEXT NOT NULL,
+  volume TEXT,
+  usage TEXT,
+  variants JSONB NOT NULL
+) ON COMMIT DROP;
+
+INSERT INTO catalog_translation_overrides (slug, name, category, description, volume, usage, variants)
+SELECT slug, name, category, description, volume, usage, variants
+FROM jsonb_to_recordset($catalog_data$[
   {
     "slug": "karandash-dlya-gub-pusy-strawberry-100464",
     "name": "Strawberry 唇线笔",
-    "price": 490,
-    "image": "/products/yandex/cgc5lrm25r8xhvbc9mfhp8mkwds9p68k-2d69895734.webp",
-    "imageAlt": "/products/yandex/btk99rtv8vznpn9dw4rh4pdzkl4ffzj5-407b9d9993.webp",
-    "images": [
-      "/products/yandex/cgc5lrm25r8xhvbc9mfhp8mkwds9p68k-2d69895734.webp",
-      "/products/yandex/btk99rtv8vznpn9dw4rh4pdzkl4ffzj5-407b9d9993.webp",
-      "/products/yandex/jwtfvpm86zzvzk6vhk5m2x6j55msntsd-5795a5cc36.webp"
-    ],
-    "badge": "畅销",
     "category": "彩妆",
     "description": "打造时髦、持久唇妆组合的理想唇线笔。\n\nPÚSY Lip Liner Strawberry 是一款冷调粉色，可为自然唇色增加鲜明度。轻柔描画并晕开边缘，可塑造唇部轮廓；也可勾勒清晰线条，打造更鲜明妆效。持久配方可维持全天，即使进食或饮用后也不易结块、晕染。柔滑质地形成天鹅绒般轻盈的覆盖，全天使用舒适。\n\nPÚSY LIP LINER 是想轻松快速凸显唇部美感人群的理想选择，让你每天都能享受利落精致的妆容。",
-    "sku": "01411",
-    "ingredients": "Synthetic Wax, Copernicia Cerifera Wax, Microcrystalline Wax, Ethylhexyl Palmitate, Parfum, Hexyl Cinnamal, Geraniol, Benzyl Alcohol, Phenoxyethanol, Sorbic Acid, CI 77891, CI 77491, CI 77499, CI 15850:1, CI 77492",
+    "volume": null,
     "usage": "用唇线笔沿唇部轮廓描画，勾勒出所需唇形。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -77,22 +80,10 @@
   {
     "slug": "karandash-dlya-gub-pusy-morning-100461",
     "name": "Morning 唇线笔",
-    "price": 490,
-    "image": "/products/yandex/fzhz4fvt8qh8gc2z6rphcq25h4p5hhnd-007e457636.webp",
-    "imageAlt": "/products/yandex/w2t8978b99tbxbphhdqlwkfdldfvgssj-105940dd50.webp",
-    "images": [
-      "/products/yandex/fzhz4fvt8qh8gc2z6rphcq25h4p5hhnd-007e457636.webp",
-      "/products/yandex/w2t8978b99tbxbphhdqlwkfdldfvgssj-105940dd50.webp",
-      "/products/yandex/jwtfvpm86zzvzk6vhk5m2x6j55msntsd-5795a5cc36.webp"
-    ],
-    "badge": "畅销",
     "category": "彩妆",
     "description": "打造时髦、持久唇妆组合的理想唇线笔。\n\nPÚSY Lip Liner Morning 是恰到好处的柔和粉色，为妆容增添清新感。轻柔描画并晕开边缘，可塑造唇部轮廓；也可勾勒清晰线条，打造更鲜明妆效。持久配方可维持全天，即使进食或饮用后也不易结块、晕染。柔滑质地形成天鹅绒般轻盈的覆盖，全天使用舒适。\n\nPÚSY LIP LINER 是想轻松快速凸显唇部美感人群的理想选择，让你每天都能享受利落精致的妆容。",
-    "sku": "01409",
-    "ingredients": "Synthetic Wax, Copernicia Cerifera Wax, Microcrystalline Wax, Ethylhexyl Palmitate, Parfum, Hexyl Cinnamal, Geraniol, Benzyl Alcohol, Phenoxyethanol, Sorbic Acid, CI 77891, CI 77491, CI 15850:1, CI 77499, CI 77492.",
+    "volume": null,
     "usage": "用唇线笔沿唇部轮廓描画，勾勒出所需唇形。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -152,23 +143,10 @@
   {
     "slug": "karandash-dlya-gub-pusy-cream-100460",
     "name": "Cream 唇线笔",
-    "price": 490,
-    "image": "/products/yandex/28mx6zjs756m2shk49bb8m2qwwlnwg9q-c1bba33ade.webp",
-    "imageAlt": "/products/yandex/xjjfftpvkf92rlv9cmh9g6btdpnqxnqz-f08c4b4b2b.webp",
-    "images": [
-      "/products/yandex/28mx6zjs756m2shk49bb8m2qwwlnwg9q-c1bba33ade.webp",
-      "/products/yandex/xjjfftpvkf92rlv9cmh9g6btdpnqxnqz-f08c4b4b2b.webp",
-      "/products/yandex/nnn9ptb5mvbqn95rhjxf4tbbcqpdn8db-4e10816f09.webp",
-      "/products/yandex/jwtfvpm86zzvzk6vhk5m2x6j55msntsd-5795a5cc36.webp"
-    ],
-    "badge": "畅销",
     "category": "彩妆",
     "description": "打造时髦、持久唇妆组合的理想唇线笔。\n\nPÚSY Lip Liner Cream 是一款略带暖调的棕色，仿佛牛奶巧克力融化在双唇上。轻柔描画并晕开边缘，可塑造唇部轮廓；也可勾勒清晰线条，打造更鲜明妆效。持久配方可维持全天，即使进食或饮用后也不易结块、晕染。柔滑质地形成天鹅绒般轻盈的覆盖，全天使用舒适。\n\nPÚSY LIP LINER 是想轻松快速凸显唇部美感人群的理想选择，让你每天都能享受利落精致的妆容。",
-    "sku": "01406",
-    "ingredients": "Synthetic Wax, Copernicia Cerifera Wax, Microcrystalline Wax, Ethylhexyl Palmitate, Parfum, Hexyl Cinnamal, Geraniol, Benzyl Alcohol, Phenoxyethanol, Sorbic Acid, CI 77492, CI 77499, CI 15985, CI 77491, CI 15850:1",
+    "volume": null,
     "usage": "用唇线笔沿唇部轮廓描画，勾勒出所需唇形。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -228,21 +206,10 @@
   {
     "slug": "jele-dlya-gub-autumn-1-100675",
     "name": "Winter 果冻唇蜜",
-    "price": 790,
-    "image": "/products/yandex/v45ntlxwnlbqrrf9bt4lpbm7g6k62pwq-278d456bab.webp",
-    "imageAlt": "/products/yandex/srq87g8lxmqvpdj7hgs59vbsdcqqg6z6-99b0a3e683.webp",
-    "images": [
-      "/products/yandex/v45ntlxwnlbqrrf9bt4lpbm7g6k62pwq-278d456bab.webp",
-      "/products/yandex/srq87g8lxmqvpdj7hgs59vbsdcqqg6z6-99b0a3e683.webp",
-      "/products/yandex/f59v9k675dvb7rdzvxjbhwfhfrb2dptb-e8e7ce33d2.webp"
-    ],
     "category": "彩妆",
     "description": "浆果色泽，比亲吻后的唇色更动人。\n\nPÚSY Winter 唇冻是一款凝胶质地的保湿唇部产品，为双唇增添鲜明色泽与釉面般水润光泽。视觉上让双唇更饱满、平滑，呈现精致妆效且不黏腻。\n\n配方有助于修饰干燥和细小唇纹；可通过叠涂调节显色度：一层轻透，继续叠涂则色彩更浓郁，呈现饱满染唇效果。维生素 E 帮助柔润保湿并维持舒适感，让双唇四季都显得好看。\n\n可与唇线笔或染唇产品搭配，增强色彩并增加光泽。可用指腹或唇刷涂抹，选择你顺手的方式即可。",
-    "sku": "ДППЧЗ07",
-    "ingredients": "Octyldodecanol, Hydrogenated Polyisobutene, Bis-Behenyl/Isostearyl/Phytosteryl Dimer Dilinoleyl Dimer Dilinoleate, Polyglyceryl-2 Triisostearate, Ethylcellulose, Microcrystalline Wax, Phenoxyethanol, Ethylene/Propylene Copolymer, Caprylyl Glycol, Hydrogenated Polydecene, Ethylhexyl Palmitate, Polybutene, Pentaerythrityl Tetra-Di-T-Butyl Hydroxyhydrocinnamate, Tocopheryl Acetate, Sorbitan Sesquioleate, CI 15850, CI 77499, CI 77491.",
+    "volume": null,
     "usage": "用指尖将少量产品涂抹到嘴唇上。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -286,24 +253,10 @@
   {
     "slug": "maslo-dlya-gub-purple-rozovyiy-100781",
     "name": "Purple 粉色唇油",
-    "price": 1010,
-    "image": "/products/yandex/r6ccm6j86qsg4rmdgtmtj9pdnxfgk9tz-8537dd9687.webp",
-    "imageAlt": "/products/yandex/mj2p5pjs4dbvf2snn6mwwttqtkmltk5c-b8a5ffb681.webp",
-    "images": [
-      "/products/yandex/r6ccm6j86qsg4rmdgtmtj9pdnxfgk9tz-8537dd9687.webp",
-      "/products/yandex/mj2p5pjs4dbvf2snn6mwwttqtkmltk5c-b8a5ffb681.webp",
-      "/products/yandex/cf7xskz9jct4tdgrsdpg78kbkf879jxl-9a0bf35896.webp",
-      "/products/yandex/5s9xpw5bwtmhwjnqtmkkqs6t75zsgbm9-da1531baaa.webp"
-    ],
-    "badge": "畅销",
     "category": "彩妆",
     "description": "一款为您的妆容增添表现力的色调，其质地呵护您的双唇。\n\nPÚSY Purple Lip Oil 打造玻璃光泽，底色略带冷色调，强调唇部形状并增加唇部深度。它看起来令人印象深刻，但佩戴起来仍然轻便舒适。油配方有助于软化双唇、平滑表面并在视觉上增强丰盈度。\n\n方便的涂抹器可让您准确、均匀地涂抹产品，只需几下即可打造整洁的妆容。",
-    "sku": "ПП53ЧЗ",
     "volume": "4毫升",
-    "ingredients": "Hydrogenated Polyisobutene, Polybutene, Ethylhexyl Palmitate, Pentaerythrityl Tetraisostearate, Caprylic/Capric Triglyceride, Tridecyl Trimellitate, Polyglyceryl-2 Triisostearate, Hydrogenated Styrene/Isoprene Copolymer, Simmondsia Chinensis (Jojoba) Seed Oil, Squalane, Prunus Amygdalus Dulcis (Sweet Almond) Oil, Helianthus Annuus (Sunflower) Seed Oil, Octyldodecanol, Bisabolol, Phenoxyethanol, Tocopheryl Acetate, Ethylhexylglycerin, Parfum, CI 15850, CI 42090",
     "usage": "使用涂抹头将唇油涂于双唇。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -371,24 +324,10 @@
   {
     "slug": "maslo-dlya-gub-black-chernyiy-100779",
     "name": "Black 黑色唇油",
-    "price": 990,
-    "image": "/products/yandex/nbr8v9tdxzmtq9nzrdtwsbtfgchs44zv-5dbda44f69.webp",
-    "imageAlt": "/products/yandex/cwnzvwdlftcnqkd8mmnkmgz4jp4k8l6s-3f70a42218.webp",
-    "images": [
-      "/products/yandex/nbr8v9tdxzmtq9nzrdtwsbtfgchs44zv-5dbda44f69.webp",
-      "/products/yandex/cwnzvwdlftcnqkd8mmnkmgz4jp4k8l6s-3f70a42218.webp",
-      "/products/yandex/zjnrs269djfmgs225r6hkx67v94zvlkg-b17289bfb9.webp",
-      "/products/yandex/prldfbwp77qzcjv4xn5pnqrcgkhvdrcv-5d2735489e.webp"
-    ],
-    "badge": "畅销",
     "category": "彩妆",
     "description": "富有表现力的色泽与唇部护理质地兼具。\n\nPÚSY Black 唇油呈现带冷调的镜面光泽，突出唇部轮廓与形状。配方帮助平滑双唇，并在视觉上增加丰盈感；樱桃利口酒香气增添大胆个性，让人想反复体验。\n\n方便的涂抹头可快速、利落地涂抹唇油，无需繁琐步骤。",
-    "sku": "ДЧА0001",
     "volume": "4毫升",
-    "ingredients": "Hydrogenated Polyisobutene, Polybutene, Ethylhexyl Palmitate, Pentaerythrityl Tetraisostearate, Caprylic/Capric Triglyceride, Tridecyl Trimellitate, Polyglyceryl-2 triisostearate, Hydrogenated Styrene/Isoprene Copolymer, Simmondsia Chinensis (Jojoba) Seed Oil, Octyldodecanol, Squalane, Prunus Amygdalus Dulcis (Sweet Almond) Oil, Helianthus Annuus (Sunflower) Seed Oil, Bisabolol, Phenoxyethanol, Tocopheryl Acetate, Ethylhexylglycerin, Parfum, May Contain, CI 15985, CI 15850, CI 77499.",
     "usage": "使用涂抹头将唇油涂于双唇。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -456,24 +395,10 @@
   {
     "slug": "maslo-dlya-gub-red-krasnyiy-100784",
     "name": "Red 红色唇油",
-    "price": 1010,
-    "image": "/products/yandex/jrf25gdq7gh2jwb4r6m5fvj8vp6kfxxf-ac90e1c7e7.webp",
-    "imageAlt": "/products/yandex/xvklcwb464mzm7p6jh7gn4tsnpdmvc29-506c430c7f.webp",
-    "images": [
-      "/products/yandex/jrf25gdq7gh2jwb4r6m5fvj8vp6kfxxf-ac90e1c7e7.webp",
-      "/products/yandex/xvklcwb464mzm7p6jh7gn4tsnpdmvc29-506c430c7f.webp",
-      "/products/yandex/gvfkc9dfdp7zs85fp5rkxt59rjvs5wjm-9e695e1210.webp",
-      "/products/yandex/sgx7jqg5hb48s6cll7wbgpbbwnw62rfd-e7edfdba5c.webp"
-    ],
-    "badge": "新品",
     "category": "彩妆",
     "description": "经典红色，同时呵护双唇。色泽凸显唇部魅力，质地则带来护理。\n\nPÚSY Red 唇油形成亮泽妆效，可搭配日常妆容。恰到好处的红色适合多种风格，令双唇看起来饱满迷人。\n\n配方温和护理娇嫩唇部，帮助改善干燥并维持柔润。唇油质地赋予光泽，营造视觉丰盈感。方便的涂抹头只需几下即可快速均匀上妆；成熟覆盆子的甜美香气，让人想反复使用。",
-    "sku": "ДЧЗ0015",
     "volume": "4毫升",
-    "ingredients": "Hydrogenated Polyisobutene, Polybutene, Ethylhexyl Palmitate, Pentaerythrityl Tetraisostearate, Caprylic/Capric Triglyceride, Tridecyl Trimellitate, Polyglyceryl-2 triisostearate, Hydrogenated Styrene/Isoprene Copolymer, Simmondsia Chinensis (Jojoba) Seed Oil, Octyldodecanol, Squalane, Prunus Amygdalus Dulcis (Sweet Almond) Oil, Helianthus Annuus (Sunflower) Seed Oil, Bisabolol, Phenoxyethanol, Tocopheryl Acetate, Ethylhexylglycerin, Parfum, May Contain, CI 15985, CI 15850, CI 77499",
     "usage": "使用涂抹头将唇油涂于双唇。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -541,22 +466,10 @@
   {
     "slug": "karandash-dlya-gub-pusy-passion-100463",
     "name": "Passion 唇线笔",
-    "price": 490,
-    "image": "/products/yandex/gdxfcgxx62nb2lx5j52c9rgvbkhvxnmf-fa4b947eea.webp",
-    "imageAlt": "/products/yandex/b7fdhqk75vbswj5z4pzhqsd54l2825lc-c680d2e5e5.webp",
-    "images": [
-      "/products/yandex/gdxfcgxx62nb2lx5j52c9rgvbkhvxnmf-fa4b947eea.webp",
-      "/products/yandex/b7fdhqk75vbswj5z4pzhqsd54l2825lc-c680d2e5e5.webp",
-      "/products/yandex/jwtfvpm86zzvzk6vhk5m2x6j55msntsd-5795a5cc36.webp"
-    ],
-    "badge": "畅销",
     "category": "彩妆",
     "description": "打造时髦、持久唇妆组合的理想唇线笔。\n\nPÚSY Lip Liner Passion 是一款奢华梅子色，适合喜欢饱满水润唇妆效果的人群。轻柔描画并晕开边缘，可塑造唇部轮廓；也可勾勒清晰线条，打造更鲜明妆效。持久配方可维持全天，即使进食或饮用后也不易结块、晕染。柔滑质地形成天鹅绒般轻盈的覆盖，全天使用舒适。\n\nPÚSY LIP LINER 是想轻松快速凸显唇部美感人群的理想选择，让你每天都能享受利落精致的妆容。",
-    "sku": "01407",
-    "ingredients": "Synthetic Wax, Copernicia Cerifera Wax, Microcrystalline Wax, Ethylhexyl Palmitate, Parfum, Hexyl Cinnamal, Geraniol, Benzyl Alcohol, Phenoxyethanol, Sorbic Acid, CI 77491, CI 77499, CI 77891, CI 77492",
+    "volume": null,
     "usage": "用唇线笔沿唇部轮廓描画，勾勒出所需唇形。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -616,23 +529,10 @@
   {
     "slug": "kapsulnaya-tush-dlya-resnic-black-100670",
     "name": "Black 温水可卸管状睫毛膏",
-    "price": 990,
-    "image": "/products/yandex/glr7qxrcgc8xlrsjzsw78n695nsjk5rb-99328fdaf9.webp",
-    "imageAlt": "/products/yandex/mfxsrcqnhmknn8ttlxrmfmw2rjljchpn-d6f8f2a2e4.webp",
-    "images": [
-      "/products/yandex/glr7qxrcgc8xlrsjzsw78n695nsjk5rb-99328fdaf9.webp",
-      "/products/yandex/mfxsrcqnhmknn8ttlxrmfmw2rjljchpn-d6f8f2a2e4.webp",
-      "/products/yandex/cf258wpnjz5xz77skf9h5r57b6cmx7cn-09dbc2b4f0.webp",
-      "/products/yandex/nxfpw7wbtkq5f4cqwwrk4hq75k8cpjs8-348336476b.webp"
-    ],
     "category": "彩妆",
     "description": "这款睫毛膏可打造根根分明、自然卷翘的睫毛妆效。膏体不结块、不掉屑，卷翘效果可维持一整天。更特别的是它的卸除方式。\n\n遇温水后，膏体会以小管状从睫毛上轻柔脱落，不流黑水、不晕染，也不会形成熊猫眼。\n\n提供经典黑和中性深棕两种色号。",
-    "sku": "ДЧЗ0013",
     "volume": "10毫升",
-    "ingredients": "Aqua, Styrene/Acrylates Copolymer, Copernicia Cerifera (Carnauba) Wax, Synthetic Wax, Isododecane, Glycerin, Lauric/Myristic/Palmitic/Stearic Glycerides, Stearic Acid, Palmitic Acid, Glyceryl Stearate, Aminomethyl Propanol, Phenoxyethanol, Stearyl Alcohol, Cetyl Alcohol, Ethylhexylglycerin, Panthenol, Sodium Dehydroacetate, Tocopheryl Acetate, Lepidium Meyenii Root Extract, Maltodextrin, Myristoyl Pentapeptide-4, 1,2-Hexanediol, CI 77492, CI 77499, CI 77491.",
     "usage": "涂于洁净、干燥的睫毛，从根部向梢部刷涂。将睫毛膏均匀包裹每根睫毛，打造纤长丰盈妆效。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -660,23 +560,10 @@
   {
     "slug": "klassicheskaya-tush-dlya-resnic-pusy-black-10-ml-100365",
     "name": "睫毛膏黑色",
-    "price": 1010,
-    "image": "/products/yandex/szqwmx97nvbj9flfwmqgzlpqxpz4g457-38ef2acac8.webp",
-    "imageAlt": "/products/yandex/qjkk7f29tr4gsdhrrc9lxcjqspkzqxpl-e3622d77dc.webp",
-    "images": [
-      "/products/yandex/szqwmx97nvbj9flfwmqgzlpqxpz4g457-38ef2acac8.webp",
-      "/products/yandex/qjkk7f29tr4gsdhrrc9lxcjqspkzqxpl-e3622d77dc.webp",
-      "/products/yandex/2jmvndrh22qslwvzlscbqwtmw6jlpnvt-fa0f315be5.webp",
-      "/products/yandex/cwktbr6w5ljv58nvrtxkt24xh2l7wt89-6d9c76e020.webp"
-    ],
-    "badge": "畅销",
     "category": "彩妆",
     "description": "PÚSY Choco Mascara Dark Chocolate 呈现如黑巧克力般浓郁的黑色，是经典黑色睫毛膏，也是 PÚSY 化妆包中的基础款。\n\n它不仅通过纤长、根根分明的睫毛突出眼神，也在日间给予睫毛护理。方便的刷头可细致包裹并拉长每根睫毛，特殊形状帮助自然卷翘。\n\n小烛树蜡帮助锁住睫毛水分，乳木果油和蜂蜜为睫毛补充滋润。膏体耐潮，不易印染、留痕或掉屑。\n\n适合深发色人群，也适合偏爱更鲜明睫妆的人。",
-    "sku": "1914ЧЗ",
-    "ingredients": "Aqua, Styrene/Acrylates Copolymer, Paraffin, Microcrystalline Wax, Propylene Glycol, Ozokerite, Polyisobutene, Stearic Acid, Euphorbia Cerifera Wax, Glyceryl Stearate, Cetearyl Alcohol, Hydroxyethylcellulose, PEG-100 Stearate, Phenoxyethanol, Polysorbate 60, Acrylates Copolymer, Glycerin, 1,2-Hexanediol, Caprylyl Glycol, Tromethamine, Ethylhexylglycerin, Mel, Panthenol, Butyrospermum Parkii Butter, Butyrospermum Parkii Butter Unsaponifiables, CI 77266.",
+    "volume": null,
     "usage": "涂于洁净、干燥的睫毛，从根部向梢部刷涂。将睫毛膏均匀包裹每根睫毛，打造纤长丰盈妆效。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -712,46 +599,19 @@
   {
     "slug": "termogel-dlya-resnic-pusy-black-5-ml-13-100413",
     "name": "Lash Fix 睫毛定型啫喱",
-    "price": 810,
-    "image": "/products/yandex/ql8bg9lzgjdrg56d8c5l49bdbcp7h8rx-8f15a64f6b.webp",
-    "imageAlt": "/products/yandex/bj22qdbpx856kvn5s2gzdknxcj4jxwqn-287219cae6.webp",
-    "images": [
-      "/products/yandex/ql8bg9lzgjdrg56d8c5l49bdbcp7h8rx-8f15a64f6b.webp",
-      "/products/yandex/bj22qdbpx856kvn5s2gzdknxcj4jxwqn-287219cae6.webp",
-      "/products/yandex/fp8v52v4q6tbgvwnl6n8zcwstqs9kznv-4fdf9e639f.webp",
-      "/products/yandex/c4pn76vp45msptddq22fq4c2dls275d6-3ba9c91bea.webp"
-    ],
-    "badge": "畅销",
     "category": "彩妆",
     "description": "PÚSY Lash Fix Gel 是一款带来仿沙龙翘睫定型效果、自然突出睫毛的睫毛凝胶。它凸显睫毛本身的美，带来淡淡色泽，在视觉上拉长睫毛并固定卷翘度，却几乎没有明显妆感。\n\n配方持效超过 12 小时：凝胶不掉屑、不压塌睫毛，全天保持整洁效果。便捷刷头可从根部轻松包裹睫毛，均匀涂布产品并细致分开每根睫毛，呈现干净、细致的效果。\n\n淡淡色素让睫毛稍显深邃、更有神，同时保持自然，仿佛化了妆却不着痕迹。配方适合日常使用。当你不想用睫毛膏、却想让眼神更突出时，就用 PÚSY Lash Fix Gel。",
-    "sku": "ПП116",
     "volume": "5毫升",
-    "ingredients": "Aqua, Ceteareth 30, Ceteareth 20, Propylene Glycol, PEG-7 Glyceryl Cocoate, Acrylates, Ethylhexyl Acrylates Copolymer! Phenoxyethanol, Ethylhexylglycerin, Xanthan Gum, Chacroal Powder, Polyglyceryl-10 stearate, Polyglyceryl-10 Myristate, Polyglycerin-10, Laureth-21, Sodium Dehydroacetate, Citric Acid",
     "usage": "用刷头蘸取少量凝胶，从睫毛根部向梢部涂抹，并梳理出所需形状。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "maslo-dlya-gub-crystal-pink-svetlo-rozovyiy-100783",
     "name": "Crystal Pink 浅粉色唇油",
-    "price": 1010,
-    "image": "/products/yandex/xw4bhtgpx9k8wmjsl68xqq498fhtnmfj-5f248a533f.webp",
-    "imageAlt": "/products/yandex/xrc42jh57k4gds4v5jgmbtklbmbfp25d-fb8a2526e6.webp",
-    "images": [
-      "/products/yandex/xw4bhtgpx9k8wmjsl68xqq498fhtnmfj-5f248a533f.webp",
-      "/products/yandex/xrc42jh57k4gds4v5jgmbtklbmbfp25d-fb8a2526e6.webp",
-      "/products/yandex/rzn7f5ksfq26p52864zzqqqtf7h99gbx-60acdb737e.webp",
-      "/products/yandex/7bjgbmjmwpxlg2gtdxwgrk8ftgxjnzxc-8c669878db.webp"
-    ],
     "category": "彩妆",
     "description": "一款为您的妆容增添表现力的色调，其质地呵护您的双唇。 PÚSY Crystal Pink Lip Oil 营造出玻璃般的光泽，带有轻微的冷色调底色，强调嘴唇的形状并增加嘴唇的深度。它看起来令人印象深刻，但佩戴起来仍然轻便舒适。\n\n油配方有助于软化双唇、平滑表面并在视觉上增强丰盈度。方便的涂抹器可让您准确、均匀地涂抹产品，只需几下即可打造整洁的妆容。",
-    "sku": "ПП51ЧЗ",
     "volume": "4毫升",
-    "ingredients": "Hydrogenated Polyisobutene, Polybutene, Ethylhexyl Palmitate, Pentaerythrityl Tetraisostearate, Caprylic/Capric Triglyceride, Tridecyl Trimellitate, Polyglyceryl-2 Triisostearate, Hydrogenated Styrene/Isoprene Copolymer, Simmondsia Chinensis (Jojoba) Seed Oil, Squalane, Prunus Amygdalus Dulcis (Sweet Almond) Oil, Helianthus Annuus (Sunflower) Seed Oil, Octyldodecanol, Bisabolol, Phenoxyethanol, Tocopheryl Acetate, Ethylhexylglycerin, Parfum, CI 45410, CI 15850",
     "usage": "使用涂抹头将唇油涂于双唇。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -819,22 +679,10 @@
   {
     "slug": "karandash-plamper-dlya-gub-pusy-chili-100455",
     "name": "Chili 丰唇唇线笔",
-    "price": 790,
-    "image": "/products/yandex/pthxbb8prc89th87kltgckgst7sxqdp2-a941ae9e3b.webp",
-    "imageAlt": "/products/yandex/czm6h5f7pmzvclwcvz26qwt8bgxm7wpq-a6fad51c51.webp",
-    "images": [
-      "/products/yandex/pthxbb8prc89th87kltgckgst7sxqdp2-a941ae9e3b.webp",
-      "/products/yandex/czm6h5f7pmzvclwcvz26qwt8bgxm7wpq-a6fad51c51.webp",
-      "/products/yandex/zl44gwxc8vflmwxfdl49l8dz5lt8848l-ae2f4c1982.webp",
-      "/products/yandex/cdgjz54z46gcrstbkp67q58n68xsc2mq-46a2bbf687.webp"
-    ],
     "category": "彩妆",
     "description": "打造醒目、持久唇妆组合并带轻微丰唇感的理想唇笔。\n\nPÚSY Chili 丰唇唇笔采用鲜明色调，立即令唇形更突出。柔软笔芯顺滑描画，勾勒均匀轮廓而不显干、不适。轻柔涂抹并晕开边缘可塑造唇部轮廓，也可清晰勾边打造更醒目妆容。\n\n轻微温热与细腻刺感带来视觉丰唇效果，使双唇看起来更饱满。\n\n配方持久服帖，全天不易结块或晕染。自动旋转式笔身无需削笔，随时可以使用。",
-    "sku": "ПП117ЧЗ",
-    "ingredients": "Diisostearyl Malate, Polyglyceryl-2 Triisostearate, Methyl Trimethicone, Synthetic Wax, Trimethylsiloxysilicate, Isononyl Isononanoate, Caprylic/Capric Triglyceride, Vanillyl Butyl Ether, Silica, Copernicia Cerifera Cera, Cera Microcristallina, Disteardimonium Hectorite, Caprylyl Glycol, Triethoxycaprylylsilane, Tocopheryl Acetate, Propylene Carbonate, Myrothamnus Flabellifolia Leaf/Stem Extract, BHT, CI 77891, CI 77491, CI 77499, CI 15850.",
+    "volume": null,
     "usage": "取少量产品涂于双唇。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -854,22 +702,10 @@
   {
     "slug": "karandash-dlya-gub-pusy-mommy-100462",
     "name": "Mommy 唇线笔",
-    "price": 490,
-    "image": "/products/yandex/7g2h62j6jt8dr8k76snbd6wntx4klgvk-08632b3a79.webp",
-    "imageAlt": "/products/yandex/qq6phjcr9vzsxbvcmrbfvn2qfj75fhqk-154b80634e.webp",
-    "images": [
-      "/products/yandex/7g2h62j6jt8dr8k76snbd6wntx4klgvk-08632b3a79.webp",
-      "/products/yandex/qq6phjcr9vzsxbvcmrbfvn2qfj75fhqk-154b80634e.webp",
-      "/products/yandex/jwtfvpm86zzvzk6vhk5m2x6j55msntsd-5795a5cc36.webp"
-    ],
-    "badge": "畅销",
     "category": "彩妆",
     "description": "打造时髦、持久唇妆组合的理想唇线笔。\n\nPÚSY Lip Liner Mommy 采用独特的灰玫瑰色，凸显妆容的精致与柔美。轻柔描画并晕开边缘，可塑造唇部轮廓；也可勾勒清晰线条，打造更鲜明妆效。持久配方可维持全天，即使进食或饮用后也不易结块、晕染。柔滑质地形成天鹅绒般轻盈的覆盖，全天使用舒适。\n\nPÚSY LIP LINER 是想轻松快速凸显唇部美感人群的理想选择，让你每天都能享受利落精致的妆容。",
-    "sku": "01410",
-    "ingredients": "Synthetic Wax, Copernicia Cerifera Wax, Microcrystalline Wax, Ethylhexyl Palmitate, Parfum, Hexyl Cinnamal, Geraniol, Benzyl Alcohol, Phenoxyethanol, Sorbic Acid, CI 77891, CI 77491, CI 15850:1, CI 77499",
+    "volume": null,
     "usage": "用唇线笔沿唇部轮廓描画，勾勒出所需唇形。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -929,22 +765,10 @@
   {
     "slug": "kremovye-rumyana-pusy-honey-25-gr-5-100362",
     "name": "Honey 奶油腮红",
-    "price": 910,
-    "image": "/products/yandex/c2thzxtkmvhvkjxz9c2v675blbrskmn5-5b6a0f817d.webp",
-    "imageAlt": "/products/yandex/r6k9tvxc76rlngxhkksm2h4zmfgz8fh4-70b8b9952c.webp",
-    "images": [
-      "/products/yandex/c2thzxtkmvhvkjxz9c2v675blbrskmn5-5b6a0f817d.webp",
-      "/products/yandex/r6k9tvxc76rlngxhkksm2h4zmfgz8fh4-70b8b9952c.webp",
-      "/products/yandex/94cfjrl986fcm8wqf6lx27chvqjk92m6-86b24cb530.webp"
-    ],
-    "badge": "畅销",
     "category": "彩妆",
     "description": "PÚSY Honey 乳霜腮红为妆容增添清新与暖意，尤其适合暖调肤色。\n\n细腻质地易于涂抹在双颊，打造自然红润感，也可用于双唇和眼睑。持久配方全天保持清新妆效，不易结块或暗沉。\n\n小巧包装便于使用，让这款腮红成为快速打造清新妆容的实用单品。",
-    "sku": "ПП88ЧЗ",
-    "ingredients": "Isononyl Isononanoate, Octyldodecyl Stearoyl Stearate, Cera Microcristallina, Dimethicone/Vinyl Dimethicone Crosspolymer, Dimethicone, Tribehenin, Phenoxyethanol, Tocopheryl Acetate, Ethylhexylglycerin, Ci 77891, Ci 15850:2, Ci 77491, Ci 19140:1.",
+    "volume": null,
     "usage": "用手指、刷子或海绵涂抹腮红霜。分层涂抹产品以获得更鲜艳的色调。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -988,22 +812,10 @@
   {
     "slug": "kremovye-rumyana-pusy-flower-25-gr-9-100359",
     "name": "Flower 奶油腮红",
-    "price": 910,
-    "image": "/products/yandex/n6jhlx2fltt847nbmdkmslk9657bdm9z-ec59ef7317.webp",
-    "imageAlt": "/products/yandex/lvmmsps8cjwxx4wqg74gxjt9n49tbvtg-76cb55d64c.webp",
-    "images": [
-      "/products/yandex/n6jhlx2fltt847nbmdkmslk9657bdm9z-ec59ef7317.webp",
-      "/products/yandex/lvmmsps8cjwxx4wqg74gxjt9n49tbvtg-76cb55d64c.webp",
-      "/products/yandex/84w8dnqgc26kn6xtdzrpx6x2jk5ks2n5-a43dfd8827.webp"
-    ],
-    "badge": "畅销",
     "category": "彩妆",
     "description": "自然清新，一罐即可完成。\n\nPÚSY Flowers 乳霜腮红如同玫瑰花瓣轻触脸颊。细腻质地易于涂抹在双颊，打造自然红润感，也可用于双唇和眼睑。\n\n持久配方全天保持清新妆效，不易结块或暗沉。小巧包装便于使用，让这款腮红成为快速打造清新妆容的实用单品。",
-    "sku": "ПП89ЧЗ",
-    "ingredients": "Isononyl Isononanoate, Octyldodecyl Stearoyl Stearate, Cera Microcristallina, Dimethicone/Vinyl Dimethicone Crosspolymer, Dimethicone, Tribehenin, Phenoxyethanol, Tocopheryl Acetate, Ethylhexylglycerin, Ci 77891, Ci 15850:1, Ci 15850:2, Ci 77491.",
+    "volume": null,
     "usage": "用手指、刷子或海绵涂抹腮红霜。分层涂抹产品以获得更鲜艳的色调。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -1047,22 +859,10 @@
   {
     "slug": "klassicheskaya-tush-dlya-resnic-pusy-light-brown-10-ml-100363",
     "name": "浅棕色睫毛膏",
-    "price": 1010,
-    "image": "/products/yandex/szqwmx97nvbj9flfwmqgzlpqxpz4g457-38ef2acac8.webp",
-    "imageAlt": "/products/yandex/vrqpgs4rrg4r44nmn8dkmpbxf9tdt6b6-0ff1d725f2.webp",
-    "images": [
-      "/products/yandex/szqwmx97nvbj9flfwmqgzlpqxpz4g457-38ef2acac8.webp",
-      "/products/yandex/vrqpgs4rrg4r44nmn8dkmpbxf9tdt6b6-0ff1d725f2.webp",
-      "/products/yandex/4cdhp4xnj8x7brz4c2jgnwj9nkn59jjt-430c614c79.webp"
-    ],
-    "badge": "畅销",
     "category": "彩妆",
     "description": "PÚSY Choco Mascara White Mocha 是一款为浅发色人群设计的浅棕色睫毛膏。\n\n它不仅以纤长、根根分明的睫毛突出眼神，也在日间给予睫毛护理。方便的刷头可细致包裹并拉长每根睫毛，刷头形状帮助打造轻微卷翘效果。\n\n小烛树蜡帮助锁住睫毛水分，乳木果油和蜂蜜为睫毛补充滋润。膏体耐潮，不易印染、留痕或掉屑。\n\n适合浅发色人群，也适合希望自然强调睫毛的人。",
-    "sku": "1912ЧЗ",
-    "ingredients": "Aqua, Styrene/Acrylates Copolymer, Paraffin, Microcrystalline Wax, Propylene Glycol, Ozokerite, Polyisobutene, Euphorbia Cerifera Wax, Stearic Acid, Glyceryl Stearate, Cetearyl Alcohol, Hydroxyethylcellulose, PEG-100 Stearate, Phenoxyethanol, Polysorbate 60, 1,2-Hexanediol, Caprylyl Glycol, Tromethamine, Ethylhexylglycerin, Synthetic Fluorphlogopite, Aluminum Hydroxide, Panthenol, Mel, Butyrospermum Parkii Butter, Butyrospermum Parkii Butter Unsaponifiables, Tin Oxide, CI 77499, CI 77492, CI 77891, CI 77491.",
+    "volume": null,
     "usage": "涂于洁净、干燥的睫毛，从根部向梢部刷涂。将睫毛膏均匀包裹每根睫毛，打造纤长丰盈妆效。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -1098,24 +898,10 @@
   {
     "slug": "maslo-dlya-gub-chocolate-shokoladnyiy-100782",
     "name": "Chocolate 巧克力色唇油",
-    "price": 1010,
-    "image": "/products/yandex/d2nnc4c6tpxkznrbpl2d7n4tvlj2px6m-4ecb318ba9.webp",
-    "imageAlt": "/products/yandex/fjk4g4tslq2fk98ksjshvb8lkl6llrsb-5a217a8e37.webp",
-    "images": [
-      "/products/yandex/d2nnc4c6tpxkznrbpl2d7n4tvlj2px6m-4ecb318ba9.webp",
-      "/products/yandex/fjk4g4tslq2fk98ksjshvb8lkl6llrsb-5a217a8e37.webp",
-      "/products/yandex/l9tjzvk6796w25hd7gjkhzj246nk5czr-273bced0ea.webp",
-      "/products/yandex/6dnm24s7dppwcchsn5nkq7ssqcr7952f-51d957d753.webp"
-    ],
-    "badge": "畅销",
     "category": "彩妆",
     "description": "有高级感的色泽，加上令双唇更显精致的护理质地。PÚSY Chocolate 唇油衬托自然唇色，增加色彩深度与亮泽妆效。这款裸色让整体妆容更完整、更有吸引力。\n\n唇油配方帮助柔润、平滑双唇，并在视觉上增加丰盈感；方便的涂抹头只需几下即可均匀、利落上妆。",
-    "sku": "ПП54ЧЗ",
     "volume": "4毫升",
-    "ingredients": "Hydrogenated Polyisobutene, Polybutene, Ethylhexyl Palmitate, Pentaerythrityl Tetraisostearate, Caprylic/Capric Triglyceride, Tridecyl Trimellitate, Polyglyceryl-2 Triisostearate, Hydrogenated Styrene/Isoprene Copolymer, Simmondsia Chinensis (Jojoba) Seed Oil, Squalane, Prunus Amygdalus Dulcis (Sweet Almond) Oil, Helianthus Annuus (Sunflower) Seed Oil, Octyldodecanol, Bisabolol, Phenoxyethanol, Tocopheryl Acetate, Ethylhexylglycerin, Parfum, CI 77492, CI 77499, CI 16035",
     "usage": "使用涂抹头将唇油涂于双唇。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -1183,22 +969,10 @@
   {
     "slug": "mercayshchie-teni-sparkly-dlya-vek-pusy-magic-flower-100469",
     "name": "Magic Flower 闪耀眼影",
-    "price": 990,
-    "image": "/products/yandex/9sfw68tl8hv525562q89plzqbqdfv7hw-4d660a3cc7.webp",
-    "imageAlt": "/products/yandex/95652bbcdc4dxwjdfshmfzk9n9thjplh-d3ee101874.webp",
-    "images": [
-      "/products/yandex/9sfw68tl8hv525562q89plzqbqdfv7hw-4d660a3cc7.webp",
-      "/products/yandex/95652bbcdc4dxwjdfshmfzk9n9thjplh-d3ee101874.webp",
-      "/products/yandex/hzg5w4b6kprz5t42wrgn85gggp78hhln-861f115731.webp",
-      "/products/yandex/wfxdfwdsm8b9fn242dk7g7xq8gqf5vgv-610f34935b.webp"
-    ],
     "category": "彩妆",
     "description": "闪亮双眸 PÚSY Magic Flower 是一朵迷人的暖粉色花朵，绽放紫金色光芒。\n\nPÚSY Magic Flower 的魔力在于其完美的配方：丰富的粉红色基底充当粘合剂，中等大小的闪光提供最大的反射表面。\n\n其结果是一种神奇的闪光效果，从粉色、蓝色到金色闪闪发光，就像温暖的粉色底色发出的火花一样闪烁。光泽并非来自于皮肤，而是来自于皮肤的深处。柔软的质地让您可以轻松均匀地涂抹产品，不会出现不均匀或脱落的情况。持久配方让您从第一次涂抹到最后一支舞都焕发光彩。",
-    "sku": "ДЧЗ0007",
-    "ingredients": "Calcium Aluminum Borosilicate, Dimethicone, Mica, Boron Nitride, Talc, Triethylhexanoin, Caprylic/Capric Triglyceride, Dimethicone/Vinyl Dimethicone Crosspolymer, Stearyl Dimethicone, Tridecyl Trimellitate, Kaolin, Octyldodecanol, Magnesium Stearate, Diisostearyl Malate, Phenyl Trimethicone, Silica, Hydrogenated Sunflower Seed Oil, Octadecene, C10-18 Triglycerides, Phenoxyethanol, Tocopheryl Acetate, Tin Oxide, Ethylhexylglycerin, CI 77891, CI 15850, CI 45410.",
+    "volume": null,
     "usage": "用手指、刷子或涂抹器将眼影涂抹在眼睑上。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -1234,21 +1008,10 @@
   {
     "slug": "mercayshchie-teni-sparkly-dlya-vek-pusy-sand-100466",
     "name": "Sand 闪耀眼影",
-    "price": 990,
-    "image": "/products/yandex/zjn8fdvmvdk8ls795pgph7fpd5v6q5pz-06f63ecad3.webp",
-    "imageAlt": "/products/yandex/68ql7wl745fr5kctvcns9k94nl2fn87l-606afbc5f3.webp",
-    "images": [
-      "/products/yandex/zjn8fdvmvdk8ls795pgph7fpd5v6q5pz-06f63ecad3.webp",
-      "/products/yandex/68ql7wl745fr5kctvcns9k94nl2fn87l-606afbc5f3.webp",
-      "/products/yandex/zgctqgrc9jv9sthdw2twt92h4flhf8q4-46223b2792.webp"
-    ],
     "category": "彩妆",
     "description": "让眼睛闪闪发光 PÚSY Sand 不仅仅是金色的闪光，而是温暖的光芒的集中，在日落时将眼睑变成闪亮的沙漠天鹅绒。\n\nPÚSY Sand 的魔力在于其完美的配方：轻盈、半透明的缎面基底可作为隐形粘合剂，不会给眼睑皮肤带来负担，而中等大小的金色亮片可提供最大程度的反光表面。\n\n其结果是一种温暖的、几乎“热”的光芒的错觉，没有粗俗的黄色色调。光泽并非来自于皮肤，而是来自于皮肤的深处。柔软的质地让您可以轻松均匀地涂抹产品，不会出现不均匀或脱落的情况。持久配方让您从第一次涂抹到最后一支舞都焕发光彩。",
-    "sku": "ДЧЗ0003",
-    "ingredients": "Calcium Aluminum Borosilicate, Polymethylsilsesquioxane, Octyldodecanol, Synthetic Fluorphlogopite, Dimethicone, Triethylhexanoin, Caprylic/Capric Triglyceride, Dimethicone/Vinyl Dimethicone Crosspolymer, Mica, Tridecyl Trimellitate, Stearyl Dimethicone, Octadecene, C10-18 Triglycerides, Phenoxyethanol, Tocopheryl Acetate, Hydrogenated Sunflower Seed Oil, Tin Oxide, Ethylhexylglycerin, CI 77891, CI 16035, CI 19140, CI 45410, CI 77266, CI 77499.",
+    "volume": null,
     "usage": "用手指、刷子或涂抹器将眼影涂抹在眼睑上。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -1284,23 +1047,10 @@
   {
     "slug": "klassicheskaya-tush-dlya-resnic-pusy-dark-brown-10-ml-100364",
     "name": "深棕色睫毛膏",
-    "price": 1010,
-    "image": "/products/yandex/szqwmx97nvbj9flfwmqgzlpqxpz4g457-38ef2acac8.webp",
-    "imageAlt": "/products/yandex/txlbmb6d6d44vnq85rq69rjgqgmjsqf8-8f9919bdee.webp",
-    "images": [
-      "/products/yandex/szqwmx97nvbj9flfwmqgzlpqxpz4g457-38ef2acac8.webp",
-      "/products/yandex/txlbmb6d6d44vnq85rq69rjgqgmjsqf8-8f9919bdee.webp",
-      "/products/yandex/phdhh9bmfnd8xqbs7dmtzdnns5zcs4fr-2aeeaf64dc.webp",
-      "/products/yandex/kwhlfrhzbgtcjhzzzqfhgx6jx252jcp4-319253119d.webp"
-    ],
-    "badge": "畅销",
     "category": "彩妆",
     "description": "PÚSY Choco Mascara Milk Chocolate 呈现如牛奶巧克力中牛奶与可可比例般恰到好处的棕色。\n\n它不仅以纤长、根根分明的睫毛突出眼神，也在日间给予睫毛护理。方便的刷头可细致包裹并拉长每根睫毛，刷头形状帮助打造自然卷翘效果。\n\n小烛树蜡帮助锁住睫毛水分，乳木果油和蜂蜜为睫毛补充滋润。膏体耐潮，不易印染、留痕或掉屑。\n\n适合浅棕发色人群，也适合希望自然强调睫毛的人。",
-    "sku": "1913ЧЗ",
-    "ingredients": "Aqua, Styrene/Acrylates Copolymer, Paraffin, Microcrystalline Wax, Ozokerite, Propylene Glycol, Polyisobutene, Euphorbia Cerifera Wax, Stearic Acid, Glyceryl Stearate, Cetearyl Alcohol, Hydroxyethylcellulose, PEG-100 Stearate, Phenoxyethanol, Polysorbate 60, 1,2-Hexanediol, Caprylyl Glycol, Tromethamine, Ethylhexylglycerin, Panthenol, Mel, Butyrospermum Parkii Butter, Butyrospermum Parkii Butter Unsaponifiables, CI 77499, CI 77491, CI 77492.",
+    "volume": null,
     "usage": "涂于洁净、干燥的睫毛，从根部向梢部刷涂。将睫毛膏均匀包裹每根睫毛，打造纤长丰盈妆效。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -1336,22 +1086,10 @@
   {
     "slug": "karandash-dlya-gub-pusy-paradise-100459",
     "name": "Paradise 唇线笔",
-    "price": 490,
-    "image": "/products/yandex/67q2sh7v7cfxfxt9h67s5pv2mf95xpb7-1a2b8c5b00.webp",
-    "imageAlt": "/products/yandex/2p5s282xxwmxxgqfk5js6zwhklpz7bz2-7b3ad51a5e.webp",
-    "images": [
-      "/products/yandex/67q2sh7v7cfxfxt9h67s5pv2mf95xpb7-1a2b8c5b00.webp",
-      "/products/yandex/2p5s282xxwmxxgqfk5js6zwhklpz7bz2-7b3ad51a5e.webp",
-      "/products/yandex/jwtfvpm86zzvzk6vhk5m2x6j55msntsd-5795a5cc36.webp"
-    ],
-    "badge": "畅销",
     "category": "彩妆",
     "description": "打造时髦、持久唇妆组合的理想唇线笔。\n\nPÚSY Lip Liner Paradise 是一款层次丰富、略偏冷调却不过分的米色裸色，可凸显你的个性。轻柔描画并晕开边缘，可塑造唇部轮廓；也可勾勒清晰线条，打造更鲜明妆效。持久配方可维持全天，即使进食或饮用后也不易结块、晕染。柔滑质地形成天鹅绒般轻盈的覆盖，全天使用舒适。\n\nPÚSY LIP LINER 是想轻松快速凸显唇部美感人群的理想选择，让你每天都能享受利落精致的妆容。",
-    "sku": "01408",
-    "ingredients": "Synthetic Wax, Copernicia Cerifera Wax, Microcrystalline Wax, Ethylhexyl Palmitate, Parfum, Hexyl Cinnamal, Geraniol, Benzyl Alcohol, Phenoxyethanol, Sorbic Acid, CI 77891, CI 77491, CI 77499, CI 15850:1, CI 77492",
+    "volume": null,
     "usage": "用唇线笔沿唇部轮廓描画，勾勒出所需唇形。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -1411,23 +1149,10 @@
   {
     "slug": "maslo-dlya-gub-crystal-prozrachnyiy-100780",
     "name": "Crystal 透明唇油",
-    "price": 1010,
-    "image": "/products/yandex/gdkw2bc9crrdgpfxwx96xlfj9g76g7fr-fbc7908d75.webp",
-    "imageAlt": "/products/yandex/x7glt87bwnr7vbtj2fql4wlwfzwbsxfx-8da0a9a719.webp",
-    "images": [
-      "/products/yandex/gdkw2bc9crrdgpfxwx96xlfj9g76g7fr-fbc7908d75.webp",
-      "/products/yandex/x7glt87bwnr7vbtj2fql4wlwfzwbsxfx-8da0a9a719.webp",
-      "/products/yandex/ns5qngfz4vhhrcfq97fndm4ll46bxdv6-ed4b722342.webp"
-    ],
-    "badge": "畅销",
     "category": "彩妆",
     "description": "透明色调可增强双唇的自然美感，质感每日呵护双唇。\n\nPÚSY 水晶唇油可打造光泽妆效，在视觉上使双唇更光滑、更整洁。这是最通用的选择，适合任何妆容 - 从简约到晚装。油配方可温和软化双唇，帮助应对干燥并带来舒适感。\n\n轻盈的质地增添光泽和丰盈感，方便的涂抹器让您只需轻轻涂抹几下即可涂抹产品 - 即使没有镜子。",
-    "sku": "ПП52ЧЗ",
     "volume": "4毫升",
-    "ingredients": "Hydrogenated Polyisobutene, Ethylhexyl Palmitate, Polybutene, Pentaerythrityl Tetraisostearate, Tridecyl Trimellitate, Caprylic/Capric Triglyceride, Hydrogenated Styrene/Isoprene Copolymer, Polyglyceryl-2 Triisostearate, Simmondsia Chinensis (Jojoba) Seed Oil, Squalane, Prunus Amygdalus Dulcis (Sweet Almond) Oil, Helianthus Annuus (Sunflower) Seed Oil, Bisabolol, Phenoxyethanol, Tocopheryl Acetate, Ethylhexylglycerin, Parfum",
     "usage": "使用涂抹头将唇油涂于双唇。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -1495,22 +1220,10 @@
   {
     "slug": "mercayshchie-teni-sparkly-dlya-vek-pusy-dangerous-100467",
     "name": "Dangerous 闪耀眼影",
-    "price": 990,
-    "image": "/products/yandex/ss5fmcr4r7dknx4xlfmvq5kzvs5cx8cw-bb7f8b8afb.webp",
-    "imageAlt": "/products/yandex/j79ztp8vtmzrmbz9cmq5wd26xskcf8c5-02beaa0e2f.webp",
-    "images": [
-      "/products/yandex/ss5fmcr4r7dknx4xlfmvq5kzvs5cx8cw-bb7f8b8afb.webp",
-      "/products/yandex/j79ztp8vtmzrmbz9cmq5wd26xskcf8c5-02beaa0e2f.webp",
-      "/products/yandex/5snvq82rh2hmqnfmzmftpgz67kb6t5kr-feb696a0e3.webp",
-      "/products/yandex/prmjg8j5nsr57464wx9kcfr8vwfchr8t-80459288f3.webp"
-    ],
     "category": "彩妆",
     "description": "PÚSY Dangerous 闪耀眼影，不只是一种色彩，更是一份“成为全场焦点”的宣言。\n\nPÚSY Dangerous 的魅力来自精心调配的配方：珊瑚色缎光基底承托中等颗粒的金色闪片，带来充分的反光效果。\n\n最终呈现炽热明亮的铜色调，流转金色火花，让双眸如被点燃。光泽并非浮在肌肤表面，而是仿佛从肌肤深处透出。柔软质地易于均匀铺开，不易斑驳或飞粉；持久配方让光彩从上妆一直延续到舞会落幕。",
-    "sku": "ДЧЗ0010",
-    "ingredients": "Calcium Aluminum Borosilicate, Dimethicone, Mica, Boron Nitride, Triethylhexanoin, Talc, Caprylic/Capric Triglyceride, Stearyl Dimethicone, Dimethicone/Vinyl Dimethicone Crosspolymer, Tridecyl Trimellitate, Kaolin, Octyldodecanol, Magnesium Stearate, Diisostearyl Malate, Phenyl Trimethicone, Hydrogenated Sunflower Seed Oil, Octadecene, C10-18 Triglycerides, Phenoxyethanol, Tocopheryl Acetate, Tin Oxide, Ethylhexylglycerin, CI 77891, CI 15850, CI 19140, CI 15985, CI 77499, CI 45410.",
+    "volume": null,
     "usage": "用手指、刷子或涂抹器将眼影涂抹在眼睑上。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -1546,23 +1259,10 @@
   {
     "slug": "maslo-dlya-gub-apricot-1-100778",
     "name": "Apricot 杏桃色唇油",
-    "price": 1010,
-    "image": "/products/yandex/d54v4wxhrxtlng4fmzjhs85fncf725wf-7835a31972.webp",
-    "imageAlt": "/products/yandex/mn2phzkzn9htkh6lt5hs4w525grcrl76-58e40ca42e.webp",
-    "images": [
-      "/products/yandex/d54v4wxhrxtlng4fmzjhs85fncf725wf-7835a31972.webp",
-      "/products/yandex/mn2phzkzn9htkh6lt5hs4w525grcrl76-58e40ca42e.webp",
-      "/products/yandex/2ffck8vktdwvnc89qgk8bzqsjwxrr2pl-b68441827a.webp"
-    ],
-    "badge": "畅销",
     "category": "彩妆",
     "description": "鲜活的杏桃色衬托双唇自然色泽，令妆容清新有活力。PÚSY Apricot 唇油形成亮泽涂层，使双唇更柔润，视觉上更饱满。\n\n配方温和护理唇部肌肤，帮助改善干燥，使双唇平滑、精致。轻盈质地带来光泽与舒适感；方便的涂抹头让你在一天中随时快速、均匀地涂抹唇油。",
-    "sku": "ПП50ЧЗ",
     "volume": "4毫升",
-    "ingredients": "Hydrogenated Polyisobutene, Polybutene, Ethylhexyl Palmitate, Pentaerythrityl Tetraisostearate, Caprylic/Capric Triglyceride, Tridecyl Trimellitate, Polyglyceryl-2 Triisostearate, Hydrogenated Styrene/Isoprene Copolymer, Simmondsia Chinensis (Jojoba) Seed Oil, Squalane, Prunus Amygdalus Dulcis (Sweet Almond) Oil, Helianthus Annuus (Sunflower) Seed Oil, Octyldodecanol, Bisabolol, Phenoxyethanol, Tocopheryl Acetate, Ethylhexylglycerin, Parfum, CI 15850, CI 19140, CI 77499",
     "usage": "使用涂抹头将唇油涂于双唇。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -1630,23 +1330,10 @@
   {
     "slug": "kremovye-rumyana-pusy-blood-mary-25-gr-8-1-100361",
     "name": "Bloody Mary 奶油腮红",
-    "price": 910,
-    "image": "/products/yandex/8ns5x7trfm24kjtvclj8l5z45nth6rkd-7da79bf88f.webp",
-    "imageAlt": "/products/yandex/jcj9qv5l4mj6zx46blmtddkkrdhhf4sz-774668d606.webp",
-    "images": [
-      "/products/yandex/8ns5x7trfm24kjtvclj8l5z45nth6rkd-7da79bf88f.webp",
-      "/products/yandex/jcj9qv5l4mj6zx46blmtddkkrdhhf4sz-774668d606.webp",
-      "/products/yandex/bm76kk52ff6dg4j66vw4mnl2cvrsqx8s-1205ec92b7.webp",
-      "/products/yandex/bg8rkvv45wnb2dbmjkt7hppjzbnxc4js-e218aca534.webp"
-    ],
-    "badge": "畅销",
     "category": "彩妆",
     "description": "PÚSY Bloody Mary 乳霜腮红轻轻一抹，即可呈现如寒冷天气后自然泛红的双颊妆效。\n\n细腻质地易于涂抹在双颊，打造自然红润感，也可用于双唇和眼睑。持久配方全天保持清新妆效，不易结块或暗沉。\n\n小巧包装便于使用，让这款腮红成为快速打造清新妆容的实用单品。",
-    "sku": "ПП87ЧЗ",
-    "ingredients": "Isononyl Isononanoate, Octyldodecyl Stearoyl Stearate, Cera Microcristallina, Dimethicone/Vinyl Dimethicone Crosspolymer, Dimethicone, Tribehenin, Phenoxyethanol, Tocopheryl Acetate, Ethylhexylglycerin, Ci 77499, Ci 77891, Ci 15850:2, Ci 77491, Ci 77492.",
+    "volume": null,
     "usage": "用手指、刷子或海绵涂抹腮红霜。分层涂抹产品以获得更鲜艳的色调。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -1690,46 +1377,19 @@
   {
     "slug": "haiylaiyter-sufle-pusy-ice-baby-4-g-1-100693",
     "name": "Ice Baby 舒芙蕾高光",
-    "price": 990,
-    "image": "/products/yandex/fc7mx2rpss6pq22qq6qvgz5r65dbdhtp-96c41f6bb2.webp",
-    "imageAlt": "/products/yandex/ld55snqfk2n7fxv564sknzq4npzv6g2d-0521467161.webp",
-    "images": [
-      "/products/yandex/fc7mx2rpss6pq22qq6qvgz5r65dbdhtp-96c41f6bb2.webp",
-      "/products/yandex/ld55snqfk2n7fxv564sknzq4npzv6g2d-0521467161.webp",
-      "/products/yandex/9qbv4vgx2l8qmqgg46frbxf2xt8pbmgv-742c639f81.webp",
-      "/products/yandex/gmdh9hn7pjz8hpp9qq4s5f49lcwf299v-4894c710f3.webp"
-    ],
-    "badge": "新品",
     "category": "彩妆",
     "description": "这是一款空气感乳霜质地、闪耀度较高的高光。轻盈质地容易晕染，较大的闪光颗粒带来鲜明的多维闪耀效果。",
-    "sku": "ДЧЗ0011",
-    "ingredients": "Mica, Polymethylsilsesquioxane, Synthetic Fluorphlogopite, Paraffinum Liquidum, Isononyl Isononanoate, Calcium Aluminum Borosilicate, Synthetic Wax, Hydrogenated Styrene/Isoprene Copolymer, Silica, Zinc Oxide, Phenoxyethanol, CI 77891.",
+    "volume": null,
     "usage": "想要高密度闪耀效果，可用指腹涂抹高光舒芙蕾；想要柔和光泽，可用化妆刷涂抹。可用于任何需要提亮、增加闪耀感的位置。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "jidkie-rumyana-dlya-lica-peachland-100768",
     "name": "Peachland 液体腮红",
-    "price": 990,
-    "image": "/products/yandex/jslnm8thjtk6lfsq6jj6kjqx4qm8bm5x-98ebb15785.webp",
-    "imageAlt": "/products/yandex/78gpjc27p4jghbctwr6mr5fgkzcrgbch-a7fd66063c.webp",
-    "images": [
-      "/products/yandex/jslnm8thjtk6lfsq6jj6kjqx4qm8bm5x-98ebb15785.webp",
-      "/products/yandex/78gpjc27p4jghbctwr6mr5fgkzcrgbch-a7fd66063c.webp",
-      "/products/yandex/4px59qqgqrwcnkpb5tcmsd82nmnsfjrz-d393747c63.webp",
-      "/products/yandex/l5d7lpgwm5tj9q945wrz22n6mj57v62r-efda455e1f.webp"
-    ],
-    "badge": "新品",
     "category": "彩妆",
     "description": "这款腮红让面部看起来清新透亮，即使早晨不尽如人意，也能迅速提气色。\n\n轻盈的水感乳霜质地，只需用指腹、刷具或海绵轻轻几下即可晕开。上脸后自然融入肤色，仿佛肌肤原生红润。颜色可叠加：薄涂一层是适合日间的半透明红晕，再叠涂几次即可获得更浓郁的晚间妆效。\n\n一支即可用于面颊、颧骨、双唇和眼睑。柔软涂抹头每次取量适中，更省用量；小巧瓶身也方便随身放入包中。\n\n使用前摇匀，旋开带涂抹头的瓶盖，在双颊点上少量并晕开；想加深颜色时重复叠涂即可。",
-    "sku": "ДЧЗ0064",
     "volume": "5.5毫升",
-    "ingredients": "Aqua，Isohexadecane，Isododecane，Dimethicone，Butylene Glycol，Tridecyl Trimellitate，Kaolin，Lauryl Peg-10 Tris(Trimethylsiloxy)Silylethyl Dimethicone, Polyglyceryl-2 Triisostearate，Trimethylsiloxysilicate，Mica，Disteardimonium Hectorite，Silica, Cetyl Peg/Ppg-10/1 Dimethicone，Sodium Chloride，Phenoxyethanol，Tribehenin，Sorbitan Sesquioleate，1,2-Hexanediol，Dimethicone/Vinyl Dimethicone Crosspolymer，Propylene Carbonate，Caprylyl Glycol，Tocopheryl Acetate，Xanthan Gum，Olea Europaea (Olive) Fruit Oil，Parfum，Sodium Hyaluronate，Benzyl Alcohol，Vanillin， CI 77891，CI 77492，CI 77491, CI 15850，CI 77499.",
     "usage": "使用前轻轻摇匀瓶身，用涂抹头点涂数下，再用海绵、化妆刷或指腹晕染开。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -1773,23 +1433,10 @@
   {
     "slug": "kremovye-rumyana-pusy-pusyboy-25-gr-20-100360",
     "name": "Pusyboy 奶油腮红",
-    "price": 910,
-    "image": "/products/yandex/r6b4prrk2zv2g9z2f72c9stjhgn9x4hp-2896e9480e.webp",
-    "imageAlt": "/products/yandex/jbsqt2pstk8dr7789g77mh7g8pbpqr45-9ba76e9851.webp",
-    "images": [
-      "/products/yandex/r6b4prrk2zv2g9z2f72c9stjhgn9x4hp-2896e9480e.webp",
-      "/products/yandex/jbsqt2pstk8dr7789g77mh7g8pbpqr45-9ba76e9851.webp",
-      "/products/yandex/mr9px7scwctp48h2gjwd2bl4wdvpssvp-08d4b51a86.webp",
-      "/products/yandex/58l57t56hvxvjlprc7crd24vhmdjjgzn-23a0c889f3.webp"
-    ],
-    "badge": "畅销",
     "category": "彩妆",
     "description": "PÚSY Pusy Boy 乳霜腮红看似大胆，实际妆效十分细腻。显色度可自由调节，从自然冷调红晕到浓郁粉色，随当天心情叠加。\n\n细腻质地易于涂抹在双颊，打造自然红润感，也可用于双唇和眼睑。持久配方全天保持清新妆效，不易结块或暗沉。\n\n小巧包装便于使用，让这款腮红成为快速打造清新妆容的实用单品。",
-    "sku": "ПП90ЧЗ",
-    "ingredients": "Isononyl Isononanoate, Octyldodecyl Stearoyl Stearate, Cera Microcristallina, Dimethicone/Vinyl Dimethicone Crosspolymer, Dimethicone, Tribehenin, Phenoxyethanol, Tocopheryl Acetate, Ethylhexylglycerin, Ci 77891, Ci 45410:2, Ci 45380:3.",
+    "volume": null,
     "usage": "用手指、刷子或海绵涂抹腮红霜。分层涂抹产品以获得更鲜艳的色调。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -1833,24 +1480,10 @@
   {
     "slug": "jidkie-rumyana-dlya-lica-sleepy-morning-pylnaya-roza-100769",
     "name": "Sleepy Morning 液体腮红（灰粉色）",
-    "price": 990,
-    "image": "/products/yandex/qlxn5wcdxg5xcp449hk6qljphc5h5txp-8c02c14270.webp",
-    "imageAlt": "/products/yandex/jpmt6qbw84xqrvfkkcdtvqg5p2c6qqq8-81315c417f.webp",
-    "images": [
-      "/products/yandex/qlxn5wcdxg5xcp449hk6qljphc5h5txp-8c02c14270.webp",
-      "/products/yandex/jpmt6qbw84xqrvfkkcdtvqg5p2c6qqq8-81315c417f.webp",
-      "/products/yandex/l84w5xv7thm5bjnvlgsw8prr9blxzjwp-08d348c3ac.webp",
-      "/products/yandex/w5x7x6w7fp2wpxm4jcp7m2xxkhn57c94-158e2703f8.webp"
-    ],
-    "badge": "新品",
     "category": "彩妆",
     "description": "这款腮红让面部看起来清新透亮，即使早晨不尽如人意，也能迅速提气色。\n\n轻盈的水感乳霜质地，只需用指腹、刷具或海绵轻轻几下即可晕开。上脸后自然融入肤色，仿佛肌肤原生红润。颜色可叠加：薄涂一层是适合日间的半透明红晕，再叠涂几次即可获得更浓郁的晚间妆效。\n\n一支即可用于面颊、颧骨、双唇和眼睑。柔软涂抹头每次取量适中，更省用量；小巧瓶身也方便随身放入包中。\n\n使用前摇匀，旋开带涂抹头的瓶盖，在双颊点上少量并晕开；想加深颜色时重复叠涂即可。",
-    "sku": "ДЧЗ0066",
     "volume": "5.5毫升",
-    "ingredients": "Aqua，Isohexadecane，Isododecane，Dimethicone，Butylene Glycol，Tridecyl Trimellitate，Kaolin，Lauryl Peg-10 Tris(Trimethylsiloxy)Silylethyl Dimethicone, Polyglyceryl-2 Triisostearate，Trimethylsiloxysilicate，Mica，Disteardimonium Hectorite，Silica, Cetyl Peg/Ppg-10/1 Dimethicone，Sodium Chloride，Phenoxyethanol，Tribehenin，Sorbitan Sesquioleate，1,2-Hexanediol，Dimethicone/Vinyl Dimethicone Crosspolymer，Propylene Carbonate，Caprylyl Glycol，Tocopheryl Acetate，Xanthan Gum，Olea Europaea (Olive) Fruit Oil，Parfum，Sodium Hyaluronate，Benzyl Alcohol，Vanillin， CI 77891，CI 77491, CI 77492，CI 15850，CI 15985, CI 77499.",
     "usage": "使用前轻轻摇匀瓶身，用涂抹头点涂数下，再用海绵、化妆刷或指腹晕染开。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -1894,24 +1527,10 @@
   {
     "slug": "jidkie-rumyana-dlya-lica-smoochies-rozovyiy-100770",
     "name": "Smoochies 液体腮红（粉色）",
-    "price": 990,
-    "image": "/products/yandex/72v8z5rcn66594sh8ztglfk9g8s686bs-40ce5da6c0.webp",
-    "imageAlt": "/products/yandex/2rw7cdnrsgk2dmxwqnzc7nzzj7htgrh8-9feb67dee8.webp",
-    "images": [
-      "/products/yandex/72v8z5rcn66594sh8ztglfk9g8s686bs-40ce5da6c0.webp",
-      "/products/yandex/2rw7cdnrsgk2dmxwqnzc7nzzj7htgrh8-9feb67dee8.webp",
-      "/products/yandex/5qpsfhq7rjwksllt47rw4tlg5gqrx2kr-0449229f66.webp",
-      "/products/yandex/qq2lcdkgsrzzfp2hp979kd8gs66d66qs-a08e3deec3.webp"
-    ],
-    "badge": "新品",
     "category": "彩妆",
     "description": "这款腮红让面部看起来清新透亮，即使早晨不尽如人意，也能迅速提气色。\n\n轻盈的水感乳霜质地，只需用指腹、刷具或海绵轻轻几下即可晕开。上脸后自然融入肤色，仿佛肌肤原生红润。颜色可叠加：薄涂一层是适合日间的半透明红晕，再叠涂几次即可获得更浓郁的晚间妆效。\n\n一支即可用于面颊、颧骨、双唇和眼睑。柔软涂抹头每次取量适中，更省用量；小巧瓶身也方便随身放入包中。\n\n使用前摇匀，旋开带涂抹头的瓶盖，在双颊点上少量并晕开；想加深颜色时重复叠涂即可。",
-    "sku": "ДЧЗ0065",
     "volume": "5.5毫升",
-    "ingredients": "Aqua，Isohexadecane，Isododecane，Dimethicone，Butylene Glycol，Tridecyl Trimellitate，Kaolin，Lauryl Peg-10 Tris(Trimethylsiloxy)Silylethyl Dimethicone, Polyglyceryl-2 Triisostearate，Trimethylsiloxysilicate，Mica，Disteardimonium Hectorite，Silica, Cetyl Peg/Ppg-10/1 Dimethicone，Sodium Chloride，Phenoxyethanol，Tribehenin，Sorbitan Sesquioleate，1,2-Hexanediol，Dimethicone/Vinyl Dimethicone Crosspolymer，Propylene Carbonate，Caprylyl Glycol，Tocopheryl Acetate，Xanthan Gum，Olea Europaea (Olive) Fruit Oil，Parfum，Sodium Hyaluronate，Benzyl Alcohol，Vanillin， CI 77891，CI 77492，CI 15850，CI 77499.",
     "usage": "使用前轻轻摇匀瓶身，用涂抹头点涂数下，再用海绵、化妆刷或指腹晕染开。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -1955,24 +1574,10 @@
   {
     "slug": "jidkie-rumyana-dlya-lica-toasty-korichnevyiy-100771",
     "name": "Toasty 液体腮红（棕色）",
-    "price": 990,
-    "image": "/products/yandex/sprfgp7774zsv8fbcgxhczqxwdh6p6qx-6bff06c23e.webp",
-    "imageAlt": "/products/yandex/pqqd8k9j9jx8ww2vf5dqd7g7r7pkw4bv-a311e692ba.webp",
-    "images": [
-      "/products/yandex/sprfgp7774zsv8fbcgxhczqxwdh6p6qx-6bff06c23e.webp",
-      "/products/yandex/pqqd8k9j9jx8ww2vf5dqd7g7r7pkw4bv-a311e692ba.webp",
-      "/products/yandex/bdc7bwzbrnfbwx8bp6w5tfqp7vm4zqfq-eab1f5f422.webp",
-      "/products/yandex/v8qtjfwxfrbkz5dwlnh9rgs4tfcd29j9-b252dfc77d.webp"
-    ],
-    "badge": "新品",
     "category": "彩妆",
     "description": "这款腮红让面部看起来清新透亮，即使早晨不尽如人意，也能迅速提气色。\n\n轻盈的水感乳霜质地，只需用指腹、刷具或海绵轻轻几下即可晕开。上脸后自然融入肤色，仿佛肌肤原生红润。颜色可叠加：薄涂一层是适合日间的半透明红晕，再叠涂几次即可获得更浓郁的晚间妆效。\n\n一支即可用于面颊、颧骨、双唇和眼睑。柔软涂抹头每次取量适中，更省用量；小巧瓶身也方便随身放入包中。\n\n使用前摇匀，旋开带涂抹头的瓶盖，在双颊点上少量并晕开；想加深颜色时重复叠涂即可。",
-    "sku": "ДЧЗ0063",
     "volume": "5.5毫升",
-    "ingredients": "Aqua，Isohexadecane，Isododecane，Dimethicone，Butylene Glycol，Tridecyl Trimellitate，Kaolin，Lauryl Peg-10 Tris(Trimethylsiloxy)Silylethyl Dimethicone, Polyglyceryl-2 Triisostearate，Trimethylsiloxysilicate，Mica，Disteardimonium Hectorite，Silica, Cetyl Peg/Ppg-10/1 Dimethicone，Sodium Chloride，Phenoxyethanol，Tribehenin，Sorbitan Sesquioleate，1,2-Hexanediol，Dimethicone/Vinyl Dimethicone Crosspolymer，Propylene Carbonate，Caprylyl Glycol，Tocopheryl Acetate，Xanthan Gum，Olea Europaea (Olive) Fruit Oil，Parfum，Sodium Hyaluronate，Benzyl Alcohol，Vanillin， CI 77891，CI 77492，CI 77491, CI 77499, CI 15850.",
     "usage": "使用前轻轻摇匀瓶身，用涂抹头点涂数下，再用海绵、化妆刷或指腹晕染开。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -2016,324 +1621,136 @@
   {
     "slug": "uvlajnyayshchiiy-mist-dlya-lica-pusy-moisturizing-face-mist-pusy-100-ml-100201",
     "name": "保湿面部喷雾",
-    "price": 810,
-    "image": "/products/yandex/7f6z6xc4j2dqndprfkchgkzjgrmp4ngg-cc26326620.webp",
-    "imageAlt": "/products/yandex/pb4ccfb8vwqmvm8p44vlbpdzlc2fhkss-a03252050f.webp",
-    "images": [
-      "/products/yandex/7f6z6xc4j2dqndprfkchgkzjgrmp4ngg-cc26326620.webp",
-      "/products/yandex/pb4ccfb8vwqmvm8p44vlbpdzlc2fhkss-a03252050f.webp",
-      "/products/yandex/bzhp9plnbxkbxhwcwtl9qvrxk4c6p62w-b257c8ca6f.webp"
-    ],
     "category": "护肤",
     "description": "只需轻轻一喷，感受肌肤重新焕发活力与光泽。PÚSY 面部喷雾，是即刻清新与深层补水的小秘诀。\n\n透明质酸深入肌肤，由内而外带来弹润与清新感；神经酰胺形成无形屏障，帮助牢牢锁住水分，并保护肌肤免受城市环境压力及其他不利环境因素影响。\n\n黄瓜水与椰子水的组合帮助清新、调理肌肤，恢复令人向往的自然光泽。\n\n小巧便携，可轻松放入手袋。即使在妆容之上也可使用，随时迅速补水并带来清新感。早晨用来唤醒肌肤，办公室里用来提振状态，运动后用来清新……想喷就喷！轻轻一喷，就能感受肌肤焕发活力。",
-    "sku": "ПП67ЧЗ",
     "volume": "100毫升",
-    "ingredients": "Aqua, Cocos Nucifera Water, Cucumis Sativus Fruit Water, 1,2-Hexanediol, Propylene glycol, Glycerin, Biosaccharide Gum-1, Polysorbate 20, Sodium Hyaluronate, Disodium EDTA, Ethylhexylglycerin, Phenoxyethanol, Ceramide 1, Ceramide 2, Ceramide 3, Ceramide 6 Il, Butylene Glycol, Hydrogenated Lecithin, Caprylic/Capric Glycerides Polyglyceryl-10 Esters, Pentylene Glycol, Citrus Aurantifolia Fruit Extract, Potassium sorbate, Sodium benzoate, Sodium Hydroxide, Parfum.",
     "usage": "距面部15—20厘米处喷洒适量产品，静待完全吸收。可在一天中按需使用。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "gialuronovyiy-krem-dlya-lica-pusy-pusy-hyaluronic-face-cream-50-ml-8-100496",
     "name": "玻尿酸面霜",
-    "price": 1010,
-    "image": "/products/yandex/k47zztw2p5qjpkmxh6g4jqgvq9s5szvt-f9a85c796a.webp",
-    "imageAlt": "/products/yandex/n6qwr48l6kl4psct6kj888qr56wnmnwk-aa4a5757b5.webp",
-    "images": [
-      "/products/yandex/k47zztw2p5qjpkmxh6g4jqgvq9s5szvt-f9a85c796a.webp",
-      "/products/yandex/n6qwr48l6kl4psct6kj888qr56wnmnwk-aa4a5757b5.webp",
-      "/products/yandex/mp9mlck87kpz2v77l6dkgp4gqln5d6fl-c249de6835.webp",
-      "/products/yandex/rvm76pxj8hmtxh5tfzg6x77lwssqbm9z-8fc02515fe.webp"
-    ],
     "category": "护肤",
     "description": "PÚSY 透明质酸面霜不只是化妆包里的一瓶面霜，更是日常护肤的基础。\n\n它为后续妆容和肌肤光泽打好底。透明质酸为肌肤补充水分，提升弹润感，令肌肤焕发光泽。\n\n可可脂、乳木果油和荷荷巴油的奢华组合带来如 SPA 般的滋养，帮助深度柔润肌肤，赋予柔软细腻、舒适的肤感。适合需要加强保湿的干性肌肤，也适合希望提升光泽和精致度的中性肌肤。",
-    "sku": "ДЧЗ0012",
     "volume": "100毫升",
-    "ingredients": "Aqua, Dicaprylyl Carbonate, Coco-Caprylate, Cetearyl Alcohol, Cetearyl Glucoside, Caprylic/Capric Triglyceride, Glycerin, Simmondsia Chinensis (Jojoba) Seed Oil, Cupressus Sempervirens Leaf Water, Hydrogenated Starch Hydrolysate, Aphanizomenon Flosa-quae Extract, Caprylic/Capric Glycerides, Polyglyceryl-10 Esters, Pentylene Glycol, Butyrospermum Parkii (Shea Butter), Theobroma Cacao Seed Butter, Sodium Hyaluronate, Panthenol, Phenoxyethanol, Ethylhexylglycerin, Myristyl Myristate, Carbomer, Ceramide 1, Ceramide 2, Ceramide 3, Ceramide 6 li, Butylene Glycol, Hydrogenated Lecithin, Sodium Hydroxide, Parfum, Alpha-Isomethyl lonone, Hexyl Cinnamal, Limonene, Linalool.",
     "usage": "将面霜涂抹在干净干燥的脸上，并轻轻按摩。早上和/或晚上使用。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "rebrending-micellyarnaya-voda-pusy-300-ml-100192",
     "name": "胶束卸妆水",
-    "price": 1010,
-    "image": "/products/yandex/6kd4m58sgctsvp2pp49hhnqkbl9qrtm2-34ba97bf2f.webp",
-    "imageAlt": "/products/yandex/c7p7dt5ljj89xdf62j4hjv2g7jcg87nc-f52a57445a.webp",
-    "images": [
-      "/products/yandex/6kd4m58sgctsvp2pp49hhnqkbl9qrtm2-34ba97bf2f.webp",
-      "/products/yandex/c7p7dt5ljj89xdf62j4hjv2g7jcg87nc-f52a57445a.webp",
-      "/products/yandex/xsxbb2ztw559k24pjmcrc6992vg4g9g8-0bb5be22b3.webp"
-    ],
     "category": "护肤",
     "description": "PÚSY Micellar Water 胶束卸妆水可温和快速地卸除彩妆，不留黏腻薄膜，也不会令肌肤干燥，让肌肤呈现舒缓、休息后的状态。\n\n黄瓜、迷迭香、椴树和薄荷复合成分共同调理、保湿并舒缓肌肤，留下清新感。泛醇深度保湿并帮助缓解刺激，仿佛为肌肤包裹一层保护云。金松水提取物帮助调节肌肤平衡、收敛毛孔、改善气色，带来如呼吸新鲜空气般的清爽感。\n\n配方不含刺激性成分，适合各种肤质。把日常护肤变成简单愉悦的护理仪式，每天维持肌肤的洁净与美丽。",
-    "sku": "ДЧЗ0018",
     "volume": "300毫升",
-    "ingredients": "Aqua, Peg-6 Caprylic / Capric Glycerides, Pinus Sylvestris Wood Extract, Propylene Glycol, Glycerin, Tilia Cordata Flower Water, Mentha Piperita Flower / Leaf / Stem Water, Cucumis Sativus Extract, Potassium Sorbate, Sodium Benzoate, Rosmarinus Officinalis Water, Panthenol, Disodium EDTA, Parfum, Caprylyl Glycol, Methylpropanediol, Didecyldimonium Chloride, Polyquaternium-80, Sodium Hydroxide, Benzyl Alcohol, Dehydroacetic Acid",
     "usage": "将化妆棉用胶束水浸湿，敷在皮肤上10-30秒，然后轻轻擦拭面部和颈部皮肤，去除彩妆和杂质。使用后，用温水或皮肤清洁剂冲洗。适合日常使用。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "rebrending-penka-dlya-umyvaniya-pusy150ml-100227",
     "name": "洁面泡沫",
-    "price": 1320,
-    "image": "/products/yandex/2lzr5cs8g8nlstdz8xvcrj8r4jxv2k85-357e77477c.webp",
-    "imageAlt": "/products/yandex/m8z96dvpszk5cqsc99pnsljlmszcfr2x-4a86597032.webp",
-    "images": [
-      "/products/yandex/2lzr5cs8g8nlstdz8xvcrj8r4jxv2k85-357e77477c.webp",
-      "/products/yandex/m8z96dvpszk5cqsc99pnsljlmszcfr2x-4a86597032.webp",
-      "/products/yandex/gkjtlpmr62kc7lfslgh8v8n8s7h9v9kr-17f94025fe.webp"
-    ],
     "category": "护肤",
     "description": "Gentle Face Foam 洁面泡沫可为日常护理提供温和而有效的清洁。它轻柔清洁面部和颈部肌肤，去除污垢与多余皮脂，洗后留下清新、舒适的感受。\n\n含发酵燕麦、海带和温和表面活性剂的配方有助于深入清洁毛孔、减轻炎症，并维持肌肤适宜的水润状态。适合问题肌肤，清洁后不会令肌肤过度干燥，也不破坏天然保护屏障。\n\n内置硅胶刷头可进行轻柔按摩与温和去角质，增强清洁效果并让护理过程更舒适。适合每天早晚使用。",
-    "sku": "ПП98ЧЗ",
     "volume": "150毫升",
-    "ingredients": "Aqua, Sodium Cocoamphoacetate, Hydroxyethyl urea, Cocamidopropyl Betaine, Decyl Glucoside, PEG-7 Glyceryl Cocoate, Coco-Glucoside, Glyceryl Oleate, Avena Sativa Leaf/Stalk Extract, Saccharomyces Ferment Lysate Filtrate, Laminaria Digitata Extract, Citrus Aurantium Dulcis Juice, Citrus Limon Juice, Zingiber Officinale Root Juice, Parfum, Panthenol, Glycerin, Phenoxyethanol, Ethylhexylglycerin, Citric Acid, Sodium Benzoate, Potassium Sorbate, Sodium Chloride, Disodium EDTA.",
     "usage": "将所需量的产品涂抹在硅胶刷上，并按摩整个面部表面。用温水冲洗。适合日常使用。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "rebrending-piling-skatka-pusy100ml-100193",
     "name": "面部温和去角质凝胶",
-    "price": 910,
-    "image": "/products/yandex/92l27vfrr2njxf57fb7gxbmx6kw76brg-f80e35936d.webp",
-    "imageAlt": "/products/yandex/fft6vrnwgmgzwz6vbs9fpdzgpx62g957-09fc6cf344.webp",
-    "images": [
-      "/products/yandex/92l27vfrr2njxf57fb7gxbmx6kw76brg-f80e35936d.webp",
-      "/products/yandex/fft6vrnwgmgzwz6vbs9fpdzgpx62g957-09fc6cf344.webp",
-      "/products/yandex/lzhjcf5hgqb2tnttjxwv92c765zgxmfl-78d2a64a3e.webp"
-    ],
     "category": "护肤",
     "description": "PÚSY 搓泥型去角质凝胶，专为喜欢轻松、愉悦护理肌肤的人设计。\n\n只需轻柔触碰和打圈按摩，便能温和带走老废角质，让肌肤轻松焕新，不造成微小损伤、泛红或负担。没有粗糙磨砂颗粒，只有温和的肤感变化。使用后，肌肤纹理更加平滑，粗糙不均得到改善，肤色也显得清新均匀。去角质后的肌肤光滑洁净，为后续护理做好准备，让精华和面霜更易吸收并充分发挥作用。\n\nPÚSY 搓泥型去角质凝胶，适合想给肌肤多一点细致呵护的时候。",
-    "sku": "ПП69",
     "volume": "100毫升",
-    "ingredients": "Aqua, Propylene Glycol, Microcrystalline cellulose, Citrus Aurantium Dulcis Juice, Citrus Limon Juice, Zingiber Officinale Root Juice, Cetrimonium Chloride, Carbomer, Phenoxyethanol, Ethylhexylglycerin, PEG-40 Hydrogenated Castor Oil, Citric Acid, Sodium Benzoate, Potassium Sorbate, Partum, Hexyl Cinnamal, Linalool.",
     "usage": "将产品涂抹在洁净、干燥的皮肤上并停留 1-2 分钟。以打圈方式按摩，不要拉伸皮肤，避开眼睛周围区域。用水彻底冲洗。建议每周使用该产品不超过1-2次。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "rebrending-gialuronovaya-emulsiya-dlya-lica-pusy50ml-100191",
     "name": "面部玻尿酸乳液",
-    "price": 1010,
-    "image": "/products/yandex/5rg9b5whtk7574jmrw5d7rbs2kbr7t8k-db86701ce8.webp",
-    "imageAlt": "/products/yandex/kz6x8s9cxrpv8gns24dwz4m27tk8zrps-11b998ad3d.webp",
-    "images": [
-      "/products/yandex/5rg9b5whtk7574jmrw5d7rbs2kbr7t8k-db86701ce8.webp",
-      "/products/yandex/kz6x8s9cxrpv8gns24dwz4m27tk8zrps-11b998ad3d.webp",
-      "/products/yandex/86qgtqjr8r2q2x7q22dmksgw7kt7r9rc-6fe7ad7539.webp",
-      "/products/yandex/dzs8kt7kcpz56nmgzp6dqq6kjn98j2sx-4a81dcdab0.webp"
-    ],
     "category": "护肤",
     "description": "PÚSY Hyaluronic Emulsion 透明质酸面部乳液，不只是护肤中的一个步骤，更是让肌肤看起来休息充分、细致，并由内而外焕发光泽的私藏秘诀。\n\n富含透明质酸、蜗牛黏蛋白、维生素B3和神经酰胺的配方，帮助密集补水、修护脂质屏障，并改善肌肤纹理与肤色不均。轻盈丝滑的质地在肌肤上融化，不留黏腻感或油光。肌肤因此更加平滑细致，适合后续上妆，使粉底更均匀服帖、不易搓泥，妆效也更持久。\n\n可在面霜前使用以加强保湿，也可用于妆前准备。",
-    "sku": "ПП01РЧЗ",
     "volume": "50毫升",
-    "ingredients": "Aqua, Dicaprylyl Carbonate, Glycerin, Coco-Caprylate/Caprate, Coco-Caprylate, Caprylic/Capric Triglyceride, Squalane, Cetearyl Alcohol, Panthenol, Myristyl Myristate, Snail Secretion Filtrate, Phenethyl Alcohol, Caprylyl Glycol, Butyrospermum Parkii (Shea) Butter, Nicotinamide, D-Biotin, Sodium Polyacrylate, Avena Sativa Leaf/Stalk Extract, Saccharomyces Ferment Lysate Filtrate, Tocopheryl Acetate, Sodium Hyaluronate, Simmondsia Chinensis (Jojoba) Seed Oil, Disodium Cetearyl Sulfosuccinate, Phenoxyethanol, Ethylhexylglycerin, Ceramide 1, Ceramide 2, Ceramide 3, Ceramide 6 ll, Butylene Glycol, Hydrogenated Lecithin, Caprylic/Capric Glycerides Polyglyceryl-10 Esters, Pentylene Glycol, Citric Acid, Sodium Benzoate, Potassium Sorbate, Parfum, Benzyl Benzoate, Hexyl Cinnamal, Limonene.",
     "usage": "将少量乳液均匀涂抹在之前清洁且干燥的面部和颈部皮肤上。静置直至完全干燥。对于油性和混合性皮肤来说，它完全满足了基本的日常补水需求。对于干燥缺水的肌肤，可作为保湿的第一步使用。不需要冲洗。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "gidrofilnoe-maslo-dlya-lica-pusy-110-ml-100733",
     "name": "面部卸妆油",
-    "price": 990,
-    "image": "/products/yandex/9fjc2gcsnphgtcqmnxmlllph9478qv4h-50f42482be.webp",
-    "imageAlt": "/products/yandex/krdltdzgvw8tm2r2gstzmmg7pdqgnbcz-4d377b76c1.webp",
-    "images": [
-      "/products/yandex/9fjc2gcsnphgtcqmnxmlllph9478qv4h-50f42482be.webp",
-      "/products/yandex/krdltdzgvw8tm2r2gstzmmg7pdqgnbcz-4d377b76c1.webp",
-      "/products/yandex/s2sd9d288llxr5pgfs7r5jpdz84zzgm2-714ef31065.webp"
-    ],
-    "badge": "新品",
     "category": "护肤",
     "description": "该油提供温和而有效的清洁作用，溶解彩妆、防晒霜和皮脂，而不会堵塞毛孔。该产品含有轻质油复合物，可温和呵护肌肤，防止出现干燥感。",
-    "sku": "ДЧЗ0021",
     "volume": "110毫升",
-    "ingredients": "Caprylic/Capric Triglyceride, Glycine Soja (Soybean) Oil, Sorbeth-30 Tetraoleate, Silica Dimethyl Silylate, Coco-Caprylate/Caprate, Isononyl Isononanoate, Simmondsia Chinensis (Jojoba) Seed Oil, Squalane, Crambe Abyssinica Seed Oil, Glycine Soja Oil, Amaranthus Caudatus Seed Extract, Аesculus Hippocastanum Fruit Extract, Rosmarinus Officinalis (Rosemary) Leaf Extract, Tocopheryl Acetate, Parfum, Citral, Citronellol, Hydroxycitronellal, Limonene, Linalool.",
     "usage": "将所需量涂抹在干燥的皮肤上并按摩。加水继续乳化直至彩妆完全卸除，然后用温水彻底冲洗干净。为了完成清洁，建议使用凝胶或泡沫清洁剂。不建议在眼睛周围区域使用该产品。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "gel-massajer-pusy-refresh-face-gel-75-ml-26-100375",
     "name": "Refresh 面部滚珠按摩凝胶",
-    "price": 990,
-    "image": "/products/yandex/l74d8bzprhqszjtc4tc5wkpf9rthcxvr-39b01150f8.webp",
-    "imageAlt": "/products/yandex/h6rjk26d5jzbm9fzcldh5xpdsh7wkmxm-1f42e15dae.webp",
-    "images": [
-      "/products/yandex/l74d8bzprhqszjtc4tc5wkpf9rthcxvr-39b01150f8.webp",
-      "/products/yandex/h6rjk26d5jzbm9fzcldh5xpdsh7wkmxm-1f42e15dae.webp",
-      "/products/yandex/zrl4m7lvrwtptrr878ztbcgqd82skcxb-0154ba7e07.webp",
-      "/products/yandex/hjw8x2b5p2c4q2p5wcwp6rbxqvtb5qg8-ad1ba6a909.webp"
-    ],
     "category": "护肤",
     "description": "这款产品专为早晨脸部显得没精神时准备。PÚSY 按摩滚珠凝胶有助于快速缓解浮肿、焕活肌肤，使面部恢复休息充足般的状态，即使睡眠不足也适用。\n\n配方针对浮肿、疲态和暗沉肤色。咖啡因与植物提取物有助于减轻浮肿、提升肌肤活力，按摩滚珠可均匀涂布产品并增强按摩引流效果。滚动几下后，面部轮廓看起来更清晰，肌肤更显清新透亮。\n\n质地滋润却轻盈，易于推开并快速吸收，不留黏腻感，同时带来舒适清凉感。早晨可用于快速护理；晚上则可留在肌肤上过夜，以加强并延长护理效果。",
-    "sku": "ДПП125",
     "volume": "75毫升",
-    "ingredients": "Aqua, Glycerin, Propylene, Glycol, Polysorbate 20, Sodium PCA, Glucose, Urea, Glutamic Acid, Lysine, Glycine, Allantoin, Lactic Acid, Potassium Sorbate, Sodium Benzoate, Gluconolactone, Calcium Gluconate, Aesculus Hippocastanum Seed Extract, Ruscus Aculeatus Root Extract, Centella Asiatica Extract, Vitis Vinifera Extract, Hedera Helix Leaf Extract, Polygonum Fagopyrum (Buckwheat) Leaf Extract, Troxerutin, Ethyl Menthane Carboxamide, Phenoxyethanol, Ethylhexylglycerin, Caffeine, Sodium Hydroxide, Parfum, Benzyl Salicylate, Hydroxycitronellal, Limonene, Linalool, Disodium EDTA, Sodium Hyaluronate, Carbomer",
     "usage": "使用前，将滚珠部件旋转至听到咔嗒声。轻压包装，将少量凝胶挤在面部肌肤上，再用滚珠沿按摩线从面部中央向外侧滚动涂开。需要时可再次轻压包装补充凝胶。按摩结束后，用湿化妆棉擦去余量，或用温水洗净。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "ochishchayshchiiy-gel-dlya-umyvaniya-pusy-purifying-facial-cleanser-pusy-110-ml-1-1-100481",
     "name": "净澈洁面啫喱",
-    "price": 810,
-    "image": "/products/yandex/72mpwn9k8nn977qvcv5cr7mcgklrcjd7-b9cd1dcce1.webp",
-    "imageAlt": "/products/yandex/94lkwmmwfzz8m9q86s69qxpbpb5dfbhc-6f8127e05a.webp",
-    "images": [
-      "/products/yandex/72mpwn9k8nn977qvcv5cr7mcgklrcjd7-b9cd1dcce1.webp",
-      "/products/yandex/94lkwmmwfzz8m9q86s69qxpbpb5dfbhc-6f8127e05a.webp",
-      "/products/yandex/pjs6glbnh57bj5h9hddvrcxsnkjdxntx-da37cf482c.webp",
-      "/products/yandex/swc5s5vbh49l62tv9rkrlxxwqphktr5c-c737824625.webp"
-    ],
-    "badge": "畅销",
     "category": "护肤",
     "description": "PÚSY 洁面凝胶是一款适合日常护理的温和洁面乳。它可以去除杂质和多余的皮脂，而不破坏皮肤的自然平衡，让您感觉清新干净。\n\n与水接触后，凝胶可轻松铺展在皮肤上并形成柔软的泡沫，提供温和有效的清洁效果，而不会过度干燥。\n\n含有泛醇和洋甘菊水的配方有助于保持洗后的舒适感，而海带提取物则可舒缓肌肤并保持其自然柔软和弹性。",
-    "sku": "ПП70ЧЗ",
     "volume": "110毫升",
-    "ingredients": "Aqua, Acrylates/ Palmeth-25 Acrylate Copolymer, Disodium Laureth Sulfosuccinate, PEG-7 Glyceryl Cocoate, Cocamidopropyl Betaine, Sodium Coco-Sulfate, Biosaccharide Gum-1, Panthenol, Centella Asiatica Extract, Actinidia Chinensis Extract, Sodium Hydroxide, Phenoxyethanol, Ethylhexylglycerin, Sodium Cocoamphoacetate, Rosmarinus Officinalis Water, Citrus Aurantifolia Fruit Extract, Carica Papaya Fruit Extract, Sodium chloride, Glycerin, Palmaria Palmata Extract, Melaleuca Аlternifolia (Tea tree) Leaf Water, Sodium Benzoate, Citric Acid, 1,2-Hexanediol, Disodium EDTA, Potassium Sorbate, Benzyl Alcohol, Dehydroacetic Acid, Propylene Glycol, Parfum, Limonene, Linalool, Citronellol",
     "usage": "将少量凝胶涂抹在湿润的面部皮肤上，轻轻按摩，避开眼睛周围区域，然后用清水彻底冲洗。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "kokosovaya-micellyarnaya-voda-pusy-100-ml-micellar-cocowater-pusy-100-ml-100171",
     "name": "椰子胶束卸妆水",
-    "price": 500,
-    "image": "/products/yandex/fxtg7rx9m76zw47xjsncpjvmhtm5r6gw-e1e861a03a.webp",
-    "imageAlt": "/products/yandex/zbs2g62h9ld67f89lbs26xntwp4qbz5x-8c8a133f37.webp",
-    "images": [
-      "/products/yandex/fxtg7rx9m76zw47xjsncpjvmhtm5r6gw-e1e861a03a.webp",
-      "/products/yandex/zbs2g62h9ld67f89lbs26xntwp4qbz5x-8c8a133f37.webp",
-      "/products/yandex/7s6snqtf864hblz68rgpl77298lvjrp9-c5cf9446c2.webp",
-      "/products/yandex/rvfbdlf8pxqspnsmd5k5t2j7lvlkpsql-60c51a2559.webp"
-    ],
     "category": "护肤",
     "description": "PÚSY 椰子胶束卸妆水可温和清除彩妆与日常污垢。\n\n配方可细致卸除面部、眼部和唇部彩妆，不破坏肌肤自然平衡。以椰子水和温和胶束为基础，在清洁时带来清新感，不会令肌肤过度干燥。\n\n使用后肌肤洁净舒适，不紧绷、不黏腻，也不易感到刺激。适合包括敏感肌在内的各种肤质。",
-    "sku": "1903",
     "volume": "100毫升",
-    "ingredients": "Aqua, Cocos Nucifera Water, Peg-6 Caprylic / Capric Glycerides, Propylene Glycol, Glycerin, Cucumis Sativus Fruit Water, Potassium Sorbate, Sodium Cocoamphoacetate, Panthenol, Disodium EDTA, Caprylyl Glycol, Methy|propanediol, Didecyldimonium Chloride, Polyqua-ternium-80, Citric Acid, Parfum",
     "usage": "将产品涂抹在化妆棉上，轻轻清洁脸部、眼睛和嘴唇的皮肤。用水冲洗",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "rebrending-utrenniiy-ohlajdayshchiiy-tonik-dlya-koji-lica-i-shei-pusy150ml-100232",
     "name": "晨间清凉爽肤水",
-    "price": 1010,
-    "image": "/products/yandex/t92p2ntc2vp5r8cbn9njvqmldhvggj5g-d943ec6f8a.webp",
-    "imageAlt": "/products/yandex/46zhk7fxwh9rqdxfkvsxr9pfdtst65ct-bad2bbe107.webp",
-    "images": [
-      "/products/yandex/t92p2ntc2vp5r8cbn9njvqmldhvggj5g-d943ec6f8a.webp",
-      "/products/yandex/46zhk7fxwh9rqdxfkvsxr9pfdtst65ct-bad2bbe107.webp",
-      "/products/yandex/2llksnmxdb8p7v7j94kmzs6lr6rwwjxx-16fa14e024.webp"
-    ],
     "category": "护肤",
     "description": "PÚSY 晨间清凉爽肤水是一款具有清凉、清新效果的高效护理产品，帮助肌肤为活力满满的一天做好准备，带来清新、焕亮的状态。\n\n这款面部淋巴引流爽肤水兼具保湿作用，有助于改善浮肿。它带来提拉感，减轻肿胀和疲惫痕迹，改善肌肤状态，恢复健康气色。",
-    "sku": "ПП99ЧЗ",
     "volume": "150毫升",
-    "ingredients": "Aqua, Pinus Sylvestris Wood Extract, Propylene Glycol, Glycerin, Biosaccharide Gum-1, Chondrus Crispus Extract, Palmaria Palmata Extract, Panthenol, Citrus Aurantium Dulcis Juice, Citrus Limon Juice, Zingiber Officinale Root Juice, Polysorbate 20, Ethyl Menthane Carboxamide, Disodium EDTA, Ethylhexylglycerin, Phenoxyethanol, Caffeine, Sodium Hydroxide, Sodium Benzoate, Citric Acid, Potassium Sorbate, Parfum, Benzyl Salicylate, Hexyl Cinnamaldehyd.",
-    "inventoryVerified": false,
-    "stock": 0,
+    "usage": null,
     "variants": []
   },
   {
     "slug": "gel-dlya-dusha-pusy-home-shower-body-gel-tobacco-pepper-vanilla-12-100495",
     "name": "沐浴露",
-    "price": 990,
-    "image": "/products/yandex/skj2n2c79rt4gp2l8p62ftfwpbn8ptfv-82a20c4649.webp",
-    "imageAlt": "/products/yandex/xkl2h9dbqkxfhd54bm2n7kcw2fblksp4-eb7d5afb42.webp",
-    "images": [
-      "/products/yandex/skj2n2c79rt4gp2l8p62ftfwpbn8ptfv-82a20c4649.webp",
-      "/products/yandex/xkl2h9dbqkxfhd54bm2n7kcw2fblksp4-eb7d5afb42.webp",
-      "/products/yandex/p2bxzffp6klkfql5f4pg7swtrpw95wjp-30ae384a8c.webp"
-    ],
     "category": "身体护理",
     "description": "PÚSY Shower Body Gel 是一款香氛沐浴露，可温和清洁肌肤，每次使用后都留下细致柔润的肤感。它能轻柔去除污垢，不会令肌肤过度干燥，并带来清新、柔软的感受。\n\n含泛醇、梨果仙人掌提取物和西兰花汁的配方帮助肌肤保持舒适、光滑，甘油则有助于维持沐浴后的水润感。丰盈细腻的泡沫易于在肌肤上铺开，把普通淋浴变成放松的护理仪式。\n\nTobacco Pepper Vanilla 香气由深沉烟草、温暖香草与辛香胡椒交织而成，营造香氛护理体验。适合各种肤质及日常使用。PÚSY Shower Body Gel，让清洁也成为一种享受。",
-    "sku": "ПП92ЧЗ",
     "volume": "230毫升",
-    "ingredients": "Aqua, Sodium Сoco-Sulfate, Coco-Glucoside, Acrylates/Beheneth-25 Methacrylate Copolymer, Parfum, Sodium Cocoamphoacetate, Brassica Oleracea Italica Juice, Glycerin, Opuntia Ficus-Indica Stem Extract, Panthenol, PEG-40 Hydrogenated Castor Oil, Phenoxyethanol, Ethylhexylglycerin, Sodium Benzoate, Potassium Sorbate, Sodium Chloride, Citric Acid, Disodium EDTA, Sodium Hydroxide, Eugenol, Limonene",
     "usage": "取少量沐浴露涂于湿润肌肤或浴球（浴花）上，以按摩方式涂遍全身，再用清水冲洗。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "pena-dlya-vanny-psy-bath-foam-200-ml-100187",
     "name": "泡泡浴液",
-    "price": 690,
-    "image": "/products/yandex/wtbc4xnb86hf258nqftk9zt796dwbvdw-22a4e8a403.webp",
-    "imageAlt": "/products/yandex/2zt9m4rs9bwb49d97p9c4f2xdtgpvp5c-ab64e0b798.webp",
-    "images": [
-      "/products/yandex/wtbc4xnb86hf258nqftk9zt796dwbvdw-22a4e8a403.webp",
-      "/products/yandex/2zt9m4rs9bwb49d97p9c4f2xdtgpvp5c-ab64e0b798.webp",
-      "/products/yandex/6stld7qxbvmdm4s7959wbxlz8rp52wsv-71d12f56e5.webp"
-    ],
     "category": "家居",
     "description": "仿佛在浴室里触碰一朵云。Bath Foam 沐浴泡泡带来彻底放松的片刻。绵密泡沫充盈浴缸，散发柔和香气，并温和呵护肌肤。\n\n含泛醇和甘油的配方有助于预防干燥，使肌肤更显柔润丝滑。不含SLS和对羟基苯甲酸酯，也适合敏感肌肤。\n\n沉浸在芬芳的SPA沐浴仪式中，闭上双眼，让一整天的疲惫重新归零。",
-    "sku": "ПП44ЧЗ",
     "volume": "200毫升",
-    "ingredients": "Aqua; Coco-Glucoside; Sodium Сoco-sulfate; Cocamidopropyl Betaine; parfum; glycerin; Panthenol; Phenoxyethanol; Ethylhexylglycerin; Citric Acid; Disodium; EDTA; СI 14720",
-    "inventoryVerified": false,
-    "stock": 0,
+    "usage": null,
     "variants": []
   },
   {
     "slug": "pusy-home-sol-dlya-vanny-bath-salt-400g-100160",
     "name": "浴盐",
-    "price": 810,
-    "image": "/products/yandex/c56mrtt55bm6nxf4b7qgqqskvjr9cwcn-ee99019ac3.webp",
-    "imageAlt": "/products/yandex/2kmchdhwptqxw2hc9dchnklnm5g7mlqs-ab491601e5.webp",
-    "images": [
-      "/products/yandex/c56mrtt55bm6nxf4b7qgqqskvjr9cwcn-ee99019ac3.webp",
-      "/products/yandex/2kmchdhwptqxw2hc9dchnklnm5g7mlqs-ab491601e5.webp",
-      "/products/yandex/vccmprtcdjxrrschzh6d57c5n6f2gm9q-dcad5434bc.webp",
-      "/products/yandex/dd687zdhbksmz8plqt7db77bn627pzvr-a7350c27fc.webp"
-    ],
     "category": "家居",
     "description": "PÚSY Bath Salt，让浴缸成为属于你的宁静与愉悦空间。海盐与粉红喜马拉雅盐的组合为水中注入天然矿物质，帮助身体放松，缓解漫长一天后的疲劳与紧张。\n\n浴盐温和软化肌肤，让你在泡澡时就感到轻松舒适。Tobacco Pepper Vanilla 香气以温暖舒适的气息包裹身体：烟草、香草与辛香胡椒交织出安宁、深度放松的氛围，把一次普通泡澡变成完整的SPA仪式。",
-    "sku": "ПП22ЧЗ",
     "volume": "400克",
-    "ingredients": "Sodium Chloride (Sea Salt), Sodium Chloride (Himalayan Salt), Parfum.",
     "usage": "在浴缸中注入温水 (36–40°C)。添加 150-200 克盐，等待晶体完全溶解。洗澡15-25分钟，然后洗掉剩余的盐分。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "rebrending-prozrachnyiy-super-gel-fiksator-dlya-broveiy-super-fix-brow-gel-pusy-5-ml-10-100344",
     "name": "Super Fix 眉毛强力定型啫喱",
-    "price": 910,
-    "image": "/products/yandex/4v2424shq9grftr2bq8lpsfgtbc2sqxg-2ea3a3f1ab.webp",
-    "imageAlt": "/products/yandex/t44hmc7qv9tvhh6jn6xvzjcgqr64xvg9-078d5f3454.webp",
-    "images": [
-      "/products/yandex/4v2424shq9grftr2bq8lpsfgtbc2sqxg-2ea3a3f1ab.webp",
-      "/products/yandex/t44hmc7qv9tvhh6jn6xvzjcgqr64xvg9-078d5f3454.webp",
-      "/products/yandex/gxk94j25zb4spbdwrgcd8q7mn8n4sz98-9b3c5a5505.webp",
-      "/products/yandex/4vj4nzklnxz8fgrtthbbxxwr4h72jkkm-3ec10e1a02.webp"
-    ],
-    "badge": "畅销",
     "category": "眉妆",
     "description": "广受欢迎的 Brow Fix Gel 眉毛定型凝胶，是打造利落眉形的秘密。即使难以驾驭的眉毛，也能帮助梳理定型，并维持一整天。\n\n含维生素B5的配方不仅可靠定型，也能滋养并强韧眉毛，使其保持健康、细致的状态。适合日常使用，无论雨天、炎热天气还是运动时，都能帮助眉形保持整齐。\n\n凝胶逐根固定眉毛，不粘结、不留白屑。透明质地适配各种眉色，超细刷头能均匀梳理眉毛，打造如沙龙整理后的效果。",
-    "sku": "ДЧЗ0006",
     "volume": "5毫升",
-    "ingredients": "Aqua, VP/VA Copolymer, Glycerin, Acrylates Copolymer, Acrylates/C10-30 Alkyl Methacrylate Copolymer, Aminomethyl Propanol, Panthenol, PEG-40 Hydrogenated Castor Oil, Ethylhexylglycerin, Phenoxyethanol, Parfum, Disodium EDTA, Citric Acid.",
     "usage": "用刷子在眉毛上涂抹少量凝胶，使眉毛呈现所需的形状。静置直至完全干燥。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -2395,23 +1812,10 @@
   {
     "slug": "rebrending-prozrachnyiy-gel-fiksator-dlya-jestkih-broveiy-pusy-5-ml-6-100345",
     "name": "粗硬眉毛强力定型啫喱",
-    "price": 910,
-    "image": "/products/yandex/lw5z929wzmc8h4bhxbffmltc7mgt52tw-b221cb5c3e.webp",
-    "imageAlt": "/products/yandex/h7mnrhrlh6vdbxrqcrlt98vxvq49nw4n-d01713059d.webp",
-    "images": [
-      "/products/yandex/lw5z929wzmc8h4bhxbffmltc7mgt52tw-b221cb5c3e.webp",
-      "/products/yandex/h7mnrhrlh6vdbxrqcrlt98vxvq49nw4n-d01713059d.webp",
-      "/products/yandex/w7c8thqmq8mvwxbsxfrmvbcbvkz8nlwz-66b0597cb4.webp",
-      "/products/yandex/z6hv8qcrncnswrspbm8z69bwgtm7747b-2a9a1ef284.webp"
-    ],
-    "badge": "畅销",
     "category": "眉妆",
     "description": "专为浓密、粗硬和难以驾驭的眉毛打造。PÚSY Strong Fix Brow Gel 强力定型眉胶，会成为你的新宠。\n\n无需沙龙护理，即可打造最长 48 小时的仿沙龙眉形定型效果。使用舒适，不留白屑；便捷的双面刷头可让产品均匀覆盖，并细致梳理每一根眉毛。",
-    "sku": "ДЧЗ0004",
     "volume": "5毫升",
-    "ingredients": "Aqua, VP/VA, Copolymer, Glycerin, Acrylates Copolymer, Acrylates/C10-30 Alkyl Methacrylate Copolymer, Aminomethypropanol, Panthenol, PEG-40 Hydrogenated Castor Oil, Ethylhexylglycerin, Phenoxyethanol, Parfum, Disodium EDTA, Citric Acid",
-    "inventoryVerified": false,
-    "stock": 0,
+    "usage": null,
     "variants": [
       {
         "name": "色号",
@@ -2473,21 +1877,10 @@
   {
     "slug": "karandash-dlya-broveiy-s-refilom-medium-brown-100758",
     "name": "眉笔带笔芯 深棕色",
-    "price": 890,
-    "image": "/products/yandex/95ckqhmb8bqmbw9n5vttg4r5rxnnv9fk-9928132662.webp",
-    "imageAlt": "/products/yandex/95ckqhmb8bqmbw9n5vttg4r5rxnnv9fk-9928132662.webp",
-    "images": [
-      "/products/yandex/95ckqhmb8bqmbw9n5vttg4r5rxnnv9fk-9928132662.webp",
-      "/products/yandex/95ckqhmb8bqmbw9n5vttg4r5rxnnv9fk-9928132662.webp"
-    ],
-    "badge": "新品",
     "category": "眉妆",
     "description": "认识一下你的理想眉笔。\n\n0.8 毫米超细笔芯可画出仿真毛流般的细线，填补眉毛稀疏处，令眉形自然利落。新手也易上手：笔芯始终保持尖细，无需削笔；柔软眉刷可及时晕开笔触、梳理眉毛，呈现自然整洁的妆效。\n\nDark Brown 是浓郁的冷调棕色，适合深发色人群。\n\n配方持妆最长可达 24 小时，从早到晚保持眉形，无需反复补妆。\n\n笔芯用完后不必更换整支眉笔，只需换上替换芯即可。",
-    "sku": "ДЧЗ0057",
-    "ingredients": "C10-18 Triglycerides, Copernicia Cerifera (Carnauba) Wax, Hydrogenated Coco-Glycerides, Hydrogenated C12-18 Triglycerides, Hydrogenated Rapeseed Oil, Hydrogenated Palm Kernel Oil, Mica, Paraffin, Hydrogenated Soybean Oil, Microcrystalline Wax, Bis-Diglyceryl Polyacyladipate-2, Glyceryl Stearates, Triethoxycaprylylsilane, Rhus Succedanea Fruit Wax, Stearic Acid, Caprylyl Glycol, CI 77499, CI 77492, CI 77491, CI 77163, CI 77891.",
+    "volume": null,
     "usage": "沿着毛发生长的方向短而轻地涂抹。填充稀疏区域并刷涂以获得自然效果。\n\n更换笔芯：逆时针拧下用过的笔芯。插入新的并稍微顺时针旋转将其固定。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -2523,21 +1916,10 @@
   {
     "slug": "refil-karandasha-dlya-broveiy-light-brown-100757",
     "name": "眉笔替换芯 深棕色",
-    "price": 390,
-    "image": "/products/yandex/v7bzk2rzktlk5cpssvmnc5qwr8xcctxb-8b14f9226d.webp",
-    "imageAlt": "/products/yandex/v7bzk2rzktlk5cpssvmnc5qwr8xcctxb-8b14f9226d.webp",
-    "images": [
-      "/products/yandex/v7bzk2rzktlk5cpssvmnc5qwr8xcctxb-8b14f9226d.webp",
-      "/products/yandex/v7bzk2rzktlk5cpssvmnc5qwr8xcctxb-8b14f9226d.webp"
-    ],
-    "badge": "新品",
     "category": "眉妆",
     "description": "一支笔身，可反复更换笔芯。替换芯同样采用 0.8 毫米超细笔芯，能逐根勾勒眉毛、填补稀疏部位，呈现自然利落的眉形。配方持妆最长可达 24 小时，笔芯用量节省，经久耐用。\n\nDark Brown 是浓郁的冷调深棕色，适合深色头发人群。\n\n旋下用完的笔芯，装入新笔芯，眉笔即可继续使用。",
-    "sku": "ДЧЗ0060",
-    "ingredients": "C10-18 Triglycerides, Copernicia Cerifera (Carnauba) Wax, Hydrogenated Coco-Glycerides, Hydrogenated C12-18 Triglycerides, Hydrogenated Rapeseed Oil, Hydrogenated Palm Kernel Oil, Mica, Paraffin, Hydrogenated Soybean Oil, Microcrystalline Wax, Bis-Diglyceryl Polyacyladipate-2, Glyceryl Stearates, Triethoxycaprylylsilane, Rhus Succedanea Fruit Wax, Stearic Acid, Caprylyl Glycol, CI 77499, CI 77492, CI 77491, CI 77163, CI 77891.",
+    "volume": null,
     "usage": "沿眉毛生长方向，用短而轻的笔触描画，填补稀疏部位，再用眉刷梳理，使妆效更自然。\n\n更换笔芯：逆时针旋下用完的笔芯，装入新笔芯，再轻轻顺时针旋转固定。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -2573,46 +1955,19 @@
   {
     "slug": "gel-dlya-ukladki-broveiy-pusy-brow-fix-professional-15ml-10-100535",
     "name": "眉毛定型凝胶",
-    "price": 1520,
-    "image": "/products/yandex/8j6rcj6n7blss5d4gq4fhqhhmmcr7g2g-5a30ce9290.webp",
-    "imageAlt": "/products/yandex/shc7hblrx99dqln7lxzrmm8ltdt5jnhv-b21e759f96.webp",
-    "images": [
-      "/products/yandex/8j6rcj6n7blss5d4gq4fhqhhmmcr7g2g-5a30ce9290.webp",
-      "/products/yandex/shc7hblrx99dqln7lxzrmm8ltdt5jnhv-b21e759f96.webp",
-      "/products/yandex/xt5pfpnxflw79q6fc9g7gn6sqgz9n7vb-dd3348cd9f.webp",
-      "/products/yandex/m7wkhhnjfr65jd9bx4l5dtnksz4pxm4z-9e17ff3e7f.webp"
-    ],
     "category": "眉妆",
     "description": "专业定型与护理，一瓶兼得。Brow Fix Gel PRO 眉毛定型凝胶专为专业人士打造，也适合日常使用。透明配方含维生素 B5，帮助强韧眉毛、促进生长，并提供可靠定型而不粘结眉毛。\n\n轻盈质地在肌肤上自然不显痕迹，可呈现仿沙龙眉毛定型效果，最长维持 48 小时。15 毫升大容量罐装搭配细小斜角刷，即使较难梳理的眉毛也能精准定型，突出自然弧度与眉形。\n\nBrow Fix Gel PRO 集大容量、护理与专业妆效于一体，随时都能使用。",
-    "sku": "ПП10ЧЗ",
     "volume": "15毫升",
-    "ingredients": "Aqua, Glycerin, Acrylates Copolymer, Acrylates/C10-30 Alkyl Methacrylate, Copolymer, Aminomethyl Propanol, Panthenol, PEG-40 Hydrogenated Castor Oil, Ethylhexylglycerin, Phenoxyethanol, Disodium EDTA, Citric Acid, Parfum, Limonene, Eugenol, Coumarin",
     "usage": "在眉毛上涂抹少量凝胶，赋予眉毛所需的形状。静置直至完全干燥。用水或专用卸妆液冲洗。适合日常使用",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "rebrending-vosstanavlivayshchiiy-gel-fiksator-dlya-broveiy-pusy-5-ml-13-100346",
     "name": "修护型眉毛定型啫喱",
-    "price": 810,
-    "image": "/products/yandex/klbbvm9l6k2xqxfrfw4cxjmc9lmczbtq-e13e5a569c.webp",
-    "imageAlt": "/products/yandex/5ndldmtff62nbwz9c9qggj7nktnfdhjz-d515642375.webp",
-    "images": [
-      "/products/yandex/klbbvm9l6k2xqxfrfw4cxjmc9lmczbtq-e13e5a569c.webp",
-      "/products/yandex/5ndldmtff62nbwz9c9qggj7nktnfdhjz-d515642375.webp",
-      "/products/yandex/g47vzwlqw7qppqsfgwlbkspwbvn9hbw6-6d6a89a33e.webp",
-      "/products/yandex/dnj2twd6q6zv6fgsvt7s422znqnczjwt-5b135103d8.webp"
-    ],
-    "badge": "畅销",
     "category": "眉妆",
     "description": "一次涂抹，同时实现密集护理与自然定型。PÚSY Healthy Fix Brow Gel 可轻柔、细致地固定眉毛，保留自然妆效，同时作为完整的眉毛护理产品发挥作用。\n\n含生物素和肽的配方帮助强韧眉毛、修护受损眉毛并维持健康状态。锯棕榈、茶树和鼠尾草提取物帮助滋养保湿、减轻炎症，并为更强韧、更浓密的眉毛生长营造舒适条件。\n\n适合日常使用，不留白屑，全天保持眉毛整洁有型。",
-    "sku": "ДЧЗ0005",
     "volume": "5毫升",
-    "ingredients": "Aqua, VP/VA Copolymer, Glycerin, Acrylates Copolymer, Acrylates/C10-30 Alkyl Methacrylate Copolymer, Aminomethyl Propanol, Biotinoyl Tripeptide-1, 1,2-Hexanediol, Arginine, Lactic Acid, Glycine Soja Germ Extract, Triticum Vulgare Germ Extract, Scutellaria Baicalensis Root Extract, Gluconolactone, Calcium Gluconate, Serenoa Serrulata Fruit Extract, Panthenol, Hydrolyzed Keratin, Biotin, Niacinamide, Camellia Sinensis Leaf Water, Aloe Barbadensis Leaf Juice, Sodium Hyaluronate, PEG-40 Hydrogenated Castor Oil, Propanediol, Ethylhexylglycerin, Phenoxyethanol, Parfum, Disodium EDTA, Citric Acid, Dehydroacetic Acid, Benzyl Alcohol, Potassium Sorbate, Sodium Benzoate.",
     "usage": "用刷子在眉毛上涂抹少量凝胶，使眉毛呈现所需的形状。静置直至完全干燥。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -2674,44 +2029,19 @@
   {
     "slug": "fiksiruyshchiiy-gel-dlya-broveiy-pusy-lamination-5-ml-5-1-100619",
     "name": "Lamination 眉毛定型啫喱",
-    "price": 490,
-    "image": "/products/yandex/2pw6k74vmll7fmj7xst2nngtgk5klbwj-0e8e7ca4d1.webp",
-    "imageAlt": "/products/yandex/jb74r5czvb5ljg2vvnbcvl72vqfzh9b2-5d32384021.webp",
-    "images": [
-      "/products/yandex/2pw6k74vmll7fmj7xst2nngtgk5klbwj-0e8e7ca4d1.webp",
-      "/products/yandex/jb74r5czvb5ljg2vvnbcvl72vqfzh9b2-5d32384021.webp",
-      "/products/yandex/7klfw6m5dxl8k9gvhl2htxqkv8cmhfrz-6badbb09fd.webp"
-    ],
     "category": "眉妆",
     "description": "Lamination 眉毛定型凝胶，以适合日常使用的便捷形式呈现仿沙龙眉毛定型效果。一次梳理定型，之后无需反复整理。\n\n凝胶贴合眉毛并固定毛流方向，帮助塑造清晰眉形，无需到店护理也能保持利落妆效。\n\n超强定型最长可达 48 小时，适合长时间外出或活动安排。\n\n迷你刷头配有短而有弹性的刷毛，可精准控制眉毛走向，从自然眉形到更利落的线条感均可轻松打造。配方快速成膜，不粘结眉毛，也不留白屑。\n\n适合各种眉型，定型后自然不显痕迹，日间无需反复调整。",
-    "sku": "ДЧА0005",
     "volume": "5毫升",
-    "ingredients": "Aqua, PVP, Propylene Glycol,Glycerin, Acrylates/Palmeth-25 Acrylate Copolymer, PEG-40 Hydrogenated Castor Oil, PPG-26-Buteth-26, DMDM Hydantoin, Sodium Hydroxide, Disodium EDTA, Parfum, Benzyl Salicylate, Citral.",
     "usage": "用刷子在眉毛上涂抹少量凝胶，使眉毛呈现所需的形状。静置直至完全干燥。适合日常使用。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "rebrending-prozrachnyiy-gel-fiksator-dlya-broveiy-pusy-5ml-1-100347",
     "name": "透明眉毛定型啫喱",
-    "price": 810,
-    "image": "/products/yandex/6g65dkrjdfgc7xgxsqngm8vnqtc8j2mt-94e286be02.webp",
-    "imageAlt": "/products/yandex/xkz77r7c5fj2kgwrlbkfjh6nnh4lvshw-0543ff4b9f.webp",
-    "images": [
-      "/products/yandex/6g65dkrjdfgc7xgxsqngm8vnqtc8j2mt-94e286be02.webp",
-      "/products/yandex/xkz77r7c5fj2kgwrlbkfjh6nnh4lvshw-0543ff4b9f.webp",
-      "/products/yandex/ms2cflrgf44gl4ln6ppgv59hqqv6tjcs-d3970a0b0d.webp"
-    ],
-    "badge": "畅销",
     "category": "眉妆",
     "description": "广受欢迎的 Brow Fix Gel 眉毛定型凝胶，是打造利落眉形的秘密。即使难以驾驭的眉毛，也能帮助梳理定型，并维持一整天。\n\n含维生素B5的配方不仅可靠定型，也能滋养并强韧眉毛，使其保持健康、细致的状态。适合日常使用，无论雨天、炎热天气还是运动时，都能帮助眉形保持整齐。\n\n凝胶逐根固定眉毛，不粘结、不留白屑。透明质地适配各种眉色，超细刷头能均匀梳理眉毛，打造如沙龙整理后的效果。",
-    "sku": "ПП08Р",
     "volume": "5毫升",
-    "ingredients": "Aqua, Glycerin, Acrylates Copolymer, Acrylates/C10-30 Alkyl\nMethacrylate, Copolymer, Aminomethyl Propanol, Panthenol, PEG-40 Hydrogenated Castor Oil, Ethylhexylglycerin, Phenoxyethanol, Disodium EDTA, Citric Acid, Parfum, Limonene, Eugenol, Coumarin",
     "usage": "在眉毛上涂抹少量凝胶，赋予眉毛所需的形状。静置直至完全干燥。用水或专用卸妆液冲洗。适合日常使用。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -2773,42 +2103,19 @@
   {
     "slug": "prozrachnyiy-super-gel-fiksator-dlya-broveiy-super-fix-brow-gel-pusy-25-ml-13-100641",
     "name": "透明迷你强效眉毛定型啫喱",
-    "price": 490,
-    "image": "/products/yandex/ntmjr25r9bxlbbkg5fr28bmvwhc86b6l-f05e128e1f.webp",
-    "imageAlt": "/products/yandex/ntmjr25r9bxlbbkg5fr28bmvwhc86b6l-f05e128e1f.webp",
-    "images": [
-      "/products/yandex/ntmjr25r9bxlbbkg5fr28bmvwhc86b6l-f05e128e1f.webp"
-    ],
-    "badge": "畅销",
     "category": "眉妆",
     "description": "为了让你能把喜爱的眉毛定型凝胶随身携带，超强定型眉胶现推出迷你规格：\n– 轻松装进任何手袋，随时取用；\n– 方便体验广受欢迎的 PÚSY 明星单品；\n– 品牌标识全新呈现，将风格与实用融于一瓶。\n\nPÚSY Brow Super Fix Gel 超强定型眉胶，是打造利落眉形的秘密。它能帮助梳理再难驾驭的眉毛，并让造型维持一整天，不黏腻、不紧绷，也不留白屑。\n\n含维生素B5的配方在可靠定型的同时呵护眉毛，帮助强韧眉毛并保持细致状态。适合日常使用，无论雨天、炎热天气还是运动时，都能帮助眉形保持整齐。",
-    "sku": "ПП80ЧЗ",
     "volume": "2.5毫升",
-    "ingredients": "Aqua, VP/VA Copolymer, Glycerin, Acrylates Copolymer, Acrylates/C10-30 Alkyl Methacrylate Copolymer, Aminomethyl Propanol, Panthenol, PEG-40 Hydrogenated Castor Oil, Ethylhexylglycerin, Phenoxyethanol, Parfum, Disodium EDTA, Citric Acid.",
     "usage": "用刷子在眉毛上涂抹少量凝胶，使眉毛呈现所需的形状。静置直至完全干燥。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "mnogofunkcionalnaya-kist-pusy-touch-point-32-gr-100252",
     "name": "多功能刷",
-    "price": 810,
-    "image": "/products/yandex/bfnmkwxvt8m7b7tghd29s5rfjszjrfrm-5afbe510f9.webp",
-    "imageAlt": "/products/yandex/h64q6xhtwbbjwg6dpfs245n5lmn64pk9-c2e9f1ffc4.webp",
-    "images": [
-      "/products/yandex/bfnmkwxvt8m7b7tghd29s5rfjszjrfrm-5afbe510f9.webp",
-      "/products/yandex/h64q6xhtwbbjwg6dpfs245n5lmn64pk9-c2e9f1ffc4.webp",
-      "/products/yandex/28g8f9wkzt2wq5ssls42588l2sznrzmj-61209282a4.webp",
-      "/products/yandex/jsw5jbpz69bv9jkb4bwk2bxvvjvlt6v4-453f1fd185.webp"
-    ],
     "category": "配件",
     "description": "PÚSY 多功能美妆刷，是处理膏霜类彩妆的全能助手：从粉底、遮瑕，到腮红、修容和高光均可使用。\n\n柔软而密实的刷毛可帮助产品均匀上妆，并实现自然、充分的晕染。\n\n一把刷具，解锁多种妆容。",
-    "sku": "1915",
-    "ingredients": "Ручка: полистирол, алюминий; Ворс: синтетические нити (ПБТ)",
+    "volume": null,
     "usage": "用刷具蘸取适量产品，以轻柔动作均匀涂抹于肌肤。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -2828,158 +2135,55 @@
   {
     "slug": "kosmetichka-oblachko-pusy-100249",
     "name": "云朵化妆包",
-    "price": 2030,
-    "image": "/products/yandex/nch8x9frk5q6qncsz8rwbl4cm6hzrcgh-02aa1f0eb6.webp",
-    "imageAlt": "/products/yandex/nnntksw8n5rzqt4spghs4dqrx9cscqzq-1a364f6c2c.webp",
-    "images": [
-      "/products/yandex/nch8x9frk5q6qncsz8rwbl4cm6hzrcgh-02aa1f0eb6.webp",
-      "/products/yandex/nnntksw8n5rzqt4spghs4dqrx9cscqzq-1a364f6c2c.webp"
-    ],
     "category": "配件",
     "description": "给你的 PÚSY 瓶瓶罐罐一个云朵般的收纳空间！\n\n材质柔软、触感舒适，简约设计配合恰到好处的容量，适合收纳化妆品和配件。可靠的拉链便于使用，也能安心收纳。雪白表面易于清洁，用湿布轻轻擦拭即可。\n\n适合日常使用，也适合旅行携带。",
-    "sku": "1904",
-    "ingredients": "Текстильный материал – 100% полиэстер.\nНаполнитель – 100% полипропиленовое волокно.",
-    "inventoryVerified": false,
-    "stock": 0,
-    "variants": []
-  },
-  {
-    "slug": "kosmetichka-magic-bag-pusy-100248",
-    "name": "化妆包MAGIC BAG",
-    "price": 2590,
-    "image": "/products/yandex/5b5zg8rbc8qztq6bgx6x5ml6x2x6s6w7-96c5bae821.webp",
-    "imageAlt": "/products/yandex/zljpc8zvxgb7chs5wgtlc9znfs5c56sm-dc894f04bf.webp",
-    "images": [
-      "/products/yandex/5b5zg8rbc8qztq6bgx6x5ml6x2x6s6w7-96c5bae821.webp",
-      "/products/yandex/zljpc8zvxgb7chs5wgtlc9znfs5c56sm-dc894f04bf.webp",
-      "/products/yandex/cldhcgbckfxmfc976jk48m5ths2jlmjs-ef6f8ded99.webp"
-    ],
-    "category": "配件",
-    "description": "由于空间的完美组织，宽敞的白色 PÚSY 化妆包可轻松容纳您所有的必备产品。其时尚的设计和百搭的白色使其成为从日常穿着到旅行等任何造型的时尚伴侣。",
-    "sku": "ДА0001",
-    "inventoryVerified": false,
-    "stock": 0,
-    "variants": []
-  },
-  {
-    "slug": "mini-kosmetichka-magic-bag-pusy-100251",
-    "name": "迷你化妆包 MAGIC BAG",
-    "price": 2190,
-    "image": "/products/yandex/mwzvkvj6gc5vwk5b5c4j4s69txgvjfs8-e0a839e992.webp",
-    "imageAlt": "/products/yandex/74fknnjhv22wflbxfsl6fvp9rdv54jcz-3df0621260.webp",
-    "images": [
-      "/products/yandex/mwzvkvj6gc5vwk5b5c4j4s69txgvjfs8-e0a839e992.webp",
-      "/products/yandex/74fknnjhv22wflbxfsl6fvp9rdv54jcz-3df0621260.webp",
-      "/products/yandex/rjbg4bqhwpcnvfxctzhm4c5vwdpw6vmt-88295f43c8.webp"
-    ],
-    "category": "配件",
-    "description": "这款小巧的白色 PÚSY 化妆包将时尚的设计与惊人的必需品容量融为一体。紧凑而时尚 - 甚至可以轻松放入小手提包中。",
-    "sku": "ДА0002",
-    "inventoryVerified": false,
-    "stock": 0,
+    "volume": null,
+    "usage": null,
     "variants": []
   },
   {
     "slug": "odnorazovye-netkanye-polotenca-dlya-lica-pusy-clean-girl-80sht-up-100224",
     "name": "一次性无纺布洗脸巾",
-    "price": 490,
-    "image": "/products/yandex/lnvjq77j7xjn7h9kv2jcnj4tbz8zpqh6-fe8b82fc1a.webp",
-    "imageAlt": "/products/yandex/ptp4fdgh2q77gkttv9b8wr86rnktjblk-f23a35238f.webp",
-    "images": [
-      "/products/yandex/lnvjq77j7xjn7h9kv2jcnj4tbz8zpqh6-fe8b82fc1a.webp",
-      "/products/yandex/ptp4fdgh2q77gkttv9b8wr86rnktjblk-f23a35238f.webp",
-      "/products/yandex/qkc2qqcssw4j64wk7874gndx2p6lmwxw-61287b9a64.webp",
-      "/products/yandex/mq5bb8w8dfbc9vvfdq7wqqdgrlcw8vv9-3ecdcb9f0d.webp"
-    ],
     "category": "配件",
     "description": "由无纺材料制成的一次性粘胶面巾提供细腻的皮肤护理。无绒质地可降低皮肤刺激的风险。\n\n毛巾由 100% 粘胶纤维制成，不含染料或颜料。",
-    "sku": "1905ЧЗ",
-    "ingredients": "100% вискоза (нетканое полотно)",
+    "volume": null,
     "usage": "用水或您最喜欢的清洁剂润湿毛巾，然后轻轻擦拭脸部。适合日常清洁面部杂质和去除淡妆，方便在家、水疗中心、旅行和健身房使用。不适合重复使用。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "rebrending-uvlajnyayshchiiy-krem-dlya-ruk-pusy-tobacco-pepper-vanilla-13-100658",
     "name": "保湿护手霜",
-    "price": 400,
-    "image": "/products/yandex/6mf7tkr9h7pqkrh5b68ngmm4gvzhxzwv-7e50bc3cc5.webp",
-    "imageAlt": "/products/yandex/tvmlcww9wsk6ksp7q7jprlgv444kbncc-201d3d6b90.webp",
-    "images": [
-      "/products/yandex/6mf7tkr9h7pqkrh5b68ngmm4gvzhxzwv-7e50bc3cc5.webp",
-      "/products/yandex/tvmlcww9wsk6ksp7q7jprlgv444kbncc-201d3d6b90.webp"
-    ],
     "category": "身体护理",
     "description": "便携规格，可轻松放入手袋、化妆包，也适合放在办公桌上，让手部护理始终触手可及。PÚSY 护手霜以轻盈舒适的质地，为双手提供密集滋养与保湿。\n\n它能迅速缓解干燥与紧绷，柔软肌肤，让双手恢复细致、健康有光泽的状态。玫瑰水、泛醇和乳木果油帮助修护肌肤，使其更平滑柔嫩；维生素E则帮助维持保护屏障，提升舒适感。\n\n乳霜易于涂开、迅速吸收，不留黏腻感或油膜，只留下柔软、细致的双手。",
-    "sku": "ПП96ЧЗ",
     "volume": "30毫升",
-    "ingredients": "Aqua, Rosa Damascena Flower Water, Coco-Caprylate, Glycerin, Octyldodecano, Butyrospermum Parkii (Shea) Butter, Cetearyl Alcohol, Glyceryl Stearate, PEG-100 Stearate, Cyclopentasiloxane, Dimethicone, Phenoxyethanol, Ethylhexylglycerin, Panthenol, Sodium Polyacrylate, Carbomer, Tocopheryl Acetate, Sodium Hyaluronate, Avena Sativa Leaf/Stalk Extract, Saccharomyces Ferment Lysate Filtrate, Citric Acid, Sodium Benzoate, Potassium Sorbate, Sodium Hydroxide, Parfum, Eugenol, Linalool.",
     "usage": "将乳霜涂抹在清洁双手的皮肤上，并通过按摩动作使其均匀分布。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "v-tube-gialuronovyiy-krem-gel-dlya-tela-pusy-hyaluronic-body-cream-gel-150-ml-100237",
     "name": "玻尿酸身体乳霜啫喱",
-    "price": 1010,
-    "image": "/products/yandex/s48jqdqg4vhktdcm9c9q5zkjkbj49b2w-6f9c8e62c1.webp",
-    "imageAlt": "/products/yandex/rdhmdmfs6vvvh7nl9b5mct4jxmdv4sbp-be21519a78.webp",
-    "images": [
-      "/products/yandex/s48jqdqg4vhktdcm9c9q5zkjkbj49b2w-6f9c8e62c1.webp",
-      "/products/yandex/rdhmdmfs6vvvh7nl9b5mct4jxmdv4sbp-be21519a78.webp",
-      "/products/yandex/tdcpdm6llgggs9bglkkhf7xjqzgjpxpr-b93d8c1e6b.webp"
-    ],
     "category": "身体护理",
     "description": "PÚSY Hyaluronic Body Cream-Gel 透明质酸身体乳霜啫喱，为重视舒适肤感的肌肤提供轻盈、愉悦的护理。丝滑质地易于在肌肤上涂开并迅速吸收，可快速缓解干燥与紧绷感，使肌肤柔软、光滑、细致，不留黏腻感或厚重感。\n\n透明质酸帮助肌肤维持适宜的水润状态，乳木果油、可可脂和西兰花油滋养肌肤并帮助提升弹性。维生素 E 帮助维持肌肤保护屏障，使肌肤在不同季节都呈现健康光泽。\n\n适合日常使用，可在沐浴后或白天肌肤需要舒适护理时涂抹。",
-    "sku": "ПП32",
     "volume": "150毫升",
-    "ingredients": "Aqua, Rosa Damascena Flower Water, Dicaprylyl Carbonate, Butylene Glycol, Coco-Caprylate, Hydroxypropyl Starch Phosphate, Brassica Campestris (Rapeseed) Sterols, Cetearyl Alcohol, Disodium Cetearyl Sulfosuccinate, Butyrospermum Parkii (Shea) Butter, Theobroma Cacao (Cocoa) Seed Butter, Brassica Oleracea Italica (Broccoli) Seed Oil, Panthenol, Glycerin, Sodium Hyaluronate, Pullulan, Trehalose, Urea, Serine, Algin, Pentylene Glycol, Caprylyl Glycol, Phenoxyethanol, Ethylhexylglycerin, Acrylates/Beheneth-25 Methacrylate Copolymer, Glyceryl Polyacrylate, Mica (CI 77019), Titanium Dioxide (CI 77891), Iron Oxides (CI 77491), Disodium EDTA, Pentaerythrityl Tetra-di-t-butyl Hydroxyhydrocinnamate, Cyclopentasiloxane, Disodium Phosphate, Potassium Phosphate, Sodium Hydroxide, Citric Acid, Parfum, Eugenol, Coumarin, Linalool, Limonene",
     "usage": "通过按摩动作将乳霜均匀涂抹到之前清洁过的湿或干身体皮肤上。留下直至完全吸收。供外用。不需要冲洗。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "avtozagar-dlya-lica-pusy-magic-water-face-self-tanner-pusy-magic-water-100-ml-25-100566",
     "name": "Magic Water 面部免晒美黑喷雾",
-    "price": 1010,
-    "image": "/products/yandex/vc2ztdj8zp5n89nm2rghfgtrjmdh6rcx-ccc8ba0018.webp",
-    "imageAlt": "/products/yandex/lxksj9pswl69ks9755lzvjc4hmvw5l4l-b4e2bd72b2.webp",
-    "images": [
-      "/products/yandex/vc2ztdj8zp5n89nm2rghfgtrjmdh6rcx-ccc8ba0018.webp",
-      "/products/yandex/lxksj9pswl69ks9755lzvjc4hmvw5l4l-b4e2bd72b2.webp"
-    ],
     "category": "护肤",
     "description": "PÚSY Magic Water 面部免晒美黑喷雾，一瓶兼顾自然光泽与面部肌肤护理。新一代温和配方可呈现均匀、自然的美黑效果，不留斑驳，也不会令肌肤干燥，同时为肌肤补充水分。\n\n海带和积雪草天然提取物温和呵护肌肤，帮助提升弹润感；泛醇和透明质酸帮助肌肤保持健康、年轻的状态。\n\nMagic Water，轻轻一喷即可呈现美黑效果。",
-    "sku": "ДЧЗ0020",
     "volume": "100毫升",
-    "ingredients": "Aqua, Dihydroxyacetone, Propylene Glycol, Polysorbate 20, Erythrulose, Glycerin, Laminaria Digitata Extract, Citric Acid, Centella Asiatica Extract, Panthenol, Mentha Perita Flower/Leaf/Stem Water, Anthemis Nobilis Flower Water, Sodium Hyaluronate, Ethylhexylglycerin, Phenoxyethanol, Sodium benzoate, Potassium Sorbate, Benzyl Alcohol, Dehydroacetic Acid, Parfum, Benzyl Salicylate, Linalool, Limonene.",
     "usage": "为了获得均匀的晒黑效果，请在使用产品之前用轻微的去角质或磨砂膏彻底清洁皮肤。将美黑喷雾喷在清洁干燥的面部皮肤上，距离 20-30 厘米。请记住，自晒黑不是一种涂抹后可以立即洗掉的颜料，不要喷得太靠近皮肤。使用后，请勿触摸脸部或用水冲洗产品。等到完全干燥。涂抹后 2-6 小时，肤色将开始显现。为了保持效果，每周使用美黑剂 2-3 次。开始使用 2-3 次喷雾，然后选择最佳用量以达到所需的晒黑强度。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "skrab-slaiym-dlya-tela-pusy-matcha-detox-100197",
     "name": "Matcha Detox 身体史莱姆磨砂膏",
-    "price": 910,
-    "image": "/products/yandex/gtgw4pd8wqv56pmhn6g48x9cr5wtbsbn-cb3730cb5e.webp",
-    "imageAlt": "/products/yandex/s9hr7gttvjgcwv9rzgnpfv8qgsllxlj2-4ed316bfd6.webp",
-    "images": [
-      "/products/yandex/gtgw4pd8wqv56pmhn6g48x9cr5wtbsbn-cb3730cb5e.webp",
-      "/products/yandex/s9hr7gttvjgcwv9rzgnpfv8qgsllxlj2-4ed316bfd6.webp",
-      "/products/yandex/lld2wxqdr6pz5kmvtxfq8fggbnndvrdg-ed02f18da7.webp"
-    ],
     "category": "身体护理",
     "description": "PÚSY Matcha Detox 史莱姆身体磨砂膏二合一：把放松的触感体验与专业身体护理装进一个可爱的罐子里。\n\n磨砂膏温和去除老废角质，让肌肤呈现清新、健康光泽。令人愉悦的史莱姆触感让人忍不住想用手捏一捏，把单调的清洁过程变成一段冥想般的体验，帮助舒缓漫长一天后的紧张。抹茶如同肌肤的超级食物，帮助改善瑕疵，令肌肤更有活力、焕发健康光泽，如同做完SPA。大豆油和大麻籽油深度滋养并帮助修护肌肤，使其平滑有弹性。\n\nPÚSY Matcha Detox 史莱姆身体磨砂膏，是你的专属自爱仪式：给肌肤一场净澈护理，也给自己片刻愉悦。",
-    "sku": "ПП79ЧЗ",
     "volume": "250克",
-    "ingredients": "Sucrose (Sugar), Glycerin, Aqua, Kaolin, Glycine Soja (Soybean) Oil, Phenoxyethanol, Parfum, Xanthan Gum, Tocopheryl Acetate, Camellia Sinensis (Matcha) Leaf Powder, Cannabis Sativa Seed Oil, Tocopherol, Beta-Sitosterol, Squalene, Helianthus Annuus Seed Oil, CI 75810",
     "usage": "在湿润的皮肤上涂抹少量磨砂膏。用手指或专用刷子轻轻按摩身体几分钟，然后用温水冲洗。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -2999,23 +2203,10 @@
   {
     "slug": "skrab-dlya-tela-pusy-body-shimmering-scrub-250gr-100195",
     "name": "闪亮身体磨砂膏",
-    "price": 1210,
-    "image": "/products/yandex/92ft77w2jldbdkznk9pzhktctwmvl9l5-16d4733cdb.webp",
-    "imageAlt": "/products/yandex/4vn8k2nkqw5tvqrgb45z5d8cxwr4vdbk-23431f589b.webp",
-    "images": [
-      "/products/yandex/92ft77w2jldbdkznk9pzhktctwmvl9l5-16d4733cdb.webp",
-      "/products/yandex/4vn8k2nkqw5tvqrgb45z5d8cxwr4vdbk-23431f589b.webp",
-      "/products/yandex/r7vm74zdbtx7xjw2lwlcrvjqwgdb5hk2-cf2128541b.webp",
-      "/products/yandex/jkgqrz95xqkcddbxq5q26hrh27klc8df-f8baf8adf5.webp"
-    ],
     "category": "身体护理",
     "description": "PÚSY Body Shimmering Scrub 身体闪耀磨砂膏，让肌肤仿佛自带一层光泽滤镜。细腻质地在肌肤上融化，把清洁变成真正的美肤仪式。\n\n糖粒与创新的球形蓖麻油颗粒温和而有效地去除老废角质，展现肌肤的光滑柔软，不易造成损伤或刺激。乳木果油滋养肌肤，使其更显紧致、富有弹性；西兰花油则帮助抵御外部环境影响，维持细致状态。\n\n最后的点睛之笔，是让人忍不住反复进行这场护理仪式的闪耀微粒。它们为肌肤带来自然轻盈的光泽，仿佛刚度假归来，或刚完成一场SPA护理。",
-    "sku": "ПП15ЧЗ",
     "volume": "250克",
-    "ingredients": "Glycerin, Sucrose, Hydrogenated Castor Oil, Cetearyl Alcohol, Caprylic/Capric Triglyceride, Butyrospermum Parkii (Shea) Butter, Aqua, Cocamidopropyl Betaine, Brassica Oleracea Italica (Broccoli) Seed Oil, Parfum, Phenoxyethanol, Ethylhexylglycerin, Sodium Chloride, Synthetic Fluorphlogopite, Titanium Dioxide (CI 77891), Iron Oxides (CI 77491), Pentaerythrityl Tetra-di-t-butyl Hydroxyhydrocinnamate, Amyl cinnamal, Benzyl salicylate, Coumarin, Linalool, Limonene, Alpha-isomethyl lonone.",
     "usage": "轻轻地将磨砂膏涂在潮湿的身体皮肤上。用手指或特殊的刷子以打圈的方式按摩几分钟。用水冲洗。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -3035,43 +2226,19 @@
   {
     "slug": "mercayshchiiy-spreiy-dlya-tela-pusy-shine-100ml-100250",
     "name": "闪亮身体喷雾",
-    "price": 790,
-    "image": "/products/yandex/kt7rclpxw9r4s2dt7snkh9xrvmpc2x6m-02b88f3ada.webp",
-    "imageAlt": "/products/yandex/qpstzjnk96f4vchvjrppq54r8fkz6wvx-d6808ac1bb.webp",
-    "images": [
-      "/products/yandex/kt7rclpxw9r4s2dt7snkh9xrvmpc2x6m-02b88f3ada.webp",
-      "/products/yandex/qpstzjnk96f4vchvjrppq54r8fkz6wvx-d6808ac1bb.webp",
-      "/products/yandex/hrblw4tdgxk8bwx988c2d672v4szqxcn-d11f123dad.webp"
-    ],
     "category": "身体护理",
     "description": "闪耀亮片身体喷雾是一款多效身体喷雾，不仅能为肌肤带来惊艳且持久的闪耀光泽，也能同时呵护肌肤。喷后不留油腻或黏腻感，能迅速干燥，肤感轻盈，并且不易沾染衣物。\n\n配方含维生素B5，有助改善肌肤外观并支持肌肤修护；其中的玫瑰水有助提升肌肤弹润感，缓解干燥与脱屑，使肌肤柔软、光滑、细腻如丝绒。瓶身配有便捷喷头，适合各种肤质。",
-    "sku": "ПП06",
     "volume": "100毫升",
     "usage": "将喷雾从 20-30 厘米的距离均匀喷洒到之前清洁并干燥的皮肤上，等待完全吸收。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "skrab-slaiym-dlya-tela-pusy-slime-scrub-250-g-100196",
     "name": "身体史莱姆磨砂膏",
-    "price": 910,
-    "image": "/products/yandex/p85thgvvlk556q8s4fmsv4c5dkpdgkff-4da9c12a17.webp",
-    "imageAlt": "/products/yandex/v5kvxlqvfxtlc24d27swls6hfw4sqc6f-034a826417.webp",
-    "images": [
-      "/products/yandex/p85thgvvlk556q8s4fmsv4c5dkpdgkff-4da9c12a17.webp",
-      "/products/yandex/v5kvxlqvfxtlc24d27swls6hfw4sqc6f-034a826417.webp",
-      "/products/yandex/9v4kgpw5gl2tzf2b6jdb5ckrm9246pdq-9018b0db2b.webp",
-      "/products/yandex/vwqlj9zjpbks2p7mgltrqw2b5wv4gpbt-b1b35f69d0.webp"
-    ],
     "category": "身体护理",
     "description": "PÚSY Slime Scrub 史莱姆身体磨砂膏，让身体护理成为享受，也让肌肤如丝般顺滑。黏弹的史莱姆质地令人忍不住想在手中轻揉；即使用量很少，也能轻松涂开全身，把清洁变成愉悦的护理仪式，同时更加省用量。\n\n糖质基底温和而有效地去除老废角质，展现肌肤自然光泽，不易造成损伤或刺激。甜杏仁油滋养肌肤，杏核油令肌肤柔软、丝滑且不黏腻；泛醇、角鲨烷和芦荟的组合则帮助修护肌肤，并长时间保持水润感。\n\nPÚSY Slime Scrub 是你专属的身体宠爱仪式：每一罐都带来平滑肌肤、自然光泽与愉悦体验。",
-    "sku": "ПП48ЧЗ",
     "volume": "250克",
-    "ingredients": "Sugar, Aqua, Cocamidopropyl Betaine, Glycerin, Sweet Almond Oil, Prunus Armeniaca Kernel Oil, Panthenol, Tocopherol, Squalane, Xanthan Gum, Aloe Barbadensis (Aloe Vera) Leaf Gel, Parfum, Citric Acid, Sodium Benzoate, Potassium Sorbate, Benzyl Alcohol, Cl 17200",
     "usage": "轻轻地将磨砂膏涂在潮湿的身体皮肤上。用手指或特殊的刷子以打圈的方式按摩几分钟。用水冲洗。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -3091,23 +2258,10 @@
   {
     "slug": "skrab-slaiym-dlya-tela-pusy-tropic-enzymes-100198",
     "name": "Tropic Enzymes 身体史莱姆磨砂膏",
-    "price": 910,
-    "image": "/products/yandex/wz6zwqlh4ckm7wl5z6n5kj67qk748pfs-35796fdac8.webp",
-    "imageAlt": "/products/yandex/lwdqh28pp7krpg9jsrpq5zxmw4lr5z9p-c193b04e7b.webp",
-    "images": [
-      "/products/yandex/wz6zwqlh4ckm7wl5z6n5kj67qk748pfs-35796fdac8.webp",
-      "/products/yandex/lwdqh28pp7krpg9jsrpq5zxmw4lr5z9p-c193b04e7b.webp",
-      "/products/yandex/g5lxt2rn78jmzhkcndcq2tsj4sp7m8cz-6d0b5257b3.webp",
-      "/products/yandex/qxrpzzsv6x6qw9l9cl9btztx6bxwp2d9-110e7ac08a.webp"
-    ],
     "category": "身体护理",
     "description": "PÚSY Tropic Enzymes 史莱姆身体磨砂膏，为浴室带来一份令人向往的热带清新。\n\n准备体验焕新魔法，让每一秒护理都像在巴厘岛度假。令人愉悦的史莱姆触感，让人忍不住想用手捏一捏；它把单调的清洁变成一段冥想般的体验，帮助舒缓漫长一天后的紧张。\n\n温和酶成分细致而有效地去除老废角质，促进肌肤更新，使肌肤平滑、细腻如丝绒。椰子油和桃油组成的丰润复合物为肌肤补充水分，留下丝滑柔软的肤感；木瓜和芒果提取物为肌肤补充维生素，其中木瓜帮助保湿提亮，芒果帮助滋养修护。\n\nPÚSY Tropic Enzymes 史莱姆身体磨砂膏，是你的专属自爱仪式：给予肌肤悉心护理，也给你热带般的愉悦。",
-    "sku": "ПП78ЧЗ",
     "volume": "250克",
-    "ingredients": "Sucrose (Sugar), Glycerin, Aqua, Prunus Persica (Peach) Kernel Oil, Cocos Nucifera (Coconut) Oil, Phenoxyethanol, Parfum, Xanthan Gum, Tocopheryl Acetate, Passiflora Edulis Seed Oil, Tocopherol, Beta-Sitosterol, Squalene, Panthenol, Mangifera Indica (Mango) Fruit Extract, Carica Papaya (Papaya) Fruit Extract, Inulin, Papain, Sodium Benzoate, Potassium Sorbate, CI 45100, CI 18965, CI 19140.",
     "usage": "在湿润的皮肤上涂抹少量磨砂膏。用手指或专用刷子轻轻按摩身体几分钟，然后用温水冲洗。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": [
       {
         "name": "色号",
@@ -3127,83 +2281,37 @@
   {
     "slug": "muss-avtozagar-dlya-tela-pusy-body-tan-mousse-body-tan-mousse-pusy-200-ml-4-100590",
     "name": "身体免晒美黑慕斯",
-    "price": 1420,
-    "image": "/products/yandex/62vrfvx5ss8gj65xgjpsv52xxwqlxmt4-1ee0406787.webp",
-    "imageAlt": "/products/yandex/fd6b586h5grkvzdwsk78x9pnmvrrlh65-885be8d57f.webp",
-    "images": [
-      "/products/yandex/62vrfvx5ss8gj65xgjpsv52xxwqlxmt4-1ee0406787.webp",
-      "/products/yandex/fd6b586h5grkvzdwsk78x9pnmvrrlh65-885be8d57f.webp",
-      "/products/yandex/7n4gkqq55g8fcshlt2lxxmlsggsjlqjj-827fb5ecbf.webp"
-    ],
     "category": "身体护理",
     "description": "PÚSY 身体免晒美黑慕斯，一瓶兼顾均匀美黑与温和护理。\n\n轻盈蓬松的质地易于涂开并迅速吸收，为肌肤带来自然金色调，不留斑驳、条纹或黏腻感。\n\n含天然提取物的配方深度保湿并帮助修护肌肤。泛醇和透明质酸复合物帮助维持肌肤水分，并促进肌肤更新。芒果和木瓜提取物温和去除老废角质、带来清新感，使肌肤更加柔软、光滑。椴树花水和丝柏纯露帮助舒缓肌肤、减轻泛红，使肌肤呈现细致的哑光状态。",
-    "sku": "ПП73ЧЗ",
     "volume": "200毫升",
-    "ingredients": "Aqua, Dihydroxyacetone, Propylene Glycol, Dimethyl Isosorbide, Glycerin, Polysor-bate 20, Cocamidopropyl Betaine, Erythrulose, Panthenol, Centella Asiatica Extract, Mangifera Indica Fruit Extract, Carica Papaya Fruit Extract, Sodium Hyaluronate, Tilia Cordata Flower Water, Cupressus Sempervirens Leaf Water, Xanthan Gum, Ethylhexylglycerin, Phenoxyethanol, 1,2-hexanediol, Sodium Benzoate, Potassium Sorbate, Parfum, Benzyl Salicylate, Linalool, Limonene.",
     "usage": "为使显色均匀，使用前先用身体磨砂产品彻底清洁肌肤，再涂身体乳保湿。摇匀瓶身，将少量慕斯挤在上色手套上，以平缓的打圈方式从下向上均匀涂开，等待完全吸收。在产品完全干燥前避免接触水或衣物等织物表面。建议4—6小时后使用清洁产品洗去自晒黑慕斯。显色效果视肤质可维持5—10天；如需更深色泽，可重复操作。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "uvlajnyayshchiiy-krem-dlya-ruk-pusy-ginger-verveine-100763",
     "name": "生姜马鞭草保湿护手霜",
-    "price": 400,
-    "image": "/products/yandex/jb9rf6w242gcnfmnl2rw78dg5q89vmth-880cef155c.webp",
-    "imageAlt": "/products/yandex/plrqvbgwzbmc9hk9fb8ctrl9lk6kglgd-d37510633b.webp",
-    "images": [
-      "/products/yandex/jb9rf6w242gcnfmnl2rw78dg5q89vmth-880cef155c.webp",
-      "/products/yandex/plrqvbgwzbmc9hk9fb8ctrl9lk6kglgd-d37510633b.webp",
-      "/products/yandex/p26z8hf8jmtndpwwrhvvtwvhwpfbz6p4-ca1cf4dbf4.webp"
-    ],
-    "badge": "新品",
     "category": "身体护理",
     "description": "柠檬雪葩爱上了姜饼，于是便有了 Ginger Verveine。\n\n前调先展开柠檬与马鞭草的清新气息，随后温暖的生姜浮现，尾调则变得柔和、甜美，并带有香草气息。\n\n轻盈质地数秒吸收，不会在手机屏幕、咖啡杯或键盘上留下油膜或痕迹。涂完护手霜，就能立即继续你的美好生活。\n\n注意：这款香气会让你寻找各种理由再次涂抹。0%评判，100%理解。",
-    "sku": "ДЧЗ0068",
     "volume": "30毫升",
-    "ingredients": "Aqua, Rosa Damascena Flower Water, Coco-Caprylate, Glycerin, Octyldodecanol, Butyrospermum Parkii (Shea) Butter, Cetearyl Alcohol, Glyceryl Stearate, PEG-100 Stearate, Cyclopentasiloxane, Dimethicone, Phenoxyethanol, Ethylhexylglycerin, Panthenol, Sodium Polyacrylate, Carbomer, Tocopheryl Acetate, Sodium Hyaluronate, Avena Sativa Leaf/Stalk Extract, Saccharomyces Ferment Lysate Filtrate, Citric Acid, Sodium Benzoate, Potassium Sorbate, Sodium Hydroxide, Parfum, Citral, Hexyl Cinnamal, Limonene, Linalool.",
     "usage": "将乳霜涂抹在清洁双手的皮肤上，并通过按摩动作使其均匀分布。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "pitatelnaya-krem-maska-dlya-ruk-pusy-100188",
     "name": "滋养手膜霜",
-    "price": 590,
-    "image": "/products/yandex/jlr7wh8vrhqvxxv9mdkdgxpk5mtmkn57-c164e885f5.webp",
-    "imageAlt": "/products/yandex/h8rnbcdmt4kwvf5vkx7v94fc4snfl7st-7077c8d8be.webp",
-    "images": [
-      "/products/yandex/jlr7wh8vrhqvxxv9mdkdgxpk5mtmkn57-c164e885f5.webp",
-      "/products/yandex/h8rnbcdmt4kwvf5vkx7v94fc4snfl7st-7077c8d8be.webp"
-    ],
     "category": "身体护理",
     "description": "PÚSY 手部霜膜采用融化般的质地，迅速缓解干燥与紧绷，让双手肌肤恢复柔软、舒适与细致状态。\n\n富含红没药醇以及乳木果油、椰子油和澳洲坚果油复合物，深度滋养并帮助修护肌肤，同时形成无形保护屏障。它有助于锁住肌肤水分、抵御外部环境影响，使用后即让双手更显光滑、滋润与柔韧。\n\n轻盈质地迅速吸收，不留膜感或油腻感。无论晚间集中护理还是白天随时使用都很舒适，尤其适合手部肌肤需要快速修护时。\n\n当双手急需呵护、又希望立即改善肤感时，PÚSY 手部霜膜就是你的SOS护理。",
-    "sku": "ПП114ЧЗ",
     "volume": "50毫升",
-    "ingredients": "Aqua, Cetearyl Alcohol, Caprylic/Capric Triglyceride, Cyclopentasiloxane, Butyrospermum Parkii (Shea) Butter, Cocos Nucifera Oil, Glyceryl Stearate, PEG-100 Stearate, Octyldodecanol, Macadamia Integrifolia Seed Oil, Ethylhexylglycerin, Phenoxyethanol, Dicaprylyl Carbonate, Dimethicone, Panthenol, Citric Acid, Cocos Nucifera Water, Tocopheryl Acetate, Sodium Polyacrylate, Bisabolol, Disodium EDTA, Potassium Sorbate, Parfum",
     "usage": "取适量手部霜膜，涂于预先清洁并擦干的双手，均匀涂开，等待活性成分吸收。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "sekretnyiy-boks-vsye-vklycheno-m-100729",
     "name": "“一应俱全”神秘礼盒",
-    "price": 1990,
-    "oldPrice": 2560,
-    "image": "/products/yandex/rbzmntwjfqwp8nw62lnpksdpnpt4jl9h-5b2d098a6a.webp",
-    "imageAlt": "/products/yandex/2dmt6v24zl4d7jhqjht49v2jbt2vmhb7-d03ab918b8.webp",
-    "images": [
-      "/products/yandex/rbzmntwjfqwp8nw62lnpksdpnpt4jl9h-5b2d098a6a.webp",
-      "/products/yandex/2dmt6v24zl4d7jhqjht49v2jbt2vmhb7-d03ab918b8.webp"
-    ],
-    "badge": "新品",
     "category": "神秘礼盒",
     "description": "“全包式”不只属于精彩的度假酒店，也属于我们的秘密礼盒！\n\n礼盒中装有适合各种夏日时刻的彩妆与护理产品——从活力假期到露天派对，都能派上用场。\n\n里面有什么？最令人愉悦的惊喜当然不该提前剧透。但我们保证，没有一件产品是随意放进去的。这只礼盒属于那些准备尽情度假、漂亮出场，也不愿委屈自己的人。\n\nS号礼盒含4件正装明星单品，M号含6件，L号则有10件——这还是我们克制后的结果。\n\n唯一没有装进去的是大海，不过我们正在想办法。\n\n*图片所示产品仅供展示，可能与礼盒实际内容不同。",
-    "sku": "НДЧЗ0072",
-    "inventoryVerified": false,
-    "stock": 0,
+    "volume": null,
+    "usage": null,
     "variants": [
       {
         "name": "尺寸",
@@ -3236,20 +2344,10 @@
   {
     "slug": "sekretnyiy-boks-otpusk-dlya-sebya-s-100731",
     "name": "“给自己放个假”神秘礼盒",
-    "price": 1990,
-    "oldPrice": 2560,
-    "image": "/products/yandex/cxcs2bgqbn2g4b97m659b6xtwknltkcm-bc6ea6d1eb.webp",
-    "imageAlt": "/products/yandex/fk4r8lmsqdhzjgfsr2p9csll4vrkfkkl-92a0103326.webp",
-    "images": [
-      "/products/yandex/cxcs2bgqbn2g4b97m659b6xtwknltkcm-bc6ea6d1eb.webp",
-      "/products/yandex/fk4r8lmsqdhzjgfsr2p9csll4vrkfkkl-92a0103326.webp"
-    ],
-    "badge": "新品",
     "category": "神秘礼盒",
     "description": "今天不打算工作，但一定要美美的！\n\n盒内装有 PÚSY 人气彩妆单品，适合各种夏日场景：从临时起意的约会，到让人忍不住立刻分享的照片。\n\n里面到底有什么？我们只能透露：这里集齐了旅行、约会或出门前最先放进化妆包的那些必备单品。\n\n按假期规模来选：S号含4件正装，M号含6件，L号则有整整10件人气彩妆。\n\n*图片所示产品仅供展示，可能与礼盒实际内容不同。",
-    "sku": "НДЧЗ0067",
-    "inventoryVerified": false,
-    "stock": 0,
+    "volume": null,
+    "usage": null,
     "variants": [
       {
         "name": "尺寸",
@@ -3282,20 +2380,10 @@
   {
     "slug": "sekretnyiy-boks-siyaiy-bez-sprosa-3-100738",
     "name": "“尽情闪耀”神秘礼盒",
-    "price": 1990,
-    "oldPrice": 2660,
-    "image": "/products/yandex/kxqpgnttjrjqqk9d6zmgfc59z7cjc9nv-e0763fd30e.webp",
-    "imageAlt": "/products/yandex/c7bzfn8q5pfxxkqwxfkmlhk7k8gdd2kc-d13b0885f8.webp",
-    "images": [
-      "/products/yandex/kxqpgnttjrjqqk9d6zmgfc59z7cjc9nv-e0763fd30e.webp",
-      "/products/yandex/c7bzfn8q5pfxxkqwxfkmlhk7k8gdd2kc-d13b0885f8.webp"
-    ],
-    "badge": "新品",
     "category": "神秘礼盒",
     "description": "这是一盒 PÚSY 正装护理明星单品，献给那些不需要特别理由也懂得享受生活的人。\n\n里面到底有什么？暂时保密。不过我们正式建议：让干燥、暗沉，以及总把自我护理推迟到以后的习惯，一起放个假。\n\nS号礼盒含4件正装护理产品，M号含6件，L号则有10罐。\n\n*图片所示产品仅供展示，可能与礼盒实际内容不同。",
-    "sku": "НДЧЗ0069",
-    "inventoryVerified": false,
-    "stock": 0,
+    "volume": null,
+    "usage": null,
     "variants": [
       {
         "name": "尺寸",
@@ -3328,275 +2416,176 @@
   {
     "slug": "hodovoiy-nabor-im-100688",
     "name": "“美丽随手可得”随行彩妆套装",
-    "price": 5490,
-    "oldPrice": 6050,
-    "image": "/products/yandex/k95r8qtp268mvtk4cv72q5mzpf7qdnzm-56e6c0b942.webp",
-    "imageAlt": "/products/yandex/rprm7lbh88jcz5r4p8gjpgc6bm5l7k2f-5e8a053e1d.webp",
-    "images": [
-      "/products/yandex/k95r8qtp268mvtk4cv72q5mzpf7qdnzm-56e6c0b942.webp",
-      "/products/yandex/rprm7lbh88jcz5r4p8gjpgc6bm5l7k2f-5e8a053e1d.webp"
-    ],
-    "badge": "新品",
     "category": "套装",
     "description": "这是一套方便随身携带的全能彩妆组合，适合旅行、外宿，或直接放进包中，让你随时快速完成利落妆容。\n\n套装包含打造轻盈而有表现力妆容所需的一切：Brow Fix Gel 梳理并固定眉毛，Choco Mascara 拉长并分明睫毛，Chili 丰唇唇笔让唇形更鲜明，Spring 唇冻增添淡淡色泽与水润光泽，化妆包则方便收纳这些产品，让它们随时触手可及。",
-    "sku": "НДЧЗ0063",
-    "inventoryVerified": false,
-    "stock": 0,
+    "volume": null,
+    "usage": null,
     "variants": []
   },
   {
     "slug": "nabor-hodovoiy-bazovyiy-100685",
     "name": "“轻松变美”彩妆套装",
-    "price": 2290,
-    "oldPrice": 2670,
-    "image": "/products/yandex/4qnk588m6v4hf8js5tdpfvjr9r5v9vrn-7fba3a74df.webp",
-    "imageAlt": "/products/yandex/czzmwvw9pk7wrz2jqzrb9bjdxtrml5l2-e821ad33c6.webp",
-    "images": [
-      "/products/yandex/4qnk588m6v4hf8js5tdpfvjr9r5v9vrn-7fba3a74df.webp",
-      "/products/yandex/czzmwvw9pk7wrz2jqzrb9bjdxtrml5l2-e821ad33c6.webp"
-    ],
-    "badge": "新品",
     "category": "套装",
     "description": "三款产品，打造快速轻松的日常妆容，在不过度堆叠妆感的同时突出自然美。\n\nBrow Fix Gel 让眉毛整齐定型并维持一整天，不粘结；睫毛膏塑造根根分明、自然卷翘的睫毛效果，不结块、不掉屑；Summer 唇冻带来淡粉色泽和水润光泽，让双唇更显平滑、细致。\n\n当你想要快速、舒适而真正轻盈的夏日妆容时，这套组合恰到好处。",
-    "sku": "НДЧЗ0060",
-    "inventoryVerified": false,
-    "stock": 0,
+    "volume": null,
+    "usage": null,
     "variants": []
   },
   {
     "slug": "nabor-hodovoiy-dlya-tela-100686",
     "name": "“我在SPA，稍后回电”身体护理套装",
-    "price": 1990,
-    "oldPrice": 2870,
-    "image": "/products/yandex/tztwt8j7t4t2d7nmjcvrbd6jrdkh6pvc-b72c1509e4.webp",
-    "imageAlt": "/products/yandex/fsx5xbkhbzxsgql7qxqmdpp6cfbxjcbz-92a310b7dc.webp",
-    "images": [
-      "/products/yandex/tztwt8j7t4t2d7nmjcvrbd6jrdkh6pvc-b72c1509e4.webp",
-      "/products/yandex/fsx5xbkhbzxsgql7qxqmdpp6cfbxjcbz-92a310b7dc.webp"
-    ],
-    "badge": "新品",
     "category": "套装",
     "description": "这是一套从温和清洁、细腻平滑到舒适保湿都齐全的身体护理仪式。\n\n香氛沐浴露温和清洁，史莱姆身体磨砂膏轻柔去角质、展现肌肤自然光泽，透明质酸身体霜凝胶则为护理收尾，让肌肤柔软、光滑、细腻，不黏腻也不厚重。\n\n从清洁到滋养与保湿，每一步都给予身体用心呵护：愉悦的护理过程、宜人的香气，以及让人忍不住想触碰的肌肤。",
-    "sku": "НДЧЗ0062",
-    "inventoryVerified": false,
-    "stock": 0,
+    "volume": null,
+    "usage": null,
     "variants": []
   },
   {
     "slug": "nabor-lichiko-freshik-100684",
     "name": "“派对不留痕”焕肤套装",
-    "price": 2590,
-    "oldPrice": 3070,
-    "image": "/products/yandex/z2lm98knpbmm7ln5frpjwvcsrnfjsh2m-48171ad794.webp",
-    "imageAlt": "/products/yandex/mqktls9g2l8ncxx26s6t5plbgqgflfm5-158b0f6021.webp",
-    "images": [
-      "/products/yandex/z2lm98knpbmm7ln5frpjwvcsrnfjsh2m-48171ad794.webp",
-      "/products/yandex/mqktls9g2l8ncxx26s6t5plbgqgflfm5-158b0f6021.webp"
-    ],
-    "badge": "新品",
     "category": "套装",
     "description": "这是一套随时可用的护肤流程，适合需要清新、补水和恢复倦容的肌肤。\n\n三款产品协同护理：清凉爽肤水带来清新感，并帮助改善浮肿；含咖啡因与植物提取物的按摩啫喱帮助减轻肿胀，让面部看起来更清爽；含蜗牛黏蛋白、维生素B3和神经酰胺的透明质酸乳液密集补水，使肌肤更平滑、更显细致。\n\n轻盈质地可迅速吸收，不给肌肤增加负担，只留下舒适、清新与自然光泽，不黏腻。",
-    "sku": "НДЧЗ0061",
-    "inventoryVerified": false,
-    "stock": 0,
+    "volume": null,
+    "usage": null,
     "variants": []
   },
   {
     "slug": "nabor-hodovoiy-letniiy-vaiyb-100687",
     "name": "“今夏闪耀”夏日彩妆套装",
-    "price": 2390,
-    "oldPrice": 2860,
-    "image": "/products/yandex/f2zkx5ts6kkrjhgpnd2w7m7z8t7fl8rc-fba5349b18.webp",
-    "imageAlt": "/products/yandex/2c7qx72bgz7b5hq92qt9722pddhrjwwr-3da07f0e54.webp",
-    "images": [
-      "/products/yandex/f2zkx5ts6kkrjhgpnd2w7m7z8t7fl8rc-fba5349b18.webp",
-      "/products/yandex/2c7qx72bgz7b5hq92qt9722pddhrjwwr-3da07f0e54.webp"
-    ],
-    "badge": "新品",
     "category": "套装",
     "description": "这是一套轻盈的夏日基础组合，适合不想让妆容给面部增加负担、只需突出自然美的日子。让你看起来清新动人，仿佛睡饱了、坠入爱河，又刚刚晒出一点健康气色。\n\n套装中的每件产品都服务于自然透亮的妆效：面部喷雾即刻清新并滋润肌肤；睫毛膏令睫毛根根分明、自然卷翘；Crystal 唇油增添镜面光泽与细致感；Morning 唇线笔则轻柔勾勒唇部轮廓，为整体妆容增添清新气息。\n\n不厚重、不多余，也不需要复杂步骤——妆容如夏日般轻松。",
-    "sku": "НДЧЗ0064",
-    "inventoryVerified": false,
-    "stock": 0,
+    "volume": null,
+    "usage": null,
     "variants": []
   },
   {
     "slug": "nabor-dlya-tela-i-rasslableniya-plys-vaiyb-100676",
     "name": "“Plus Vibe”身体放松套装",
-    "price": 6999,
-    "image": "/products/yandex/lc2m7885skszbcq82ds2dbxwm2wz6b45-e6bb69d8b6.webp",
-    "imageAlt": "/products/yandex/lc2m7885skszbcq82ds2dbxwm2wz6b45-e6bb69d8b6.webp",
-    "images": [
-      "/products/yandex/lc2m7885skszbcq82ds2dbxwm2wz6b45-e6bb69d8b6.webp"
-    ],
     "category": "套装",
     "description": "",
-    "sku": "НДЧЗ0057",
-    "inventoryVerified": false,
-    "stock": 0,
+    "volume": null,
+    "usage": null,
     "variants": []
   },
   {
     "slug": "nabor-dlya-vosstanovleniya-volos-pusy-prime-your-prime-era-kit-100678",
     "name": "Prime Hair 修护套装",
-    "price": 3590,
-    "image": "/products/yandex/h9h4mb8bmklnln7rrszwtls5vhcbvwts-c036759473.webp",
-    "imageAlt": "/products/yandex/w6nwg2k42mn5dnjs5r6t95899tj42k9r-b5556c47de.webp",
-    "images": [
-      "/products/yandex/h9h4mb8bmklnln7rrszwtls5vhcbvwts-c036759473.webp",
-      "/products/yandex/w6nwg2k42mn5dnjs5r6t95899tj42k9r-b5556c47de.webp",
-      "/products/yandex/7lwb7mhcmkhxntqvhml8qn9c8mskrsl9-fc6e68f2f7.webp",
-      "/products/yandex/cgsp74tlf6jzwgwlf429v969ph47mv5v-fd1a487245.webp"
-    ],
-    "badge": "新品",
     "category": "套装",
     "description": "一套完整的护发流程，让头发始终保持如沙龙护理后的状态，适合各种发质和长度。\n\nProtein & Oil Therapy 蛋白与油脂护理配方，旨在带来沙龙造型般的顺滑感。蛋白成分帮助强韧发丝，油脂帮助抚平毛躁并增强光泽。柔和的麝香香草气息会留在发间。\n\n套装内还配有一根丝滑发圈：不拉扯头发，也不易留下勒痕，让人想天天佩戴。",
-    "sku": "НДЧЗ0056",
     "volume": "洗发水、护发素：各400毫升；发膜：250毫升",
-    "ingredients": "Шампунь: Aqua, Sodium C14–16 Olefin Sulfonate, Sodium Cocoyl Isethionate, Cocamidopropyl Betaine, Acrylates/Palmeth-25 Acrylate Copolymer, Glycerin, Coco-Glucoside, Decyl-Glucoside, Glyceryl Oleate, Phenoxyethanol, Ethylhexylglycerin, Panthenol, Guar Hydroxypropyltrimonium Chloride, Coconut Acid, Sodium Isethionate, Laminaria Digitata Extract, Hydrolyzed Hemp Seed Extract, Hydrolyzed Rice Protein, Calendula Officinalis Flower Extract, Arnica Chamissonis Flower Extract, Hydrolyzed Wheat Protein, Parfum, Citric Acid, Sodium Benzoate, Potassium Sorbate, Rosmarinus Officinalis Water, Benzyl Alcohol, Dehydroacetic Acid, Styrene/Acrylates Copolymer, Disodium EDTA, Sodium Hydroxide, Propylene Glycol, Sodium Chloride. \n\nКондиционер: Aqua, Cetearyl Alcohol, Behentrimonium Chloride, Panthenol, Phenyl Trimethicone, Cyclopentasiloxane, Persea Gratissima (Avocado) Oil, Argania Spinosa Kernel Oil, Butyrospermum Parkii (Shea) Butter, Dimethicone, Phenoxyethanol, Ethylhexylglycerin, Glycerin, Sodium PCA, Glucose, Urea, Glutamic Acid, Lysine, Glycine, Allantoin, Gluconolactone, Calcium Gluconate, Hydrolyzed Hemp Seed Extract, Hydrolyzed Rice Protein, Hydrolyzed Wheat Protein, Parfum, Propylene Glycol, Vaccinium Myrtillus Fruit Extract, Prunus Persica Fruit Extract, Tocopheryl Acetate, Cetrimonium Chloride, Citric Acid, Sodium Benzoate, Potassium Sorbate, Isopropyl Alcohol, Lactic Acid, Disodium EDTA. \n\nМаска: Aqua, Cetearyl Alcohol, Behentrimonium Methosulfate, Glycerin, Macadamia Integrifolia Seed Oil, Crambe Abyssinica Seed Oil, Phenyl Trimethicone, Sodium PCA, Glucose, Urea, Glutamic Acid, Lysine, Glycine, Allantoin, Gluconolactone, Calcium Gluconate, Avena Sativa Leaf/Stalk Extract, Saccharomyces Ferment Lysate Filtrate, Panthenol, Hydrolyzed Keratin, Hydrolyzed Wheat Protein, Parfum, Propylene Glycol, Carica Papaya Fruit Extract, Tocopheryl Acetate, Cetrimonium Chloride, Bis(C13-15 Alkoxy) PG-Amodimethicone, C14-15 Alcohols, Isotridecyl Alcohol, Phenoxyethanol, Ethylhexylglycerin, Citric Acid, Prunus Amygdalus Dulcis Fruit Extract, Punica Granatum Fruit Extract, Sodium Benzoate, Potassium Sorbate, Benzyl Alcohol, Lactic Acid, Disodium EDTA.",
     "usage": "步骤1：洗发水\n涂抹于湿发，按摩头皮1—2分钟后，用温水冲洗。如头发较脏，可重复一次。\n\n步骤2：护发素\n均匀涂抹于发中至发梢，停留2—5分钟后冲洗。\n\n步骤3：发膜\n均匀涂抹于发中至发梢，停留15—20分钟后冲洗。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "maska-dlya-volos-pusy-base-hair-500-g-100177",
     "name": "Base Hair 发膜",
-    "price": 690,
-    "image": "/products/yandex/p4w6b2dmwgkq8bcgzlw2dfn44c7tsbsq-dbb791dff1.webp",
-    "imageAlt": "/products/yandex/hz2qcqcvn4pjp4gmvcmx899pl52d87fb-81900fcfd9.webp",
-    "images": [
-      "/products/yandex/p4w6b2dmwgkq8bcgzlw2dfn44c7tsbsq-dbb791dff1.webp",
-      "/products/yandex/hz2qcqcvn4pjp4gmvcmx899pl52d87fb-81900fcfd9.webp"
-    ],
     "category": "头发护理",
     "description": "Base Hair 修护发膜是居家打造沙龙般发质的基础护理，一罐集强韧、滋养和保湿于一体。\n\n椰子油和澳洲坚果油包裹发丝，提供深层滋润并帮助减少断裂。水解角蛋白作用于发丝内部，帮助抚平发丝结构，使头发更显柔顺。泛醇和维生素 E 则赋予弹性与镜面般光泽。配方深度护理却不压塌发丝；使用后头发更丰盈、顺滑、易于打理，缩短造型时间。\n\n持续使用角蛋白发膜有助于改善受损发质，恢复光泽与健康发感。适合干燥、染后及受损发质，也适合希望提升光泽的人群。",
-    "sku": "ДППЧЗ03",
     "volume": "500毫升",
-    "ingredients": "Aqua, Cetearyl Alcohol, Behenamidopropyl Dimethylamine, Caprylic/Capric Triglyceride, Cocos Nucifera Oil, Macadamia Integrifolia Seed Oil, Panthenol, Hydrolyzed Keratin, Tocopheryl Acetate, Cetrimonium Chloride, Silicone Quaternium-18, Trideceth-6, Trideceth-12, Phenoxyethanol, Ethylhexylglycerin, Propylene Glycol, Actinidia Chinensis Extract, Potassium Sorbate, Sodium Benzoate, Benzyl Alcohol, Lactic Acid, Parfum, Disodium EDTA.",
     "usage": "将发膜涂在湿发上，沿发丝全长均匀涂开，重点护理发梢。为获得更好效果，可使用宽齿梳梳匀。停留 15–20 分钟后，用温水彻底冲洗。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "kondicioner-dlya-volos-pusy-base-hair-750-ml-1-1-100579",
     "name": "Base Hair 护发素",
-    "price": 590,
-    "image": "/products/yandex/k8z7jqr222dm986pb7p9gm8jrhlpr5mm-edad3ae99b.webp",
-    "imageAlt": "/products/yandex/qmgdfqc4bnh87wxqgf2s8q989g5mmwh4-df80d2a639.webp",
-    "images": [
-      "/products/yandex/k8z7jqr222dm986pb7p9gm8jrhlpr5mm-edad3ae99b.webp",
-      "/products/yandex/qmgdfqc4bnh87wxqgf2s8q989g5mmwh4-df80d2a639.webp"
-    ],
     "category": "头发护理",
     "description": "Base Hair 护发素是日常头发保湿护理的基础，也是让秀发呈现顺滑与光泽的秘诀。乳木果油和摩洛哥坚果油仿佛以柔软丝绒包裹每一缕发丝，赋予柔软度与弹性。\n\n泛醇、维生素 E 和芒果提取物如同为秀发准备的营养组合，帮助强韧发丝，并带来自然活力光泽。护发素质地不会压塌或粘结发丝，只留下易梳理、轻盈流动的发感。\n\n适合每日使用，为日常护发增添一份精致光泽。",
-    "sku": "ДППЧЗ02",
-    "inventoryVerified": false,
-    "stock": 0,
+    "volume": null,
+    "usage": null,
     "variants": []
   },
   {
     "slug": "shampun-dlya-volos-pusy-base-hair-750-ml-3-100595",
     "name": "Base Hair 洗发水",
-    "price": 590,
-    "image": "/products/yandex/9ljqdp62bm97wplgw622kqk8zb7jxslh-5afd9c93a3.webp",
-    "imageAlt": "/products/yandex/fshtbbwhqfmklwzshncpwljzrkzps5kg-0fd91614e0.webp",
-    "images": [
-      "/products/yandex/9ljqdp62bm97wplgw622kqk8zb7jxslh-5afd9c93a3.webp",
-      "/products/yandex/fshtbbwhqfmklwzshncpwljzrkzps5kg-0fd91614e0.webp",
-      "/products/yandex/7p6sc6j9pjzk45xjfmdsfxmpgv9xk8w8-b0c9f92215.webp"
-    ],
     "category": "头发护理",
     "description": "日常头发清洁的基础。Base Hair 洗发水不仅清洁头发，也帮助发丝呈现强韧感与丰盈感。\n\n温和配方细致清洁，不会令头发过度干燥或增加负担。绿茶纯露带来头皮清新舒适的感受，小麦蛋白则帮助发丝从内而外更显强韧、有弹性。泛醇和芦荟让头发触感柔软，并呈现即使在暗光下也清晰可见的自然光泽。\n\n一瓶兼顾清洁、保湿与细致护发。",
-    "sku": "ДППЧЗ01",
     "volume": "750毫升",
-    "inventoryVerified": false,
-    "stock": 0,
+    "usage": null,
     "variants": []
   },
   {
     "slug": "nesmyvaemyiy-krem-spreiy-dlya-volos-pusy-base-hair-200-ml-100223",
     "name": "Base Hair 免洗护发霜喷雾",
-    "price": 490,
-    "image": "/products/yandex/7w6c5ncwrvvtr4qjzvmzgjjhcszk8glg-1019b6f672.webp",
-    "imageAlt": "/products/yandex/7w6c5ncwrvvtr4qjzvmzgjjhcszk8glg-1019b6f672.webp",
-    "images": [
-      "/products/yandex/7w6c5ncwrvvtr4qjzvmzgjjhcszk8glg-1019b6f672.webp"
-    ],
     "category": "头发护理",
     "description": "即刻缓解干燥：富含有益活性成分的配方迅速发挥作用，从第一次喷洒起就带来深层润泽感。\n\n喷雾仿佛为每根发丝覆上一层隐形丝绸，让梳子顺畅滑过，减少拉扯的不适；头发变得柔软、顺滑、易打理，如同刚做完沙龙护理。它带来的不是黏腻或油亮，而是由内而外的自然健康光泽。\n\n发丝会随着光线自然闪耀，仿佛广告画面。对染后、干燥和受损发质尤其适用：喷雾温和包裹发梢，滋养头发并帮助锁住水分。",
-    "sku": "ДЧА0006",
     "volume": "200毫升",
-    "ingredients": "Aqua, Cetearyl Alcohol, Behenamidopropyl Dimethylamine, PPG-3 Caprylyl Ether, Isopropyl Myristate, Myristyl Alcohol, Biosaccharide Gum-1, Tocopheryl Acetate, Sodium PCA, Glucose, Urea, Glutamic Acid, Lysine, Glycine, Allantoin, Glycerin, Gluconolactone, Calcium Gluconate, Panthenol, Silicone Quaternium-16, Undeceth-11, Butyloctanol, Undeceth-5, Hydrolyzed Keratin, Hydrolyzed Wheat Protein, Parfum, Propylene Glycol, Bis(C13-15 Alkoxy) PG-Amodimethicone, C14-15 Alcohols, Isotridecyl Alcohol, Phenoxyethanol, Ethylhexylglycerin, Prunus Amygdalus Dulcis Fruit Extract, Mangifera Indica Fruit Extract, Malva Verticillata Flower/Leaf/Stem Extract, Sodium Benzoate, Potassium Sorbate, Benzyl Alcohol, Lactic Acid, Disodium EDTA.",
     "usage": "使用前摇匀瓶身，均匀喷洒在洁净的湿发上。使用宽齿梳从发梢开始，逐步向发根轻柔梳理。随后按平时习惯吹干并造型。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "maska-dlya-volos-pusy-prime-hair-250-ml-100178",
     "name": "Prime Hair 发膜",
-    "price": 1290,
-    "image": "/products/yandex/dbjtgtmq5chgpdcj5d9klj5wqdck5zxg-d95034dfca.webp",
-    "imageAlt": "/products/yandex/pfpz4jtzdssbhjk22t89d7bh4kzc8spw-47d519de43.webp",
-    "images": [
-      "/products/yandex/dbjtgtmq5chgpdcj5d9klj5wqdck5zxg-d95034dfca.webp",
-      "/products/yandex/pfpz4jtzdssbhjk22t89d7bh4kzc8spw-47d519de43.webp",
-      "/products/yandex/w6m4t86nxb5z8fll9qrqlwkrdl6sd4pb-1a007525ec.webp"
-    ],
     "category": "头发护理",
     "description": "PÚSY Prime Hair 发膜是一款密集修护与滋养护理，适合希望获得顺滑、丰盈和充分滋养发感时使用。\n\nProtein & Oil Therapy 配方含澳洲坚果油和阿比西尼亚海甘蓝籽油，帮助柔软发丝、减少干燥，使发丝全长看起来更具光泽、更加柔顺。水解角蛋白、小麦蛋白和泛醇帮助强韧发丝、维持结构并修护受损部位。石榴、木瓜和燕麦提取物改善发丝质感，赋予柔软与弹性。\n\n建议每周使用 1–2 次，适合所有发质。",
-    "sku": "ДППЧЗ06",
     "volume": "250毫升",
-    "ingredients": "Aqua, Cetearyl Alcohol, Behentrimonium Methosulfate, Glycerin, Macadamia Integrifolia Seed Oil, Crambe Abyssinica Seed Oil, Phenyl Trimethicone, Sodium PCA, Glucose, Urea, Glutamic Acid, Lysine, Glycine, Allantoin, Gluconolactone, Calcium Gluconate, Avena Sativa Leaf/Stalk Extract, Saccharomyces Ferment Lysate Filtrate, Panthenol, Hydrolyzed Keratin, Hydrolyzed Wheat Protein, Parfum, Propylene Glycol, Carica Papaya Fruit Extract, Tocopheryl Acetate, Cetrimonium Chloride, Bis(C13-15 Alkoxy) PG-Amodimethicone, C14-15 Alcohols, Isotridecyl Alcohol, Phenoxyethanol, Ethylhexylglycerin, Citric Acid, Prunus Amygdalus Dulcis Fruit Extract, Punica Granatum Fruit Extract, Sodium Benzoate, Potassium Sorbate, Benzyl Alcohol, Lactic Acid, Disodium EDTA.",
     "usage": "将发膜涂在湿发上，沿发丝全长均匀涂开，重点护理发梢。为获得更好效果，可使用宽齿梳梳匀。停留 15–20 分钟后，用温水彻底冲洗。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "kondicioner-dlya-volos-pusy-prime-hair-400-ml-100173",
     "name": "Prime Hair 护发素",
-    "price": 1290,
-    "image": "/products/yandex/qwjtzhzb49jkmdccn7mlg7drvmf5f28g-3a8a01f743.webp",
-    "imageAlt": "/products/yandex/rqpp99qcpr8tmz2n9dwql6ttzkdt98dv-00c36a79f9.webp",
-    "images": [
-      "/products/yandex/qwjtzhzb49jkmdccn7mlg7drvmf5f28g-3a8a01f743.webp",
-      "/products/yandex/rqpp99qcpr8tmz2n9dwql6ttzkdt98dv-00c36a79f9.webp",
-      "/products/yandex/4s8ckltzrdqwl2w2llgf9kg7b8df2njf-8970c43a5d.webp",
-      "/products/yandex/hnqjzrv7xgvhb5kzd4z4jfmmdb8f8lfx-78da127a32.webp"
-    ],
     "category": "头发护理",
     "description": "PÚSY Prime Hair 护发素在不增加负担的同时为头发补充营养和水分，使其更柔软、顺滑、易于打理。\n\nProtein & Oil Therapy 配方含泛醇及大米、小麦和火麻蛋白，帮助强韧发丝并维持发丝全长的丰盈度。牛油果油、摩洛哥坚果油和乳木果油复合物滋养头发，赋予柔滑与光泽。蓝莓和桃子提取物有助于减少断裂和暗沉；配方中的氨基酸从内帮助维持发丝弹性和健康外观。\n\n适合所有发质。",
-    "sku": "ДППЧЗ05",
     "volume": "400毫升",
-    "ingredients": "Aqua, Cetearyl Alcohol, Behentrimonium Chloride, Panthenol, Phenyl Trimethicone, Cyclopentasiloxane, Persea Gratissima (Avocado) Oil, Argania Spinosa Kernel Oil, Butyrospermum Parkii (Shea) Butter, Dimethicone, Phenoxyethanol, Ethylhexylglycerin, Glycerin, Sodium PCA, Glucose, Urea, Glutamic Acid, Lysine, Glycine, Allantoin, Gluconolactone, Calcium Gluconate, Hydrolyzed Hemp Seed Extract, Hydrolyzed Rice Protein, Hydrolyzed Wheat Protein, Parfum, Propylene Glycol, Vaccinium Myrtillus Fruit Extract, Prunus Persica Fruit Extract, Tocopheryl Acetate, Cetrimonium Chloride, Citric Acid, Sodium Benzoate, Potassium Sorbate, Isopropyl Alcohol, Lactic Acid, Disodium EDTA.",
     "usage": "洗发后将护发素涂抹在湿润的头发上。将产品分布在整个长度上，包括末端。为了获得最佳效果，请使用宽齿梳子。停留 2-5 分钟以恢复和保湿，然后用温水冲洗。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   },
   {
     "slug": "shampun-dlya-volos-pusy-prime-hair-400-ml-100203",
     "name": "Prime Hair 洗发水",
-    "price": 1290,
-    "image": "/products/yandex/jvldxdrcrszrxr92w8w2pj8s7gwvm9sb-4ab9fbfddb.webp",
-    "imageAlt": "/products/yandex/jd2tg4smxscbgtvjrhp5cj7p86bbszkb-f429ce6b41.webp",
-    "images": [
-      "/products/yandex/jvldxdrcrszrxr92w8w2pj8s7gwvm9sb-4ab9fbfddb.webp",
-      "/products/yandex/jd2tg4smxscbgtvjrhp5cj7p86bbszkb-f429ce6b41.webp",
-      "/products/yandex/5mr9c8wzs6lnmjxnf96bvkmb5bttqz98-20c0b90a02.webp",
-      "/products/yandex/xqxnzcq2jdw4rk6tkfgpl8z6cpqcfzz2-9846394297.webp"
-    ],
     "category": "头发护理",
     "description": "PÚSY Prime Hair 洗发水可温和清洁头皮和头发，维持头皮自然舒适感，也不会令发丝全长过度干燥。\n\nProtein & Oil Therapy 配方含泛醇以及大米、小麦和火麻植物蛋白，帮助强韧发丝结构、减少断裂，并维持顺滑与弹性。海带、金盏花和山金车提取物帮助柔润、呵护头皮，同时赋予头发自然光泽与细致发感。\n\n适合各种发质及经常使用，不含硫酸盐和对羟基苯甲酸酯。",
-    "sku": "ДППЧЗ04",
     "volume": "400毫升",
-    "ingredients": "Aqua, Sodium C14–16 Olefin Sulfonate, Sodium Cocoyl Isethionate, Cocamidopropyl Betaine, Acrylates/Palmeth-25 Acrylate Copolymer, Glycerin, Coco-Glucoside, Decyl-Glucoside, Glyceryl Oleate, Phenoxyethanol, Ethylhexylglycerin, Panthenol, Guar Hydroxypropyltrimonium Chloride, Coconut Acid, Sodium Isethionate, Laminaria Digitata Extract, Hydrolyzed Hemp Seed Extract, Hydrolyzed Rice Protein, Calendula Officinalis Flower Extract, Arnica Chamissonis Flower Extract, Hydrolyzed Wheat Protein, Parfum, Citric Acid, Sodium Benzoate, Potassium Sorbate, Rosmarinus Officinalis Water, Benzyl Alcohol, Dehydroacetic Acid, Styrene/Acrylates Copolymer, Disodium EDTA, Sodium Hydroxide, Propylene Glycol, Sodium Chloride.",
     "usage": "将少量洗发水涂抹在湿润的头发上。轻轻按摩头皮并沿着头发的长度分布，停留 1-2 分钟。用温水彻底冲洗。如有必要，请重复。为了获得最佳效果，请使用 PÚSY 保湿护发素。",
-    "inventoryVerified": false,
-    "stock": 0,
     "variants": []
   }
-]
+]$catalog_data$::JSONB) AS item(
+  slug TEXT,
+  name TEXT,
+  category TEXT,
+  description TEXT,
+  volume TEXT,
+  usage TEXT,
+  variants JSONB
+);
+
+DO $translation_checks$
+DECLARE
+  missing_products TEXT;
+  missing_categories TEXT;
+BEGIN
+  SELECT string_agg(o.slug, ', ' ORDER BY o.slug)
+  INTO missing_products
+  FROM catalog_translation_overrides AS o
+  LEFT JOIN products AS p ON p.slug = o.slug
+  WHERE p.id IS NULL;
+
+  IF missing_products IS NOT NULL THEN
+    RAISE EXCEPTION 'Catalog translation migration references missing products: %', missing_products;
+  END IF;
+
+  SELECT string_agg(DISTINCT o.category, ', ' ORDER BY o.category)
+  INTO missing_categories
+  FROM catalog_translation_overrides AS o
+  LEFT JOIN product_categories AS c ON c.name = o.category
+  WHERE c.id IS NULL;
+
+  IF missing_categories IS NOT NULL THEN
+    RAISE EXCEPTION 'Catalog translation migration references missing categories: %', missing_categories;
+  END IF;
+END
+$translation_checks$;
+
+UPDATE products AS p
+SET
+  name = o.name,
+  category = o.category,
+  category_id = c.id,
+  description = o.description,
+  volume = o.volume,
+  usage = o.usage,
+  variants_json = o.variants::TEXT,
+  updated_at = CURRENT_TIMESTAMP
+FROM catalog_translation_overrides AS o
+JOIN product_categories AS c ON c.name = o.category
+WHERE p.slug = o.slug;

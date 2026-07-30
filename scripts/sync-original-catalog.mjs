@@ -1,4 +1,9 @@
 import { readFile, writeFile } from "node:fs/promises";
+import {
+  applyProductTranslationOverrides,
+  translateVariantGroup,
+  translateVariantLabel,
+} from "./catalog-translation-overrides.mjs";
 
 const SOURCE = "https://pusy.beauty";
 const OUTPUT = new URL("../app/data/products.generated.json", import.meta.url);
@@ -80,52 +85,31 @@ function categoryName(value = "", slug = "") {
   return "彩妆";
 }
 
-const productNameOverrides = new Map([
-  ["jidkie-rumyana-dlya-lica-peachland-100768", "Peachland 液体腮红"],
-  ["jidkie-rumyana-dlya-lica-sleepy-morning-pylnaya-roza-100769", "Sleepy Morning 液体腮红（灰粉色）"],
-  ["jidkie-rumyana-dlya-lica-smoochies-rozovyiy-100770", "Smoochies 液体腮红（粉色）"],
-  ["jidkie-rumyana-dlya-lica-toasty-korichnevyiy-100771", "Toasty 液体腮红（棕色）"],
-  ["maslo-dlya-gub-apricot-1-100778", "杏桃唇油"],
-  ["maslo-dlya-gub-black-chernyiy-100779", "黑色唇油"],
-  ["maslo-dlya-gub-chocolate-shokoladnyiy-100782", "巧克力唇油"],
-  ["maslo-dlya-gub-crystal-pink-svetlo-rozovyiy-100783", "晶透粉唇油"],
-  ["maslo-dlya-gub-crystal-prozrachnyiy-100780", "透明唇油"],
-  ["maslo-dlya-gub-purple-rozovyiy-100781", "粉紫唇油"],
-  ["maslo-dlya-gub-red-krasnyiy-100784", "红色唇油"],
-  ["uvlajnyayshchiiy-krem-dlya-ruk-pusy-ginger-verveine-100763", "生姜马鞭草保湿护手霜"],
-]);
-
 function characteristic(variant, slug) {
   return variant.characteristics?.find((item) => item.slug === slug)?.value || "";
 }
 
 async function normalizedVariants(groupingCharacteristics = []) {
-  return Promise.all(groupingCharacteristics.map(async (group) => ({
-    name: await translate(group.title || group.name || "规格"),
-    options: await Promise.all((group.values || group.options || group.characteristics || []).map(async (option) => ({
-      label: normalizeVariantLabel(await translate(option.title || option.value || option.name || "")),
-      sku: option.variant?.sku || option.sku || "",
-      price: Number(option.variant?.finalPrice || option.finalPrice || 0),
-      slug: option.variantUrl ? option.variantUrl.split("?")[0].split("/").pop() : undefined,
-      image: option.image?.filePath || undefined,
-      color: option.color || undefined,
-    }))),
-  }))).then((groups) => groups.map((group) => ({ ...group, options: group.options.filter((option) => option.label) })).filter((group) => group.options.length));
-}
-
-function normalizeVariantLabel(label) {
-  const overrides = {
-    杏: "杏桃色",
-    红色的: "红色",
-    透明的: "透明",
-    粉色的: "粉色",
-    黑色的: "黑色",
-    巧克力: "巧克力色",
-    棕色的: "棕色",
-    桃: "蜜桃色",
-    尘土飞扬的玫瑰: "灰粉色",
-  };
-  return overrides[label] || label;
+  const groups = await Promise.all(groupingCharacteristics.map(async (group) => {
+    const sourceGroupName = group.title || group.name || "规格";
+    return {
+      name: translateVariantGroup(sourceGroupName) || await translate(sourceGroupName),
+      options: await Promise.all((group.values || group.options || group.characteristics || []).map(async (option) => {
+        const sourceOptionName = option.title || option.value || option.name || "";
+        return {
+          label: translateVariantLabel(sourceOptionName) || await translate(sourceOptionName),
+          sku: option.variant?.sku || option.sku || "",
+          price: Number(option.variant?.finalPrice || option.finalPrice || 0),
+          slug: option.variantUrl ? option.variantUrl.split("?")[0].split("/").pop() : undefined,
+          image: option.image?.filePath || undefined,
+          color: option.color || undefined,
+        };
+      })),
+    };
+  }));
+  return groups
+    .map((group) => ({ ...group, options: group.options.filter((option) => option.label) }))
+    .filter((group) => group.options.length);
 }
 
 async function mapLimit(items, worker) {
@@ -157,9 +141,9 @@ const rawProducts = await mapLimit(urls, async (url, index) => {
   const slug = new URL(url).pathname.split("/").pop();
   const images = (variant.mediaItems || []).filter((item) => item.type === "IMAGE" && item.payload?.filePath).sort((a, b) => a.displaySequence - b.displaySequence).map((item) => item.payload.filePath);
   console.log(`[${index + 1}/${urls.length}] ${variant.slug}`);
-  return {
+  return applyProductTranslationOverrides({
     slug,
-    name: productNameOverrides.get(slug) || name.replace(/普西/g, "PÚSY").replace(/PUSY/g, "PÚSY"),
+    name,
     price: Number(variant.finalPrice || 0),
     oldPrice: variant.price && Number(variant.price) !== Number(variant.finalPrice) ? Number(variant.price) : undefined,
     image: images[0] || "",
@@ -167,15 +151,15 @@ const rawProducts = await mapLimit(urls, async (url, index) => {
     images,
     badge: variant.badges?.[0]?.label === "Хит" ? "畅销" : variant.badges?.[0]?.label === "Новинка" ? "新品" : undefined,
     category: categoryName(variant.categoryName, variant.slug),
-    description: description.replace(/普西/g, "PÚSY").replace(/PUSY/g, "PÚSY"),
+    description,
     sku: variant.sku || undefined,
     volume: characteristic(variant, "obieem").replace(/мл/gi, "毫升").replace(/\bг\b/gi, "克") || undefined,
     ingredients: characteristic(variant, "sostav") || undefined,
-    usage: usage.replace(/普西/g, "PÚSY").replace(/PUSY/g, "PÚSY") || undefined,
+    usage: usage || undefined,
     inventoryVerified: false,
     stock: 0,
     variants: await normalizedVariants(model.groupingCharacteristics),
-  };
+  });
 });
 
 const products = rawProducts.sort((a, b) => a.category.localeCompare(b.category, "zh-CN") || a.name.localeCompare(b.name, "zh-CN"));

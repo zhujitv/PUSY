@@ -52,8 +52,10 @@ test("requires checkout consent and exposes China compliance settings", async ()
 });
 
 test("matches the catalog scope while keeping inventory independently managed", async () => {
-  const [catalogJson, productPage, productActions, catalogClient, orderApi, sitemap, mobileCss, nextConfig, imageFiles] = await Promise.all([
+  const [catalogJson, translationsJson, translationMigration, productPage, productActions, catalogClient, orderApi, sitemap, mobileCss, nextConfig, imageFiles] = await Promise.all([
     read("app/data/products.generated.json"),
+    read("scripts/catalog-translations.zh-CN.json"),
+    read("db/migrations/2026-07-30-zzzzzzzzzzzz-catalog-translations.sql"),
     read("app/products/[slug]/page.tsx"),
     read("app/products/[slug]/ProductActions.tsx"),
     read("app/components/CatalogClient.tsx"),
@@ -64,13 +66,53 @@ test("matches the catalog scope while keeping inventory independently managed", 
     readdir(new URL("../public/products/yandex/", import.meta.url)),
   ]);
   const products = JSON.parse(catalogJson);
+  const translations = JSON.parse(translationsJson);
+  const bySlug = new Map(products.map((product) => [product.slug, product]));
   assert.equal(products.length, 88);
   assert.equal(new Set(products.map((product) => product.slug)).size, 88);
   assert.ok(products.every((product) => product.stock === 0 && product.inventoryVerified === false));
   assert.ok(products.filter((product) => product.variants?.length).length >= 39);
   assert.ok(products.every((product) => product.images?.length >= 1));
   assert.equal(products.find((product) => product.slug === "jidkie-rumyana-dlya-lica-peachland-100768")?.category, "彩妆");
-  assert.equal(products.find((product) => product.slug === "maslo-dlya-gub-crystal-pink-svetlo-rozovyiy-100783")?.name, "晶透粉唇油");
+  assert.equal(products.find((product) => product.slug === "maslo-dlya-gub-crystal-pink-svetlo-rozovyiy-100783")?.name, "Crystal Pink 浅粉色唇油");
+  for (const [slug, override] of Object.entries(translations.products)) {
+    const product = bySlug.get(slug);
+    assert.ok(product, `Curated translation references an unknown product: ${slug}`);
+    for (const field of ["name", "category", "description", "usage", "volume"]) {
+      if (Object.hasOwn(override, field)) {
+        assert.equal(product[field], override[field] ?? undefined, `${slug}.${field} must use the curated translation`);
+      }
+    }
+  }
+  const migrationPayload = translationMigration.match(/\$catalog_data\$(\[[\s\S]*\])\$catalog_data\$/);
+  assert.ok(migrationPayload, "Catalog translation migration must contain its JSON payload");
+  const databaseOverrides = JSON.parse(migrationPayload[1]);
+  assert.equal(databaseOverrides.length, 86);
+  for (const override of databaseOverrides) {
+    const product = bySlug.get(override.slug);
+    assert.ok(product, `Database translation references an unknown product: ${override.slug}`);
+    assert.deepEqual({
+      name: product.name,
+      category: product.category,
+      description: product.description,
+      volume: product.volume ?? null,
+      usage: product.usage ?? null,
+      variants: product.variants ?? [],
+    }, {
+      name: override.name,
+      category: override.category,
+      description: override.description,
+      volume: override.volume,
+      usage: override.usage,
+      variants: override.variants,
+    });
+  }
+  const strawberry = bySlug.get("karandash-dlya-gub-pusy-strawberry-100464");
+  assert.equal(strawberry?.name, "Strawberry 唇线笔");
+  assert.equal(strawberry?.variants?.[0]?.name, "色号");
+  assert.equal(strawberry?.variants?.[0]?.options.find((option) => option.slug === strawberry.slug)?.label, "冷调粉色");
+  assert.ok(bySlug.get("jele-dlya-gub-autumn-1-100675")?.variants?.[0]?.options.some((option) => option.label === "珊瑚色"));
+  assert.equal(bySlug.get("rebrending-utrenniiy-ohlajdayshchiiy-tonik-dlya-koji-lica-i-shei-pusy150ml-100232")?.usage, undefined);
   assert.ok(!products.some((product) => product.slug === "maslo-dlya-gub-black-chernyiy-100710"));
   assert.match(nextConfig, /maslo-dlya-gub-black-chernyiy-100710/);
   assert.match(nextConfig, /maslo-dlya-gub-black-chernyiy-100779/);
@@ -83,7 +125,20 @@ test("matches the catalog scope while keeping inventory independently managed", 
     price: products.find((product) => product.slug === "nabor-hodovoiy-letniiy-vaiyb-100687").price,
     oldPrice: products.find((product) => product.slug === "nabor-hodovoiy-letniiy-vaiyb-100687").oldPrice,
   }, { price: 2390, oldPrice: 2860 });
-  assert.doesNotMatch(products.map((product) => `${product.name} ${product.description} ${product.usage ?? ""}`).join("\n"), /[\u0400-\u04ff]/);
+  const visibleCatalogCopy = products.flatMap((product) => [
+    product.name,
+    product.category,
+    product.description,
+    product.usage,
+    product.volume,
+    product.badge,
+    ...(product.variants ?? []).flatMap((group) => [group.name, ...group.options.map((option) => option.label)]),
+  ]).filter(Boolean).join("\n");
+  assert.doesNotMatch(visibleCatalogCopy, /[\u0400-\u04ff]/);
+  assert.doesNotMatch(visibleCatalogCopy, /荧光笔|补品|去角质滚轮|睫毛(?:用)?热凝胶|永远不会再做|无需胶水|当您决定不醒来|生发发膜|畅销书|多余的皮肤|将眉毛拉到头发上|粘膜|云存储|层压|长度和体积|涂抹一些然后混合|将油涂到嘴唇|到 12 点|酷粉色/);
+  assert.match(translationMigration, /updated_at = CURRENT_TIMESTAMP/);
+  assert.match(translationMigration, /variants_json = o\.variants::TEXT/);
+  assert.doesNotMatch(translationMigration, /\b(?:stock|inventory_verified|low_stock_threshold)\s*=/);
   assert.match(productPage, /generateMetadata/);
   assert.match(productPage, /product\.variants/);
   assert.match(productActions, /inventoryVerified/);

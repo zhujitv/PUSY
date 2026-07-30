@@ -3,7 +3,7 @@ import { paymentAdapter } from "./index";
 import { sha256 } from "./crypto";
 import type { PaymentProviderName, PaymentStatus, ProviderConfig, RefundStatus } from "./types";
 import { notifyGiftCards, notifyOrderConfirmed, notifyRefundCompleted } from "../notifications/business";
-import { commitPaidOrder, refreshOrderMemberTotals, releaseExpiredOrderReservations } from "../orders/reservations";
+import { commitPaidOrder, refreshOrderMemberTotals, releaseExpiredOrderReservations, restockCancelledPaidOrder } from "../orders/reservations";
 import { syncOrderPoints } from "../growth/loyalty";
 
 type DbPayment = { id: string; order_id: string; provider: PaymentProviderName; merchant_trade_no: string; provider_transaction_id: string | null; amount_fen: number; status: PaymentStatus; checkout_url: string | null; code_url: string | null; attempts: number };
@@ -19,7 +19,11 @@ export async function providerConfig(provider: PaymentProviderName) {
 export async function paymentProviderState() {
   const db = await getStoreDb();
   const rows = await db.prepare("SELECT * FROM payment_providers ORDER BY provider").all<ProviderConfig>();
-  return rows.results.map((config) => ({ ...config, configured: paymentAdapter(config.provider).configured(config), secrets: { privateKey: config.provider === "wechat" ? Boolean(process.env.WECHAT_PAY_PRIVATE_KEY) : Boolean(process.env.ALIPAY_PRIVATE_KEY), publicKey: config.provider === "wechat" ? Boolean(process.env.WECHAT_PAY_PUBLIC_KEY) : Boolean(process.env.ALIPAY_PUBLIC_KEY), apiV3Key: config.provider === "wechat" ? Boolean(process.env.WECHAT_PAY_API_V3_KEY) : undefined } }));
+  return rows.results.map((config) => {
+    const secrets = { privateKey: config.provider === "wechat" ? Boolean(process.env.WECHAT_PAY_PRIVATE_KEY) : Boolean(process.env.ALIPAY_PRIVATE_KEY), publicKey: config.provider === "wechat" ? Boolean(process.env.WECHAT_PAY_PUBLIC_KEY) : Boolean(process.env.ALIPAY_PUBLIC_KEY), apiV3Key: config.provider === "wechat" ? Boolean(process.env.WECHAT_PAY_API_V3_KEY) : undefined };
+    const missing = [!config.app_id && "应用 ID", !config.merchant_id && "商户号", config.provider === "wechat" && !config.public_key_id && "平台公钥 ID", config.provider === "wechat" && !config.certificate_serial && "商户证书序列号", !secrets.privateKey && "商户私钥", !secrets.publicKey && "平台公钥", config.provider === "wechat" && !secrets.apiV3Key && "API v3 密钥", config.enabled && config.mode !== "production" && "正式环境模式"].filter(Boolean) as string[];
+    return { ...config, configured: paymentAdapter(config.provider).configured(config) && (!config.enabled || config.mode === "production"), secrets, missing };
+  });
 }
 
 function retryAt(attempts: number) { const seconds = [5, 30, 60, 180, 300, 600, 1800][Math.min(attempts, 6)]; return new Date(Date.now() + seconds * 1000).toISOString(); }
@@ -175,6 +179,7 @@ export async function updateRefundRollup(paymentIdValue: string) {
   const sums = await db.prepare("SELECT COALESCE(SUM(CASE WHEN status = 'succeeded' THEN amount_fen ELSE 0 END), 0) AS succeeded, COALESCE(SUM(CASE WHEN status IN ('pending','processing') THEN amount_fen ELSE 0 END), 0) AS processing FROM refunds WHERE payment_id = ?").bind(payment.id).first<{ succeeded: number; processing: number }>();
   const status: PaymentStatus = (sums?.succeeded ?? 0) >= payment.amount_fen ? "refunded" : (sums?.processing ?? 0) > 0 ? "refunding" : (sums?.succeeded ?? 0) > 0 ? "partially_refunded" : "paid";
   await applyPaymentStatus(payment, status);
+  if (status === "refunded") await restockCancelledPaidOrder(payment.order_id);
 }
 
 export async function syncRefund(refundIdValue: string) {

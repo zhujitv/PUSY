@@ -11,6 +11,11 @@ export async function POST(request: Request) {
     const email = String(payload.email ?? "").trim().toLowerCase();
     const reason = String(payload.reason ?? "").trim().slice(0, 120);
     const details = String(payload.details ?? "").trim().slice(0, 1000);
+    const requestType = String(payload.requestType ?? "refund");
+    const returnCarrier = String(payload.returnCarrier ?? "").trim().slice(0, 60);
+    const returnTrackingNumber = String(payload.returnTrackingNumber ?? "").trim().replace(/\s+/g, "").slice(0, 64);
+    if (!["refund", "exchange", "reship"].includes(requestType)) return Response.json({ error: "售后类型无效" }, { status: 400 });
+    if (returnTrackingNumber && !/^[A-Za-z0-9-]{5,64}$/.test(returnTrackingNumber)) return Response.json({ error: "退回物流单号格式无效" }, { status: 400 });
     if (!orderId || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !reason) return Response.json({ error: "请填写订单号、有效下单邮箱和申请原因" }, { status: 400 });
 
     const db = await getStoreDb();
@@ -23,8 +28,9 @@ export async function POST(request: Request) {
       return Response.json({ error: `该订单已有进行中的申请：${existing.id}` }, { status: 409 });
     }
 
+    const items = await db.prepare("SELECT product_slug, product_name, quantity, unit_price FROM order_items WHERE order_id = ? ORDER BY id").bind(order.id).all();
     const id = `RET-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
-    await db.prepare("INSERT INTO returns (id, order_id, email, reason, details, status) VALUES (?, ?, ?, ?, ?, '待审核')").bind(id, order.id, email, reason, details).run();
+    await db.prepare("INSERT INTO returns (id, order_id, email, reason, details, request_type, items_json, return_carrier, return_tracking_number, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, '待审核')").bind(id, order.id, email, reason, details, requestType, JSON.stringify(items.results), returnCarrier, returnTrackingNumber).run();
     await createWebsiteReturnThread({ returnId: id, orderId: order.id, memberId: order.member_id, customer: order.customer, email, reason, details });
     return Response.json({ ok: true, id, status: "待审核" });
   } catch {

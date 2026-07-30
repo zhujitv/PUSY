@@ -6,6 +6,7 @@ import { sha256 } from "../../../lib/payments/crypto";
 import { releaseExpiredOrderReservations } from "../../../lib/orders/reservations";
 import { allowRequest, hasTrustedOrigin, rateLimitResponse, safeServerError } from "../../../lib/request-security";
 import { createGiftCardCode } from "../../../lib/gift-cards";
+import { notifyLowStock } from "../../../lib/notifications/business";
 
 type OrderPayload = { customer?: string; email?: string; phone?: string; address?: string; delivery?: string; payment?: string; couponCode?: string; items?: { slug: string; quantity: number; product?: { description?: string } }[] };
 const orderId = () => `PUSY-${new Date().toISOString().slice(0, 10).replaceAll("-", "")}-${crypto.randomUUID().replaceAll("-", "").slice(0, 10).toUpperCase()}`;
@@ -64,10 +65,16 @@ export async function POST(request: Request) {
     if (coupon.valid && coupon.giftCardCode) statements.push(db.prepare("UPDATE gift_cards SET balance = balance - ?, status = CASE WHEN balance - ? <= 0 THEN 'used' ELSE status END WHERE code = ? AND status = 'active' AND balance >= ?").bind(coupon.discount, coupon.discount, coupon.giftCardCode, coupon.discount).requireChanges("礼品卡余额不足或已被使用"));
     for (const line of resolvedItems) {
       statements.push(db.prepare("INSERT INTO order_items (order_id, product_slug, product_name, quantity, unit_price) VALUES (?, ?, ?, ?, ?)").bind(id, line.slug, line.name, line.quantity, line.price));
-      if (line.manageStock) statements.push(db.prepare("UPDATE products SET stock = stock - ?, updated_at = CURRENT_TIMESTAMP WHERE slug = ? AND inventory_verified = 1 AND stock >= ?").bind(line.quantity, line.slug, line.quantity).requireChanges(`${line.name} 库存不足`));
+      if (line.manageStock) {
+        statements.push(db.prepare("UPDATE products SET stock = stock - ?, updated_at = CURRENT_TIMESTAMP WHERE slug = ? AND inventory_verified = 1 AND stock >= ?").bind(line.quantity, line.slug, line.quantity).requireChanges(`${line.name} 库存不足`));
+        statements.push(db.prepare(`INSERT INTO inventory_movements (product_slug, order_id, movement_type, quantity, stock_after, reference_id)
+          SELECT slug, ?, 'reserve', ?, stock, ? FROM products WHERE slug = ?
+          ON CONFLICT (product_slug, movement_type, reference_id) DO NOTHING`).bind(id, -line.quantity, id, line.slug));
+      }
       if (line.slug.startsWith("gift-card-")) for (let index = 0; index < line.quantity; index += 1) statements.push(db.prepare("INSERT INTO gift_cards (code, order_id, initial_balance, balance, recipient_name, recipient_email, message, delivery_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')").bind(createGiftCardCode(), id, line.price, line.price, giftDetail(line.description, "收件人"), giftDetail(line.description, "邮箱"), giftDetail(line.description, "祝福"), giftDetail(line.description, "发送日期") || null));
     }
     await db.batch(statements);
+    await notifyLowStock(id).catch(() => undefined);
     return Response.json({ orderId: id, paymentToken, total: verifiedTotal, discount: coupon.discount, couponCode: coupon.valid ? coupon.code : null, reservationExpiresAt }, { status: 201 });
   } catch (error) {
     const message = error instanceof Error && /库存不足|优惠码|礼品卡/.test(error.message) ? error.message : "创建订单失败，请稍后再试";

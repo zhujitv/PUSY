@@ -75,6 +75,7 @@ export async function verifyAlipayWebhook(request: Request) {
   const raw = await request.text();
   const params = Object.fromEntries(new URLSearchParams(raw).entries());
   const signature = params.sign ?? "";
+  if (!params.notify_id) throw new Error("支付宝通知缺少唯一编号");
   if (!signature || !await rsaVerify(canonical(params), signature, publicKey())) throw new Error("支付宝通知验签失败");
-  return { eventId: `alipay:${params.notify_id || crypto.randomUUID()}`, eventType: params.notify_type || "trade_status_sync", body: raw, resource: params };
+  return { eventId: `alipay:${params.notify_id}`, eventType: params.notify_type || "trade_status_sync", body: raw, resource: params };
 }

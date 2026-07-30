@@ -888,11 +888,19 @@ body.overlay-open { overflow: hidden; }
 .member-order-detail > div { display: flex; justify-content: space-between; padding: 13px 0; border-top: 1px solid #ddd; font-size: 13px; }
 .member-order-detail span small { display: block; margin-top: 5px; color: #999; }
 .member-discount { color: #c33170 !important; text-align: right; }
+.member-shipment { display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; margin-top: 16px; padding: 16px; border: 1px solid #ddd; background: #fff; }
+.member-shipment a { color: #c33170; font-size: 12px; }
+.member-shipment p { grid-column: 1 / -1; margin: 0; color: #666; font-size: 11px; line-height: 1.6; }
+.member-shipment time { color: #999; }
+.member-order-cancel, .member-order-return { display: inline-block; margin: 16px 10px 0 0; padding: 9px 14px; border: 1px solid #222; color: #222; background: transparent; font-size: 11px; text-decoration: none; }
 .return-progress { display: grid; gap: 10px; }
 .return-progress article { padding: 24px; border: 1px solid #ddd; }
 .return-progress article > div { display: flex; justify-content: space-between; }
 .return-progress h3 { margin: 20px 0 8px; font-size: 20px; font-weight: 400; }
 .return-progress p, .return-progress small { color: #777; font-size: 12px; }
+.member-return-logistics { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; margin: 16px 0; }
+.member-return-logistics input { min-width: 0; padding: 10px; border: 1px solid #ccc; background: #fff; }
+.member-return-logistics button { padding: 10px 14px; border: 0; color: #fff; background: #111; }
 .return-status { padding: 7px 11px; border-radius: 20px; background: #f1f1ef; font-size: 11px; }
 .status-已批准, .status-已退款 { color: #32633b; background: #e8f4e9; }
 .status-已拒绝 { color: #9c2c46; background: #fae9ed; }
@@ -1108,6 +1116,12 @@ body.overlay-open { overflow: hidden; }
 .revenue-bars i { flex: 1; min-height: 3px; border-radius: 3px 3px 0 0; background: #ef398b; }
 .revenue-axis { display: flex; justify-content: space-between; padding-top: 8px; color: #999; font-size: 10px; }
 .admin-payment-stack { display: grid; gap: 18px; }
+.shipment-admin-list { display: grid; gap: 10px; margin-bottom: 22px; }
+.shipment-admin-list form { display: grid; grid-template-columns: 1.2fr .8fr 1fr 1fr auto; gap: 8px; align-items: center; padding: 12px; background: #f6f5f3; }
+.shipment-admin-list form span { color: #777; font-size: 11px; }
+.shipment-admin-list input, .shipment-admin-list select, .admin-table-wrap td form input, .admin-table-wrap td form select { min-width: 0; padding: 8px; border: 1px solid #ccc; background: #fff; }
+.shipment-admin-list button, .admin-table-wrap td form button { padding: 9px 12px; border: 0; color: #fff; background: #111; white-space: nowrap; }
+.admin-table-wrap td form { display: flex; gap: 6px; min-width: 440px; }
 .payment-provider-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .payment-provider-card { padding: 26px; border-radius: 12px; background: #fff; }
 .payment-provider-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
@@ -1477,12 +1491,15 @@ body.overlay-open { overflow: hidden; }
   .payment-card { padding: 22px 16px; }
   .payment-help { flex-direction: column; }
   .payment-provider-grid, .payment-provider-form { grid-template-columns: 1fr; }
+  .shipment-admin-list form { grid-template-columns: 1fr; }
+  .admin-table-wrap td form { min-width: 360px; }
   .notification-settings-grid { grid-template-columns: 1fr; }
   .china-check-grid { grid-template-columns: 1fr; }
   .china-settings-list > div { grid-template-columns: 1fr; gap: 5px; }
   .payment-event-list article { grid-template-columns: 1fr auto; }
   .payment-event-list article time { grid-column: 1 / -1; text-align: left; }
   .return-form-grid { grid-template-columns: 1fr; }
+  .member-return-logistics { grid-template-columns: 1fr; }
   .cookie-consent { left: 12px; right: 12px; bottom: 12px; align-items: stretch; flex-direction: column; gap: 15px; }
   .cookie-actions button { flex: 1; }
 }

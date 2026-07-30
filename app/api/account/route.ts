@@ -3,6 +3,7 @@ import { getStoreDb } from "../../../db/store";
 import { getPreviewMemberIdentity } from "../../../lib/preview-member-auth";
 import { ensureMemberProfile } from "../../../db/member-profile";
 import { hasTrustedOrigin, safeServerError } from "../../../lib/request-security";
+import { cancelOrder } from "../../../lib/orders/cancellation";
 
 const genderValues = new Set(["", "female", "male", "undisclosed"]);
 const skinTypeValues = new Set(["", "normal", "dry", "oily", "combination", "sensitive"]);
@@ -36,7 +37,7 @@ export async function GET() {
     const member = await ensureMember(viewer);
     await ensureMemberProfile(member.id);
     const db = await getStoreDb();
-    const [profile, addresses, orders, orderItems, returns, invoices, pointsLedger, coupons, productAlerts, tags] = await Promise.all([
+    const [profile, addresses, orders, orderItems, returns, invoices, pointsLedger, coupons, productAlerts, tags, shipments, shipmentEvents] = await Promise.all([
       db.prepare("SELECT * FROM member_profiles WHERE member_id = ?").bind(member.id).first(),
       db.prepare("SELECT * FROM member_addresses WHERE member_id = ? ORDER BY is_default DESC, id DESC").bind(member.id).all(),
       db.prepare("SELECT o.*, COUNT(oi.id) AS item_count FROM orders o LEFT JOIN order_items oi ON oi.order_id = o.id WHERE o.member_id = ? GROUP BY o.id ORDER BY o.created_at DESC").bind(member.id).all(),
@@ -47,8 +48,10 @@ export async function GET() {
       db.prepare("SELECT c.id, c.code, c.kind, c.value, c.minimum, c.starts_at, c.ends_at, ca.status, ca.assigned_at FROM coupon_assignments ca JOIN coupons c ON c.id = ca.coupon_id WHERE ca.member_id = ? AND c.status = 'active' ORDER BY ca.assigned_at DESC").bind(member.id).all(),
       db.prepare("SELECT a.id, a.product_slug, a.alert_type, a.target_price, a.last_notified_at, a.created_at, p.name AS product_name, p.image, p.price, p.stock FROM member_product_alerts a JOIN products p ON p.slug = a.product_slug WHERE a.member_id = ? AND a.status = 'active' ORDER BY a.created_at DESC").bind(member.id).all(),
       db.prepare("SELECT t.id, t.name, t.color FROM member_tag_assignments a JOIN customer_tags t ON t.id = a.tag_id WHERE a.member_id = ? ORDER BY t.name").bind(member.id).all(),
+      db.prepare("SELECT s.* FROM shipments s JOIN orders o ON o.id = s.order_id WHERE o.member_id = ? ORDER BY s.shipped_at DESC").bind(member.id).all(),
+      db.prepare("SELECT se.* FROM shipment_events se JOIN shipments s ON s.id = se.shipment_id JOIN orders o ON o.id = s.order_id WHERE o.member_id = ? ORDER BY se.event_time DESC").bind(member.id).all(),
     ]);
-    return Response.json({ member, profile, addresses: addresses.results, orders: orders.results, orderItems: orderItems.results, returns: returns.results, invoices: invoices.results, pointsLedger: pointsLedger.results, coupons: coupons.results, productAlerts: productAlerts.results, tags: tags.results, canSignOut: true }, { headers: { "cache-control": "private, no-store" } });
+    return Response.json({ member, profile, addresses: addresses.results, orders: orders.results, orderItems: orderItems.results, returns: returns.results, invoices: invoices.results, pointsLedger: pointsLedger.results, coupons: coupons.results, productAlerts: productAlerts.results, tags: tags.results, shipments: shipments.results, shipmentEvents: shipmentEvents.results, canSignOut: true }, { headers: { "cache-control": "private, no-store" } });
   } catch {
     return safeServerError("读取会员资料失败，请稍后再试");
   }
@@ -132,9 +135,23 @@ export async function POST(request: Request) {
         const invoiceId = `INV-${crypto.randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase()}`;
         await db.prepare("INSERT INTO invoices (id, order_id, member_id, invoice_type, title, tax_number, recipient_email, amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?)").bind(invoiceId, order.id, member.id, invoiceType, title, invoiceType === "company" ? taxNumber : "", recipientEmail, invoiceAmount).run();
       }
+    } else if (action === "cancel-order") {
+      const orderId = text(payload.orderId, 60).toUpperCase();
+      if (!orderId) return Response.json({ error: "订单号无效" }, { status: 400 });
+      const result = await cancelOrder({ orderId, memberId: member.id, reason: text(payload.reason, 200) || "会员中心申请取消", origin: new URL(request.url).origin });
+      return Response.json({ ok: true, ...result });
+    } else if (action === "update-return-logistics") {
+      const returnId = text(payload.returnId, 60);
+      const carrier = text(payload.carrier, 60);
+      const trackingNumber = text(payload.trackingNumber, 64).replace(/\s+/g, "");
+      if (!returnId || !carrier || !/^[A-Za-z0-9-]{5,64}$/.test(trackingNumber)) return Response.json({ error: "请填写有效退回物流公司和单号" }, { status: 400 });
+      const result = await db.prepare("UPDATE returns r SET return_carrier = ?, return_tracking_number = ?, updated_at = CURRENT_TIMESTAMP FROM orders o WHERE r.order_id = o.id AND r.id = ? AND o.member_id = ? AND r.status IN ('待审核','已批准')").bind(carrier, trackingNumber, returnId, member.id).run();
+      if (!result.meta.changes) return Response.json({ error: "未找到可更新物流的售后申请" }, { status: 404 });
     } else return Response.json({ error: "未知操作" }, { status: 400 });
     return Response.json({ ok: true });
-  } catch {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (/订单已经|订单当前|已经发货|没有可退|订单不存在/.test(message)) return safeServerError(message, 409);
     return safeServerError("保存会员资料失败，请稍后再试");
   }
 }

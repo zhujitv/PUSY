@@ -306,4 +306,6 @@ export async function recordReturnStatusChange(input: { returnId: string; status
     );
   }
   await db.batch(statements);
+  const { notifyReturnUpdated } = await import("../notifications/business");
+  await notifyReturnUpdated(input.returnId, input.status, input.note ?? "").catch(() => undefined);
 }

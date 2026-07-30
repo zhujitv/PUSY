@@ -7,7 +7,7 @@ import { useStore } from "./components/StoreProvider";
 import { HeaderIcon } from "./components/HeaderIcons";
 
 const featuredProducts = products.slice(1, 9);
-const defaultHomeContent = { announcement: `订单满 ${formatCnyFromRub(5000)} 免费配送`, hero_eyebrow: "púsy × Ü", hero_title: "礼物飞进\n你的订单", hero_subtitle: "猜猜你会收到哪一份？", featured_title: "新品" };
+const defaultHomeContent = { announcement: `订单满 ${formatCnyFromRub(5000)} 免费配送`, show_announcement: "1", hero_eyebrow: "púsy × Ü", hero_title: "礼物飞进\n你的订单", hero_subtitle: "猜猜你会收到哪一份？", hero_cta_label: "立即探索", hero_cta_url: "/catalog/products", hero2_eyebrow: "PÚSY 神秘礼盒", hero2_title: "装下这个夏天\n需要的一切", hero2_cta_label: "了解更多", hero2_cta_url: "/catalog/sekretnye-boksy", show_featured: "1", featured_title: "新品", featured_subtitle: "从当季新品开始，找到你的下一件日常心动。", featured_cta_label: "查看全部", show_categories: "1", categories_title: "按心情探索", category_1_label: "彩妆", category_1_url: "/catalog/makiyazh", category_2_label: "护肤", category_2_url: "/catalog/uhod", category_3_label: "家居", category_3_url: "/catalog/dlya-doma", show_reels: "1", reels_title: "你与 PÚSY", reels_subtitle: "真实灵感、使用方式与热门单品。", show_newsletter: "1", newsletter_title: "订阅邮件，立享 9 折", newsletter_success: "订阅成功，欢迎加入 PÚSY CLUB。" };
 
 const reels = [
   { player: "vplvbx7qwc3dhtviylip", slug: "karandash-dlya-gub-pusy-cream-100460", title: "奶油唇线笔" },
@@ -63,7 +63,7 @@ export default function Home() {
 
   return (
     <main>
-      <div className="shipping-bar">{homeContent.announcement}</div>
+      {homeContent.show_announcement !== "0" && <div className="shipping-bar">{homeContent.announcement}</div>}
 
       <header className={`site-header home-header ${scrolled ? "is-scrolled" : ""}`}>
         <button className="icon-button menu-button" aria-label="打开菜单" onClick={() => setMenuOpen(!menuOpen)}>
@@ -86,21 +86,22 @@ export default function Home() {
           <div className="campaign-mark">{homeContent.hero_eyebrow}</div>
           <h1 className="multiline-title">{homeContent.hero_title}</h1>
           <p>{homeContent.hero_subtitle}</p>
+          <a className="hero-primary-cta" href={homeContent.hero_cta_url}>{homeContent.hero_cta_label} →</a>
           <div className="prize-panel"><div><small>随机赢取</small><b>9 款礼物<br />中的 1 款</b></div><div><small>重磅好礼</small><b>Dyson、Paper Shoot、<br />Apple 等惊喜</b></div></div>
         </div> : <div className="hero-copy hero-copy--box">
-          <p>PÚSY 神秘礼盒</p>
-          <h1>装下这个夏天<br />需要的一切</h1>
-          <a className="outline-button" href="/catalog/sekretnye-boksy">了解更多</a>
+          <p>{homeContent.hero2_eyebrow}</p>
+          <h1 className="multiline-title">{homeContent.hero2_title}</h1>
+          <a className="outline-button" href={homeContent.hero2_cta_url}>{homeContent.hero2_cta_label}</a>
         </div>}
         <button className="hero-arrow hero-arrow--prev" type="button" aria-label="上一张" onClick={() => moveHero(-1)}>‹</button>
         <button className="hero-arrow hero-arrow--next" type="button" aria-label="下一张" onClick={() => moveHero(1)}>›</button>
         <div className="hero-dots" aria-label="选择轮播图">{[0, 1].map((index) => <button key={index} type="button" className={heroIndex === index ? "active" : ""} aria-label={`第 ${index + 1} 张`} aria-current={heroIndex === index ? "true" : undefined} onClick={() => setHeroIndex(index)} />)}</div>
       </section>
 
-      <section className="product-section" id="products">
+      {homeContent.show_featured !== "0" && <section className="product-section" id="products">
         <div className="section-heading">
-          <h2>{homeContent.featured_title}</h2>
-          <a href="/catalog/products">查看全部</a>
+          <div><h2>{homeContent.featured_title}</h2><p>{homeContent.featured_subtitle}</p></div>
+          <a href="/catalog/products">{homeContent.featured_cta_label}</a>
         </div>
         <div className="product-grid">
           {featuredProducts.map((product) => (
@@ -115,25 +116,25 @@ export default function Home() {
             </article>
           ))}
         </div>
-      </section>
+      </section>}
 
-      <section className="category-grid" aria-label="热门分类">
-        <a className="category-card" href="/catalog/makiyazh">
+      {homeContent.show_categories !== "0" && <section className="category-section" aria-label="热门分类"><div className="section-heading"><h2>{homeContent.categories_title}</h2></div><div className="category-grid">
+        <a className="category-card" href={homeContent.category_1_url}>
           <Image src="/assets/04.webp" alt="彩妆" width={960} height={1280} sizes="(max-width: 700px) 100vw, 33vw" />
-          <span>彩妆</span>
+          <span>{homeContent.category_1_label}</span>
         </a>
-        <a className="category-card" href="/catalog/uhod">
+        <a className="category-card" href={homeContent.category_2_url}>
           <Image src="/assets/01.webp" alt="护肤" width={960} height={1439} sizes="(max-width: 700px) 100vw, 33vw" />
-          <span>护肤</span>
+          <span>{homeContent.category_2_label}</span>
         </a>
-        <a className="category-card" href="/catalog/dlya-doma">
+        <a className="category-card" href={homeContent.category_3_url}>
           <Image src="/assets/13.webp" alt="家居护理" width={960} height={960} sizes="(max-width: 700px) 100vw, 33vw" />
-          <span>家居</span>
+          <span>{homeContent.category_3_label}</span>
         </a>
-      </section>
+      </div></section>}
 
-      <section className="reels-section" aria-labelledby="reels-title">
-        <h2 id="reels-title">你与 PÚSY</h2>
+      {homeContent.show_reels !== "0" && <section className="reels-section" aria-labelledby="reels-title">
+        <div className="reels-heading"><h2 id="reels-title">{homeContent.reels_title}</h2><p>{homeContent.reels_subtitle}</p></div>
         <div className="reels-grid">
           {reels.map((reel) => <article className="reel-card" key={reel.player}>
             <div className="reel-video"><iframe src={`https://runtime.strm.yandex.ru/player/video/${reel.player}`} title={`${reel.title} 视频`} loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowFullScreen /></div>
@@ -143,7 +144,7 @@ export default function Home() {
             </a>
           </article>)}
         </div>
-      </section>
+      </section>}
 
       <footer className="pusy-footer">
         <div className="footer-contact-line"><span>© PÚSY 2026 · <a href="https://pusy.cn">PUSY.CN</a> · 中国</span><div><a href="/contact">客户服务</a><a href="/stores-china#retail-partnership">商务合作</a><a href="/details">经营者信息</a></div></div>
@@ -152,7 +153,7 @@ export default function Home() {
           <div><a href="/catalog/products">商品目录</a><a href="/about">关于我们</a><a href="/delivery">配送说明</a><a href="/return">退换货</a><a href="/payment">支付方式</a></div>
           <div><a href="/stores-china">中国渠道</a><a href="/gift-card/questions">礼品卡问题</a><a href="/faq">常见问题</a><a href="/oferta">用户服务协议</a><a href="/privacy">隐私政策</a><a href="/cookie">Cookie 政策</a><a href="/details">经营者信息</a></div>
         </div>
-        <div className="footer-subscribe"><p>订阅邮件，立享 9 折</p>{subscribed ? <span>订阅成功，欢迎加入 PÚSY CLUB。</span> : <><form onSubmit={subscribe}><label className="sr-only" htmlFor="email">电子邮箱</label><input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="电子邮箱" required /><button type="submit">➤</button></form><small>提交即表示同意我们按照<a href="/privacy">隐私政策</a>发送品牌资讯，可随时退订。</small></>}</div>
+        {homeContent.show_newsletter !== "0" && <div className="footer-subscribe"><p>{homeContent.newsletter_title}</p>{subscribed ? <span>{homeContent.newsletter_success}</span> : <><form onSubmit={subscribe}><label className="sr-only" htmlFor="email">电子邮箱</label><input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="电子邮箱" required /><button type="submit">➤</button></form><small>提交即表示同意我们按照<a href="/privacy">隐私政策</a>发送品牌资讯，可随时退订。</small></>}</div>}
       </footer>
     </main>
   );

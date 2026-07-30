@@ -4,7 +4,7 @@ import { createPayment, createRefund, paymentProviderState, retryRefund, syncPay
 import type { PaymentProviderName } from "../../../lib/payments/types";
 import { notificationChannelState, processDueNotifications, processNotificationJob } from "../../../lib/notifications/service";
 import { chinaComplianceReady, chinaRegion } from "../../../lib/china-region";
-import { ensureCommerceFeatureSchema, getSiteContent } from "../../../db/commerce-features";
+import { deleteContentRevision, ensureCommerceFeatureSchema, getContentWorkspace, publishContentRevision, saveContentRevision } from "../../../db/commerce-features";
 import { hasTrustedOrigin, safeServerError } from "../../../lib/request-security";
 import { ensureLinkedSupportThread, recordReturnStatusChange, sendSupportReply, supportReceivingDomain } from "../../../lib/support/service";
 import { adminActionPermissions, roleCan, validAdminRole, type AdminPermission } from "../../../lib/admin-permissions";
@@ -61,7 +61,7 @@ export async function GET(request: Request) {
       rowsIf(can("system.manage") && wants("notifications"), "SELECT * FROM notification_templates ORDER BY key"),
       rowsIf(can("system.manage") && wants("notifications"), "SELECT * FROM notification_jobs ORDER BY created_at DESC LIMIT 500"),
       rowsIf(marketingVisible && wants("reviews"), "SELECT * FROM product_reviews ORDER BY created_at DESC LIMIT 500"),
-      can("content.manage") && wants("content") ? getSiteContent() : Promise.resolve({}),
+      can("content.manage") && wants("content") ? getContentWorkspace() : Promise.resolve({ current: {}, revisions: [] }),
       rowsIf(supportVisible && wants("support", "orders"), "SELECT st.*, m.name AS member_name, o.status AS order_status, r.status AS return_status FROM support_threads st LEFT JOIN members m ON m.id = st.member_id LEFT JOIN orders o ON o.id = st.order_id LEFT JOIN returns r ON r.id = st.return_id ORDER BY st.last_message_at DESC LIMIT 500"),
       rowsIf(supportVisible && wants("support"), "SELECT * FROM (SELECT id, thread_id, direction, source, provider_email_id, from_email, to_email, subject, text_body, attachments_json, created_at FROM support_messages ORDER BY created_at DESC LIMIT 1000) recent ORDER BY created_at ASC"),
       rowsIf(supportVisible && wants("support"), "SELECT * FROM (SELECT * FROM return_events ORDER BY created_at DESC LIMIT 1000) recent ORDER BY created_at ASC"),
@@ -112,7 +112,8 @@ export async function GET(request: Request) {
       notificationTemplates: can("system.manage") ? notificationTemplates.results : [],
       notificationJobs: can("system.manage") ? notificationJobs.results : [],
       reviews: marketingVisible ? reviews.results : [],
-      content: can("content.manage") ? content : {},
+      content: can("content.manage") ? content.current : {},
+      contentRevisions: can("content.manage") ? content.revisions : [],
       supportThreads: supportVisible ? supportThreads.results : [],
       supportMessages: supportVisible ? supportMessages.results : [],
       returnEvents: supportVisible ? returnEvents.results : [],
@@ -473,11 +474,13 @@ export async function POST(request: Request) {
       const status = String(payload.status ?? "");
       if (!["pending", "approved", "rejected"].includes(status)) return Response.json({ error: "评价状态无效" }, { status: 400 });
       await db.prepare("UPDATE product_reviews SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(status, Number(payload.id)).run();
-    } else if (action === "update-site-content") {
+    } else if (action === "update-site-content" || action === "save-content-draft" || action === "schedule-site-content") {
       const content = payload.content && typeof payload.content === "object" ? payload.content as Record<string, unknown> : {};
-      const allowed = ["announcement", "hero_eyebrow", "hero_title", "hero_subtitle", "featured_title"];
-      const statements = allowed.map((key) => db.prepare("INSERT INTO site_content (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP").bind(key, String(content[key] ?? "").trim().slice(0, 180)));
-      await db.batch(statements);
+      await saveContentRevision({ title: String(payload.title ?? "首页内容版本"), content, status: action === "update-site-content" ? "published" : action === "schedule-site-content" ? "scheduled" : "draft", publishAt: String(payload.publishAt ?? ""), actor: actor.email });
+    } else if (action === "publish-content-revision") {
+      await publishContentRevision(String(payload.id ?? ""), actor.email);
+    } else if (action === "delete-content-revision") {
+      await deleteContentRevision(String(payload.id ?? ""));
     } else return Response.json({ error: "未知操作" }, { status: 400 });
     await completeAdminAudit(auditId, "succeeded");
     auditCompleted = true;

@@ -219,6 +219,10 @@ test("about page presents an optimized, responsive brand story", async () => {
   assert.doesNotMatch(about, /unoptimized|loading="eager"/);
   assert.doesNotMatch(about, /src="\/assets\/30\.webp"/);
   assert.match(css, /position: sticky/);
+  assert.match(css, /\.eyebrow \{[^}]*font-size: var\(--section-eyebrow-size, 14px\);[^}]*white-space: nowrap;/s);
+  assert.match(css, /\.sectionHeading h2 \{[^}]*grid-column: span 10;[^}]*font-size: clamp\(42px, 4\.9vw, 78px\);[^}]*white-space: nowrap;/s);
+  assert.match(css, /\.chinaCopy h2 \{[^}]*font-size: clamp\(44px, 5\.2vw, 84px\);[^}]*white-space: nowrap;/s);
+  assert.match(css, /\.sectionHeading h2,[^}]*\.mission h2 \{[^}]*white-space: normal;/s);
   assert.match(css, /@media \(max-width: 760px\)/);
   assert.match(css, /prefers-reduced-motion: reduce/);
   assert.ok(desktopHero.byteLength > 100_000);
@@ -226,14 +230,42 @@ test("about page presents an optimized, responsive brand story", async () => {
   assert.ok(historyImage.byteLength > 50_000);
 });
 
+test("uses readable section eyebrows across public and member pages", async () => {
+  const css = await read("app/globals.css");
+
+  assert.match(css, /--section-eyebrow-size: clamp\(14px, 1vw, 16px\)/);
+  assert.match(css, /\.info-page > header > p \{[^}]*font-size: var\(--section-eyebrow-size\)/);
+  assert.match(css, /\.stores-page header p, \.blog-page header p \{[^}]*font-size: var\(--section-eyebrow-size\)/);
+  assert.match(css, /\.reviews-heading p \{[^}]*font-size: var\(--section-eyebrow-size\)/);
+  assert.match(css, /\.payment-page > section > p \{[^}]*font-size: var\(--section-eyebrow-size\)/);
+  assert.match(css, /\.member-auth-heading > p \{[^}]*font-size: var\(--section-eyebrow-size\)/);
+  assert.match(css, /\.membership-card p \{[^}]*font-size: 13px;/);
+});
+
 test("gift card layout stays compact without title overlap", async () => {
   const css = await read("app/globals.css");
 
-  assert.match(css, /\.gift-page \{[^}]*align-items: start;[^}]*min-height: 0;/);
-  assert.match(css, /\.gift-visual \{[^}]*height: clamp\(480px, 45vw, 620px\);/);
+  assert.match(css, /\.gift-page \{[^}]*grid-template-columns: minmax\(0, 1fr\) minmax\(0, 1fr\);[^}]*align-items: stretch;[^}]*min-height: 0;/);
+  assert.match(css, /\.gift-visual \{[^}]*height: auto;[^}]*min-height: clamp\(620px, 75vh, 860px\);[^}]*place-items: start center;/);
   assert.match(css, /\.gift-copy > p:first-child \{[^}]*font-size: clamp\(14px, 1\.05vw, 16px\);[^}]*line-height: 1\.4;/);
   assert.match(css, /\.gift-copy h1 \{[^}]*font-size: clamp\(44px, 4\.7vw, 68px\);[^}]*line-height: 1;[^}]*white-space: nowrap;/);
-  assert.match(css, /\.gift-visual \{ height: clamp\(330px, 82vw, 420px\);/);
+  assert.match(css, /\.gift-visual \{ height: clamp\(330px, 82vw, 420px\); min-height: 0; place-items: center;/);
+});
+
+test("gift card product links always open the dedicated gift card page", async () => {
+  const [productsData, cart, store, productPage] = await Promise.all([
+    read("app/data/products.ts"),
+    read("app/cart/page.tsx"),
+    read("app/components/StoreProvider.tsx"),
+    read("app/products/[slug]/page.tsx"),
+  ]);
+
+  assert.match(productsData, /productDetailHref/);
+  assert.match(productsData, /product\.category === "礼品卡"/);
+  assert.ok((cart.match(/productDetailHref\(product\)/g) ?? []).length >= 3);
+  assert.ok((store.match(/productDetailHref\(product\)/g) ?? []).length >= 3);
+  assert.match(productPage, /isGiftCardProductSlug\(slug\).*redirect\("\/gift-card"\)/s);
+  assert.match(productPage, /canonical: `\$\{siteUrl\}\/gift-card`/);
 });
 
 test("commerce feature set covers discovery, cart, membership, reviews and content operations", async () => {

@@ -43,6 +43,14 @@ export function formatCnyFromRub(rubles: number) {
   })} 元`;
 }
 
+export function isGiftCardProductSlug(slug: string) {
+  return slug === "gift-card" || slug.startsWith("gift-card-");
+}
+
+export function productDetailHref(product: Pick<Product, "slug" | "category">) {
+  return product.category === "礼品卡" || isGiftCardProductSlug(product.slug) ? "/gift-card" : `/products/${product.slug}`;
+}
+
 export const products = catalog as Product[];
 
 export const categoryNames: Record<string, string> = {

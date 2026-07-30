@@ -70,10 +70,11 @@
 
 .eyebrow {
   margin: 0;
-  font-size: 11px;
-  letter-spacing: 0.14em;
+  font-size: var(--section-eyebrow-size, 14px);
+  letter-spacing: 0.1em;
   line-height: 1.4;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .heroIntro > .eyebrow {
@@ -212,18 +213,19 @@
 }
 
 .sectionHeading .eyebrow {
-  grid-column: span 3;
+  grid-column: span 2;
   padding-top: 10px;
 }
 
 .sectionHeading h2 {
-  grid-column: span 9;
+  grid-column: span 10;
   margin: 0;
-  max-width: 1040px;
-  font-size: clamp(48px, 6.2vw, 96px);
+  max-width: none;
+  font-size: clamp(42px, 4.9vw, 78px);
   font-weight: 400;
   letter-spacing: -0.06em;
   line-height: 0.95;
+  white-space: nowrap;
 }
 
 .principleGrid {
@@ -277,17 +279,18 @@
 }
 
 .historyHeader .eyebrow {
-  grid-column: span 3;
+  grid-column: span 2;
   padding-top: 10px;
 }
 
 .historyHeader h2 {
-  grid-column: span 9;
+  grid-column: span 10;
   margin: 0;
   font-size: clamp(58px, 7vw, 112px);
   font-weight: 400;
   letter-spacing: -0.065em;
   line-height: 0.9;
+  white-space: nowrap;
 }
 
 .historyGrid {
@@ -496,8 +499,8 @@
 .worldCopy p {
   margin: 0 0 7px;
   color: var(--about-muted);
-  font-size: 10px;
-  letter-spacing: 0.12em;
+  font-size: 13px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -524,7 +527,7 @@
 }
 
 .chinaYear {
-  grid-column: 1 / span 7;
+  grid-column: 1 / span 6;
   align-self: end;
   margin: 0;
   font-size: clamp(150px, 20vw, 330px);
@@ -533,17 +536,18 @@
 }
 
 .chinaCopy {
-  grid-column: 8 / span 5;
+  grid-column: 7 / span 6;
   align-self: center;
   max-width: 620px;
 }
 
 .chinaCopy h2 {
   margin: 18px 0 28px;
-  font-size: clamp(54px, 6vw, 94px);
+  font-size: clamp(44px, 5.2vw, 84px);
   font-weight: 400;
   letter-spacing: -0.065em;
   line-height: 0.92;
+  white-space: nowrap;
 }
 
 .chinaCopy > p:not(.eyebrow) {
@@ -576,6 +580,7 @@
   font-weight: 400;
   letter-spacing: -0.07em;
   line-height: 0.88;
+  white-space: nowrap;
 }
 
 .mission blockquote {
@@ -602,9 +607,7 @@
 }
 
 @media (max-width: 1050px) {
-  .heroIntro > .eyebrow,
-  .sectionHeading .eyebrow,
-  .historyHeader .eyebrow {
+  .heroIntro > .eyebrow {
     grid-column: span 3;
   }
 
@@ -647,6 +650,11 @@
 }
 
 @media (max-width: 760px) {
+  .eyebrow {
+    font-size: 13px;
+    letter-spacing: 0.08em;
+  }
+
   .hero {
     padding-bottom: 20px;
   }
@@ -729,6 +737,14 @@
   .historyHeader h2 {
     margin-top: 20px;
     font-size: clamp(48px, 14vw, 67px);
+  }
+
+  .sectionHeading h2,
+  .historyHeader h2,
+  .chinaCopy h2,
+  .mission h2 {
+    text-wrap: balance;
+    white-space: normal;
   }
 
   .principleGrid {

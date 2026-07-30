@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import Image from "next/image";
-import { formatCnyFromRub, getProduct, products, type Product } from "../data/products";
+import { formatCnyFromRub, getProduct, productDetailHref, products, type Product } from "../data/products";
 
 export type CartLine = { slug: string; quantity: number; product?: Product };
 export type Order = {
@@ -116,7 +116,7 @@ function SearchOverlay() {
       <div className="panel-title"><span>搜索</span><button onClick={() => setSearchOpen(false)} aria-label="关闭搜索">×</button></div>
       <form action="/search" className="search-form"><input name="q" autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="输入商品名称或品类" /><button type="submit">搜索</button></form>
       <p className="search-caption">{query ? `找到 ${results.length} 件相关商品` : "热门搜索"}</p>
-      <div className="search-results">{results.map((product) => <a href={`/products/${product.slug}`} key={product.slug} onClick={() => setSearchOpen(false)}><Image src={product.image} alt="" width={100} height={104} sizes="70px" /><span>{product.name}<b>{formatCnyFromRub(product.price)}</b></span></a>)}</div>
+      <div className="search-results">{results.map((product) => <a href={productDetailHref(product)} key={product.slug} onClick={() => setSearchOpen(false)}><Image src={product.image} alt="" width={100} height={104} sizes="70px" /><span>{product.name}<b>{formatCnyFromRub(product.price)}</b></span></a>)}</div>
     </section>
   </div>;
 }
@@ -128,7 +128,7 @@ function CartDrawer() {
     <aside className="cart-drawer">
       <div className="panel-title"><span>购物袋</span><button onClick={() => setCartOpen(false)} aria-label="关闭购物袋">×</button></div>
       {cart.length === 0 ? <div className="empty-state"><p>购物袋还是空的</p><a href="/catalog/products" onClick={() => setCartOpen(false)}>去挑选商品</a></div> : <>
-        <div className="cart-lines">{cart.map((line) => { const product = line.product ?? getProduct(line.slug); return <article key={line.slug}><a href={`/products/${product.slug}`} onClick={() => setCartOpen(false)}><Image src={product.image} alt={product.name} width={120} height={125} sizes="90px" /></a><div><a href={`/products/${product.slug}`} onClick={() => setCartOpen(false)}>{product.name}</a><b>{formatCnyFromRub(product.price)}</b><div className="mini-quantity"><button onClick={() => updateQuantity(line.slug, line.quantity - 1)}>−</button><span>{line.quantity}</span><button onClick={() => updateQuantity(line.slug, line.quantity + 1)}>+</button></div><button className="remove-line" onClick={() => removeFromCart(line.slug)}>删除</button></div></article>; })}</div>
+        <div className="cart-lines">{cart.map((line) => { const product = line.product ?? getProduct(line.slug); return <article key={line.slug}><a href={productDetailHref(product)} onClick={() => setCartOpen(false)}><Image src={product.image} alt={product.name} width={120} height={125} sizes="90px" /></a><div><a href={productDetailHref(product)} onClick={() => setCartOpen(false)}>{product.name}</a><b>{formatCnyFromRub(product.price)}</b><div className="mini-quantity"><button onClick={() => updateQuantity(line.slug, line.quantity - 1)}>−</button><span>{line.quantity}</span><button onClick={() => updateQuantity(line.slug, line.quantity + 1)}>+</button></div><button className="remove-line" onClick={() => removeFromCart(line.slug)}>删除</button></div></article>; })}</div>
         <div className="cart-summary"><p><span>小计</span><b>{formatCnyFromRub(subtotal)}</b></p><small>配送费用将在结账时计算</small><a href="/checkout" onClick={() => setCartOpen(false)}>去结账</a><a className="text-link" href="/cart" onClick={() => setCartOpen(false)}>查看购物袋</a></div>
       </>}
     </aside>

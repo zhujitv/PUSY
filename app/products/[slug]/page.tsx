@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { PageShell } from "../../components/SiteChrome";
-import { formatCnyFromRub, products, type Product, type ProductVariantGroup } from "../../data/products";
+import { formatCnyFromRub, isGiftCardProductSlug, products, type Product, type ProductVariantGroup } from "../../data/products";
 import { ProductActions } from "./ProductActions";
 import { ProductGallery } from "./ProductGallery";
 import { ProductReviews } from "./ProductReviews";
@@ -54,6 +54,7 @@ function withLocalizedMedia(product: Product, catalogProduct: Product): Product 
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
+  if (isGiftCardProductSlug(slug)) return { title: "PÚSY 礼品卡 | PUSY.CN", description: "选购可用于 PUSY.CN 中国官方商城的记名电子礼品卡。", alternates: { canonical: `${siteUrl}/gift-card` } };
   const product = products.find((item) => item.slug === slug);
   if (!product) return { title: "商品未找到 | PUSY.CN" };
   const description = product.description.slice(0, 150);
@@ -67,6 +68,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  if (isGiftCardProductSlug(slug)) redirect("/gift-card");
   const catalogProduct = products.find((item) => item.slug === slug);
   if (!catalogProduct) notFound();
   let product: Product = catalogProduct;

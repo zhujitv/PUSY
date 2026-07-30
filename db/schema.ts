@@ -190,8 +190,36 @@ export const supportThreads = sqliteTable("support_threads", {
   starred: integer("starred").notNull().default(0),
   archivedAt: text("archived_at"),
   deletedAt: text("deleted_at"),
+  dueAt: text("due_at"),
   lastMessageAt: text("last_message_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const supportCannedReplies = sqliteTable("support_canned_replies", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  title: text("title").notNull().unique(),
+  content: text("content").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const invoices = sqliteTable("invoices", {
+  id: text("id").primaryKey(),
+  orderId: text("order_id").notNull().unique().references(() => orders.id),
+  memberId: integer("member_id").notNull().references(() => members.id),
+  invoiceType: text("invoice_type").notNull().default("personal"),
+  title: text("title").notNull(),
+  taxNumber: text("tax_number").notNull().default(""),
+  recipientEmail: text("recipient_email").notNull(),
+  amount: integer("amount").notNull(),
+  status: text("status").notNull().default("pending"),
+  invoiceNumber: text("invoice_number").notNull().default(""),
+  fileUrl: text("file_url").notNull().default(""),
+  rejectionReason: text("rejection_reason").notNull().default(""),
+  adminNote: text("admin_note").notNull().default(""),
+  requestedAt: text("requested_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  issuedAt: text("issued_at"),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 

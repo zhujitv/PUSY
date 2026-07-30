@@ -17,6 +17,7 @@ export type SupportThread = {
   status: "unread" | "open" | "pending" | "resolved";
   priority: "low" | "normal" | "high" | "urgent";
   assigned_to?: string;
+  due_at?: string;
   starred: number;
   archived_at?: string;
   deleted_at?: string;
@@ -41,6 +42,7 @@ export type SupportMessage = {
 export type ReturnEvent = { id: string; return_id: string; event_type: string; from_status?: string; to_status?: string; note: string; actor: string; created_at: string };
 type Attachment = { id: string; filename: string; content_type?: string; size?: number };
 type SupportReceiving = { domain: string; configured: boolean };
+type CannedReply = { id: number; title: string; content: string };
 type Folder = "inbox" | "unread" | "handling" | "starred" | "archived" | "trash";
 type ManageOperation = "mark-read" | "mark-unread" | "star" | "unstar" | "archive" | "unarchive" | "trash" | "restore" | "delete-permanent";
 
@@ -52,10 +54,11 @@ function attachments(value: string) { try { return JSON.parse(value) as Attachme
 function fileSize(value = 0) { if (!value) return ""; if (value < 1024) return `${value} B`; if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`; return `${(value / 1024 / 1024).toFixed(1)} MB`; }
 function active(thread: SupportThread) { return !thread.archived_at && !thread.deleted_at; }
 
-export function SupportAdmin({ threads, messages, returnEvents, receiving, query, viewer, focusThreadId, onAct }: {
+export function SupportAdmin({ threads, messages, returnEvents, cannedReplies, receiving, query, viewer, focusThreadId, onAct }: {
   threads: SupportThread[];
   messages: SupportMessage[];
   returnEvents: ReturnEvent[];
+  cannedReplies: CannedReply[];
   receiving: SupportReceiving;
   query: string;
   viewer: string;
@@ -67,6 +70,8 @@ export function SupportAdmin({ threads, messages, returnEvents, receiving, query
   const [selectedId, setSelectedId] = useState(focusThreadId ?? "");
   const [checked, setChecked] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
+  const [replyText, setReplyText] = useState("");
+  const [renderedAt] = useState(() => Date.now());
   const counts = useMemo(() => ({
     inbox: threads.filter(active).length,
     unread: threads.filter((thread) => active(thread) && thread.status === "unread").length,
@@ -104,17 +109,16 @@ export function SupportAdmin({ threads, messages, returnEvents, receiving, query
   async function reply(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!selected) return;
-    const form = event.currentTarget;
-    const message = String(new FormData(form).get("message") ?? "").trim();
+    const message = replyText.trim();
     if (!message) return;
     setBusy(true);
-    if (await onAct({ action: "reply-support-thread", id: selected.id, message })) form.reset();
+    if (await onAct({ action: "reply-support-thread", id: selected.id, message })) setReplyText("");
     setBusy(false);
   }
 
   function openThread(thread: SupportThread) {
     setSelectedId(thread.id);
-    if (thread.status === "unread" && active(thread)) void onAct({ action: "update-support-thread", id: thread.id, status: "open", priority: thread.priority, assignedTo: thread.assigned_to || viewer });
+    if (thread.status === "unread" && active(thread)) void onAct({ action: "update-support-thread", id: thread.id, status: "open", priority: thread.priority, assignedTo: thread.assigned_to || viewer, dueAt: thread.due_at || "" });
   }
 
   const allChecked = Boolean(filtered.length) && filtered.every((thread) => checked.includes(thread.id));
@@ -144,7 +148,7 @@ export function SupportAdmin({ threads, messages, returnEvents, receiving, query
             <div>{filtered.length ? filtered.map((thread) => <div className={`support-thread-row ${selected?.id === thread.id ? "active" : ""} ${thread.status === "unread" ? "unread" : ""}`} key={thread.id}>
               <label className="support-thread-check"><input type="checkbox" checked={checked.includes(thread.id)} onChange={(event) => setChecked((current) => event.target.checked ? [...new Set([...current, thread.id])] : current.filter((id) => id !== thread.id))} aria-label={`选择 ${thread.subject}`} /></label>
               <button className="support-star" title={thread.starred ? "取消星标" : "添加星标"} onClick={() => void manage(thread.starred ? "unstar" : "star", [thread.id])}>{thread.starred ? "★" : "☆"}</button>
-              <button className="support-thread-open" onClick={() => openThread(thread)}><span><b>{thread.customer_name || thread.customer_email}</b><time>{new Date(thread.last_message_at).toLocaleDateString("zh-CN")}</time></span><strong>{thread.subject}</strong><small>{thread.mailbox === "returns" ? "售后" : "客服"} · {statusLabels[thread.status]}{thread.order_id ? ` · ${thread.order_id}` : ""}</small></button>
+              <button className="support-thread-open" onClick={() => openThread(thread)}><span><b>{thread.customer_name || thread.customer_email}</b><time>{new Date(thread.last_message_at).toLocaleDateString("zh-CN")}</time></span><strong>{thread.subject}</strong><small>{thread.mailbox === "returns" ? "售后" : "客服"} · {statusLabels[thread.status]}{thread.order_id ? ` · ${thread.order_id}` : ""}{thread.due_at && new Date(thread.due_at).getTime() < renderedAt && thread.status !== "resolved" ? " · 已超时" : ""}</small></button>
             </div>) : <p className="support-empty">这个文件夹里没有邮件</p>}</div>
           </aside>
           <div className="support-conversation">
@@ -152,15 +156,16 @@ export function SupportAdmin({ threads, messages, returnEvents, receiving, query
               <header className="support-conversation-header"><div><p>{selected.id}</p><h2>{selected.subject}</h2><span>{selected.customer_name || "客户"} · {selected.customer_email}</span></div>
                 <div className="support-header-actions">{!selected.deleted_at && <button title="星标" onClick={() => void manage(selected.starred ? "unstar" : "star", [selected.id])}>{selected.starred ? "★ 已星标" : "☆ 星标"}</button>}{selected.deleted_at ? <><button onClick={() => void manage("restore", [selected.id])}>恢复</button><button className="danger" onClick={() => void manage("delete-permanent", [selected.id])}>永久删除</button></> : selected.archived_at ? <><button onClick={() => void manage("unarchive", [selected.id])}>移回收件箱</button><button className="danger" onClick={() => void manage("trash", [selected.id])}>删除</button></> : <><button onClick={() => void manage(selected.status === "unread" ? "mark-read" : "mark-unread", [selected.id])}>{selected.status === "unread" ? "标为已读" : "标为未读"}</button><button onClick={() => void manage("archive", [selected.id])}>归档</button><button className="danger" onClick={() => void manage("trash", [selected.id])}>删除</button></>}</div>
               </header>
-              {!selected.deleted_at && !selected.archived_at && <div className="support-controls"><label>优先级<select value={selected.priority} onChange={(event) => void onAct({ action: "update-support-thread", id: selected.id, status: selected.status, priority: event.target.value, assignedTo: selected.assigned_to || viewer })}>{Object.entries(priorityLabels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label><label>处理状态<select value={selected.status} onChange={(event) => void onAct({ action: "update-support-thread", id: selected.id, status: event.target.value, priority: selected.priority, assignedTo: selected.assigned_to || viewer })}>{Object.entries(statusLabels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label></div>}
-              <div className="support-links">{selected.member_id && <span>会员 #{selected.member_id}{selected.member_name ? ` · ${selected.member_name}` : ""}</span>}{selected.order_id && <span>订单 {selected.order_id} · {selected.order_status}</span>}{selected.return_id && <span>售后 {selected.return_id} · {selected.return_status}</span>}<span>负责人：{selected.assigned_to || "未分配"}</span></div>
-              <div className="support-message-list">{selectedMessages.map((message) => <article className={message.direction} key={message.id}><header><b>{message.direction === "inbound" ? selected.customer_name || selected.customer_email : message.direction === "outbound" ? "PUSY.CN 客服" : "系统记录"}</b><time>{new Date(message.created_at).toLocaleString("zh-CN")}</time></header><p>{message.text_body || "（邮件没有可显示的文字内容）"}</p>{attachments(message.attachments_json).length > 0 && <div className="support-attachments">{attachments(message.attachments_json).map((file) => message.provider_email_id ? <a key={file.id} href={`/api/admin/support/attachment?emailId=${encodeURIComponent(message.provider_email_id)}&attachmentId=${encodeURIComponent(file.id)}`} target="_blank" rel="noopener noreferrer"><span>附件</span><b>{file.filename}</b><small>{fileSize(file.size)}</small></a> : <span key={file.id}>{file.filename}</span>)}</div>}</article>)}</div>
+              {!selected.deleted_at && !selected.archived_at && <form className="support-controls" key={selected.id} onSubmit={(event) => { event.preventDefault(); const values = Object.fromEntries(new FormData(event.currentTarget).entries()); void onAct({ action: "update-support-thread", id: selected.id, ...values }); }}><label>优先级<select name="priority" defaultValue={selected.priority}>{Object.entries(priorityLabels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label><label>处理状态<select name="status" defaultValue={selected.status}>{Object.entries(statusLabels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label><label>负责人<input name="assignedTo" defaultValue={selected.assigned_to || viewer} placeholder="客服姓名或邮箱" /></label><label>处理时限<input name="dueAt" type="datetime-local" defaultValue={selected.due_at ? new Date(selected.due_at).toISOString().slice(0, 16) : ""} /></label><button>保存分派</button></form>}
+              <div className="support-links">{selected.member_id && <span>会员 #{selected.member_id}{selected.member_name ? ` · ${selected.member_name}` : ""}</span>}{selected.order_id && <span>订单 {selected.order_id} · {selected.order_status}</span>}{selected.return_id && <span>售后 {selected.return_id} · {selected.return_status}</span>}<span>负责人：{selected.assigned_to || "未分配"}</span>{selected.due_at && <span className={new Date(selected.due_at).getTime() < renderedAt && selected.status !== "resolved" ? "overdue" : ""}>时限：{new Date(selected.due_at).toLocaleString("zh-CN")}</span>}</div>
+              <div className="support-message-list">{selectedMessages.map((message) => <article className={`${message.direction} ${message.source === "internal_note" ? "internal-note" : ""}`} key={message.id}><header><b>{message.source === "internal_note" ? "内部备注 · 仅员工可见" : message.direction === "inbound" ? selected.customer_name || selected.customer_email : message.direction === "outbound" ? "PUSY.CN 客服" : "系统记录"}</b><time>{new Date(message.created_at).toLocaleString("zh-CN")}</time></header><p>{message.text_body || "（邮件没有可显示的文字内容）"}</p>{attachments(message.attachments_json).length > 0 && <div className="support-attachments">{attachments(message.attachments_json).map((file) => message.provider_email_id ? <a key={file.id} href={`/api/admin/support/attachment?emailId=${encodeURIComponent(message.provider_email_id)}&attachmentId=${encodeURIComponent(file.id)}`} target="_blank" rel="noopener noreferrer"><span>附件</span><b>{file.filename}</b><small>{fileSize(file.size)}</small></a> : <span key={file.id}>{file.filename}</span>)}</div>}</article>)}</div>
               {timeline.length > 0 && <details className="support-return-timeline"><summary>查看售后处理记录（{timeline.length}）</summary>{timeline.map((event) => <p key={event.id}><time>{new Date(event.created_at).toLocaleString("zh-CN")}</time><b>{event.from_status ? `${event.from_status} → ${event.to_status}` : event.to_status}</b><span>{event.note || event.actor}</span></p>)}</details>}
-              {!selected.deleted_at && !selected.archived_at && <form className="support-reply" onSubmit={reply}><textarea name="message" rows={5} maxLength={10000} placeholder="回复客户；发送后客户可直接回复同一工单" required /><footer><span>发件人：PUSY.CN · 回复将保留在当前工单</span><button disabled={busy || !receiving.configured}>{busy ? "正在发送…" : receiving.configured ? "发送回复" : "等待收件配置"}</button></footer></form>}
+              {!selected.deleted_at && !selected.archived_at && <><form className="support-note" onSubmit={async (event) => { event.preventDefault(); const form = event.currentTarget; const note = String(new FormData(form).get("note") ?? "").trim(); if (note && await onAct({ action: "add-support-note", id: selected.id, note })) form.reset(); }}><input name="note" maxLength={5000} placeholder="添加内部备注，客户不会看到" required /><button>添加备注</button></form><form className="support-reply" onSubmit={reply}><div className="support-quick-reply"><label>快捷回复<select defaultValue="" onChange={(event) => { const selectedReply = cannedReplies.find((item) => item.id === Number(event.target.value)); if (selectedReply) setReplyText(selectedReply.content); }}><option value="">选择模板</option>{cannedReplies.map((item) => <option value={item.id} key={item.id}>{item.title}</option>)}</select></label></div><textarea name="message" value={replyText} onChange={(event) => setReplyText(event.target.value)} rows={5} maxLength={10000} placeholder="回复客户；发送后客户可直接回复同一工单" required /><footer><span>发件人：PUSY.CN · 回复将保留在当前工单</span><button disabled={busy || !receiving.configured}>{busy ? "正在发送…" : receiving.configured ? "发送回复" : "等待收件配置"}</button></footer></form></>}
             </> : <div className="support-empty-conversation"><b>选择一封邮件</b><p>客户邮件、订单关联、附件和处理记录会显示在这里。</p></div>}
           </div>
         </div>
       </div>
     </section>
+    <details className="support-template-manager"><summary>管理快捷回复（{cannedReplies.length}）</summary><form onSubmit={async (event) => { event.preventDefault(); const form = event.currentTarget; const values = Object.fromEntries(new FormData(form).entries()); if (await onAct({ action: "create-canned-reply", ...values })) form.reset(); }}><input name="title" maxLength={80} placeholder="模板名称" required /><textarea name="content" maxLength={5000} rows={3} placeholder="回复内容" required /><button>新增快捷回复</button></form><div>{cannedReplies.map((item) => <article key={item.id}><div><b>{item.title}</b><p>{item.content}</p></div><button className="danger" onClick={() => void onAct({ action: "delete-canned-reply", id: item.id })}>删除</button></article>)}</div></details>
   </div>;
 }

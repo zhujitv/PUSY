@@ -36,14 +36,15 @@ export async function GET() {
     const member = await ensureMember(viewer);
     await ensureMemberProfile(member.id);
     const db = await getStoreDb();
-    const [profile, addresses, orders, orderItems, returns] = await Promise.all([
+    const [profile, addresses, orders, orderItems, returns, invoices] = await Promise.all([
       db.prepare("SELECT * FROM member_profiles WHERE member_id = ?").bind(member.id).first(),
       db.prepare("SELECT * FROM member_addresses WHERE member_id = ? ORDER BY is_default DESC, id DESC").bind(member.id).all(),
       db.prepare("SELECT o.*, COUNT(oi.id) AS item_count FROM orders o LEFT JOIN order_items oi ON oi.order_id = o.id WHERE o.member_id = ? GROUP BY o.id ORDER BY o.created_at DESC").bind(member.id).all(),
       db.prepare("SELECT oi.* FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.member_id = ? ORDER BY oi.id").bind(member.id).all(),
       db.prepare("SELECT r.* FROM returns r JOIN orders o ON o.id = r.order_id WHERE o.member_id = ? ORDER BY r.created_at DESC").bind(member.id).all(),
+      db.prepare("SELECT * FROM invoices WHERE member_id = ? ORDER BY requested_at DESC").bind(member.id).all(),
     ]);
-    return Response.json({ member, profile, addresses: addresses.results, orders: orders.results, orderItems: orderItems.results, returns: returns.results, canSignOut: true });
+    return Response.json({ member, profile, addresses: addresses.results, orders: orders.results, orderItems: orderItems.results, returns: returns.results, invoices: invoices.results, canSignOut: true });
   } catch {
     return safeServerError("读取会员资料失败，请稍后再试");
   }
@@ -100,6 +101,25 @@ export async function POST(request: Request) {
       if (!address) return Response.json({ error: "未找到该收货地址" }, { status: 404 });
       await db.prepare("DELETE FROM member_addresses WHERE id = ? AND member_id = ?").bind(id, member.id).run();
       if (address.is_default) await db.prepare("UPDATE member_addresses SET is_default = 1 WHERE id = (SELECT id FROM member_addresses WHERE member_id = ? ORDER BY id DESC LIMIT 1)").bind(member.id).run();
+    } else if (action === "request-invoice") {
+      const orderId = text(payload.orderId, 60).toUpperCase();
+      const invoiceType = text(payload.invoiceType, 20);
+      const title = text(payload.title, 120);
+      const taxNumber = text(payload.taxNumber, 30).toUpperCase();
+      const recipientEmail = text(payload.recipientEmail, 160).toLowerCase();
+      if (!orderId || !["personal", "company"].includes(invoiceType) || !title || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail)) return Response.json({ error: "请完整填写有效的开票信息" }, { status: 400 });
+      if (invoiceType === "company" && !/^[0-9A-Z]{15,20}$/.test(taxNumber)) return Response.json({ error: "请填写有效的企业税号" }, { status: 400 });
+      const order = await db.prepare("SELECT id, total, status FROM orders WHERE id = ? AND member_id = ? LIMIT 1").bind(orderId, member.id).first<{ id: string; total: number; status: string }>();
+      if (!order) return Response.json({ error: "未找到该会员订单" }, { status: 404 });
+      if (["待付款", "支付失败", "已取消", "已退款"].includes(order.status)) return Response.json({ error: "该订单当前不符合开票条件" }, { status: 400 });
+      const existing = await db.prepare("SELECT id, status FROM invoices WHERE order_id = ? AND member_id = ? LIMIT 1").bind(order.id, member.id).first<{ id: string; status: string }>();
+      if (existing && !["rejected", "cancelled"].includes(existing.status)) return Response.json({ error: "该订单已经提交过发票申请" }, { status: 409 });
+      if (existing) {
+        await db.prepare("UPDATE invoices SET invoice_type = ?, title = ?, tax_number = ?, recipient_email = ?, status = 'pending', rejection_reason = '', requested_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(invoiceType, title, invoiceType === "company" ? taxNumber : "", recipientEmail, existing.id).run();
+      } else {
+        const invoiceId = `INV-${crypto.randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase()}`;
+        await db.prepare("INSERT INTO invoices (id, order_id, member_id, invoice_type, title, tax_number, recipient_email, amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?)").bind(invoiceId, order.id, member.id, invoiceType, title, invoiceType === "company" ? taxNumber : "", recipientEmail, order.total).run();
+      }
     } else return Response.json({ error: "未知操作" }, { status: 400 });
     return Response.json({ ok: true });
   } catch {

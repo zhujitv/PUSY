@@ -15,6 +15,7 @@ const memberStatuses = ["active", "vip", "blocked"];
 const returnStatuses = ["待审核", "已批准", "补发处理中", "退款中", "已退款", "已拒绝", "已关闭"];
 const supportStatuses = ["unread", "open", "pending", "resolved"];
 const supportPriorities = ["low", "normal", "high", "urgent"];
+const invoiceStatuses = ["pending", "processing", "issued", "rejected", "cancelled"];
 const supportOperations = ["mark-read", "mark-unread", "star", "unstar", "archive", "unarchive", "trash", "restore", "delete-permanent"];
 const partnershipStatuses = ["待联系", "洽谈中", "已合作", "已拒绝", "已关闭"];
 const yuanToStored = (value: unknown) => Math.round(Number(value) / 0.12);
@@ -27,7 +28,7 @@ export async function GET() {
     if (!await allowAdmin()) return Response.json({ error: "请先登录管理后台" }, { status: 401 });
     await ensureCommerceFeatureSchema();
     const db = await getStoreDb();
-    const [products, orders, orderItems, members, subscribers, returns, retailPartnerships, coupons, giftCards, stats, revenueTrend, providers, payments, refunds, paymentEvents, notificationSettings, notificationTemplates, notificationJobs, reviews, content, supportThreads, supportMessages, returnEvents] = await Promise.all([
+    const [products, orders, orderItems, members, subscribers, returns, retailPartnerships, coupons, giftCards, stats, revenueTrend, providers, payments, refunds, paymentEvents, notificationSettings, notificationTemplates, notificationJobs, reviews, content, supportThreads, supportMessages, returnEvents, invoices, cannedReplies, orderStatusAnalytics, topProducts, customerAnalytics, returnAnalytics] = await Promise.all([
       db.prepare("SELECT * FROM products ORDER BY id DESC").all(),
       db.prepare("SELECT o.*, COUNT(oi.id) AS item_count FROM orders o LEFT JOIN order_items oi ON oi.order_id = o.id GROUP BY o.id ORDER BY o.created_at DESC LIMIT 200").all(),
       db.prepare("SELECT * FROM order_items ORDER BY id DESC LIMIT 1000").all(),
@@ -51,9 +52,15 @@ export async function GET() {
       db.prepare("SELECT st.*, m.name AS member_name, o.status AS order_status, r.status AS return_status FROM support_threads st LEFT JOIN members m ON m.id = st.member_id LEFT JOIN orders o ON o.id = st.order_id LEFT JOIN returns r ON r.id = st.return_id ORDER BY st.last_message_at DESC LIMIT 500").all(),
       db.prepare("SELECT id, thread_id, direction, source, provider_email_id, from_email, to_email, subject, text_body, attachments_json, created_at FROM support_messages ORDER BY created_at ASC LIMIT 3000").all(),
       db.prepare("SELECT * FROM return_events ORDER BY created_at ASC LIMIT 2000").all(),
+      db.prepare("SELECT i.*, o.customer, o.email AS customer_email FROM invoices i JOIN orders o ON o.id = i.order_id ORDER BY i.requested_at DESC LIMIT 500").all(),
+      db.prepare("SELECT * FROM support_canned_replies ORDER BY id").all(),
+      db.prepare("SELECT status, COUNT(*) AS count, COALESCE(SUM(total), 0) AS revenue FROM orders GROUP BY status ORDER BY count DESC").all(),
+      db.prepare("SELECT oi.product_slug, oi.product_name, SUM(oi.quantity) AS quantity, COALESCE(SUM(oi.quantity * oi.unit_price), 0) AS revenue FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.status NOT IN ('待付款','支付失败','已取消') GROUP BY oi.product_slug, oi.product_name ORDER BY quantity DESC, revenue DESC LIMIT 10").all(),
+      db.prepare("SELECT COUNT(*) FILTER (WHERE joined_at::timestamp >= CURRENT_TIMESTAMP - INTERVAL '30 days') AS new_members_30d, COUNT(*) FILTER (WHERE total_orders > 1) AS repeat_members, COUNT(*) FILTER (WHERE total_orders > 0) AS purchasing_members, COUNT(*) AS total_members FROM members").first(),
+      db.prepare("SELECT COUNT(*) AS total_returns, COUNT(*) FILTER (WHERE created_at::timestamp >= CURRENT_TIMESTAMP - INTERVAL '30 days') AS returns_30d, COUNT(*) FILTER (WHERE status IN ('已退款','退款中')) AS refund_returns FROM returns").first(),
     ]);
     const statValues = stats && typeof stats === "object" ? stats : {};
-    return Response.json({ products: products.results, orders: orders.results, orderItems: orderItems.results, members: members.results, subscribers: subscribers.results, returns: returns.results, retailPartnerships: retailPartnerships.results, coupons: coupons.results, giftCards: giftCards.results, stats: { ...statValues, unread_support: supportThreads.results.filter((item) => { const thread = item as { status?: string; archived_at?: string | null; deleted_at?: string | null }; return thread.status === "unread" && !thread.archived_at && !thread.deleted_at; }).length }, revenueTrend: revenueTrend.results, providers, payments: payments.results, refunds: refunds.results, paymentEvents: paymentEvents.results, notificationSettings, notificationTemplates: notificationTemplates.results, notificationJobs: notificationJobs.results, reviews: reviews.results, content, supportThreads: supportThreads.results, supportMessages: supportMessages.results, returnEvents: returnEvents.results, supportReceiving: { domain: supportReceivingDomain(), configured: Boolean(supportReceivingDomain() && process.env.RESEND_API_KEY && process.env.RESEND_RECEIVING_API_KEY && process.env.RESEND_WEBHOOK_SECRET) }, region: { ...chinaRegion, complianceReady: chinaComplianceReady } });
+    return Response.json({ products: products.results, orders: orders.results, orderItems: orderItems.results, members: members.results, subscribers: subscribers.results, returns: returns.results, retailPartnerships: retailPartnerships.results, coupons: coupons.results, giftCards: giftCards.results, stats: { ...statValues, unread_support: supportThreads.results.filter((item) => { const thread = item as { status?: string; archived_at?: string | null; deleted_at?: string | null }; return thread.status === "unread" && !thread.archived_at && !thread.deleted_at; }).length }, revenueTrend: revenueTrend.results, providers, payments: payments.results, refunds: refunds.results, paymentEvents: paymentEvents.results, notificationSettings, notificationTemplates: notificationTemplates.results, notificationJobs: notificationJobs.results, reviews: reviews.results, content, supportThreads: supportThreads.results, supportMessages: supportMessages.results, returnEvents: returnEvents.results, invoices: invoices.results, cannedReplies: cannedReplies.results, analytics: { orderStatuses: orderStatusAnalytics.results, topProducts: topProducts.results, customers: customerAnalytics ?? {}, returns: returnAnalytics ?? {} }, supportReceiving: { domain: supportReceivingDomain(), configured: Boolean(supportReceivingDomain() && process.env.RESEND_API_KEY && process.env.RESEND_RECEIVING_API_KEY && process.env.RESEND_WEBHOOK_SECRET) }, region: { ...chinaRegion, complianceReady: chinaComplianceReady } });
   } catch {
     return safeServerError("读取后台数据失败，请稍后再试");
   }
@@ -116,8 +123,25 @@ export async function POST(request: Request) {
       const status = String(payload.status ?? "");
       const priority = String(payload.priority ?? "normal");
       if (!supportStatuses.includes(status) || !supportPriorities.includes(priority)) return Response.json({ error: "工单状态或优先级无效" }, { status: 400 });
-      const result = await db.prepare("UPDATE support_threads SET status = ?, priority = ?, assigned_to = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL").bind(status, priority, String(payload.assignedTo ?? "").trim().slice(0, 120) || null, String(payload.id)).run();
+      const dueAt = String(payload.dueAt ?? "").trim();
+      if (dueAt && Number.isNaN(Date.parse(dueAt))) return Response.json({ error: "处理时限无效" }, { status: 400 });
+      const result = await db.prepare("UPDATE support_threads SET status = ?, priority = ?, assigned_to = ?, due_at = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL").bind(status, priority, String(payload.assignedTo ?? "").trim().slice(0, 120) || null, dueAt || null, String(payload.id)).run();
       if (!result.meta.changes) return Response.json({ error: "客服工单不存在" }, { status: 404 });
+    } else if (action === "add-support-note") {
+      const threadId = String(payload.id ?? "");
+      const note = String(payload.note ?? "").trim().slice(0, 5000);
+      if (!note) return Response.json({ error: "请填写内部备注" }, { status: 400 });
+      const actor = (await getAdminIdentity())?.email ?? "admin";
+      const result = await db.prepare("INSERT INTO support_messages (id, thread_id, direction, source, from_email, to_email, subject, text_body, headers_json) SELECT ?, id, 'system', 'internal_note', ?, customer_email, '内部备注', ?, ? FROM support_threads WHERE id = ? AND deleted_at IS NULL").bind(`MSG-${crypto.randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase()}`, actor, note, JSON.stringify({ actor }), threadId).run();
+      if (!result.meta.changes) return Response.json({ error: "客服工单不存在" }, { status: 404 });
+      await db.prepare("UPDATE support_threads SET updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(threadId).run();
+    } else if (action === "create-canned-reply") {
+      const title = String(payload.title ?? "").trim().slice(0, 80);
+      const content = String(payload.content ?? "").trim().slice(0, 5000);
+      if (!title || !content) return Response.json({ error: "请填写快捷回复名称和内容" }, { status: 400 });
+      await db.prepare("INSERT INTO support_canned_replies (title, content) VALUES (?, ?)").bind(title, content).run();
+    } else if (action === "delete-canned-reply") {
+      await db.prepare("DELETE FROM support_canned_replies WHERE id = ?").bind(Number(payload.id)).run();
     } else if (action === "manage-support-threads") {
       const operation = String(payload.operation ?? "");
       const ids = [...new Set((Array.isArray(payload.ids) ? payload.ids : []).map((id) => String(id)).filter((id) => /^TKT-[A-Z0-9]{6,32}$/.test(id)))].slice(0, 200);
@@ -146,6 +170,17 @@ export async function POST(request: Request) {
     } else if (action === "open-linked-support-thread") {
       const threadId = await ensureLinkedSupportThread({ orderId: String(payload.orderId ?? ""), returnId: String(payload.returnId ?? ""), actor: (await getAdminIdentity())?.email ?? "admin" });
       return Response.json({ ok: true, threadId });
+    } else if (action === "update-invoice") {
+      const status = String(payload.status ?? "");
+      const invoiceNumber = String(payload.invoiceNumber ?? "").trim().slice(0, 100);
+      const fileUrl = String(payload.fileUrl ?? "").trim().slice(0, 1000);
+      const rejectionReason = String(payload.rejectionReason ?? "").trim().slice(0, 1000);
+      const adminNote = String(payload.adminNote ?? "").trim().slice(0, 2000);
+      if (!invoiceStatuses.includes(status)) return Response.json({ error: "发票状态无效" }, { status: 400 });
+      if (status === "issued" && (!invoiceNumber || !(/^(https:\/\/|\/)/.test(fileUrl)))) return Response.json({ error: "已开具发票需要填写发票号码和安全下载地址" }, { status: 400 });
+      if (status === "rejected" && !rejectionReason) return Response.json({ error: "请填写驳回原因" }, { status: 400 });
+      const result = await db.prepare("UPDATE invoices SET status = ?, invoice_number = ?, file_url = ?, rejection_reason = ?, admin_note = ?, issued_at = CASE WHEN ? = 'issued' THEN COALESCE(issued_at, CURRENT_TIMESTAMP) ELSE issued_at END, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(status, invoiceNumber, fileUrl, rejectionReason, adminNote, status, String(payload.id)).run();
+      if (!result.meta.changes) return Response.json({ error: "发票申请不存在" }, { status: 404 });
     } else if (action === "update-retail-partnership-status") {
       const status = String(payload.status ?? "");
       if (!partnershipStatuses.includes(status)) return Response.json({ error: "合作申请状态无效" }, { status: 400 });

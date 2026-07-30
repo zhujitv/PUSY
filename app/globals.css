@@ -1146,6 +1146,76 @@ body.overlay-open { overflow: hidden; }
 .support-reply footer span { color: #888; font-size: 9px; }
 .support-reply button { min-width: 125px; padding: 12px 18px; border: 0; color: #fff; background: #111; }
 .support-reply button:disabled { opacity: .45; }
+.support-controls input { min-width: 155px; padding: 7px 9px; border: 1px solid #ccc; background: #fff; font: 11px inherit; }
+.support-controls > button { align-self: end; padding: 9px 13px; border: 0; color: #fff; background: #222; }
+.support-links span.overdue { color: #a32020; background: #ffe9e9; }
+.support-message-list article.internal-note { width: min(88%, 760px); align-self: center; border: 1px dashed #d1a631; color: #4e3d0c; background: #fff8d8; }
+.support-note { display: flex; gap: 8px; padding: 16px 24px 0; }
+.support-note input { flex: 1; padding: 11px 13px; border: 1px solid #d7c475; background: #fffdf3; }
+.support-note button { padding: 10px 15px; border: 0; color: #fff; background: #6c5916; }
+.support-quick-reply { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+.support-quick-reply label { display: flex; align-items: center; gap: 8px; color: #777; font-size: 9px; }
+.support-quick-reply select { min-width: 190px; padding: 8px; border: 1px solid #ccc; background: #fff; }
+.support-template-manager { padding: 18px 22px; border: 1px solid #ddd; background: #fff; }
+.support-template-manager > summary { cursor: pointer; font-size: 12px; font-weight: 600; }
+.support-template-manager > form { display: grid; grid-template-columns: 190px 1fr auto; gap: 9px; margin-top: 18px; }
+.support-template-manager input, .support-template-manager textarea { padding: 10px; border: 1px solid #ccc; font: 11px/1.5 inherit; }
+.support-template-manager form button { border: 0; color: #fff; background: #111; }
+.support-template-manager > div article { display: flex; justify-content: space-between; gap: 20px; padding: 13px 0; border-top: 1px solid #eee; }
+.support-template-manager article p { margin: 5px 0 0; color: #777; font-size: 10px; }
+.support-template-manager article button { align-self: center; border: 0; color: #a20f0f; background: transparent; }
+.invoice-summary, .analytics-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.invoice-summary article, .analytics-kpis article { min-height: 122px; display: flex; flex-direction: column; justify-content: space-between; padding: 20px; border: 1px solid #dededb; background: #fff; }
+.invoice-summary span, .analytics-kpis span { color: #777; font-size: 10px; }
+.invoice-summary b, .analytics-kpis b { font-size: 26px; font-weight: 500; }
+.analytics-kpis small { color: #999; font-size: 9px; }
+.invoice-admin-stack, .analytics-admin-stack { display: grid; gap: 14px; }
+.invoice-list details { border-top: 1px solid #e5e5e5; }
+.invoice-list summary { display: grid; grid-template-columns: minmax(230px, 1fr) 130px 100px; gap: 20px; align-items: center; padding: 17px 4px; cursor: pointer; }
+.invoice-list summary div { display: grid; gap: 5px; }
+.invoice-list summary small { color: #888; font-size: 9px; }
+.invoice-list summary strong { font-size: 13px; }
+.invoice-list details > form { padding: 20px; background: #f7f7f4; }
+.invoice-customer-info { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 18px; }
+.invoice-customer-info p { display: grid; gap: 5px; margin: 0; padding: 12px; background: #fff; }
+.invoice-customer-info span { color: #888; font-size: 9px; }
+.invoice-customer-info b { overflow-wrap: anywhere; font-size: 10px; }
+.invoice-status { display: inline-flex; justify-content: center; padding: 6px 9px; border-radius: 20px; color: #555; background: #ededeb; font-size: 9px; font-style: normal; white-space: nowrap; }
+.invoice-status.status-issued { color: #17622f; background: #e1f5e7; }
+.invoice-status.status-pending, .invoice-status.status-processing { color: #815306; background: #fff1cc; }
+.invoice-status.status-rejected { color: #942525; background: #ffe3e3; }
+.analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.analytics-bars { display: grid; gap: 13px; }
+.analytics-bars > div { display: grid; grid-template-columns: 85px 1fr 36px; gap: 10px; align-items: center; font-size: 10px; }
+.analytics-bars i { height: 8px; overflow: hidden; border-radius: 5px; background: #eee; }
+.analytics-bars i b { height: 100%; display: block; border-radius: inherit; background: linear-gradient(90deg, #ef398b, #ff78b5); }
+.analytics-bars strong { text-align: right; }
+.analytics-products article { display: grid; grid-template-columns: 30px 1fr 55px 95px; gap: 10px; align-items: center; padding: 12px 0; border-top: 1px solid #eee; }
+.analytics-products em { color: #ef398b; font-size: 10px; font-style: normal; }
+.analytics-products div { display: grid; gap: 4px; }
+.analytics-products small { color: #999; font-size: 8px; }
+.analytics-products span, .analytics-products strong { font-size: 10px; text-align: right; }
+.analytics-guidance { display: flex; justify-content: space-between; align-items: end; gap: 30px; color: #fff; background: #171717; }
+.analytics-guidance span { color: #ef80af; font-size: 9px; }
+.analytics-guidance h2 { max-width: 620px; margin: 7px 0 0; font-size: 20px; font-weight: 500; }
+.analytics-guidance p { max-width: 330px; margin: 0; color: #aaa; font-size: 10px; line-height: 1.6; }
+.member-invoice-list { display: grid; gap: 10px; margin-bottom: 32px; }
+.member-invoice-list article { display: grid; grid-template-columns: 1fr 110px 90px; gap: 15px; align-items: center; padding: 18px; border: 1px solid #ddd; }
+.member-invoice-list article > div { display: grid; gap: 5px; }
+.member-invoice-list article span, .member-invoice-list article small { color: #888; font-size: 9px; }
+.member-invoice-list article p, .member-invoice-list article a { grid-column: 1 / -1; margin: 0; color: #8a2525; font-size: 10px; }
+.member-invoice-list article a { width: fit-content; color: #111; border-bottom: 1px solid; }
+.invoice-request-list > h3 { margin: 0 0 12px; font-size: 15px; }
+.invoice-request-list details { border-top: 1px solid #ddd; }
+.invoice-request-list summary { display: grid; grid-template-columns: 1fr 110px 85px; gap: 15px; align-items: center; padding: 17px 0; cursor: pointer; }
+.invoice-request-list summary span { display: grid; gap: 4px; }
+.invoice-request-list summary small { color: #888; font-size: 9px; }
+.invoice-request-list summary em { color: #ef398b; font-size: 10px; font-style: normal; text-align: right; }
+.invoice-request-list form { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; padding: 20px; background: #f5f5f2; }
+.invoice-request-list form label { display: grid; gap: 6px; color: #777; font-size: 9px; }
+.invoice-request-list input, .invoice-request-list select { padding: 11px; border: 1px solid #ccc; background: #fff; }
+.invoice-request-list form button { grid-column: 1 / -1; padding: 13px; border: 0; color: #fff; background: #111; }
+.member-empty-inline { color: #888; font-size: 11px; }
 .support-empty-conversation { margin: auto; color: #777; text-align: center; }
 .support-empty-conversation b { color: #222; font-size: 18px; }
 .support-empty-conversation p { font-size: 11px; }
@@ -1264,6 +1334,21 @@ body.overlay-open { overflow: hidden; }
   .support-message-list article { width: 92%; }
   .support-return-timeline p { grid-template-columns: 1fr; }
   .support-reply footer { align-items: stretch; flex-direction: column; }
+  .support-controls { justify-content: flex-start; flex-wrap: wrap; }
+  .support-controls label { flex: 1 1 130px; }
+  .support-controls input { min-width: 0; width: 100%; }
+  .support-note { align-items: stretch; flex-direction: column; }
+  .support-template-manager > form { grid-template-columns: 1fr; }
+  .support-template-manager form button { padding: 12px; }
+  .invoice-summary, .analytics-kpis, .analytics-grid { grid-template-columns: 1fr 1fr; }
+  .invoice-list summary { grid-template-columns: 1fr auto; }
+  .invoice-list summary > span { grid-column: 1 / -1; justify-self: start; }
+  .invoice-customer-info { grid-template-columns: 1fr 1fr; }
+  .analytics-guidance { align-items: flex-start; flex-direction: column; }
+  .member-invoice-list article { grid-template-columns: 1fr auto; }
+  .member-invoice-list article > em { grid-column: 1 / -1; justify-self: start; }
+  .invoice-request-list form { grid-template-columns: 1fr; }
+  .invoice-request-list form button { grid-column: auto; }
   .coupon-admin-form { grid-template-columns: 1fr 1fr; }
   .coupon-admin-form button { min-height: 44px; }
   .payment-page { padding: 45px 14px 80px; }

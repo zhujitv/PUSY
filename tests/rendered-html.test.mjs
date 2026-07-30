@@ -366,3 +366,30 @@ test("admin workspace uses grouped navigation and responsive branded UI", async 
   assert.match(css, /admin-login-intro/);
   assert.match(css, /admin-loading i/);
 });
+
+test("invoice workflow, upgraded support desk and business analytics are connected", async () => {
+  const [account, accountApi, admin, businessAdmin, supportAdmin, adminApi, migration] = await Promise.all([
+    read("app/account/AccountClient.tsx"),
+    read("app/api/account/route.ts"),
+    read("app/admin/AdminClient.tsx"),
+    read("app/admin/BusinessFeaturesAdmin.tsx"),
+    read("app/admin/SupportAdmin.tsx"),
+    read("app/api/admin/route.ts"),
+    read("db/migrations/2026-07-30-workflows-and-analytics.sql"),
+  ]);
+  assert.match(account, /发票管理/);
+  assert.match(account, /下载电子发票/);
+  assert.match(accountApi, /request-invoice/);
+  assert.match(admin, /经营分析/);
+  assert.match(admin, /发票管理/);
+  assert.match(businessAdmin, /订单成交率/);
+  assert.match(businessAdmin, /热销商品排行/);
+  assert.match(supportAdmin, /内部备注/);
+  assert.match(supportAdmin, /快捷回复/);
+  assert.match(supportAdmin, /处理时限/);
+  assert.match(adminApi, /add-support-note/);
+  assert.match(adminApi, /update-invoice/);
+  assert.match(migration, /CREATE TABLE IF NOT EXISTS invoices/);
+  assert.match(migration, /CREATE TABLE IF NOT EXISTS support_canned_replies/);
+  assert.match(migration, /ADD COLUMN IF NOT EXISTS due_at/);
+});

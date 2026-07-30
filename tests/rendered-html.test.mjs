@@ -302,6 +302,57 @@ test("retail partnership requests use an online form, admin workflow and notific
   assert.match(schema, /cooperation_type TEXT NOT NULL/);
 });
 
+test("customer service and business cooperation use website forms instead of email-client links", async () => {
+  const [home, chrome, contactPage, contactForm, supportApi, supportService, supportAdmin, storesPage, partnershipForm, returnsPage, returnForm, details, privacy, cookie, payment, sitemap, migration, schema] = await Promise.all([
+    read("app/page.tsx"),
+    read("app/components/SiteChrome.tsx"),
+    read("app/contact/page.tsx"),
+    read("app/contact/ContactForm.tsx"),
+    read("app/api/support/route.ts"),
+    read("lib/support/service.ts"),
+    read("app/admin/SupportAdmin.tsx"),
+    read("app/stores-china/page.tsx"),
+    read("app/stores-china/RetailPartnershipForm.tsx"),
+    read("app/return/page.tsx"),
+    read("app/return/ReturnForm.tsx"),
+    read("app/details/page.tsx"),
+    read("app/privacy/page.tsx"),
+    read("app/cookie/page.tsx"),
+    read("app/checkout/payment/PaymentClient.tsx"),
+    read("app/sitemap.ts"),
+    read("db/migrations/2026-07-30-zzz-support-web-form.sql"),
+    read("db/railway-postgres.sql"),
+  ]);
+  const customerFacing = [home, chrome, contactPage, contactForm, storesPage, partnershipForm, returnsPage, returnForm, details, privacy, cookie, payment].join("\n");
+  assert.doesNotMatch(customerFacing, /mailto:/i);
+  assert.match(home, /href="\/contact">客户服务/);
+  assert.match(home, /\/stores-china#retail-partnership/);
+  assert.match(chrome, /href="\/contact">客户服务/);
+  assert.match(contactPage, /无需打开邮件客户端/);
+  assert.match(contactForm, /提交客服工单/);
+  assert.match(contactForm, /手机号码/);
+  assert.match(contactForm, /电子邮箱（选填）/);
+  assert.match(supportApi, /hasTrustedOrigin/);
+  assert.match(supportApi, /allowRequest\(request, "website-support"/);
+  assert.match(supportApi, /contactPreference === "微信"/);
+  assert.match(supportApi, /getPreviewMemberIdentity/);
+  assert.match(supportApi, /upper\(id\) = \? AND member_id = \?/);
+  assert.doesNotMatch(supportApi, /phone = \? OR/);
+  assert.match(supportApi, /createWebsiteSupportThread/);
+  assert.match(supportService, /source, from_email, to_email, subject, text_body/);
+  assert.match(supportService, /'inbound', 'website'/);
+  assert.match(supportAdmin, /customer_phone/);
+  assert.match(supportAdmin, /客户未填写电子邮箱/);
+  assert.match(storesPage, /id="retail-partnership"/);
+  assert.match(partnershipForm, /提交合作申请/);
+  assert.match(returnForm, /客服审核后会通过工单与你联系/);
+  assert.match(sitemap, /"\/contact"/);
+  assert.match(migration, /ADD COLUMN IF NOT EXISTS customer_phone/);
+  assert.match(migration, /ADD COLUMN IF NOT EXISTS customer_wechat/);
+  assert.match(schema, /customer_phone TEXT NOT NULL DEFAULT ''/);
+  assert.match(schema, /customer_wechat TEXT NOT NULL DEFAULT ''/);
+});
+
 test("customer inbox links verified order replies, returns and protected attachments", async () => {
   const [supportAdmin, admin, adminApi, webhook, attachmentApi, returnApi, supportService, email, migration, managementMigration, env] = await Promise.all([
     read("app/admin/SupportAdmin.tsx"),
@@ -368,6 +419,53 @@ test("admin workspace uses grouped navigation and responsive branded UI", async 
   assert.match(css, /admin-loading i/);
 });
 
+test("admin governance enforces roles, audits changes and supports safe bulk fulfillment", async () => {
+  const [admin, governanceUi, adminApi, permissions, auth, authApi, audit, exportApi, attachmentApi, migration, schema] = await Promise.all([
+    read("app/admin/AdminClient.tsx"),
+    read("app/admin/AdminGovernance.tsx"),
+    read("app/api/admin/route.ts"),
+    read("lib/admin-permissions.ts"),
+    read("lib/admin-auth.ts"),
+    read("app/api/admin/auth/route.ts"),
+    read("lib/admin-governance.ts"),
+    read("app/api/admin/export/route.ts"),
+    read("app/api/admin/support/attachment/route.ts"),
+    read("db/migrations/2026-07-30-zz-admin-governance.sql"),
+    read("db/railway-postgres.sql"),
+  ]);
+
+  assert.match(migration, /CREATE TABLE IF NOT EXISTS admin_users/);
+  assert.match(migration, /CREATE TABLE IF NOT EXISTS admin_audit_logs/);
+  assert.match(schema, /CREATE TABLE IF NOT EXISTS admin_users/);
+  assert.match(schema, /CREATE TABLE IF NOT EXISTS admin_audit_logs/);
+  assert.match(auth, /PBKDF2/);
+  assert.match(auth, /PASSWORD_ITERATIONS = 210_000/);
+  assert.match(auth, /createAdminPasswordHash/);
+  assert.match(auth, /verifyAdminCredentials/);
+  assert.match(auth, /legacyOwner/);
+  assert.match(authApi, /recordAdminAudit/);
+  assert.match(adminApi, /adminActionPermissions\[action\]/);
+  assert.match(adminApi, /roleCan\(actor\.role, requiredPermission\)/);
+  assert.match(adminApi, /currentAdminId|不能降级或停用当前登录账号/);
+  assert.match(adminApi, /bulk-update-order-status/);
+  assert.match(adminApi, /\.slice\(0, 100\)/);
+  assert.match(adminApi, /尚未完成付款，不能批量进入履约状态/);
+  assert.match(adminApi, /recordAdminAudit/);
+  assert.doesNotMatch(adminApi, /password_hash.*results|password_salt.*results/);
+  assert.match(audit, /requestIp\(input\.request\)/);
+  assert.match(exportApi, /roleCan\(actor\.role, config\.permission\)/);
+  assert.match(attachmentApi, /roleCan\(actor\.role, "support\.read"\)/);
+  assert.match(admin, /账号与权限/);
+  assert.match(admin, /操作日志/);
+  assert.match(admin, /批量更新/);
+  assert.match(governanceUi, /操作审计日志/);
+  assert.match(governanceUi, /初始密码至少 12 位/);
+
+  const routeActions = new Set([...adminApi.matchAll(/action === "([^"]+)"/g)].map((match) => match[1]));
+  const permissionActions = new Set([...permissions.matchAll(/^\s+"([^"]+)": "[^"]+",$/gm)].map((match) => match[1]));
+  assert.deepEqual([...routeActions].filter((action) => !permissionActions.has(action)), []);
+});
+
 test("invoice workflow, upgraded support desk and business analytics are connected", async () => {
   const [account, accountApi, admin, businessAdmin, supportAdmin, adminApi, migration] = await Promise.all([
     read("app/account/AccountClient.tsx"),
@@ -415,7 +513,7 @@ test("audit guards member identity, financial transitions and concurrent refunds
   assert.match(orders, /gift-card-\(1000\|3000\|5000\|10000\)/);
   assert.doesNotMatch(accountApi, /SELECT \* FROM invoices WHERE member_id/);
   assert.match(accountApi, /cache-control.*private, no-store/);
-  assert.match(accountApi, /该手机号码已关联其他会员账户/);
+  assert.doesNotMatch(accountApi, /UPDATE members SET name = \?, phone = \?/);
   assert.match(adminApi, /已支付订单不能直接取消/);
   assert.match(adminApi, /该状态由支付与退款系统自动维护/);
   assert.match(adminApi, /WITH refund_totals AS/);

@@ -1,10 +1,13 @@
 import { getAdminIdentity } from "../../../../../lib/admin-auth";
 import { getStoreDb } from "../../../../../db/store";
+import { roleCan } from "../../../../../lib/admin-permissions";
 
 type Attachment = { id: string; filename: string; download_url?: string; expires_at?: string };
 
 export async function GET(request: Request) {
-  if (!await getAdminIdentity()) return Response.json({ error: "请先登录管理后台" }, { status: 401 });
+  const actor = await getAdminIdentity();
+  if (!actor) return Response.json({ error: "请先登录管理后台" }, { status: 401 });
+  if (!roleCan(actor.role, "support.read")) return Response.json({ error: "当前账号没有读取客服附件的权限" }, { status: 403 });
   const url = new URL(request.url);
   const emailId = (url.searchParams.get("emailId") ?? "").trim();
   const attachmentId = (url.searchParams.get("attachmentId") ?? "").trim();

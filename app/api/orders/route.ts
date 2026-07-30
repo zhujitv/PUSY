@@ -5,9 +5,9 @@ import { getPreviewMemberIdentity } from "../../../lib/preview-member-auth";
 import { sha256 } from "../../../lib/payments/crypto";
 import { releaseExpiredOrderReservations } from "../../../lib/orders/reservations";
 import { allowRequest, hasTrustedOrigin, rateLimitResponse, safeServerError } from "../../../lib/request-security";
+import { createGiftCardCode } from "../../../lib/gift-cards";
 
 type OrderPayload = { customer?: string; email?: string; phone?: string; address?: string; delivery?: string; payment?: string; couponCode?: string; items?: { slug: string; quantity: number; product?: { description?: string } }[] };
-const giftCode = () => `PUSY-${crypto.randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase().replace(/(.{4})/, "$1-")}`;
 const orderId = () => `PUSY-${new Date().toISOString().slice(0, 10).replaceAll("-", "")}-${crypto.randomUUID().replaceAll("-", "").slice(0, 10).toUpperCase()}`;
 function giftDetail(description = "", label: string) { const match = description.slice(0, 1000).match(new RegExp(`${label}：([^；]+)`)); return (match?.[1]?.trim() ?? "").slice(0, label === "祝福" ? 160 : 120); }
 function validGiftCardSlug(slug: string) { return /^gift-card-(1000|3000|5000|10000)(?:-|$)/.test(slug); }
@@ -63,7 +63,7 @@ export async function POST(request: Request) {
     for (const line of resolvedItems) {
       statements.push(db.prepare("INSERT INTO order_items (order_id, product_slug, product_name, quantity, unit_price) VALUES (?, ?, ?, ?, ?)").bind(id, line.slug, line.name, line.quantity, line.price));
       if (line.manageStock) statements.push(db.prepare("UPDATE products SET stock = stock - ?, updated_at = CURRENT_TIMESTAMP WHERE slug = ? AND inventory_verified = 1 AND stock >= ?").bind(line.quantity, line.slug, line.quantity).requireChanges(`${line.name} 库存不足`));
-      if (line.slug.startsWith("gift-card-")) for (let index = 0; index < line.quantity; index += 1) statements.push(db.prepare("INSERT INTO gift_cards (code, order_id, initial_balance, balance, recipient_name, recipient_email, message, delivery_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')").bind(giftCode(), id, line.price, line.price, giftDetail(line.description, "收件人"), giftDetail(line.description, "邮箱"), giftDetail(line.description, "祝福"), giftDetail(line.description, "发送日期") || null));
+      if (line.slug.startsWith("gift-card-")) for (let index = 0; index < line.quantity; index += 1) statements.push(db.prepare("INSERT INTO gift_cards (code, order_id, initial_balance, balance, recipient_name, recipient_email, message, delivery_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')").bind(createGiftCardCode(), id, line.price, line.price, giftDetail(line.description, "收件人"), giftDetail(line.description, "邮箱"), giftDetail(line.description, "祝福"), giftDetail(line.description, "发送日期") || null));
     }
     await db.batch(statements);
     return Response.json({ orderId: id, paymentToken, total: verifiedTotal, discount: coupon.discount, couponCode: coupon.valid ? coupon.code : null, reservationExpiresAt }, { status: 201 });

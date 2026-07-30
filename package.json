@@ -10,7 +10,7 @@
     "build": "next build",
     "vercel-build": "npm run db:migrate && next build",
     "start": "next start",
-    "test": "npm run build && node --test tests/rendered-html.test.mjs",
+    "test": "npm run build && node --test tests/*.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:migrate": "node scripts/migrate-db.mjs"
   },
@@ -44,7 +44,8 @@
   },
   "overrides": {
     "postcss": "8.5.25",
-    "sharp": "0.35.3"
+    "sharp": "0.35.3",
+    "minimatch": "10.2.5"
   },
   "type": "module"
 }

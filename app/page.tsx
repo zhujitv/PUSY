@@ -146,7 +146,7 @@ export default function Home() {
       </section>
 
       <footer className="pusy-footer">
-        <div className="footer-contact-line"><span>© PÚSY 2026 · <a href="https://pusy.cn">PUSY.CN</a> · 中国</span><div><a href="mailto:help@PUSY.CN">客户服务</a><a href="mailto:help@PUSY.CN?subject=PUSY.CN%20商务合作">商务合作</a><a href="/details">经营者信息</a></div></div>
+        <div className="footer-contact-line"><span>© PÚSY 2026 · <a href="https://pusy.cn">PUSY.CN</a> · 中国</span><div><a href="/contact">客户服务</a><a href="/stores-china#retail-partnership">商务合作</a><a href="/details">经营者信息</a></div></div>
         <div className="footer-logo">púsy</div>
         <div className="footer-links">
           <div><a href="/catalog/products">商品目录</a><a href="/about">关于我们</a><a href="/delivery">配送说明</a><a href="/return">退换货</a><a href="/payment">支付方式</a></div>

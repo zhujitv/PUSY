@@ -4,7 +4,7 @@ import Image from "next/image";
 import { formatCnyFromRub, products, type Product } from "../data/products";
 import { useStore } from "../components/StoreProvider";
 
-type Member = { id: number; name: string; email: string; phone: string; status: string; total_orders: number; total_spent: number; joined_at: string };
+type Member = { id: number; name: string; email: string; phone: string; email_verified: number; phone_verified: number; status: string; total_orders: number; total_spent: number; joined_at: string };
 type MemberProfile = { member_id: number; nickname: string; gender: string; birthday: string; wechat: string; province: string; city: string; occupation: string; skin_type: string; skin_concerns: string; preferred_categories: string; bio: string; email_marketing: number; sms_marketing: number; updated_at: string };
 type Address = { id: number; label: string; recipient: string; phone: string; province: string; city: string; district: string; detail: string; postcode: string; is_default: number };
 type Order = { id: string; total: number; discount: number; delivery: string; payment: string; address: string; status: string; item_count: number; created_at: string };
@@ -61,7 +61,7 @@ export function AccountClient({ viewer, email }: { viewer: string; email: string
       {message && <div className="member-message">{message}</div>}
       {loading && !data ? <div className="member-loading">正在读取会员资料…</div> : data && <>
         {tab === "overview" && <div className="member-overview"><div className="member-stat-grid"><article><span>累计订单</span><b>{data.member.total_orders}</b></article><article><span>累计消费</span><b>{formatCnyFromRub(data.member.total_spent)}</b></article><article><span>收货地址</span><b>{data.addresses.length}</b></article><article><span>进行中售后</span><b>{data.returns.filter((item) => !["已拒绝","已关闭","已退款"].includes(item.status)).length}</b></article></div><section className="member-section"><div className="member-section-title"><h2>最近订单</h2><button onClick={() => setTab("orders")}>查看全部</button></div>{data.orders.length ? <OrderList orders={data.orders.slice(0, 3)} items={data.orderItems} /> : <Empty title="还没有订单" copy="完成第一笔订单后，可在这里持续查看配送状态。" href="/catalog/products" link="浏览商品" />}</section></div>}
-        {tab === "profile" && <ProfilePanel member={data.member} profile={data.profile} onSubmit={saveProfile} />}
+        {tab === "profile" && <ProfilePanel member={data.member} profile={data.profile} onSubmit={saveProfile} onPhoneVerified={() => void load()} />}
         {tab === "addresses" && <section className="member-section"><div className="member-section-title"><div><p>结账时可快速选择</p><h2>收货地址</h2></div><button onClick={() => { setEditingAddress(null); setCreatingAddress(true); }}>＋ 新增地址</button></div>{data.addresses.length ? <div className="address-grid">{data.addresses.map((address) => <article key={address.id} className={address.is_default ? "default" : ""}><div><span>{address.label}</span>{Boolean(address.is_default) && <em>默认</em>}</div><h3>{address.recipient}</h3><p>{address.phone}</p><p>{address.province} {address.city} {address.district}<br />{address.detail} {address.postcode}</p><footer><button onClick={() => setEditingAddress(address)}>编辑</button>{!address.is_default && <button onClick={() => act({ action:"set-default-address", id:address.id })}>设为默认</button>}<button className="danger" onClick={() => act({ action:"delete-address", id:address.id })}>删除</button></footer></article>)}</div> : <Empty title="还没有收货地址" copy="保存常用地址，结账时填写会更轻松。" onClick={() => setCreatingAddress(true)} link="新增地址" />}</section>}
         {tab === "wishlist" && <section className="member-section"><div className="member-section-title"><div><p>{savedProducts.length} 件商品</p><h2>我的收藏</h2></div><a href="/catalog/products">继续发现</a></div>{savedProducts.length ? <div className="member-wishlist-grid">{savedProducts.map((product) => <article key={product.slug}><a href={`/products/${product.slug}`}><Image src={product.image} alt={product.name} width={700} height={727} sizes="(max-width: 700px) 50vw, 25vw" /><h3>{product.name}</h3></a><p>{formatCnyFromRub(product.price)}</p><div><button disabled={!product.inventoryVerified || (product.stock ?? 0) < 1} onClick={() => addToCart(product)}>加入购物袋</button><button onClick={() => toggleWishlist(product.slug)}>移除</button></div></article>)}</div> : <Empty title="还没有收藏商品" copy="在商品卡片或详情页点击心形按钮，商品会保存在这里。" href="/catalog/products" link="浏览商品" />}</section>}
         {tab === "orders" && <section className="member-section"><div className="member-section-title"><div><p>{data.orders.length} 笔订单</p><h2>我的订单</h2></div></div>{data.orders.length ? <OrderList orders={data.orders} items={data.orderItems} /> : <Empty title="还没有订单" copy="你的线上订单会安全保存在这里。" href="/catalog/products" link="开始购物" />}</section>}
@@ -80,7 +80,7 @@ function parseSelections(value: string) {
   try { const parsed = JSON.parse(value); return Array.isArray(parsed) ? parsed.map(String) : []; } catch { return []; }
 }
 
-function ProfilePanel({ member, profile, onSubmit }: { member: Member; profile: MemberProfile; onSubmit: (event: React.FormEvent<HTMLFormElement>) => void }) {
+function ProfilePanel({ member, profile, onSubmit, onPhoneVerified }: { member: Member; profile: MemberProfile; onSubmit: (event: React.FormEvent<HTMLFormElement>) => void; onPhoneVerified: () => void }) {
   const selectedConcerns = parseSelections(profile.skin_concerns);
   const selectedCategories = parseSelections(profile.preferred_categories);
   const completionValues = [member.name, member.phone, profile.nickname, profile.gender, profile.birthday, profile.province, profile.city, profile.skin_type];
@@ -98,7 +98,7 @@ function ProfilePanel({ member, profile, onSubmit }: { member: Member; profile: 
       <fieldset><legend><span>01</span><div><b>基本资料</b><small>用于账户识别、配送联系和会员服务</small></div></legend><div className="member-form">
         <label>昵称<input name="nickname" maxLength={30} defaultValue={profile.nickname} placeholder="希望我们如何称呼你" /></label>
         <label>真实姓名<input name="name" maxLength={50} autoComplete="name" defaultValue={member.name} required /></label>
-        <label>手机号码<input name="phone" type="tel" maxLength={20} autoComplete="tel" defaultValue={member.phone} placeholder="+86 138 0000 0000" required /></label>
+        <PhoneVerification member={member} onVerified={onPhoneVerified} />
         <label>性别<select name="gender" defaultValue={profile.gender}><option value="">请选择</option><option value="female">女</option><option value="male">男</option><option value="undisclosed">不愿透露</option></select></label>
         <label>出生日期<input name="birthday" type="date" max={new Date().toISOString().slice(0, 10)} defaultValue={profile.birthday} /></label>
         <label className="full">登录邮箱<input value={member.email} disabled /><small>登录邮箱已完成验证。如需更换，请联系客户服务进行身份核验。</small></label>
@@ -121,6 +121,31 @@ function ProfilePanel({ member, profile, onSubmit }: { member: Member; profile: 
       <footer className="profile-form-footer"><p>你的资料将用于提供会员服务，可随时回来修改。</p><button type="submit">保存全部资料</button></footer>
     </form>
   </section>;
+}
+
+function PhoneVerification({ member, onVerified }: { member: Member; onVerified: () => void }) {
+  const [phone, setPhone] = useState(member.phone);
+  const [code, setCode] = useState("");
+  const [challengeId, setChallengeId] = useState("");
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function submit(action: "request-phone-code" | "verify-phone") {
+    setBusy(true);
+    setMessage("");
+    const response = await fetch("/api/account/auth", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action, phone, code, challengeId }) });
+    const body = await response.json().catch(() => ({}));
+    if (response.ok && action === "request-phone-code") setChallengeId(body.challengeId || "");
+    if (response.ok && action === "verify-phone") { setChallengeId(""); setCode(""); onVerified(); }
+    setMessage(body.message || body.error || (response.ok ? "操作成功" : "操作失败"));
+    setBusy(false);
+  }
+
+  return <div className="phone-verification full">
+    <label>手机号码 <small>{member.phone_verified ? "已验证，可用于登录" : "尚未验证，暂不能用于登录"}</small><input type="tel" maxLength={20} autoComplete="tel" value={phone} onChange={(event) => { setPhone(event.target.value); setChallengeId(""); }} placeholder="请输入中国大陆手机号" required /></label>
+    <div><button type="button" disabled={busy} onClick={() => void submit("request-phone-code")}>{busy ? "处理中…" : member.phone_verified && phone === member.phone ? "更换并验证" : "发送短信验证码"}</button>{challengeId && <><input aria-label="手机验证码" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={(event) => setCode(event.target.value)} placeholder="6 位验证码" /><button type="button" disabled={busy || code.length !== 6} onClick={() => void submit("verify-phone")}>确认验证</button></>}</div>
+    {message && <small role="status">{message}</small>}
+  </div>;
 }
 
 function OrderList({ orders, items }: { orders: Order[]; items: OrderItem[] }) { return <div className="member-order-list">{orders.map((order) => <details key={order.id}><summary><span><b>{order.id}</b><small>{new Date(order.created_at).toLocaleString("zh-CN")}</small></span><span>{order.item_count} 件商品</span><strong>{formatCnyFromRub(order.total)}</strong><em>{order.status}</em></summary><div className="member-order-detail"><p>{order.delivery} · {order.payment}</p><p>{order.address}</p>{items.filter((item) => item.order_id === order.id).map((item) => <div key={item.id}><span>{item.product_name}<small>数量 {item.quantity}</small></span><b>{formatCnyFromRub(item.unit_price * item.quantity)}</b></div>)}{order.discount > 0 && <p className="member-discount">订单优惠 −{formatCnyFromRub(order.discount)}</p>}</div></details>)}</div>; }

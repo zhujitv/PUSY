@@ -63,11 +63,7 @@ export async function POST(request: Request) {
     const db = await getStoreDb();
     if (action === "update-profile") {
       const name = text(payload.name, 50);
-      const phone = text(payload.phone, 20);
-      const normalizedPhone = phone.replace(/\s|-/g, "");
-      if (!name || !/^1[3-9]\d{9}$/.test(normalizedPhone)) return Response.json({ error: "请填写姓名和有效的中国大陆手机号码" }, { status: 400 });
-      const duplicatePhone = await db.prepare("SELECT id FROM members WHERE regexp_replace(phone, '[[:space:]-]', '', 'g') = ? AND id != ? LIMIT 1").bind(normalizedPhone, member.id).first();
-      if (duplicatePhone) return Response.json({ error: "该手机号码已关联其他会员账户" }, { status: 409 });
+      if (!name) return Response.json({ error: "请填写姓名" }, { status: 400 });
       const nickname = text(payload.nickname, 30);
       const gender = text(payload.gender, 20);
       const birthday = text(payload.birthday, 10);
@@ -77,7 +73,7 @@ export async function POST(request: Request) {
       const skinConcerns = selected(payload.skinConcerns, skinConcernValues);
       const preferredCategories = selected(payload.preferredCategories, categoryValues);
       await db.batch([
-        db.prepare("UPDATE members SET name = ?, phone = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(name, normalizedPhone, member.id),
+        db.prepare("UPDATE members SET name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(name, member.id),
         db.prepare(`UPDATE member_profiles SET nickname = ?, gender = ?, birthday = ?, wechat = ?, province = ?, city = ?, occupation = ?, skin_type = ?, skin_concerns = ?, preferred_categories = ?, bio = ?, email_marketing = ?, sms_marketing = ?, updated_at = CURRENT_TIMESTAMP WHERE member_id = ?`).bind(nickname, gender, birthday, text(payload.wechat, 50), text(payload.province, 30), text(payload.city, 30), text(payload.occupation, 50), skinType, JSON.stringify(skinConcerns), JSON.stringify(preferredCategories), text(payload.bio, 200), payload.emailMarketing ? 1 : 0, payload.smsMarketing ? 1 : 0, member.id),
       ]);
     } else if (action === "save-address") {

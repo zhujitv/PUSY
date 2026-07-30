@@ -73,7 +73,7 @@ export function MemberAuthClient() {
       <div className="member-auth-heading">
         <p>{mode === "login" ? "欢迎回来" : "加入 PÚSY CLUB"}</p>
         <h2>{mode === "login" ? "登录会员账户" : "创建会员账户"}</h2>
-        <span>{mode === "login" ? "使用注册时的手机号或邮箱登录。" : "填写基础资料，注册后即可进入会员中心。"}</span>
+        <span>{mode === "login" ? "使用已验证的手机号或邮箱登录。" : "邮箱验证完成后即可进入会员中心，手机号可在个人资料中验证。"}</span>
       </div>
       <form className="member-auth-form" onSubmit={submit}>
         {mode === "register" && <>

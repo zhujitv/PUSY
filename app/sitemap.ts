@@ -3,7 +3,7 @@ import { categoryNames, collectionNames, products } from "./data/products";
 import { blogPosts } from "./data/blog";
 
 const baseUrl = "https://pusy.cn";
-const pages = ["", "/catalog", "/catalog/products", "/about", "/blog", "/delivery", "/return", "/payment", "/stores-china", "/gift-card", "/gift-card/questions", "/faq", "/privacy", "/details", "/cookie", "/oferta"];
+const pages = ["", "/catalog", "/catalog/products", "/about", "/blog", "/contact", "/delivery", "/return", "/payment", "/stores-china", "/gift-card", "/gift-card/questions", "/faq", "/privacy", "/details", "/cookie", "/oferta"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const updated = new Date();

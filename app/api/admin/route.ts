@@ -1,5 +1,5 @@
 import { getStoreDb } from "../../../db/store";
-import { getAdminIdentity } from "../../../lib/admin-auth";
+import { createAdminPasswordHash, getAdminIdentity } from "../../../lib/admin-auth";
 import { createPayment, createRefund, paymentProviderState, retryRefund, syncPayment, syncRefund } from "../../../lib/payments/service";
 import type { PaymentProviderName } from "../../../lib/payments/types";
 import { notifyOrderShipped } from "../../../lib/notifications/business";
@@ -9,6 +9,8 @@ import { ensureCommerceFeatureSchema, getSiteContent } from "../../../db/commerc
 import { hasTrustedOrigin, safeServerError } from "../../../lib/request-security";
 import { releaseOrderReservation } from "../../../lib/orders/reservations";
 import { ensureLinkedSupportThread, recordReturnStatusChange, sendSupportReply, supportReceivingDomain } from "../../../lib/support/service";
+import { adminActionPermissions, roleCan, validAdminRole, type AdminPermission } from "../../../lib/admin-permissions";
+import { auditEntityId, auditSummary, completeAdminAudit, recordAdminAudit } from "../../../lib/admin-governance";
 
 const orderStatuses = ["待付款", "支付失败", "待处理", "已确认", "配货中", "已发货", "已完成", "退款中", "部分退款", "已退款", "已取消"];
 const memberStatuses = ["active", "vip", "blocked"];
@@ -21,46 +23,88 @@ const partnershipStatuses = ["待联系", "洽谈中", "已合作", "已拒绝",
 const yuanToStored = (value: unknown) => Math.round(Number(value) / 0.12);
 const validImagePath = (value: string) => /^\/(assets|products)\/[A-Za-z0-9_./-]+$/.test(value) || /^https:\/\/avatars\.mds\.yandex\.net\/get-yastore\//.test(value);
 
-async function allowAdmin() { return Boolean(await getAdminIdentity()); }
-
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    if (!await allowAdmin()) return Response.json({ error: "请先登录管理后台" }, { status: 401 });
+    const actor = await getAdminIdentity();
+    if (!actor) return Response.json({ error: "请先登录管理后台" }, { status: 401 });
     await ensureCommerceFeatureSchema();
     const db = await getStoreDb();
-    const [products, orders, orderItems, members, subscribers, returns, retailPartnerships, coupons, giftCards, stats, revenueTrend, providers, payments, refunds, paymentEvents, notificationSettings, notificationTemplates, notificationJobs, reviews, content, supportThreads, supportMessages, returnEvents, invoices, cannedReplies, orderStatusAnalytics, topProducts, customerAnalytics, returnAnalytics] = await Promise.all([
-      db.prepare("SELECT * FROM products ORDER BY id DESC").all(),
-      db.prepare("SELECT o.*, COUNT(oi.id) AS item_count FROM orders o LEFT JOIN order_items oi ON oi.order_id = o.id GROUP BY o.id ORDER BY o.created_at DESC LIMIT 200").all(),
-      db.prepare("SELECT * FROM order_items ORDER BY id DESC LIMIT 1000").all(),
-      db.prepare("SELECT * FROM members ORDER BY joined_at DESC LIMIT 500").all(),
-      db.prepare("SELECT * FROM subscribers ORDER BY subscribed_at DESC LIMIT 1000").all(),
-      db.prepare("SELECT * FROM returns ORDER BY created_at DESC LIMIT 500").all(),
-      db.prepare("SELECT * FROM retail_partnerships ORDER BY created_at DESC LIMIT 1000").all(),
-      db.prepare("SELECT * FROM coupons ORDER BY created_at DESC LIMIT 500").all(),
-      db.prepare("SELECT * FROM gift_cards ORDER BY created_at DESC LIMIT 500").all(),
-      db.prepare("WITH refund_totals AS (SELECT order_id, ROUND(SUM(amount_fen) / 12.0)::INTEGER AS refunded FROM refunds WHERE status = 'succeeded' GROUP BY order_id) SELECT COUNT(*) AS order_count, COALESCE(SUM(CASE WHEN o.status NOT IN ('待付款','支付失败','已取消','已退款') THEN GREATEST(o.total - COALESCE(rt.refunded, 0), 0) ELSE 0 END), 0) AS revenue, COUNT(*) FILTER (WHERE o.status IN ('待处理','已确认','配货中','已发货','退款中')) AS pending_count, COALESCE(AVG(CASE WHEN o.status NOT IN ('待付款','支付失败','已取消','已退款') THEN GREATEST(o.total - COALESCE(rt.refunded, 0), 0) END), 0) AS avg_order_value, (SELECT COUNT(*) FROM products WHERE status = 'active' AND inventory_verified = 1 AND stock < 10) AS low_stock_count, (SELECT COUNT(*) FROM products WHERE status = 'active' AND inventory_verified = 0) AS unverified_inventory_count, (SELECT COUNT(*) FROM subscribers WHERE status = 'active') AS active_subscribers, (SELECT COUNT(*) FROM returns WHERE status = '待审核') AS pending_returns, (SELECT COUNT(*) FROM retail_partnerships WHERE status = '待联系') AS pending_partnerships FROM orders o LEFT JOIN refund_totals rt ON rt.order_id = o.id").first(),
-      db.prepare("WITH refund_totals AS (SELECT order_id, ROUND(SUM(amount_fen) / 12.0)::INTEGER AS refunded FROM refunds WHERE status = 'succeeded' GROUP BY order_id) SELECT substr(o.created_at, 1, 10) AS day, COALESCE(SUM(GREATEST(o.total - COALESCE(rt.refunded, 0), 0)), 0) AS revenue, COUNT(*) AS orders FROM orders o LEFT JOIN refund_totals rt ON rt.order_id = o.id WHERE o.created_at::timestamp >= CURRENT_TIMESTAMP - INTERVAL '29 days' AND o.status NOT IN ('待付款','支付失败','已取消','已退款') GROUP BY substr(o.created_at, 1, 10) ORDER BY day").all(),
-      paymentProviderState(),
-      db.prepare("SELECT p.*, o.customer, o.email FROM payments p JOIN orders o ON o.id = p.order_id ORDER BY p.created_at DESC LIMIT 500").all(),
-      db.prepare("SELECT r.*, p.merchant_trade_no FROM refunds r JOIN payments p ON p.id = r.payment_id ORDER BY r.created_at DESC LIMIT 500").all(),
-      db.prepare("SELECT * FROM payment_events ORDER BY created_at DESC LIMIT 200").all(),
-      notificationChannelState(),
-      db.prepare("SELECT * FROM notification_templates ORDER BY key").all(),
-      db.prepare("SELECT * FROM notification_jobs ORDER BY created_at DESC LIMIT 500").all(),
-      db.prepare("SELECT * FROM product_reviews ORDER BY created_at DESC LIMIT 500").all(),
-      getSiteContent(),
-      db.prepare("SELECT st.*, m.name AS member_name, o.status AS order_status, r.status AS return_status FROM support_threads st LEFT JOIN members m ON m.id = st.member_id LEFT JOIN orders o ON o.id = st.order_id LEFT JOIN returns r ON r.id = st.return_id ORDER BY st.last_message_at DESC LIMIT 500").all(),
-      db.prepare("SELECT id, thread_id, direction, source, provider_email_id, from_email, to_email, subject, text_body, attachments_json, created_at FROM support_messages ORDER BY created_at ASC LIMIT 3000").all(),
-      db.prepare("SELECT * FROM return_events ORDER BY created_at ASC LIMIT 2000").all(),
-      db.prepare("SELECT i.*, o.customer, o.email AS customer_email FROM invoices i JOIN orders o ON o.id = i.order_id ORDER BY i.requested_at DESC LIMIT 500").all(),
-      db.prepare("SELECT * FROM support_canned_replies ORDER BY id").all(),
-      db.prepare("SELECT status, COUNT(*) AS count, COALESCE(SUM(total), 0) AS revenue FROM orders GROUP BY status ORDER BY count DESC").all(),
-      db.prepare("SELECT oi.product_slug, oi.product_name, SUM(oi.quantity) AS quantity, COALESCE(SUM(oi.quantity * oi.unit_price), 0) AS revenue FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.status NOT IN ('待付款','支付失败','已取消','已退款') GROUP BY oi.product_slug, oi.product_name ORDER BY quantity DESC, revenue DESC LIMIT 10").all(),
-      db.prepare("SELECT COUNT(*) FILTER (WHERE joined_at::timestamp >= CURRENT_TIMESTAMP - INTERVAL '30 days') AS new_members_30d, COUNT(*) FILTER (WHERE total_orders > 1) AS repeat_members, COUNT(*) FILTER (WHERE total_orders > 0) AS purchasing_members, COUNT(*) AS total_members FROM members").first(),
-      db.prepare("SELECT COUNT(*) AS total_returns, COUNT(*) FILTER (WHERE created_at::timestamp >= CURRENT_TIMESTAMP - INTERVAL '30 days') AS returns_30d, COUNT(*) FILTER (WHERE status IN ('已退款','退款中')) AS refund_returns FROM returns").first(),
+    const can = (permission: AdminPermission) => roleCan(actor.role, permission);
+    const supportVisible = can("support.read");
+    const financeVisible = can("finance.read");
+    const marketingVisible = can("marketing.read") || can("marketing.manage");
+    const requestedView = new URL(request.url).searchParams.get("view") ?? "";
+    const view = requestedView || (actor.role === "customer_service" ? "support" : actor.role === "warehouse" ? "orders" : "overview");
+    const wants = (...views: string[]) => views.includes(view);
+    const rowsIf = (visible: boolean, sql: string) => visible ? db.prepare(sql).all() : Promise.resolve({ results: [] });
+    const firstIf = (visible: boolean, sql: string) => visible ? db.prepare(sql).first() : Promise.resolve(null);
+    const [products, orders, orderItems, members, subscribers, returns, retailPartnerships, coupons, giftCards, stats, revenueTrend, providers, payments, refunds, paymentEvents, notificationSettings, notificationTemplates, notificationJobs, reviews, content, supportThreads, supportMessages, returnEvents, invoices, cannedReplies, orderStatusAnalytics, topProducts, customerAnalytics, returnAnalytics, adminUsers, auditLogs] = await Promise.all([
+      rowsIf(can("products.read") && wants("products"), "SELECT * FROM products ORDER BY id DESC"),
+      rowsIf(can("orders.read") && wants("overview", "orders", "members"), "SELECT o.*, COUNT(oi.id) AS item_count FROM orders o LEFT JOIN order_items oi ON oi.order_id = o.id GROUP BY o.id ORDER BY o.created_at DESC LIMIT 200"),
+      rowsIf(can("orders.read") && wants("overview", "orders", "members"), "SELECT * FROM order_items ORDER BY id DESC LIMIT 1000"),
+      rowsIf(can("customers.read") && wants("members"), "SELECT * FROM members ORDER BY joined_at DESC LIMIT 500"),
+      rowsIf(marketingVisible && wants("subscribers"), "SELECT * FROM subscribers ORDER BY subscribed_at DESC LIMIT 1000"),
+      rowsIf(supportVisible && wants("returns"), "SELECT * FROM returns ORDER BY created_at DESC LIMIT 500"),
+      rowsIf(marketingVisible && wants("partnerships"), "SELECT * FROM retail_partnerships ORDER BY created_at DESC LIMIT 1000"),
+      rowsIf(marketingVisible && wants("marketing"), "SELECT * FROM coupons ORDER BY created_at DESC LIMIT 500"),
+      rowsIf(marketingVisible && wants("marketing"), "SELECT * FROM gift_cards ORDER BY created_at DESC LIMIT 500"),
+      firstIf(can("dashboard.read") && wants("overview"), "WITH refund_totals AS (SELECT order_id, ROUND(SUM(amount_fen) / 12.0)::INTEGER AS refunded FROM refunds WHERE status = 'succeeded' GROUP BY order_id) SELECT COUNT(*) AS order_count, COALESCE(SUM(CASE WHEN o.status NOT IN ('待付款','支付失败','已取消','已退款') THEN GREATEST(o.total - COALESCE(rt.refunded, 0), 0) ELSE 0 END), 0) AS revenue, COUNT(*) FILTER (WHERE o.status IN ('待处理','已确认','配货中','已发货','退款中')) AS pending_count, COALESCE(AVG(CASE WHEN o.status NOT IN ('待付款','支付失败','已取消','已退款') THEN GREATEST(o.total - COALESCE(rt.refunded, 0), 0) END), 0) AS avg_order_value, (SELECT COUNT(*) FROM products WHERE status = 'active' AND inventory_verified = 1 AND stock < 10) AS low_stock_count, (SELECT COUNT(*) FROM products WHERE status = 'active' AND inventory_verified = 0) AS unverified_inventory_count, (SELECT COUNT(*) FROM subscribers WHERE status = 'active') AS active_subscribers, (SELECT COUNT(*) FROM returns WHERE status = '待审核') AS pending_returns, (SELECT COUNT(*) FROM retail_partnerships WHERE status = '待联系') AS pending_partnerships FROM orders o LEFT JOIN refund_totals rt ON rt.order_id = o.id"),
+      rowsIf(can("dashboard.read") && wants("overview"), "WITH refund_totals AS (SELECT order_id, ROUND(SUM(amount_fen) / 12.0)::INTEGER AS refunded FROM refunds WHERE status = 'succeeded' GROUP BY order_id) SELECT substr(o.created_at, 1, 10) AS day, COALESCE(SUM(GREATEST(o.total - COALESCE(rt.refunded, 0), 0)), 0) AS revenue, COUNT(*) AS orders FROM orders o LEFT JOIN refund_totals rt ON rt.order_id = o.id WHERE o.created_at::timestamp >= CURRENT_TIMESTAMP - INTERVAL '29 days' AND o.status NOT IN ('待付款','支付失败','已取消','已退款') GROUP BY substr(o.created_at, 1, 10) ORDER BY day"),
+      financeVisible && wants("payments", "settings") ? paymentProviderState() : Promise.resolve([]),
+      rowsIf(financeVisible && wants("payments"), "SELECT p.*, o.customer, o.email FROM payments p JOIN orders o ON o.id = p.order_id ORDER BY p.created_at DESC LIMIT 500"),
+      rowsIf(financeVisible && wants("payments"), "SELECT r.*, p.merchant_trade_no FROM refunds r JOIN payments p ON p.id = r.payment_id ORDER BY r.created_at DESC LIMIT 500"),
+      rowsIf(financeVisible && wants("payments"), "SELECT * FROM payment_events ORDER BY created_at DESC LIMIT 200"),
+      can("system.manage") && wants("notifications") ? notificationChannelState() : Promise.resolve([]),
+      rowsIf(can("system.manage") && wants("notifications"), "SELECT * FROM notification_templates ORDER BY key"),
+      rowsIf(can("system.manage") && wants("notifications"), "SELECT * FROM notification_jobs ORDER BY created_at DESC LIMIT 500"),
+      rowsIf(marketingVisible && wants("reviews"), "SELECT * FROM product_reviews ORDER BY created_at DESC LIMIT 500"),
+      can("content.manage") && wants("content") ? getSiteContent() : Promise.resolve({}),
+      rowsIf(supportVisible && wants("support", "orders"), "SELECT st.*, m.name AS member_name, o.status AS order_status, r.status AS return_status FROM support_threads st LEFT JOIN members m ON m.id = st.member_id LEFT JOIN orders o ON o.id = st.order_id LEFT JOIN returns r ON r.id = st.return_id ORDER BY st.last_message_at DESC LIMIT 500"),
+      rowsIf(supportVisible && wants("support"), "SELECT * FROM (SELECT id, thread_id, direction, source, provider_email_id, from_email, to_email, subject, text_body, attachments_json, created_at FROM support_messages ORDER BY created_at DESC LIMIT 1000) recent ORDER BY created_at ASC"),
+      rowsIf(supportVisible && wants("support"), "SELECT * FROM (SELECT * FROM return_events ORDER BY created_at DESC LIMIT 1000) recent ORDER BY created_at ASC"),
+      rowsIf(financeVisible && wants("invoices"), "SELECT i.*, o.customer, o.email AS customer_email FROM invoices i JOIN orders o ON o.id = i.order_id ORDER BY i.requested_at DESC LIMIT 500"),
+      rowsIf(supportVisible && wants("support"), "SELECT * FROM support_canned_replies ORDER BY id"),
+      rowsIf(can("analytics.read") && wants("analytics"), "SELECT status, COUNT(*) AS count, COALESCE(SUM(total), 0) AS revenue FROM orders GROUP BY status ORDER BY count DESC"),
+      rowsIf(can("analytics.read") && wants("analytics"), "SELECT oi.product_slug, oi.product_name, SUM(oi.quantity) AS quantity, COALESCE(SUM(oi.quantity * oi.unit_price), 0) AS revenue FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.status NOT IN ('待付款','支付失败','已取消','已退款') GROUP BY oi.product_slug, oi.product_name ORDER BY quantity DESC, revenue DESC LIMIT 10"),
+      firstIf(can("analytics.read") && wants("analytics"), "SELECT COUNT(*) FILTER (WHERE joined_at::timestamp >= CURRENT_TIMESTAMP - INTERVAL '30 days') AS new_members_30d, COUNT(*) FILTER (WHERE total_orders > 1) AS repeat_members, COUNT(*) FILTER (WHERE total_orders > 0) AS purchasing_members, COUNT(*) AS total_members FROM members"),
+      firstIf(can("analytics.read") && wants("analytics"), "SELECT COUNT(*) AS total_returns, COUNT(*) FILTER (WHERE created_at::timestamp >= CURRENT_TIMESTAMP - INTERVAL '30 days') AS returns_30d, COUNT(*) FILTER (WHERE status IN ('已退款','退款中')) AS refund_returns FROM returns"),
+      rowsIf(can("admins.manage") && wants("admins"), "SELECT id, email, display_name, role, status, last_login_at, created_at, updated_at FROM admin_users ORDER BY created_at DESC LIMIT 200"),
+      rowsIf(can("audit.read") && wants("audit"), "SELECT id, admin_id, actor_email, actor_role, action, entity_id, summary, request_ip, outcome, error_text, completed_at, created_at FROM admin_audit_logs ORDER BY created_at DESC LIMIT 1000"),
     ]);
     const statValues = stats && typeof stats === "object" ? stats : {};
-    return Response.json({ products: products.results, orders: orders.results, orderItems: orderItems.results, members: members.results, subscribers: subscribers.results, returns: returns.results, retailPartnerships: retailPartnerships.results, coupons: coupons.results, giftCards: giftCards.results, stats: { ...statValues, unread_support: supportThreads.results.filter((item) => { const thread = item as { status?: string; archived_at?: string | null; deleted_at?: string | null }; return thread.status === "unread" && !thread.archived_at && !thread.deleted_at; }).length }, revenueTrend: revenueTrend.results, providers, payments: payments.results, refunds: refunds.results, paymentEvents: paymentEvents.results, notificationSettings, notificationTemplates: notificationTemplates.results, notificationJobs: notificationJobs.results, reviews: reviews.results, content, supportThreads: supportThreads.results, supportMessages: supportMessages.results, returnEvents: returnEvents.results, invoices: invoices.results, cannedReplies: cannedReplies.results, analytics: { orderStatuses: orderStatusAnalytics.results, topProducts: topProducts.results, customers: customerAnalytics ?? {}, returns: returnAnalytics ?? {} }, supportReceiving: { domain: supportReceivingDomain(), configured: Boolean(supportReceivingDomain() && process.env.RESEND_API_KEY && process.env.RESEND_RECEIVING_API_KEY && process.env.RESEND_WEBHOOK_SECRET) }, region: { ...chinaRegion, complianceReady: chinaComplianceReady } }, { headers: { "cache-control": "private, no-store" } });
+    return Response.json({
+      viewer: actor,
+      products: can("products.read") ? products.results : [],
+      orders: can("orders.read") ? orders.results : [],
+      orderItems: can("orders.read") ? orderItems.results : [],
+      members: can("customers.read") ? members.results : [],
+      subscribers: marketingVisible ? subscribers.results : [],
+      returns: supportVisible ? returns.results : [],
+      retailPartnerships: marketingVisible ? retailPartnerships.results : [],
+      coupons: marketingVisible ? coupons.results : [],
+      giftCards: marketingVisible ? giftCards.results : [],
+      stats: can("dashboard.read") ? { ...statValues, unread_support: supportVisible ? supportThreads.results.filter((item) => { const thread = item as { status?: string; archived_at?: string | null; deleted_at?: string | null }; return thread.status === "unread" && !thread.archived_at && !thread.deleted_at; }).length : 0 } : {},
+      revenueTrend: can("dashboard.read") ? revenueTrend.results : [],
+      providers: financeVisible ? providers : [],
+      payments: financeVisible ? payments.results : [],
+      refunds: financeVisible ? refunds.results : [],
+      paymentEvents: financeVisible ? paymentEvents.results : [],
+      notificationSettings: can("system.manage") ? notificationSettings : [],
+      notificationTemplates: can("system.manage") ? notificationTemplates.results : [],
+      notificationJobs: can("system.manage") ? notificationJobs.results : [],
+      reviews: marketingVisible ? reviews.results : [],
+      content: can("content.manage") ? content : {},
+      supportThreads: supportVisible ? supportThreads.results : [],
+      supportMessages: supportVisible ? supportMessages.results : [],
+      returnEvents: supportVisible ? returnEvents.results : [],
+      invoices: financeVisible ? invoices.results : [],
+      cannedReplies: supportVisible ? cannedReplies.results : [],
+      analytics: can("analytics.read") ? { orderStatuses: orderStatusAnalytics.results, topProducts: topProducts.results, customers: customerAnalytics ?? {}, returns: returnAnalytics ?? {} } : { orderStatuses: [], topProducts: [], customers: {}, returns: {} },
+      supportReceiving: supportVisible ? { domain: supportReceivingDomain(), configured: Boolean(supportReceivingDomain() && process.env.RESEND_API_KEY && process.env.RESEND_RECEIVING_API_KEY && process.env.RESEND_WEBHOOK_SECRET) } : { domain: "", configured: false },
+      region: can("system.manage") ? { ...chinaRegion, complianceReady: chinaComplianceReady } : {},
+      adminUsers: can("admins.manage") ? [{ id: "legacy-owner", email: (process.env.ADMIN_EMAIL || "admin@pusy.cn").trim().toLowerCase(), display_name: "主管理员", role: "owner", status: "active", last_login_at: null, created_at: "", updated_at: "" }, ...adminUsers.results] : [],
+      auditLogs: can("audit.read") ? auditLogs.results : [],
+    }, { headers: { "cache-control": "private, no-store" } });
   } catch (error) {
     console.error("[api/admin] read failed", { message: error instanceof Error ? error.message : String(error), code: typeof error === "object" && error && "code" in error ? String(error.code) : undefined });
     return safeServerError("读取后台数据失败，请稍后再试");
@@ -68,14 +112,46 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  let auditId: number | null = null;
+  let auditCompleted = false;
   try {
-    if (!await allowAdmin()) return Response.json({ error: "请先登录管理后台" }, { status: 401 });
+    const actor = await getAdminIdentity();
+    if (!actor) return Response.json({ error: "请先登录管理后台" }, { status: 401 });
     if (!hasTrustedOrigin(request)) return Response.json({ error: "请求来源无效" }, { status: 403 });
     const payload = await request.json() as Record<string, unknown>;
     const action = String(payload.action ?? "");
+    const requiredPermission = adminActionPermissions[action];
+    if (!requiredPermission) return Response.json({ error: "未知操作" }, { status: 400 });
+    if (!roleCan(actor.role, requiredPermission)) return Response.json({ error: "当前账号没有执行此操作的权限" }, { status: 403 });
     await ensureCommerceFeatureSchema();
     const db = await getStoreDb();
-    if (action === "bulk-import-products") {
+    auditId = await recordAdminAudit({ request, actor, action, entityId: auditEntityId(payload), summary: auditSummary(action, payload) });
+    if (action === "create-admin-user") {
+      const email = String(payload.email ?? "").trim().toLowerCase().slice(0, 160);
+      const displayName = String(payload.displayName ?? "").trim().slice(0, 80);
+      const role = String(payload.role ?? "");
+      const password = String(payload.password ?? "");
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !displayName || !validAdminRole(role)) return Response.json({ error: "请填写有效的员工账号、姓名和角色" }, { status: 400 });
+      if (email === (process.env.ADMIN_EMAIL || "admin@pusy.cn").trim().toLowerCase()) return Response.json({ error: "该邮箱已由服务器主管理员使用" }, { status: 409 });
+      const credentials = await createAdminPasswordHash(password);
+      const id = `ADM-${crypto.randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase()}`;
+      await db.prepare("INSERT INTO admin_users (id, email, display_name, role, password_hash, password_salt) VALUES (?, ?, ?, ?, ?, ?)").bind(id, email, displayName, role, credentials.hash, credentials.salt).run();
+      payload.id = id;
+    } else if (action === "update-admin-user") {
+      const id = String(payload.id ?? "");
+      const role = String(payload.role ?? "");
+      const status = String(payload.status ?? "");
+      if (!/^ADM-[A-Z0-9]{12}$/.test(id) || !validAdminRole(role) || !["active", "disabled"].includes(status)) return Response.json({ error: "管理员账号信息无效" }, { status: 400 });
+      if (id === actor.id && (role !== "owner" || status !== "active")) return Response.json({ error: "不能降级或停用当前登录账号" }, { status: 409 });
+      const result = await db.prepare("UPDATE admin_users SET role = ?, status = ?, session_version = session_version + 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(role, status, id).run();
+      if (!result.meta.changes) return Response.json({ error: "管理员账号不存在" }, { status: 404 });
+    } else if (action === "reset-admin-password") {
+      const id = String(payload.id ?? "");
+      if (!/^ADM-[A-Z0-9]{12}$/.test(id)) return Response.json({ error: "管理员账号信息无效" }, { status: 400 });
+      const credentials = await createAdminPasswordHash(String(payload.password ?? ""));
+      const result = await db.prepare("UPDATE admin_users SET password_hash = ?, password_salt = ?, session_version = session_version + 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(credentials.hash, credentials.salt, id).run();
+      if (!result.meta.changes) return Response.json({ error: "管理员账号不存在" }, { status: 404 });
+    } else if (action === "bulk-import-products") {
       const items = Array.isArray(payload.products) ? payload.products.slice(0, 200) as Record<string, unknown>[] : [];
       if (!items.length) return Response.json({ error: "没有可导入的商品" }, { status: 400 });
       const statements = [];
@@ -89,6 +165,8 @@ export async function POST(request: Request) {
         statements.push(db.prepare("INSERT INTO products (slug, name, category, description, image, image_alt, badge, price, old_price, stock, inventory_verified, sku, volume, ingredients, usage, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(slug) DO UPDATE SET name = excluded.name, category = excluded.category, description = excluded.description, image = excluded.image, image_alt = excluded.image_alt, badge = excluded.badge, price = excluded.price, old_price = excluded.old_price, stock = excluded.stock, inventory_verified = excluded.inventory_verified, sku = excluded.sku, volume = excluded.volume, ingredients = excluded.ingredients, usage = excluded.usage, status = excluded.status, updated_at = CURRENT_TIMESTAMP").bind(slug, name, category, String(item.description ?? ""), image, String(item.imageAlt ?? "") || null, String(item.badge ?? "") || null, price, item.oldPrice ? yuanToStored(item.oldPrice) : null, Math.max(0, Math.round(Number(item.stock ?? 0))), item.inventoryVerified ? 1 : 0, String(item.sku ?? "") || null, String(item.volume ?? "") || null, String(item.ingredients ?? "") || null, String(item.usage ?? "") || null, String(item.status ?? "active")));
       }
       await db.batch(statements);
+      await completeAdminAudit(auditId, "succeeded");
+      auditCompleted = true;
       return Response.json({ ok: true, imported: statements.length });
     } else if (action === "create-product" || action === "update-product") {
       const name = String(payload.name ?? "").trim();
@@ -102,9 +180,27 @@ export async function POST(request: Request) {
       else await db.prepare("UPDATE products SET slug = ?, name = ?, category = ?, description = ?, image = ?, image_alt = ?, badge = ?, price = ?, old_price = ?, stock = ?, inventory_verified = ?, sku = ?, volume = ?, ingredients = ?, usage = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(...values, Number(payload.id)).run();
     } else if (action === "archive-product") {
       await db.prepare("UPDATE products SET status = 'archived', updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(Number(payload.id)).run();
+    } else if (action === "update-product-inventory") {
+      const id = Number(payload.id);
+      const stock = Math.max(0, Math.round(Number(payload.stock ?? 0)));
+      if (!Number.isInteger(id) || id < 1 || !Number.isFinite(stock)) return Response.json({ error: "商品库存信息无效" }, { status: 400 });
+      const result = await db.prepare("UPDATE products SET stock = ?, inventory_verified = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(stock, payload.inventoryVerified ? 1 : 0, id).run();
+      if (!result.meta.changes) return Response.json({ error: "商品不存在" }, { status: 404 });
+    } else if (action === "bulk-update-order-status") {
+      const ids = [...new Set((Array.isArray(payload.ids) ? payload.ids : []).map((id) => String(id)).filter((id) => /^PUSY-[A-Z0-9-]{8,64}$/.test(id)))].slice(0, 100);
+      const status = String(payload.status ?? "");
+      if (!ids.length || !["配货中", "已发货", "已完成"].includes(status)) return Response.json({ error: "请选择有效订单和批量处理状态" }, { status: 400 });
+      for (const id of ids) {
+        const order = await db.prepare("SELECT resources_committed FROM orders WHERE id = ? LIMIT 1").bind(id).first<{ resources_committed: number }>();
+        const payment = await db.prepare("SELECT status FROM payments WHERE order_id = ? AND status IN ('paid','partially_refunded') ORDER BY created_at DESC LIMIT 1").bind(id).first<{ status: string }>();
+        if (!order || !order.resources_committed || !payment) return Response.json({ error: `订单 ${id} 尚未完成付款，不能批量进入履约状态` }, { status: 409 });
+      }
+      await db.batch(ids.map((id) => db.prepare("UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(status, id)));
+      if (status === "已发货") await Promise.all(ids.map((id) => notifyOrderShipped(id).catch(() => undefined)));
     } else if (action === "update-order-status") {
       const status = String(payload.status ?? "");
       if (!orderStatuses.includes(status)) return Response.json({ error: "订单状态无效" }, { status: 400 });
+      if (!roleCan(actor.role, "orders.manage") && !["配货中", "已发货", "已完成"].includes(status)) return Response.json({ error: "仓库账号只能更新订单履约状态" }, { status: 403 });
       const orderId = String(payload.id ?? "");
       const order = await db.prepare("SELECT id, status, resources_committed, resources_released FROM orders WHERE id = ? LIMIT 1").bind(orderId).first<{ id: string; status: string; resources_committed: number; resources_released: number }>();
       if (!order) return Response.json({ error: "订单不存在" }, { status: 404 });
@@ -115,6 +211,8 @@ export async function POST(request: Request) {
       if (status === "已取消") {
         if (financiallySettled || order.resources_committed) return Response.json({ error: "已支付订单不能直接取消，请通过退款流程处理" }, { status: 409 });
         if (!await releaseOrderReservation(orderId)) await db.prepare("UPDATE orders SET status = '已取消', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND resources_committed = 0").bind(orderId).run();
+        await completeAdminAudit(auditId, "succeeded");
+        auditCompleted = true;
         return Response.json({ ok: true });
       }
       if (["配货中", "已发货", "已完成"].includes(status) && (!fulfillable || !order.resources_committed)) return Response.json({ error: "订单尚未完成付款，不能进入履约状态" }, { status: 409 });
@@ -131,7 +229,7 @@ export async function POST(request: Request) {
     } else if (action === "update-return-status") {
       const status = String(payload.status ?? "");
       if (!returnStatuses.includes(status)) return Response.json({ error: "售后状态无效" }, { status: 400 });
-      await recordReturnStatusChange({ returnId: String(payload.id), status, actor: (await getAdminIdentity())?.email ?? "admin", note: String(payload.note ?? "").trim().slice(0, 1000) });
+      await recordReturnStatusChange({ returnId: String(payload.id), status, actor: actor.email, note: String(payload.note ?? "").trim().slice(0, 1000) });
     } else if (action === "update-support-thread") {
       const status = String(payload.status ?? "");
       const priority = String(payload.priority ?? "normal");
@@ -144,8 +242,7 @@ export async function POST(request: Request) {
       const threadId = String(payload.id ?? "");
       const note = String(payload.note ?? "").trim().slice(0, 5000);
       if (!note) return Response.json({ error: "请填写内部备注" }, { status: 400 });
-      const actor = (await getAdminIdentity())?.email ?? "admin";
-      const result = await db.prepare("INSERT INTO support_messages (id, thread_id, direction, source, from_email, to_email, subject, text_body, headers_json) SELECT ?, id, 'system', 'internal_note', ?, customer_email, '内部备注', ?, ? FROM support_threads WHERE id = ? AND deleted_at IS NULL").bind(`MSG-${crypto.randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase()}`, actor, note, JSON.stringify({ actor }), threadId).run();
+      const result = await db.prepare("INSERT INTO support_messages (id, thread_id, direction, source, from_email, to_email, subject, text_body, headers_json) SELECT ?, id, 'system', 'internal_note', ?, customer_email, '内部备注', ?, ? FROM support_threads WHERE id = ? AND deleted_at IS NULL").bind(`MSG-${crypto.randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase()}`, actor.email, note, JSON.stringify({ actor: actor.email }), threadId).run();
       if (!result.meta.changes) return Response.json({ error: "客服工单不存在" }, { status: 404 });
       await db.prepare("UPDATE support_threads SET updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(threadId).run();
     } else if (action === "create-canned-reply") {
@@ -179,9 +276,12 @@ export async function POST(request: Request) {
                       : db.prepare("DELETE FROM support_threads WHERE id = ? AND deleted_at IS NOT NULL").bind(id));
       await db.batch(statements);
     } else if (action === "reply-support-thread") {
-      await sendSupportReply(String(payload.id), String(payload.message ?? ""), (await getAdminIdentity())?.email ?? "admin");
+      await sendSupportReply(String(payload.id), String(payload.message ?? ""), actor.email);
     } else if (action === "open-linked-support-thread") {
-      const threadId = await ensureLinkedSupportThread({ orderId: String(payload.orderId ?? ""), returnId: String(payload.returnId ?? ""), actor: (await getAdminIdentity())?.email ?? "admin" });
+      const threadId = await ensureLinkedSupportThread({ orderId: String(payload.orderId ?? ""), returnId: String(payload.returnId ?? ""), actor: actor.email });
+      payload.id = threadId;
+      await completeAdminAudit(auditId, "succeeded");
+      auditCompleted = true;
       return Response.json({ ok: true, threadId });
     } else if (action === "update-invoice") {
       const status = String(payload.status ?? "");
@@ -259,9 +359,18 @@ export async function POST(request: Request) {
       const statements = allowed.map((key) => db.prepare("INSERT INTO site_content (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP").bind(key, String(content[key] ?? "").trim().slice(0, 180)));
       await db.batch(statements);
     } else return Response.json({ error: "未知操作" }, { status: 400 });
+    await completeAdminAudit(auditId, "succeeded");
+    auditCompleted = true;
     return Response.json({ ok: true });
   } catch (error) {
+    if (auditId) {
+      await completeAdminAudit(auditId, "failed", error instanceof Error ? error.message : String(error)).catch(() => undefined);
+      auditCompleted = true;
+    }
     const conflict = error instanceof Error && /unique/i.test(error.message);
+    console.error("[api/admin] action failed", { message: error instanceof Error ? error.message : String(error), code: typeof error === "object" && error && "code" in error ? String(error.code) : undefined });
     return safeServerError(conflict ? "链接标识或邮箱已经存在" : "后台操作失败，请稍后再试", conflict ? 409 : 500);
+  } finally {
+    if (auditId && !auditCompleted) await completeAdminAudit(auditId, "failed", "请求校验未通过或操作未完成").catch(() => undefined);
   }
 }

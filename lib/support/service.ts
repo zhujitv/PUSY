@@ -244,6 +244,19 @@ export async function createWebsiteReturnThread(input: { returnId: string; order
   return threadId;
 }
 
+export async function createWebsiteSupportThread(input: { name: string; phone: string; wechat: string; email: string; category: string; contactPreference: string; orderId: string | null; memberId: number | null; message: string; submittedOrderId: string }) {
+  const db = await getStoreDb();
+  const threadId = id("TKT");
+  const subject = `${bounded(input.category, 40)} · ${bounded(input.name, 60)}`;
+  const orderNote = input.submittedOrderId ? input.orderId ? `\n关联订单：${input.orderId}` : `\n客户填写订单号：${bounded(input.submittedOrderId, 64)}（联系方式未匹配，未自动关联）` : "";
+  const body = `首选联系方式：${bounded(input.contactPreference, 20)}\n手机：${bounded(input.phone, 20)}${input.wechat ? `\n微信：${bounded(input.wechat, 60)}` : ""}${input.email ? `\n邮箱：${bounded(input.email, 160)}` : ""}${orderNote}\n\n${bounded(input.message, 4000)}`;
+  await db.batch([
+    db.prepare("INSERT INTO support_threads (id, mailbox, subject, customer_email, customer_name, customer_phone, customer_wechat, member_id, order_id, status) VALUES (?, 'service', ?, ?, ?, ?, ?, ?, ?, 'unread')").bind(threadId, subject, input.email, input.name, input.phone, input.wechat, input.memberId, input.orderId),
+    db.prepare("INSERT INTO support_messages (id, thread_id, direction, source, from_email, to_email, subject, text_body) VALUES (?, ?, 'inbound', 'website', ?, ?, ?, ?)").bind(id("MSG"), threadId, input.email, supportReplyAddress({ mailbox: "service" }), subject, body),
+  ]);
+  return threadId;
+}
+
 export async function sendSupportReply(threadId: string, message: string, actor: string) {
   const text = bounded(message, 10_000);
   if (!text) throw new Error("请填写回复内容");

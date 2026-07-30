@@ -6,6 +6,7 @@ export const products = sqliteTable("products", {
   slug: text("slug").notNull().unique(),
   name: text("name").notNull(),
   category: text("category").notNull(),
+  categoryId: integer("category_id"),
   description: text("description").notNull().default(""),
   image: text("image").notNull(),
   imageAlt: text("image_alt"),
@@ -20,6 +21,18 @@ export const products = sqliteTable("products", {
   volume: text("volume"),
   ingredients: text("ingredients"),
   usage: text("usage"),
+  status: text("status").notNull().default("active"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const productCategories = sqliteTable("product_categories", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull().unique(),
+  slug: text("slug").notNull().unique(),
+  parentId: integer("parent_id"),
+  description: text("description").notNull().default(""),
+  sortOrder: integer("sort_order").notNull().default(0),
   status: text("status").notNull().default("active"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),

@@ -146,7 +146,7 @@ export async function getStoreDb() {
 }
 
 export type DbProduct = {
-  id: number; slug: string; name: string; category: string; description: string;
+  id: number; slug: string; name: string; category: string; category_id: number | null; description: string;
   image: string; image_alt: string | null; badge: string | null; price: number;
   old_price: number | null; stock: number; low_stock_threshold: number; inventory_verified: number; images_json: string; variants_json: string; status: string; created_at: string; updated_at: string;
   sku: string | null; volume: string | null; ingredients: string | null; usage: string | null;

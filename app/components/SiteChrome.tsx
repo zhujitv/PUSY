@@ -5,6 +5,7 @@ import { formatCnyFromRub } from "../data/products";
 import { fallbackNavigationCategories, storefrontNavItems, type NavigationCategory } from "../data/navigation";
 import { useStore } from "./StoreProvider";
 import { HeaderIcon } from "./HeaderIcons";
+import { FREE_STANDARD_SHIPPING_THRESHOLD } from "../../lib/shipping";
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -12,7 +13,7 @@ export function SiteHeader() {
   const { cartCount, setCartOpen, setSearchOpen } = useStore();
   useEffect(() => { fetch("/api/categories").then((response) => response.ok ? response.json() : null).then((body) => { if (Array.isArray(body?.categories)) setNav(storefrontNavItems(body.categories as NavigationCategory[])); }).catch(() => {}); }, []);
   return <>
-    <div className="shipping-bar">订单满 {formatCnyFromRub(5000)} 免费配送</div>
+    <div className="shipping-bar">实体商品满 {formatCnyFromRub(FREE_STANDARD_SHIPPING_THRESHOLD)} 免标准快递费</div>
     <header className="site-header subpage-header">
       <button className="icon-button menu-button" aria-label="打开菜单" onClick={() => setOpen(!open)}><span /><span /></button>
       <a className="brand" href="/" aria-label="PÚSY 首页">púsy</a>

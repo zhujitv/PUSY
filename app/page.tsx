@@ -6,9 +6,12 @@ import { formatCnyFromRub, products } from "./data/products";
 import { useStore } from "./components/StoreProvider";
 import { HeaderIcon } from "./components/HeaderIcons";
 import { fallbackNavigationCategories, storefrontNavItems, type NavigationCategory } from "./data/navigation";
+import { FREE_STANDARD_SHIPPING_THRESHOLD } from "../lib/shipping";
 
 const featuredProducts = products.slice(1, 9);
-const defaultHomeContent = { announcement: `订单满 ${formatCnyFromRub(5000)} 免费配送`, show_announcement: "1", hero_eyebrow: "púsy × Ü", hero_title: "礼物飞进\n你的订单", hero_subtitle: "猜猜你会收到哪一份？", hero_cta_label: "立即探索", hero_cta_url: "/catalog/products", hero2_eyebrow: "PÚSY 神秘礼盒", hero2_title: "装下这个夏天\n需要的一切", hero2_cta_label: "了解更多", hero2_cta_url: "/catalog/sekretnye-boksy", show_featured: "1", featured_title: "新品", featured_subtitle: "从当季新品开始，找到你的下一件日常心动。", featured_cta_label: "查看全部", show_categories: "1", categories_title: "按心情探索", category_1_label: "彩妆", category_1_url: "/catalog/makiyazh", category_2_label: "护肤", category_2_url: "/catalog/uhod", category_3_label: "家居", category_3_url: "/catalog/dlya-doma", show_reels: "1", reels_title: "你与 PÚSY", reels_subtitle: "真实灵感、使用方式与热门单品。", show_newsletter: "1", newsletter_title: "订阅邮件，立享 9 折", newsletter_success: "订阅成功，欢迎加入 PÚSY CLUB。" };
+const defaultAnnouncement = `实体商品满 ${formatCnyFromRub(FREE_STANDARD_SHIPPING_THRESHOLD)} 免标准快递费`;
+const previousDefaultAnnouncements = new Set(["订单满 600.00 元免费配送", "订单满 600.00 元 免费配送", "订单满 600 元 免费配送"]);
+const defaultHomeContent = { announcement: defaultAnnouncement, show_announcement: "1", hero_eyebrow: "púsy × Ü", hero_title: "礼物飞进\n你的订单", hero_subtitle: "猜猜你会收到哪一份？", hero_cta_label: "立即探索", hero_cta_url: "/catalog/products", hero2_eyebrow: "PÚSY 神秘礼盒", hero2_title: "装下这个夏天\n需要的一切", hero2_cta_label: "了解更多", hero2_cta_url: "/catalog/sekretnye-boksy", show_featured: "1", featured_title: "新品", featured_subtitle: "从当季新品开始，找到你的下一件日常心动。", featured_cta_label: "查看全部", show_categories: "1", categories_title: "按心情探索", category_1_label: "彩妆", category_1_url: "/catalog/makiyazh", category_2_label: "护肤", category_2_url: "/catalog/uhod", category_3_label: "家居", category_3_url: "/catalog/dlya-doma", show_reels: "1", reels_title: "你与 PÚSY", reels_subtitle: "真实灵感、使用方式与热门单品。", show_newsletter: "1", newsletter_title: "订阅邮件，立享 9 折", newsletter_success: "订阅成功，欢迎加入 PÚSY CLUB。" };
 
 const reels = [
   { player: "vplvbx7qwc3dhtviylip", slug: "karandash-dlya-gub-pusy-cream-100460", title: "奶油唇线笔" },
@@ -39,7 +42,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/content").then((response) => response.ok ? response.json() : null).then((body) => { if (body?.content) setHomeContent((current) => ({ ...current, ...body.content })); }).catch(() => {});
+    fetch("/api/content").then((response) => response.ok ? response.json() : null).then((body) => { if (body?.content) setHomeContent((current) => { const next = { ...current, ...body.content }; return { ...next, announcement: previousDefaultAnnouncements.has(next.announcement) ? defaultAnnouncement : next.announcement }; }); }).catch(() => {});
   }, []);
 
   useEffect(() => {

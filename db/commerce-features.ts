@@ -1,7 +1,7 @@
 import { getStoreDb } from "./store";
 
 export const siteContentDefaults = {
-  announcement: "订单满 600.00 元免费配送",
+  announcement: "实体商品满 198.00 元 免标准快递费",
   show_announcement: "1",
   hero_eyebrow: "púsy × Ü",
   hero_title: "礼物飞进\n你的订单",

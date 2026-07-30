@@ -509,6 +509,7 @@ footer.pusy-footer .footer-links a { font-size: 16px; font-weight: 600; }
 .shipping-progress > div { display: flex; justify-content: space-between; margin-bottom: 10px; }
 .shipping-progress i { display: block; height: 6px; border-radius: 99px; background: #ead8e1; overflow: hidden; }
 .shipping-progress i span { display: block; height: 100%; border-radius: inherit; background: #e63180; }
+.shipping-progress--digital > div { margin-bottom: 0; }
 .cart-lines-heading { display: flex; justify-content: space-between; padding: 0 0 14px; border-bottom: 1px solid #ddd; }
 .cart-lines-heading button { border: 0; background: none; text-decoration: underline; }
 .cart-stock { display: block; margin: 4px 0 8px; color: #6a6a6a; }
@@ -685,6 +686,8 @@ body.overlay-open { overflow: hidden; }
 .checkout-page { display: grid; grid-template-columns: 1.25fr .75fr; gap: 7vw; padding: 60px 5vw 120px; align-items: start; }
 .checkout-page form > section { padding: 38px 0; border-top: 1px solid #aaa; }
 .checkout-page form > section:first-child { padding-top: 0; border: 0; }
+.digital-delivery-note h2 { margin: 0 0 12px; font-size: clamp(26px, 3vw, 42px); font-weight: 400; letter-spacing: -.04em; }
+.digital-delivery-note > p:last-child { max-width: 640px; margin: 0; color: #666; line-height: 1.65; }
 .checkout-consents { display: grid; gap: 14px; }
 .checkout-consents > p { margin: 0 0 8px; }
 .checkout-consents label { display: grid; grid-template-columns: 20px 1fr; gap: 10px; align-items: start; padding: 16px; border: 1px solid #ccc; background: #fafafa; font-size: 12px; line-height: 1.6; }

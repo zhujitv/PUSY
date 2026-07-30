@@ -1,6 +1,6 @@
 const { getCartView, removeFromCart, syncCartBadge, updateQuantity } = require("../../utils/cart");
 
-const FREE_SHIPPING_FEN = 59900;
+const FREE_SHIPPING_FEN = 19800;
 
 Page({
   data: {
@@ -17,8 +17,8 @@ Page({
     const cart = getCartView();
     const remainingFen = Math.max(0, FREE_SHIPPING_FEN - cart.totalFen);
     const shippingText = remainingFen > 0
-      ? `再选 ¥${(remainingFen / 100).toFixed(0)} 即享免费配送`
-      : "已享免费配送";
+      ? `实体商品再选 ¥${(remainingFen / 100).toFixed(0)} 即享标准快递免费`
+      : "已享标准快递免费";
     const progressWidth = Math.min(100, Math.round((cart.totalFen / FREE_SHIPPING_FEN) * 100));
     this.setData({ cart, shippingText, progressWidth });
     syncCartBadge();

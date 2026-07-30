@@ -7,11 +7,12 @@ import { releaseExpiredOrderReservations } from "../../../lib/orders/reservation
 import { allowRequest, hasTrustedOrigin, rateLimitResponse, safeServerError } from "../../../lib/request-security";
 import { createGiftCardCode } from "../../../lib/gift-cards";
 import { notifyLowStock } from "../../../lib/notifications/business";
+import { calculatePhysicalSubtotal, calculateShippingFee, ELECTRONIC_DELIVERY, isGiftCardLineSlug, isPhysicalDeliveryMethod } from "../../../lib/shipping";
 
 type OrderPayload = { customer?: string; email?: string; phone?: string; address?: string; delivery?: string; payment?: string; couponCode?: string; items?: { slug: string; quantity: number; product?: { description?: string } }[] };
 const orderId = () => `PUSY-${new Date().toISOString().slice(0, 10).replaceAll("-", "")}-${crypto.randomUUID().replaceAll("-", "").slice(0, 10).toUpperCase()}`;
 function giftDetail(description = "", label: string) { const match = description.slice(0, 1000).match(new RegExp(`${label}：([^；]+)`)); return (match?.[1]?.trim() ?? "").slice(0, label === "祝福" ? 160 : 120); }
-function validGiftCardSlug(slug: string) { return /^gift-card-(1000|3000|5000|10000)(?:-|$)/.test(slug); }
+function validGiftCardSlug(slug: string) { return isGiftCardLineSlug(slug); }
 
 export async function POST(request: Request) {
   try {
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
     const email = String(payload.email ?? "").trim().toLowerCase().slice(0, 120);
     const phone = String(payload.phone ?? "").replace(/\s|-/g, "");
     const address = String(payload.address ?? "").trim().slice(0, 300);
-    if (!customer || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !/^1[3-9]\d{9}$/.test(phone) || !address || !["标准快递", "顺丰速运", "门店自提"].includes(String(payload.delivery)) || !["支付宝", "微信支付"].includes(String(payload.payment)) || !payload.items?.length || payload.items.length > 50) return Response.json({ error: "订单信息不完整或格式无效" }, { status: 400 });
+    if (!customer || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !/^1[3-9]\d{9}$/.test(phone) || !["支付宝", "微信支付"].includes(String(payload.payment)) || !payload.items?.length || payload.items.length > 50) return Response.json({ error: "订单信息不完整或格式无效" }, { status: 400 });
     const db = await getStoreDb();
     const viewer = await getPreviewMemberIdentity();
     const memberEmail = (viewer?.email ?? email).toLowerCase();
@@ -42,8 +43,19 @@ export async function POST(request: Request) {
         resolvedItems.push({ slug: line.slug, name: fallback.name, price: fallback.price, quantity, manageStock: false, description: line.product?.description ?? "" });
       }
     }
+    for (const item of resolvedItems.filter((line) => isGiftCardLineSlug(line.slug))) {
+      const recipientName = giftDetail(item.description, "收件人");
+      const recipientEmail = giftDetail(item.description, "邮箱").toLowerCase();
+      if (!recipientName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail)) return Response.json({ error: "请填写有效的礼品卡收件人姓名和邮箱" }, { status: 400 });
+    }
     const merchandiseTotal = resolvedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const shipping = payload.delivery === "门店自提" || merchandiseTotal >= 5000 ? 0 : payload.delivery === "顺丰速运" ? 590 : 390;
+    const physicalSubtotal = calculatePhysicalSubtotal(resolvedItems);
+    const requiresShipping = physicalSubtotal > 0;
+    const requestedDelivery = String(payload.delivery ?? "");
+    if (requiresShipping && (!address || !isPhysicalDeliveryMethod(requestedDelivery))) return Response.json({ error: "请填写完整收货地址并选择有效配送方式" }, { status: 400 });
+    const delivery = requiresShipping && isPhysicalDeliveryMethod(requestedDelivery) ? requestedDelivery : ELECTRONIC_DELIVERY;
+    const orderAddress = requiresShipping ? address : "电子礼品卡通过收件人邮箱发送";
+    const shipping = calculateShippingFee(delivery, physicalSubtotal);
     const coupon = payload.couponCode ? await calculateCouponDiscount(payload.couponCode, merchandiseTotal, viewer?.memberId) : { valid: false, code: "", discount: 0, message: "" };
     if (payload.couponCode && !coupon.valid) return Response.json({ error: coupon.message || "优惠码无效" }, { status: 400 });
     const verifiedTotal = Math.max(0, merchandiseTotal + shipping - coupon.discount);
@@ -59,7 +71,7 @@ export async function POST(request: Request) {
         memberId = (await db.prepare("SELECT id FROM members WHERE email = ? LIMIT 1").bind(memberEmail).first<{ id: number }>())?.id ?? null;
       }
     }
-    const statements = [db.prepare("INSERT INTO orders (id, member_id, customer, email, phone, address, delivery, payment, total, discount, coupon_code, payment_token_hash, reservation_expires_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '待付款')").bind(id, memberId, customer, memberEmail, phone, address, payload.delivery, payload.payment, verifiedTotal, coupon.discount, coupon.valid ? coupon.code : null, await sha256(paymentToken), reservationExpiresAt)];
+    const statements = [db.prepare("INSERT INTO orders (id, member_id, customer, email, phone, address, delivery, payment, total, discount, coupon_code, payment_token_hash, reservation_expires_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '待付款')").bind(id, memberId, customer, memberEmail, phone, orderAddress, delivery, payload.payment, verifiedTotal, coupon.discount, coupon.valid ? coupon.code : null, await sha256(paymentToken), reservationExpiresAt)];
     if (coupon.valid && coupon.couponId) statements.push(db.prepare("UPDATE coupons SET used_count = used_count + 1 WHERE id = ? AND status = 'active' AND (usage_limit = 0 OR used_count < usage_limit)").bind(coupon.couponId).requireChanges("优惠码使用次数已达上限"));
     if (coupon.valid && coupon.assignmentId) statements.push(db.prepare("UPDATE coupon_assignments SET status = 'used', used_at = CURRENT_TIMESTAMP, order_id = ? WHERE id = ? AND member_id = ? AND status = 'available'").bind(id, coupon.assignmentId, memberId).requireChanges("专属优惠券已经使用"));
     if (coupon.valid && coupon.giftCardCode) statements.push(db.prepare("UPDATE gift_cards SET balance = balance - ?, status = CASE WHEN balance - ? <= 0 THEN 'used' ELSE status END WHERE code = ? AND status = 'active' AND balance >= ?").bind(coupon.discount, coupon.discount, coupon.giftCardCode, coupon.discount).requireChanges("礼品卡余额不足或已被使用"));
@@ -71,11 +83,11 @@ export async function POST(request: Request) {
           SELECT slug, ?, 'reserve', ?, stock, ? FROM products WHERE slug = ?
           ON CONFLICT (product_slug, movement_type, reference_id) DO NOTHING`).bind(id, -line.quantity, id, line.slug));
       }
-      if (line.slug.startsWith("gift-card-")) for (let index = 0; index < line.quantity; index += 1) statements.push(db.prepare("INSERT INTO gift_cards (code, order_id, initial_balance, balance, recipient_name, recipient_email, message, delivery_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')").bind(createGiftCardCode(), id, line.price, line.price, giftDetail(line.description, "收件人"), giftDetail(line.description, "邮箱"), giftDetail(line.description, "祝福"), giftDetail(line.description, "发送日期") || null));
+      if (isGiftCardLineSlug(line.slug)) for (let index = 0; index < line.quantity; index += 1) statements.push(db.prepare("INSERT INTO gift_cards (code, order_id, initial_balance, balance, recipient_name, recipient_email, message, delivery_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')").bind(createGiftCardCode(), id, line.price, line.price, giftDetail(line.description, "收件人"), giftDetail(line.description, "邮箱"), giftDetail(line.description, "祝福"), giftDetail(line.description, "发送日期") || null));
     }
     await db.batch(statements);
     await notifyLowStock(id).catch(() => undefined);
-    return Response.json({ orderId: id, paymentToken, total: verifiedTotal, discount: coupon.discount, couponCode: coupon.valid ? coupon.code : null, reservationExpiresAt }, { status: 201 });
+    return Response.json({ orderId: id, paymentToken, total: verifiedTotal, shipping, delivery, requiresShipping, discount: coupon.discount, couponCode: coupon.valid ? coupon.code : null, reservationExpiresAt }, { status: 201 });
   } catch (error) {
     const message = error instanceof Error && /库存不足|优惠码|礼品卡/.test(error.message) ? error.message : "创建订单失败，请稍后再试";
     return safeServerError(message, message.startsWith("创建") ? 500 : 409);

@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import { formatCnyFromRub, getProduct, productDetailHref, products, type Product } from "../data/products";
+import { calculatePhysicalSubtotal } from "../../lib/shipping";
 
 export type CartLine = { slug: string; quantity: number; product?: Product };
 export type Order = {
@@ -19,6 +20,8 @@ type StoreContextValue = {
   wishlist: string[];
   cartCount: number;
   subtotal: number;
+  physicalSubtotal: number;
+  requiresShipping: boolean;
   cartOpen: boolean;
   searchOpen: boolean;
   addToCart: (product: Product, quantity?: number) => void;
@@ -33,7 +36,7 @@ type StoreContextValue = {
 
 const StoreContext = createContext<StoreContextValue | null>(null);
 const serverFallback: StoreContextValue = {
-  cart: [], wishlist: [], cartCount: 0, subtotal: 0, cartOpen: false, searchOpen: false,
+  cart: [], wishlist: [], cartCount: 0, subtotal: 0, physicalSubtotal: 0, requiresShipping: false, cartOpen: false, searchOpen: false,
   addToCart: () => {}, updateQuantity: () => {}, removeFromCart: () => {}, clearCart: () => {},
   toggleWishlist: () => {}, isWishlisted: () => false, setCartOpen: () => {}, setSearchOpen: () => {},
 };
@@ -94,7 +97,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const isWishlisted = (slug: string) => wishlist.includes(slug);
   const cartCount = cart.reduce((sum, line) => sum + line.quantity, 0);
   const subtotal = cart.reduce((sum, line) => sum + (line.product ?? getProduct(line.slug)).price * line.quantity, 0);
-  const value = { cart, wishlist, cartCount, subtotal, cartOpen, searchOpen, addToCart, updateQuantity, removeFromCart, clearCart, toggleWishlist, isWishlisted, setCartOpen, setSearchOpen };
+  const physicalSubtotal = calculatePhysicalSubtotal(cart.map((line) => ({ slug: line.slug, price: (line.product ?? getProduct(line.slug)).price, quantity: line.quantity })));
+  const requiresShipping = physicalSubtotal > 0;
+  const value = { cart, wishlist, cartCount, subtotal, physicalSubtotal, requiresShipping, cartOpen, searchOpen, addToCart, updateQuantity, removeFromCart, clearCart, toggleWishlist, isWishlisted, setCartOpen, setSearchOpen };
 
   return <StoreContext.Provider value={value}>{children}<SearchOverlay /><CartDrawer /></StoreContext.Provider>;
 }
@@ -122,14 +127,14 @@ function SearchOverlay() {
 }
 
 function CartDrawer() {
-  const { cart, cartOpen, subtotal, setCartOpen, updateQuantity, removeFromCart } = useStore();
+  const { cart, cartOpen, subtotal, requiresShipping, setCartOpen, updateQuantity, removeFromCart } = useStore();
   if (!cartOpen) return null;
   return <div className="store-overlay" role="dialog" aria-modal="true" aria-label="购物袋" onMouseDown={(event) => { if (event.target === event.currentTarget) setCartOpen(false); }}>
     <aside className="cart-drawer">
       <div className="panel-title"><span>购物袋</span><button onClick={() => setCartOpen(false)} aria-label="关闭购物袋">×</button></div>
       {cart.length === 0 ? <div className="empty-state"><p>购物袋还是空的</p><a href="/catalog/products" onClick={() => setCartOpen(false)}>去挑选商品</a></div> : <>
         <div className="cart-lines">{cart.map((line) => { const product = line.product ?? getProduct(line.slug); return <article key={line.slug}><a href={productDetailHref(product)} onClick={() => setCartOpen(false)}><Image src={product.image} alt={product.name} width={120} height={125} sizes="90px" /></a><div><a href={productDetailHref(product)} onClick={() => setCartOpen(false)}>{product.name}</a><b>{formatCnyFromRub(product.price)}</b><div className="mini-quantity"><button onClick={() => updateQuantity(line.slug, line.quantity - 1)}>−</button><span>{line.quantity}</span><button onClick={() => updateQuantity(line.slug, line.quantity + 1)}>+</button></div><button className="remove-line" onClick={() => removeFromCart(line.slug)}>删除</button></div></article>; })}</div>
-        <div className="cart-summary"><p><span>小计</span><b>{formatCnyFromRub(subtotal)}</b></p><small>配送费用将在结账时计算</small><a href="/checkout" onClick={() => setCartOpen(false)}>去结账</a><a className="text-link" href="/cart" onClick={() => setCartOpen(false)}>查看购物袋</a></div>
+        <div className="cart-summary"><p><span>小计</span><b>{formatCnyFromRub(subtotal)}</b></p><small>{requiresShipping ? "配送费用将在结账时计算" : "电子礼品卡通过邮箱发送，免配送费"}</small><a href="/checkout" onClick={() => setCartOpen(false)}>去结账</a><a className="text-link" href="/cart" onClick={() => setCartOpen(false)}>查看购物袋</a></div>
       </>}
     </aside>
   </div>;

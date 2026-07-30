@@ -1,5 +1,6 @@
 import { getStoreDb } from "../../db/store";
 import { notifyOrderShipped } from "../notifications/business";
+import { isGiftCardLineSlug } from "../shipping";
 
 export const carriers = {
   sf: { name: "顺丰速运", url: (number: string) => `https://www.sf-express.com/chn/sc/dynamic_function/waybill/#search/bill-number/${encodeURIComponent(number)}` },
@@ -28,6 +29,8 @@ export async function shipOrder(input: { orderId: string; carrierCode: string; t
   const order = await db.prepare("SELECT id, status, resources_committed FROM orders WHERE id = ?").bind(input.orderId).first<{ id: string; status: string; resources_committed: number }>();
   if (!order) throw new Error("订单不存在");
   if (!order.resources_committed || ["待付款", "支付失败", "已取消", "已退款"].includes(order.status)) throw new Error("订单尚未支付或已关闭，不能发货");
+  const orderItems = await db.prepare("SELECT product_slug FROM order_items WHERE order_id = ?").bind(order.id).all<{ product_slug: string }>();
+  if (!orderItems.results.some((item) => !isGiftCardLineSlug(item.product_slug))) throw new Error("电子礼品卡订单无需快递发货");
   const existing = await db.prepare("SELECT id, tracking_number FROM shipments WHERE order_id = ?").bind(order.id).first<{ id: string; tracking_number: string }>();
   const id = existing?.id ?? shipmentId();
   const url = carrier.url(trackingNumber);

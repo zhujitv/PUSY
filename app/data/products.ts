@@ -1,4 +1,5 @@
 import catalog from "./products.generated.json";
+import { giftCardAmountFromSlug, isGiftCardProductSlug as isGiftCardSlug } from "../../lib/shipping";
 
 export type ProductVariantOption = {
   label: string;
@@ -44,7 +45,7 @@ export function formatCnyFromRub(rubles: number) {
 }
 
 export function isGiftCardProductSlug(slug: string) {
-  return slug === "gift-card" || slug.startsWith("gift-card-");
+  return isGiftCardSlug(slug);
 }
 
 export function productDetailHref(product: Pick<Product, "slug" | "category">) {
@@ -169,7 +170,7 @@ export function productsForCollection(slug: string) {
 }
 
 export function getProduct(slug: string) {
-  const giftMatch = slug.match(/^gift-card-(\d+)(?:-.+)?$/);
-  if (giftMatch) return { slug, name: "PÚSY 电子礼品卡", price: Number(giftMatch[1]), image: "/assets/41.webp", category: "礼品卡", description: "可用于 PÚSY 中国官方商城的记名电子礼品卡。", stock: 1, inventoryVerified: true } satisfies Product;
+  const giftCardAmount = giftCardAmountFromSlug(slug);
+  if (giftCardAmount !== null) return { slug, name: "PÚSY 电子礼品卡", price: giftCardAmount, image: "/assets/41.webp", category: "礼品卡", description: "可用于 PÚSY 中国官方商城的记名电子礼品卡。", stock: 1, inventoryVerified: true } satisfies Product;
   return products.find((product) => product.slug === slug) ?? products[0];
 }

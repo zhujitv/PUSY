@@ -711,7 +711,8 @@ INSERT INTO notification_templates (key, name, email_subject, email_body, sms_bo
   ('new_product', '新品通知', 'PUSY.CN 新品：{{productName}}', '你好 {{customer}}，新品 {{productName}} 已上架。查看详情：{{productUrl}}', 'PUSY.CN 新品 {{productName}} 已上架。', 1),
   ('product_restock', '补货通知', '{{productName}} 已补货', '你好 {{customer}}，你关注的 {{productName}} 已经补货，现在可以购买：{{productUrl}}', 'PUSY.CN：你关注的 {{productName}} 已补货。', 1),
   ('price_drop', '降价通知', '{{productName}} 已降价', '你好 {{customer}}，你关注的 {{productName}} 已从 {{oldPrice}} 元降至 {{newPrice}} 元：{{productUrl}}', 'PUSY.CN：{{productName}} 已降至 {{newPrice}} 元。', 1),
-  ('targeted_coupon', '专属优惠券', '你的 PUSY.CN 专属优惠券：{{couponCode}}', '你好 {{customer}}，我们为你准备了专属优惠券 {{couponCode}}。优惠内容：{{benefit}}，使用条件：{{condition}}。有效期至 {{endsAt}}。', 'PUSY.CN：专属优惠券 {{couponCode}} 已到账，有效期至 {{endsAt}}。', 1)
+  ('targeted_coupon', '专属优惠券', '你的 PUSY.CN 专属优惠券：{{couponCode}}', '你好 {{customer}}，我们为你准备了专属优惠券 {{couponCode}}。优惠内容：{{benefit}}，使用条件：{{condition}}。有效期至 {{endsAt}}。', 'PUSY.CN：专属优惠券 {{couponCode}} 已到账，有效期至 {{endsAt}}。', 1),
+  ('gift_card_sent', '电子礼品卡发送通知', '{{senderName}} 送你一张 PUSY.CN 电子礼品卡', '你好 {{recipientName}}，{{senderName}} 送你一张 {{amount}} 的 PUSY.CN 电子礼品卡。礼品卡号：{{giftCode}}。祝福：{{message}}。结账时输入卡号即可使用，请妥善保管。', '', 1)
 ON CONFLICT (key) DO NOTHING;
 
 COMMIT;

@@ -634,8 +634,9 @@ test("invoice workflow, upgraded support desk and business analytics are connect
 });
 
 test("audit guards member identity, financial transitions and concurrent refunds", async () => {
-  const [orders, accountApi, adminApi, adminUi, paymentApi, paymentService, reservations, returnsApi, exportApi, migration] = await Promise.all([
+  const [orders, shipping, accountApi, adminApi, adminUi, paymentApi, paymentService, reservations, returnsApi, exportApi, migration] = await Promise.all([
     read("app/api/orders/route.ts"),
+    read("lib/shipping.ts"),
     read("app/api/account/route.ts"),
     read("app/api/admin/route.ts"),
     read("app/admin/AdminClient.tsx"),
@@ -650,7 +651,7 @@ test("audit guards member identity, financial transitions and concurrent refunds
   assert.match(orders, /viewer\?\.memberId/);
   assert.match(orders, /INSERT INTO members \(name, email, phone\) VALUES \(\?, \?, ''\)/);
   assert.match(orders, /validGiftCardSlug/);
-  assert.match(orders, /gift-card-\(1000\|3000\|5000\|10000\)/);
+  assert.match(shipping, /gift-card-\(1000\|3000\|5000\|10000\)/);
   assert.doesNotMatch(accountApi, /SELECT \* FROM invoices WHERE member_id/);
   assert.match(accountApi, /cache-control.*private, no-store/);
   assert.doesNotMatch(accountApi, /UPDATE members SET name = \?, phone = \?/);

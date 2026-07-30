@@ -253,8 +253,10 @@ test("gift card layout stays compact without title overlap", async () => {
 });
 
 test("gift card product links always open the dedicated gift card page", async () => {
-  const [productsData, cart, store, productPage] = await Promise.all([
+  const [productsData, catalog, catalogPage, cart, store, productPage] = await Promise.all([
     read("app/data/products.ts"),
+    read("app/components/CatalogClient.tsx"),
+    read("app/catalog/[slug]/page.tsx"),
     read("app/cart/page.tsx"),
     read("app/components/StoreProvider.tsx"),
     read("app/products/[slug]/page.tsx"),
@@ -262,6 +264,10 @@ test("gift card product links always open the dedicated gift card page", async (
 
   assert.match(productsData, /productDetailHref/);
   assert.match(productsData, /product\.category === "礼品卡"/);
+  assert.ok((catalog.match(/productDetailHref\(product\)/g) ?? []).length >= 2);
+  assert.doesNotMatch(catalog, /href=\{`\/products\/\$\{product\.slug\}`\}/);
+  assert.match(catalogPage, /category\.slug === "gift-card" \? "\/gift-card" : `\/catalog\/\$\{category\.slug\}`/);
+  assert.match(catalogPage, /slug === "gift-card".*redirect\("\/gift-card"\)/s);
   assert.ok((cart.match(/productDetailHref\(product\)/g) ?? []).length >= 3);
   assert.ok((store.match(/productDetailHref\(product\)/g) ?? []).length >= 3);
   assert.match(productPage, /isGiftCardProductSlug\(slug\).*redirect\("\/gift-card"\)/s);

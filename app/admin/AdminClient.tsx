@@ -8,6 +8,7 @@ import { AdminUsersAdmin, AuditLogAdmin, type AdminAuditLog, type AdminUser } fr
 import { GrowthAdmin, type GrowthData } from "./GrowthAdmin";
 import { adminRoleLabels, type AdminPermission, type AdminRole } from "../../lib/admin-permissions";
 import { ProductManagement, type AdminProduct, type ProductCategory } from "./ProductManagement";
+import { ContentCandidatesAdmin } from "./ContentCandidatesAdmin";
 
 type AdminOrder = { id: string; member_id?: number; customer: string; email: string; phone: string; address: string; delivery: string; payment: string; total: number; status: string; item_count: number; created_at: string };
 type OrderItem = { id: number; order_id: string; product_slug: string; product_name: string; quantity: number; unit_price: number };
@@ -50,7 +51,7 @@ const adminTabMeta: Record<string, { eyebrow: string; title: string; description
   returns: { eyebrow: "客户体验", title: "售后管理", description: "跟进退换货申请、处理状态和客户回复" },
   payments: { eyebrow: "财务交易", title: "支付与退款", description: "查看支付结果、退款记录与回调审计" },
   products: { eyebrow: "商品中心", title: "产品管理", description: "统一维护商品分类、资料、价格、库存与销售状态" },
-  content: { eyebrow: "品牌运营", title: "内容运营", description: "管理商城公告、首页内容和营销表达" },
+  content: { eyebrow: "品牌运营", title: "内容运营", description: "管理首页内容、官方平台采集、人工审核与官网发布" },
   reviews: { eyebrow: "内容治理", title: "评价审核", description: "审核商品评价并维护公开内容质量" },
   marketing: { eyebrow: "增长运营", title: "营销工具", description: "管理优惠码、礼品卡和促销资源" },
   members: { eyebrow: "客户资产", title: "会员管理", description: "查看会员档案、订单贡献和账户状态" },
@@ -151,7 +152,7 @@ export function AdminClient({ viewer, canSignOut }: { viewer: AdminViewer; canSi
         {tab === "overview" && <div className="admin-overview"><section className="stat-grid"><article><span>累计订单</span><b>{data.stats?.order_count ?? 0}</b></article><article><span>累计销售额</span><b>{formatCnyFromRub(data.stats?.revenue ?? 0)}</b></article><article><span>平均客单价</span><b>{formatCnyFromRub(Math.round(data.stats?.avg_order_value ?? 0))}</b></article><article><span>待处理订单</span><b>{data.stats?.pending_count ?? 0}</b></article><article><span>待核验库存</span><b>{data.stats?.unverified_inventory_count ?? 0}</b></article><article><span>低库存商品</span><b>{data.stats?.low_stock_count ?? 0}</b></article><article><span>待审核售后</span><b>{data.stats?.pending_returns ?? 0}</b></article><article><span>待联系合作</span><b>{data.stats?.pending_partnerships ?? 0}</b></article></section><RevenueChart points={data.revenueTrend} /><section className="admin-panel"><div className="admin-panel-title"><h2>最新订单</h2><button onClick={() => changeTab("orders")}>查看全部</button></div><OrderTable orders={data.orders.slice(0, 6)} canManage={can("orders.manage")} canSupport={can("support.manage")} onOpen={setSelectedOrder} onSupport={(orderId) => void openLinkedSupport({ orderId })} onStatus={(id,status) => act({ action:"update-order-status", id, status })} /></section></div>}
         {tab === "analytics" && <AnalyticsAdmin analytics={data.analytics} />}
         {tab === "growth" && <GrowthAdmin data={data.growth} onAct={act} />}
-        {tab === "content" && <ContentAdmin key={data.contentRevisions.find((item) => item.status === "published")?.id ?? "content"} content={data.content} revisions={data.contentRevisions} onAct={act} />}
+        {tab === "content" && <><ContentAdmin key={data.contentRevisions.find((item) => item.status === "published")?.id ?? "content"} content={data.content} revisions={data.contentRevisions} onAct={act} /><ContentCandidatesAdmin /></>}
         {tab === "settings" && <ChinaRegionAdmin settings={data.region} providers={data.providers} onOpenPayments={() => changeTab("payments")} />}
         {tab === "orders" && <OrderManagement orders={filtered.orders} shipments={data.shipments} shipmentEvents={data.shipmentEvents} canManage={can("orders.manage") || can("orders.fulfill")} canFullManage={can("orders.manage")} canSupport={can("support.manage")} onOpen={setSelectedOrder} onSupport={(orderId) => void openLinkedSupport({ orderId })} onStatus={(id,status) => act({ action:"update-order-status", id, status })} onAct={act} />}
         {tab === "invoices" && <InvoiceAdmin invoices={filtered.invoices} onAct={act} />}

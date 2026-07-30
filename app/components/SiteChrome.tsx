@@ -32,7 +32,7 @@ export function SiteFooter() {
   return <footer className="pusy-footer">
       <div className="footer-contact-line"><span>© PÚSY 2026 · <a href="https://pusy.cn">PUSY.CN</a> · 中国</span><div><a href="/contact">客户服务</a><a href="/stores-china#retail-partnership">商务合作</a><a href="/details">经营者信息</a></div></div>
       <a className="footer-logo" href="/">púsy</a>
-      <div className="footer-links"><div><a href="/catalog/products">商品目录</a><a href="/about">关于我们</a><a href="/delivery">配送说明</a><a href="/return">退换货政策</a><a href="/payment">支付方式</a><a href="/stores-china">中国渠道</a></div><div><a href="/faq">常见问题</a><a href="/gift-card/questions">礼品卡问题</a><a href="/oferta">用户服务协议</a><a href="/privacy">隐私政策</a><a href="/cookie">Cookie 政策</a><a href="/details">经营者信息</a></div></div>
+      <div className="footer-links"><div><a href="/catalog/products">商品目录</a><a href="/blog">美丽灵感</a><a href="/about">关于我们</a><a href="/delivery">配送说明</a><a href="/return">退换货政策</a><a href="/payment">支付方式</a><a href="/stores-china">中国渠道</a></div><div><a href="/faq">常见问题</a><a href="/gift-card/questions">礼品卡问题</a><a href="/oferta">用户服务协议</a><a href="/privacy">隐私政策</a><a href="/cookie">Cookie 政策</a><a href="/details">经营者信息</a></div></div>
       <div className="footer-subscribe"><p>订阅邮件，立享 9 折</p>{subscribed ? <span>订阅成功，欢迎加入 PÚSY CLUB。</span> : <><form onSubmit={subscribe}><input aria-label="电子邮箱" type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="电子邮箱" required /><button type="submit">➤</button></form><small>提交即表示同意我们按照<a href="/privacy">隐私政策</a>发送品牌资讯，可随时退订。</small>{subscribeError && <small className="form-error">{subscribeError}</small>}</>}</div>
     </footer>;
 }

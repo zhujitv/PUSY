@@ -37,21 +37,28 @@ export async function releaseOrderReservation(orderId: string) {
 
 export async function commitPaidOrder(orderId: string) {
   const db = await getStoreDb();
-  const order = await db.prepare("SELECT member_id, resources_committed, resources_released FROM orders WHERE id = ? LIMIT 1").bind(orderId).first<{ member_id: number | null; resources_committed: number; resources_released: number }>();
+  const order = await db.prepare("SELECT resources_committed, resources_released FROM orders WHERE id = ? LIMIT 1").bind(orderId).first<{ resources_committed: number; resources_released: number }>();
   if (!order || order.resources_committed) return;
   if (order.resources_released) throw new Error("订单资源预留已过期，请人工核对已支付订单");
-  const statements = [
+  await db.batch([
     db.prepare("UPDATE orders SET resources_committed = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND resources_committed = 0 AND resources_released = 0").bind(orderId).requireChanges("订单资源无法确认"),
     db.prepare("UPDATE gift_cards SET status = 'active' WHERE order_id = ? AND status = 'pending'").bind(orderId),
-  ];
-  if (order.member_id) {
-    statements.push(db.prepare(`
-      UPDATE members SET
-        total_orders = (SELECT COUNT(*) FROM orders WHERE member_id = ? AND status NOT IN ('待付款','支付失败','已取消')),
-        total_spent = COALESCE((SELECT SUM(total) FROM orders WHERE member_id = ? AND status NOT IN ('待付款','支付失败','已取消')), 0),
-        updated_at = CURRENT_TIMESTAMP
-      WHERE id = ?
-    `).bind(order.member_id, order.member_id, order.member_id));
-  }
-  await db.batch(statements);
+  ]);
+}
+
+export async function refreshOrderMemberTotals(orderId: string) {
+  const db = await getStoreDb();
+  const order = await db.prepare("SELECT member_id FROM orders WHERE id = ? LIMIT 1").bind(orderId).first<{ member_id: number | null }>();
+  if (!order?.member_id) return;
+  await db.prepare(`
+    UPDATE members SET
+      total_orders = (SELECT COUNT(*) FROM orders o WHERE o.member_id = ? AND o.status NOT IN ('待付款','支付失败','已取消','已退款')),
+      total_spent = COALESCE((
+        SELECT SUM(GREATEST(o.total - COALESCE((SELECT ROUND(SUM(r.amount_fen) / 12.0)::INTEGER FROM refunds r WHERE r.order_id = o.id AND r.status = 'succeeded'), 0), 0))
+        FROM orders o
+        WHERE o.member_id = ? AND o.status NOT IN ('待付款','支付失败','已取消','已退款')
+      ), 0),
+      updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `).bind(order.member_id, order.member_id, order.member_id).run();
 }

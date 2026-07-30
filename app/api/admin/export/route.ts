@@ -25,5 +25,5 @@ export async function GET(request: Request) {
   const db = await getStoreDb();
   const rows = await db.prepare(config.query).all<Record<string, unknown>>();
   const csv = `\uFEFF${config.headers.map(cell).join(",")}\r\n${rows.results.map((row) => config.headers.map((header) => cell(row[header])).join(",")).join("\r\n")}`;
-  return new Response(csv, { headers: { "content-type": "text/csv; charset=utf-8", "content-disposition": `attachment; filename="PUSY-CN-${type}.csv"` } });
+  return new Response(csv, { headers: { "content-type": "text/csv; charset=utf-8", "content-disposition": `attachment; filename="PUSY-CN-${type}.csv"`, "cache-control": "private, no-store" } });
 }

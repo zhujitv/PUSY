@@ -42,7 +42,7 @@ function percentage(value: number, total: number) { return total > 0 ? Math.roun
 export function AnalyticsAdmin({ analytics }: { analytics: AnalyticsData }) {
   const statuses = analytics.orderStatuses.map((item) => ({ ...item, count: Number(item.count), revenue: Number(item.revenue) }));
   const totalOrders = statuses.reduce((sum, item) => sum + item.count, 0);
-  const successful = statuses.filter((item) => !["待付款", "支付失败", "已取消"].includes(item.status)).reduce((sum, item) => sum + item.count, 0);
+  const successful = statuses.filter((item) => !["待付款", "支付失败", "已取消", "已退款"].includes(item.status)).reduce((sum, item) => sum + item.count, 0);
   const maxStatus = Math.max(1, ...statuses.map((item) => item.count));
   const purchasingMembers = Number(analytics.customers.purchasing_members ?? 0);
   const repeatMembers = Number(analytics.customers.repeat_members ?? 0);

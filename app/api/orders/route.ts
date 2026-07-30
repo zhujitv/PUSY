@@ -9,7 +9,8 @@ import { allowRequest, hasTrustedOrigin, rateLimitResponse, safeServerError } fr
 type OrderPayload = { customer?: string; email?: string; phone?: string; address?: string; delivery?: string; payment?: string; couponCode?: string; items?: { slug: string; quantity: number; product?: { description?: string } }[] };
 const giftCode = () => `PUSY-${crypto.randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase().replace(/(.{4})/, "$1-")}`;
 const orderId = () => `PUSY-${new Date().toISOString().slice(0, 10).replaceAll("-", "")}-${crypto.randomUUID().replaceAll("-", "").slice(0, 10).toUpperCase()}`;
-function giftDetail(description = "", label: string) { const match = description.match(new RegExp(`${label}：([^；]+)`)); return match?.[1]?.trim() ?? ""; }
+function giftDetail(description = "", label: string) { const match = description.slice(0, 1000).match(new RegExp(`${label}：([^；]+)`)); return (match?.[1]?.trim() ?? "").slice(0, label === "祝福" ? 160 : 120); }
+function validGiftCardSlug(slug: string) { return /^gift-card-(1000|3000|5000|10000)(?:-|$)/.test(slug); }
 
 export async function POST(request: Request) {
   try {
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
         if (!stored.inventory_verified || stored.stock < quantity) return Response.json({ error: `${stored.name} 库存不足` }, { status: 409 });
         resolvedItems.push({ slug: line.slug, name: stored.name, price: stored.price, quantity, manageStock: true, description: line.product?.description ?? "" });
       } else {
-        if (!line.slug.startsWith("gift-card-")) return Response.json({ error: "商品不存在或已下架" }, { status: 404 });
+        if (!validGiftCardSlug(line.slug)) return Response.json({ error: "礼品卡面额无效或商品不存在" }, { status: 404 });
         const fallback = getProduct(line.slug);
         resolvedItems.push({ slug: line.slug, name: fallback.name, price: fallback.price, quantity, manageStock: false, description: line.product?.description ?? "" });
       }
@@ -47,9 +48,16 @@ export async function POST(request: Request) {
     const id = orderId();
     const paymentToken = `${crypto.randomUUID()}${crypto.randomUUID()}`;
     const reservationExpiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
-    await db.prepare("INSERT INTO members (name, email, phone) VALUES (?, ?, ?) ON CONFLICT(email) DO UPDATE SET name = excluded.name, phone = excluded.phone, updated_at = CURRENT_TIMESTAMP").bind(customer, memberEmail, phone).run();
-    const member = await db.prepare("SELECT id FROM members WHERE email = ?").bind(memberEmail).first<{ id: number }>();
-    const statements = [db.prepare("INSERT INTO orders (id, member_id, customer, email, phone, address, delivery, payment, total, discount, coupon_code, payment_token_hash, reservation_expires_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '待付款')").bind(id, member?.id ?? null, customer, email, phone, address, payload.delivery, payload.payment, verifiedTotal, coupon.discount, coupon.valid ? coupon.code : null, await sha256(paymentToken), reservationExpiresAt)];
+    let memberId = viewer?.memberId ?? null;
+    if (!memberId) {
+      const existingMember = await db.prepare("SELECT id FROM members WHERE email = ? LIMIT 1").bind(memberEmail).first<{ id: number }>();
+      if (existingMember) memberId = existingMember.id;
+      else {
+        await db.prepare("INSERT INTO members (name, email, phone) VALUES (?, ?, '') ON CONFLICT(email) DO NOTHING").bind(customer, memberEmail).run();
+        memberId = (await db.prepare("SELECT id FROM members WHERE email = ? LIMIT 1").bind(memberEmail).first<{ id: number }>())?.id ?? null;
+      }
+    }
+    const statements = [db.prepare("INSERT INTO orders (id, member_id, customer, email, phone, address, delivery, payment, total, discount, coupon_code, payment_token_hash, reservation_expires_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '待付款')").bind(id, memberId, customer, memberEmail, phone, address, payload.delivery, payload.payment, verifiedTotal, coupon.discount, coupon.valid ? coupon.code : null, await sha256(paymentToken), reservationExpiresAt)];
     if (coupon.valid && coupon.couponId) statements.push(db.prepare("UPDATE coupons SET used_count = used_count + 1 WHERE id = ? AND status = 'active' AND (usage_limit = 0 OR used_count < usage_limit)").bind(coupon.couponId).requireChanges("优惠码使用次数已达上限"));
     if (coupon.valid && coupon.giftCardCode) statements.push(db.prepare("UPDATE gift_cards SET balance = balance - ?, status = CASE WHEN balance - ? <= 0 THEN 'used' ELSE status END WHERE code = ? AND status = 'active' AND balance >= ?").bind(coupon.discount, coupon.discount, coupon.giftCardCode, coupon.discount).requireChanges("礼品卡余额不足或已被使用"));
     for (const line of resolvedItems) {

@@ -3,7 +3,7 @@ import { paymentAdapter } from "./index";
 import { sha256 } from "./crypto";
 import type { PaymentProviderName, PaymentStatus, ProviderConfig, RefundStatus } from "./types";
 import { notifyGiftCards, notifyOrderConfirmed, notifyRefundCompleted } from "../notifications/business";
-import { commitPaidOrder, releaseExpiredOrderReservations } from "../orders/reservations";
+import { commitPaidOrder, refreshOrderMemberTotals, releaseExpiredOrderReservations } from "../orders/reservations";
 
 type DbPayment = { id: string; order_id: string; provider: PaymentProviderName; merchant_trade_no: string; provider_transaction_id: string | null; amount_fen: number; status: PaymentStatus; checkout_url: string | null; code_url: string | null; attempts: number };
 type DbRefund = { id: string; payment_id: string; order_id: string; provider: PaymentProviderName; merchant_refund_no: string; provider_refund_id: string | null; amount_fen: number; reason: string; status: RefundStatus; attempts: number };
@@ -97,6 +97,7 @@ export async function applyPaymentStatus(payment: DbPayment, status: PaymentStat
     await commitPaidOrder(payment.order_id);
     await Promise.all([notifyOrderConfirmed(payment.order_id), notifyGiftCards(payment.order_id)]).catch(() => undefined);
   }
+  await refreshOrderMemberTotals(payment.order_id);
 }
 
 export async function processPaymentWebhook(provider: PaymentProviderName, event: { eventId: string; eventType: string; body: string; resource: Record<string, unknown> }) {
@@ -128,11 +129,20 @@ export async function createRefund(paymentIdValue: string, amountFen: number, re
   const db = await getStoreDb();
   const payment = await db.prepare("SELECT * FROM payments WHERE id = ?").bind(paymentIdValue).first<DbPayment>();
   if (!payment || !["paid", "partially_refunded"].includes(payment.status)) throw new Error("仅已支付订单可以退款");
-  const active = await db.prepare("SELECT COALESCE(SUM(amount_fen), 0) AS amount FROM refunds WHERE payment_id = ? AND status IN ('pending','processing','succeeded')").bind(payment.id).first<{ amount: number }>();
-  if (!Number.isInteger(amountFen) || amountFen <= 0 || amountFen > payment.amount_fen - (active?.amount ?? 0)) throw new Error("退款金额超过可退余额");
+  if (!Number.isInteger(amountFen) || amountFen <= 0) throw new Error("退款金额无效");
   const id = refundId();
   const merchantRefundNo = id.replaceAll("-", "").slice(0, 32);
-  await db.prepare("INSERT INTO refunds (id, payment_id, order_id, provider, merchant_refund_no, amount_fen, reason) VALUES (?, ?, ?, ?, ?, ?, ?)").bind(id, payment.id, payment.order_id, payment.provider, merchantRefundNo, amountFen, reason).run();
+  await db.batch([
+    db.prepare("SELECT pg_advisory_xact_lock(hashtext(?))").bind(payment.id),
+    db.prepare(`
+      INSERT INTO refunds (id, payment_id, order_id, provider, merchant_refund_no, amount_fen, reason)
+      SELECT ?, p.id, p.order_id, p.provider, ?, ?, ?
+      FROM payments p
+      WHERE p.id = ?
+        AND p.status IN ('paid','partially_refunded')
+        AND ? <= p.amount_fen - COALESCE((SELECT SUM(r.amount_fen) FROM refunds r WHERE r.payment_id = p.id AND r.status IN ('pending','processing','succeeded')), 0)
+    `).bind(id, merchantRefundNo, amountFen, reason, payment.id, amountFen).requireChanges("退款金额超过可退余额"),
+  ]);
   return retryRefund(id, origin);
 }
 

@@ -78,7 +78,8 @@ test("matches the catalog scope while keeping inventory independently managed", 
   assert.match(productActions, /inventoryVerified/);
   assert.doesNotMatch(catalogClient, /中国仓|原站库存|原站快照/);
   assert.match(orderApi, /inventory_verified/);
-  assert.match(orderApi, /商品不存在或已下架/);
+  assert.match(orderApi, /礼品卡面额无效或商品不存在/);
+  assert.match(orderApi, /已下架/);
   assert.match(sitemap, /collectionNames/);
   assert.match(mobileCss, /\.hero \{ height: 430px; min-height: 430px/);
 });
@@ -392,4 +393,38 @@ test("invoice workflow, upgraded support desk and business analytics are connect
   assert.match(migration, /CREATE TABLE IF NOT EXISTS invoices/);
   assert.match(migration, /CREATE TABLE IF NOT EXISTS support_canned_replies/);
   assert.match(migration, /ADD COLUMN IF NOT EXISTS due_at/);
+});
+
+test("audit guards member identity, financial transitions and concurrent refunds", async () => {
+  const [orders, accountApi, adminApi, adminUi, paymentApi, paymentService, reservations, returnsApi, exportApi, migration] = await Promise.all([
+    read("app/api/orders/route.ts"),
+    read("app/api/account/route.ts"),
+    read("app/api/admin/route.ts"),
+    read("app/admin/AdminClient.tsx"),
+    read("app/api/payments/route.ts"),
+    read("lib/payments/service.ts"),
+    read("lib/orders/reservations.ts"),
+    read("app/api/returns/route.ts"),
+    read("app/api/admin/export/route.ts"),
+    read("db/migrations/2026-07-30-z-audit-integrity.sql"),
+  ]);
+  assert.doesNotMatch(orders, /ON CONFLICT\(email\) DO UPDATE SET name = excluded\.name, phone = excluded\.phone/);
+  assert.match(orders, /viewer\?\.memberId/);
+  assert.match(orders, /INSERT INTO members \(name, email, phone\) VALUES \(\?, \?, ''\)/);
+  assert.match(orders, /validGiftCardSlug/);
+  assert.match(orders, /gift-card-\(1000\|3000\|5000\|10000\)/);
+  assert.doesNotMatch(accountApi, /SELECT \* FROM invoices WHERE member_id/);
+  assert.match(accountApi, /cache-control.*private, no-store/);
+  assert.match(accountApi, /该手机号码已关联其他会员账户/);
+  assert.match(adminApi, /已支付订单不能直接取消/);
+  assert.match(adminApi, /该状态由支付与退款系统自动维护/);
+  assert.ok(adminApi.includes(String.raw`/^(https:\/\/|\/(?!\/))/.test(fileUrl)`));
+  assert.match(adminUi, /orderStatusOptions/);
+  assert.match(paymentApi, /status: 503, headers: \{ "set-cookie": paymentCookie\(orderId, token\)/);
+  assert.match(paymentService, /pg_advisory_xact_lock/);
+  assert.match(paymentService, /requireChanges\("退款金额超过可退余额"\)/);
+  assert.match(reservations, /refreshOrderMemberTotals/);
+  assert.match(returnsApi, /该订单当前不符合售后申请条件/);
+  assert.match(exportApi, /private, no-store/);
+  assert.match(migration, /status NOT IN \('待付款', '支付失败', '已取消', '已退款'\)/);
 });

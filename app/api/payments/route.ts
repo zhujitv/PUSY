@@ -38,11 +38,15 @@ export async function POST(request: Request) {
     const token = String(payload.token ?? "") || cookieToken(request, orderId);
     if (!orderId || !["wechat", "alipay"].includes(provider)) return Response.json({ error: "请选择有效的订单和支付方式" }, { status: 400 });
     if (!await authorizePayment(orderId, token)) return Response.json({ error: "支付访问凭证无效或已丢失" }, { status: 403 });
-    const payment = await createPayment(orderId, provider, new URL(request.url).origin);
-    return Response.json({ paymentId: payment?.id, orderId: payment?.order_id, status: payment?.status, redirectUrl: payment?.checkout_url, codeUrl: payment?.code_url }, { status: 201, headers: { "set-cookie": paymentCookie(orderId, token), "cache-control": "no-store" } });
+    try {
+      const payment = await createPayment(orderId, provider, new URL(request.url).origin);
+      return Response.json({ paymentId: payment?.id, orderId: payment?.order_id, status: payment?.status, redirectUrl: payment?.checkout_url, codeUrl: payment?.code_url }, { status: 201, headers: { "set-cookie": paymentCookie(orderId, token), "cache-control": "no-store" } });
+    } catch (error) {
+      const message = error instanceof Error && /支付时限|尚未启用|未配置完整/.test(error.message) ? error.message : "支付发起失败，请稍后再试";
+      return Response.json({ error: message }, { status: 503, headers: { "set-cookie": paymentCookie(orderId, token), "cache-control": "no-store" } });
+    }
   } catch (error) {
-    const message = error instanceof Error && /支付时限|尚未启用|未配置完整/.test(error.message) ? error.message : "支付发起失败，请稍后再试";
-    return safeServerError(message, 503);
+    return safeServerError(error instanceof Error && /支付时限/.test(error.message) ? error.message : "支付发起失败，请稍后再试", 503);
   }
 }
 

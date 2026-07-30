@@ -25,7 +25,8 @@ const supportOperations = ["mark-read", "mark-unread", "star", "unstar", "archiv
 const partnershipStatuses = ["待联系", "洽谈中", "已合作", "已拒绝", "已关闭"];
 const yuanToStored = (value: unknown) => Math.round(Number(value) / 0.12);
 const validImagePath = (value: string) => /^\/(assets|products)\/[A-Za-z0-9_./-]+$/.test(value) || /^https:\/\/avatars\.mds\.yandex\.net\/get-yastore\//.test(value);
-const normalizeCategorySlug = (value: unknown) => String(value ?? "").trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
+const normalizeManagedSlug = (value: unknown) => String(value ?? "").trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
+const createManagedSlug = (value: unknown, prefix: "category" | "product") => normalizeManagedSlug(value) || `${prefix}-${crypto.randomUUID().replaceAll("-", "").slice(0, 12)}`;
 
 export async function GET(request: Request) {
   try {
@@ -181,16 +182,17 @@ export async function POST(request: Request) {
     } else if (action === "create-product-category" || action === "update-product-category") {
       const id = Number(payload.id);
       const name = String(payload.name ?? "").trim().slice(0, 60);
-      const slug = normalizeCategorySlug(payload.slug);
       const description = String(payload.description ?? "").trim().slice(0, 500);
       const sortOrder = Math.min(9999, Math.max(0, Math.round(Number(payload.sortOrder ?? 0))));
       const status = String(payload.status ?? "active");
       const parentId = payload.parentId ? Number(payload.parentId) : null;
-      if (!name || !slug || !Number.isFinite(sortOrder) || !["active", "disabled"].includes(status)) return Response.json({ error: "请完整填写分类名称、链接标识和状态" }, { status: 400 });
+      if (!name || !Number.isFinite(sortOrder) || !["active", "disabled"].includes(status)) return Response.json({ error: "请完整填写分类名称和状态" }, { status: 400 });
       if (action === "update-product-category" && (!Number.isInteger(id) || id < 1)) return Response.json({ error: "分类编号无效" }, { status: 400 });
       if (parentId && (!Number.isInteger(parentId) || parentId < 1 || parentId === id)) return Response.json({ error: "上级分类无效" }, { status: 400 });
-      const duplicate = await db.prepare("SELECT id FROM product_categories WHERE (name = ? OR slug = ?) AND id <> ? LIMIT 1").bind(name, slug, action === "update-product-category" ? id : 0).first();
-      if (duplicate) return Response.json({ error: "分类名称或链接标识已存在" }, { status: 409 });
+      const previous = action === "update-product-category" ? await db.prepare("SELECT name, slug FROM product_categories WHERE id = ? LIMIT 1").bind(id).first<{ name: string; slug: string }>() : null;
+      if (action === "update-product-category" && !previous) return Response.json({ error: "分类不存在" }, { status: 404 });
+      const duplicate = await db.prepare("SELECT id FROM product_categories WHERE name = ? AND id <> ? LIMIT 1").bind(name, action === "update-product-category" ? id : 0).first();
+      if (duplicate) return Response.json({ error: "分类名称已存在" }, { status: 409 });
       if (parentId) {
         const parent = await db.prepare("SELECT id FROM product_categories WHERE id = ? LIMIT 1").bind(parentId).first();
         if (!parent) return Response.json({ error: "上级分类不存在" }, { status: 400 });
@@ -200,14 +202,13 @@ export async function POST(request: Request) {
         }
       }
       if (action === "create-product-category") {
+        const slug = createManagedSlug(name, "category");
         const created = await db.prepare("INSERT INTO product_categories (name, slug, parent_id, description, sort_order, status) VALUES (?, ?, ?, ?, ?, ?) RETURNING id").bind(name, slug, parentId, description, sortOrder, status).first<{ id: number }>();
         payload.id = created?.id ?? "";
       } else {
-        const previous = await db.prepare("SELECT name FROM product_categories WHERE id = ? LIMIT 1").bind(id).first<{ name: string }>();
-        if (!previous) return Response.json({ error: "分类不存在" }, { status: 404 });
         await db.batch([
-          db.prepare("UPDATE product_categories SET name = ?, slug = ?, parent_id = ?, description = ?, sort_order = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(name, slug, parentId, description, sortOrder, status, id).requireChanges("分类不存在"),
-          db.prepare("UPDATE products SET category = ?, category_id = ?, updated_at = CURRENT_TIMESTAMP WHERE category_id = ? OR (category_id IS NULL AND category = ?)").bind(name, id, id, previous.name),
+          db.prepare("UPDATE product_categories SET name = ?, parent_id = ?, description = ?, sort_order = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(name, parentId, description, sortOrder, status, id).requireChanges("分类不存在"),
+          db.prepare("UPDATE products SET category = ?, category_id = ?, updated_at = CURRENT_TIMESTAMP WHERE category_id = ? OR (category_id IS NULL AND category = ?)").bind(name, id, id, previous?.name ?? name),
         ]);
       }
     } else if (action === "delete-product-category") {
@@ -224,8 +225,8 @@ export async function POST(request: Request) {
       const categoryRows = await db.prepare("SELECT id, name FROM product_categories WHERE status = 'active'").all<{ id: number; name: string }>();
       const categoryIds = new Map(categoryRows.results.map((category) => [category.name, category.id]));
       for (const item of items) {
-        const slug = String(item.slug ?? "").trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-");
         const name = String(item.name ?? "").trim();
+        const slug = createManagedSlug(item.slug || `${String(item.sku ?? "")} ${name}`, "product");
         const category = String(item.category ?? "").trim();
         const categoryId = categoryIds.get(category);
         const image = String(item.image ?? "").trim();
@@ -239,10 +240,14 @@ export async function POST(request: Request) {
       return Response.json({ ok: true, imported: statements.length });
     } else if (action === "create-product" || action === "update-product") {
       const name = String(payload.name ?? "").trim();
-      const slug = String(payload.slug ?? "").trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-");
       const categoryId = Number(payload.categoryId);
       const categoryRow = Number.isInteger(categoryId) && categoryId > 0 ? await db.prepare("SELECT id, name, status FROM product_categories WHERE id = ? LIMIT 1").bind(categoryId).first<{ id: number; name: string; status: string }>() : null;
-      const currentProduct = action === "update-product" ? await db.prepare("SELECT category_id FROM products WHERE id = ? LIMIT 1").bind(Number(payload.id)).first<{ category_id: number | null }>() : null;
+      const currentProduct = action === "update-product" ? await db.prepare("SELECT slug, name, price, stock, category_id FROM products WHERE id = ? LIMIT 1").bind(Number(payload.id)).first<{ slug: string; name: string; price: number; stock: number; category_id: number | null }>() : null;
+      let slug = currentProduct?.slug ?? createManagedSlug(`${String(payload.sku ?? "")} ${name}`, "product");
+      if (action === "create-product") {
+        const slugExists = await db.prepare("SELECT id FROM products WHERE slug = ? LIMIT 1").bind(slug).first();
+        if (slugExists) slug = `${slug.slice(0, 72)}-${crypto.randomUUID().replaceAll("-", "").slice(0, 7)}`;
+      }
       const category = categoryRow?.name ?? "";
       const image = String(payload.image ?? "").trim();
       const price = yuanToStored(payload.price);
@@ -252,9 +257,8 @@ export async function POST(request: Request) {
       const values = [slug, name, category, categoryId, String(payload.description ?? ""), image, String(payload.imageAlt ?? "") || null, String(payload.badge ?? "") || null, price, payload.oldPrice ? yuanToStored(payload.oldPrice) : null, stock, Math.max(0, Math.round(Number(payload.lowStockThreshold ?? 10))), payload.inventoryVerified ? 1 : 0, String(payload.sku ?? "") || null, String(payload.volume ?? "") || null, String(payload.ingredients ?? "") || null, String(payload.usage ?? "") || null, String(payload.status ?? "active")];
       if (action === "create-product") await db.prepare("INSERT INTO products (slug, name, category, category_id, description, image, image_alt, badge, price, old_price, stock, low_stock_threshold, inventory_verified, sku, volume, ingredients, usage, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").bind(...values).run();
       else {
-        const previous = await db.prepare("SELECT slug, name, price, stock FROM products WHERE id = ? LIMIT 1").bind(Number(payload.id)).first<{ slug: string; name: string; price: number; stock: number }>();
         await db.prepare("UPDATE products SET slug = ?, name = ?, category = ?, category_id = ?, description = ?, image = ?, image_alt = ?, badge = ?, price = ?, old_price = ?, stock = ?, low_stock_threshold = ?, inventory_verified = ?, sku = ?, volume = ?, ingredients = ?, usage = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(...values, Number(payload.id)).run();
-        if (previous) await notifyProductChange({ slug, name, oldPrice: previous.price, newPrice: price, oldStock: previous.stock, newStock: stock, changeToken: crypto.randomUUID() }).catch(() => undefined);
+        if (currentProduct) await notifyProductChange({ slug, name, oldPrice: currentProduct.price, newPrice: price, oldStock: currentProduct.stock, newStock: stock, changeToken: crypto.randomUUID() }).catch(() => undefined);
       }
     } else if (action === "archive-product") {
       await db.prepare("UPDATE products SET status = 'archived', updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(Number(payload.id)).run();
@@ -542,7 +546,7 @@ export async function POST(request: Request) {
     }
     const conflict = error instanceof Error && /unique/i.test(error.message);
     console.error("[api/admin] action failed", { message: error instanceof Error ? error.message : String(error), code: typeof error === "object" && error && "code" in error ? String(error.code) : undefined });
-    return safeServerError(conflict ? "链接标识或邮箱已经存在" : "后台操作失败，请稍后再试", conflict ? 409 : 500);
+    return safeServerError(conflict ? "相同名称、商品编号或邮箱的数据已经存在" : "后台操作失败，请稍后再试", conflict ? 409 : 500);
   } finally {
     if (auditId && !auditCompleted) await completeAdminAudit(auditId, "failed", "请求校验未通过或操作未完成").catch(() => undefined);
   }

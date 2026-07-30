@@ -1,17 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { formatCnyFromRub } from "../data/products";
+import { fallbackNavigationCategories, storefrontNavItems, type NavigationCategory } from "../data/navigation";
 import { useStore } from "./StoreProvider";
 import { HeaderIcon } from "./HeaderIcons";
 
-const nav = [
-  ["神秘礼盒", "/catalog/sekretnye-boksy"], ["全部商品", "/catalog/products"], ["套装", "/catalog/nabory"], ["新品", "/collections/novinki"], ["畅销", "/catalog/hity"], ["眉妆", "/catalog/brows"], ["彩妆", "/catalog/makiyazh"], ["护肤", "/catalog/uhod"], ["身体护理", "/catalog/uhod-1"], ["头发护理", "/catalog/hair"], ["家居", "/catalog/dlya-doma"], ["配件", "/catalog/accessories"], ["礼品卡", "/gift-card"],
-];
-
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const [nav, setNav] = useState(() => storefrontNavItems(fallbackNavigationCategories));
   const { cartCount, setCartOpen, setSearchOpen } = useStore();
+  useEffect(() => { fetch("/api/categories").then((response) => response.ok ? response.json() : null).then((body) => { if (Array.isArray(body?.categories)) setNav(storefrontNavItems(body.categories as NavigationCategory[])); }).catch(() => {}); }, []);
   return <>
     <div className="shipping-bar">订单满 {formatCnyFromRub(5000)} 免费配送</div>
     <header className="site-header subpage-header">

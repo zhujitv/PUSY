@@ -5,6 +5,7 @@ import Image from "next/image";
 import { formatCnyFromRub, products } from "./data/products";
 import { useStore } from "./components/StoreProvider";
 import { HeaderIcon } from "./components/HeaderIcons";
+import { fallbackNavigationCategories, storefrontNavItems, type NavigationCategory } from "./data/navigation";
 
 const featuredProducts = products.slice(1, 9);
 const defaultHomeContent = { announcement: `订单满 ${formatCnyFromRub(5000)} 免费配送`, show_announcement: "1", hero_eyebrow: "púsy × Ü", hero_title: "礼物飞进\n你的订单", hero_subtitle: "猜猜你会收到哪一份？", hero_cta_label: "立即探索", hero_cta_url: "/catalog/products", hero2_eyebrow: "PÚSY 神秘礼盒", hero2_title: "装下这个夏天\n需要的一切", hero2_cta_label: "了解更多", hero2_cta_url: "/catalog/sekretnye-boksy", show_featured: "1", featured_title: "新品", featured_subtitle: "从当季新品开始，找到你的下一件日常心动。", featured_cta_label: "查看全部", show_categories: "1", categories_title: "按心情探索", category_1_label: "彩妆", category_1_url: "/catalog/makiyazh", category_2_label: "护肤", category_2_url: "/catalog/uhod", category_3_label: "家居", category_3_url: "/catalog/dlya-doma", show_reels: "1", reels_title: "你与 PÚSY", reels_subtitle: "真实灵感、使用方式与热门单品。", show_newsletter: "1", newsletter_title: "订阅邮件，立享 9 折", newsletter_success: "订阅成功，欢迎加入 PÚSY CLUB。" };
@@ -18,10 +19,6 @@ const reels = [
   { player: "vplvtyznzou7usg76z5w", slug: "kremovye-rumyana-pusy-flower-25-gr-9-100359", title: "FLOWER 奶油腮红" },
 ].map((reel) => ({ ...reel, product: products.find((product) => product.slug === reel.slug) }));
 
-const navItems = [
-  ["神秘礼盒", "/catalog/sekretnye-boksy"], ["全部商品", "/catalog/products"], ["套装", "/catalog/nabory"], ["新品", "/collections/novinki"], ["畅销", "/catalog/hity"], ["眉妆", "/catalog/brows"], ["彩妆", "/catalog/makiyazh"], ["护肤", "/catalog/uhod"], ["身体护理", "/catalog/uhod-1"], ["头发护理", "/catalog/hair"], ["家居", "/catalog/dlya-doma"], ["配件", "/catalog/accessories"], ["礼品卡", "/gift-card"],
-];
-
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -30,6 +27,7 @@ export default function Home() {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
   const [homeContent, setHomeContent] = useState(defaultHomeContent);
+  const [navItems, setNavItems] = useState(() => storefrontNavItems(fallbackNavigationCategories));
   const heroTouchStart = useRef<number | null>(null);
   const { cartCount, addToCart, setCartOpen, setSearchOpen } = useStore();
 
@@ -42,6 +40,10 @@ export default function Home() {
 
   useEffect(() => {
     fetch("/api/content").then((response) => response.ok ? response.json() : null).then((body) => { if (body?.content) setHomeContent((current) => ({ ...current, ...body.content })); }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/categories").then((response) => response.ok ? response.json() : null).then((body) => { if (Array.isArray(body?.categories)) setNavItems(storefrontNavItems(body.categories as NavigationCategory[])); }).catch(() => {});
   }, []);
 
   useEffect(() => {

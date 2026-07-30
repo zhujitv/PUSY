@@ -1,4 +1,5 @@
 import translations from "./catalog-translations.zh-CN.json" with { type: "json" };
+import { localizeProductIngredients } from "./ingredient-translations.mjs";
 
 const allowedProductFields = ["name", "category", "description", "usage", "volume"];
 
@@ -12,6 +13,7 @@ export function applyProductTranslationOverrides(product) {
   curated.description = cleanCatalogCopy(curated.description);
   curated.usage = cleanCatalogCopy(curated.usage) || undefined;
   curated.volume = normalizeVolume(curated.volume);
+  curated.ingredients = localizeProductIngredients(curated).ingredients;
   return curated;
 }
 

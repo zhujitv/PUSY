@@ -1,0 +1,13 @@
+<view class="page-shell benefits-page">
+  <view class="benefits-hero"><text class="eyebrow">PÚSY CLUB</text><text>会员权益</text><text>每次消费都会沉淀为积分、等级与更适合你的专属权益。</text><text wx:if="{{preview}}" class="preview-badge">开发预览 · 不产生真实积分或优惠券</text></view>
+  <view wx:if="{{loggedIn}}">
+    <view class="tier-card"><view><text>{{tier.name}}</text><text>{{member.pointsBalance || 0}} 可用积分</text></view><text>{{tier.benefit}}</text><view class="progress-track"><view style="width: {{tier.progress}}%"></view></view><text wx:if="{{tier.remaining}}">再获得 {{tier.remaining}} 积分升级至 {{tier.nextName}}</text><text wx:else>你已达到当前最高等级</text></view>
+
+    <view class="benefit-section"><view class="section-heading"><text>我的优惠券</text><text>{{coupons.length}}张</text></view><view wx:if="{{coupons.length}}" class="coupon-list"><view wx:for="{{coupons}}" wx:key="id" class="coupon-card"><view><text>{{item.benefit}}</text><text>{{item.code}}</text></view><view><text>{{item.condition}}</text><text>{{item.endsText}}</text></view></view></view><view wx:else class="small-empty">暂无可用优惠券，专属优惠发放后会显示在这里。</view></view>
+
+    <view class="benefit-section"><view class="section-heading"><text>积分明细</text><text>{{pointsLedger.length}}条</text></view><view wx:if="{{pointsLedger.length}}" class="ledger-list"><view wx:for="{{pointsLedger}}" wx:key="id"><view><text>{{item.reason}}</text><text>{{item.created_at}}</text></view><text class="{{item.points > 0 ? 'positive' : ''}}">{{item.points > 0 ? '+' : ''}}{{item.points}}</text></view></view><view wx:else class="small-empty">完成正式订单后，积分记录会显示在这里。</view></view>
+
+    <view class="benefit-section"><view class="section-heading"><text>商品提醒</text><text>{{productAlerts.length}}项</text></view><view wx:if="{{productAlerts.length}}" class="alert-list"><view wx:for="{{productAlerts}}" wx:key="key" class="alert-card"><image src="{{item.image}}" mode="aspectFill" data-id="{{item.productId}}" bindtap="openProduct" /><view data-id="{{item.productId}}" bindtap="openProduct"><text>{{item.productName}}</text><text>{{item.alertType === 'price_drop' ? '降价通知' : '补货通知'}}</text></view><button data-index="{{index}}" catchtap="removeAlert">关闭</button></view></view><view wx:else class="small-empty">在商品详情中开启补货或降价提醒。</view></view>
+  </view>
+  <view wx:elif="{{!loading}}" class="empty-state"><text class="empty-title">请先登录会员</text><text class="empty-copy">登录后查看等级、积分、优惠券和商品提醒。</text><button class="primary-button" bindtap="openProfile">返回登录</button></view>
+</view>

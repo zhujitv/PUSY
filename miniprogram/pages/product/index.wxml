@@ -13,10 +13,13 @@
     <text class="product-name">{{product.name}}</text>
     <text class="product-subtitle">{{product.subtitle}}</text>
     <text class="product-price">{{product.priceText}}</text>
+    <button class="favorite-action {{favorite ? 'active' : ''}}" bindtap="toggleFavorite">{{favorite ? '♥ 已收藏' : '♡ 收藏商品'}}</button>
+    <view class="alert-actions"><button class="{{alerts.restock ? 'active' : ''}}" data-type="restock" bindtap="toggleAlert">{{alerts.restock ? '✓ 已开启补货通知' : '补货时通知我'}}</button><button class="{{alerts.priceDrop ? 'active' : ''}}" data-type="price_drop" bindtap="toggleAlert">{{alerts.priceDrop ? '✓ 已开启降价通知' : '降价时通知我'}}</button></view>
 
     <view class="stock-note">
       <view class="stock-dot"></view>
-      <text>开发预览商品 · 正式库存将由统一接口实时返回</text>
+      <text wx:if="{{product.inventoryVerified}}">{{product.purchasable ? '有货 · ' + product.stock + '件' : '暂时缺货'}} · {{dataStatus}}</text>
+      <text wx:else>库存待核验 · {{dataStatus}}</text>
     </view>
 
     <view class="highlight-row">
@@ -60,8 +63,8 @@
   </view>
 
   <view class="product-actions">
-    <button class="bag-action" bindtap="add">加入购物袋</button>
-    <button class="buy-action" bindtap="buyNow">立即购买</button>
+    <button class="bag-action" disabled="{{product.purchasable === false}}" bindtap="add">{{product.purchasable === false ? '暂时缺货' : '加入购物袋'}}</button>
+    <button class="buy-action" disabled="{{product.purchasable === false}}" bindtap="buyNow">立即购买</button>
   </view>
   <view class="safe-bottom"></view>
 </view>

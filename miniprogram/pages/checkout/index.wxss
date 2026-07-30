@@ -1,0 +1,28 @@
+.checkout-page { padding-bottom: 40rpx; background: #fff; }
+.checkout-head { padding: 62rpx 30rpx 44rpx; border-bottom: 1rpx solid #ccc; background: #fff; }
+.checkout-head > text:nth-child(2) { display: block; margin-top: 14rpx; font-size: 62rpx; letter-spacing: -4rpx; }
+.preview-badge { display: inline-flex; margin-top: 22rpx; padding: 10rpx 16rpx; background: #fff0f7; color: #a52c64; font-size: 21rpx; }
+.checkout-section { margin: 0 30rpx; padding: 36rpx 0; border-bottom: 1rpx solid #ccc; background: #fff; }
+.address-card > view, .section-title-row, .totals > view { display: flex; justify-content: space-between; gap: 20rpx; }
+.section-label { font-weight: 600; }
+.section-action, .address-detail, .empty-address { color: #777; font-size: 22rpx; }
+.address-name, .address-detail, .empty-address { display: block; margin-top: 18rpx; line-height: 1.5; }
+.delivery-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12rpx; margin-top: 24rpx; }
+.delivery-list button { min-height: 74rpx; padding: 0 10rpx; border: 1rpx solid #bbb; background: #fff; font-size: 22rpx; }
+.delivery-list button.active { border-color: #111; background: #111; color: #fff; }
+.coupon-card .section-title-row > text:last-child { color: #888; font-size: 21rpx; }
+.coupon-picker { display: flex; justify-content: space-between; gap: 20rpx; margin-top: 24rpx; padding: 24rpx 0; border-top: 1rpx solid #eee; font-size: 25rpx; }
+.coupon-picker > text { flex: none; color: #a52c64; }
+.checkout-items { margin-top: 20rpx; }
+.checkout-items > view { display: grid; grid-template-columns: 100rpx 1fr auto; gap: 18rpx; align-items: center; padding: 18rpx 0; border-top: 1rpx solid #eee; }
+.checkout-items image { width: 100rpx; height: 120rpx; background: #eee; }
+.checkout-items view text { display: block; }
+.checkout-items view text:last-child { margin-top: 8rpx; color: #777; font-size: 21rpx; }
+.totals > view { margin-bottom: 18rpx; color: #666; }
+.totals .discount-value { color: #c62f72; }
+.totals .total { margin: 26rpx 0 0; padding-top: 24rpx; border-top: 1rpx solid #ddd; color: #111; font-size: 32rpx; font-weight: 600; }
+.payment-note { margin: 24rpx 30rpx 0; padding: 30rpx; border: 1rpx solid #eb2f83; background: #fff; }
+.payment-note text { display: block; }
+.payment-note text:nth-child(2) { margin-top: 10rpx; font-size: 32rpx; }
+.payment-note text:last-child { margin-top: 14rpx; color: #87556b; font-size: 21rpx; line-height: 1.55; }
+.submit-order { margin: 24rpx 30rpx 0; }

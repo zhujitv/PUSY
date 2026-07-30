@@ -1,0 +1,10 @@
+.address-page { min-height: 100vh; padding-bottom: 60rpx; background: #fff; }
+.form-head { padding: 62rpx 30rpx 46rpx; border-bottom: 1rpx solid #ccc; background: #fff; }
+.form-head > text:nth-child(2) { display: block; margin-top: 14rpx; font-size: 64rpx; letter-spacing: -4rpx; }
+.form-head > text:last-child { display: block; margin-top: 20rpx; color: #777; font-size: 23rpx; line-height: 1.6; }
+.address-form { margin: 28rpx; padding: 32rpx; border: 1rpx solid #aaa; background: #fff; }
+.address-form label { display: block; margin-bottom: 30rpx; }
+.address-form label > text { display: block; margin-bottom: 12rpx; color: #666; font-size: 22rpx; }
+.address-form input, .picker-value, .address-form textarea { width: 100%; min-height: 82rpx; padding: 22rpx 0; border-bottom: 1rpx solid #bbb; font-size: 28rpx; }
+.address-form textarea { height: 140rpx; }
+.address-form .primary-button { margin-top: 20rpx; }

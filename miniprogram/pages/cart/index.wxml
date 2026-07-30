@@ -33,7 +33,7 @@
 
     <view class="cart-summary">
       <view><text>商品小计</text><text>{{cart.totalText}}</text></view>
-      <view><text>配送费</text><text>{{cart.totalFen >= 59900 ? '免费' : '结算时计算'}}</text></view>
+      <view><text>配送费</text><text>{{cart.totalFen >= 60000 ? '免费' : '结算时计算'}}</text></view>
       <view class="cart-total"><text>合计</text><text>{{cart.totalText}}</text></view>
       <text class="cart-tax">最终金额将在服务端校验商品、库存、优惠和配送方式后确定。</text>
       <button class="primary-button" bindtap="checkout">去结算</button>

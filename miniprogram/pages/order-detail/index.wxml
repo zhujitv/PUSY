@@ -1,0 +1,18 @@
+<view class="page-shell detail-page">
+  <block wx:if="{{order}}">
+    <view class="detail-head"><text class="eyebrow">ORDER DETAIL</text><text class="detail-status">{{order.status}}</text><text class="detail-id">{{order.id}}</text><text>{{order.createdAt}}</text><view wx:if="{{paymentCountdown}}" class="payment-countdown"><text>{{order.preview ? '预览倒计时' : '剩余支付时间'}}</text><text>{{paymentCountdown}}</text><text>{{order.preview ? '不会锁定真实库存' : '超时后库存与优惠券将自动释放'}}</text></view></view>
+
+    <view class="detail-card"><view class="card-title"><text>商品明细</text><text>{{order.items.length}} 种</text></view><view class="item-row" wx:for="{{order.items}}" wx:key="productId"><image src="{{item.image || item.product.image}}" mode="aspectFill" /><view><text>{{item.name || item.product.name}}</text><text>{{item.unitPriceText || item.product.priceText}} × {{item.quantity}}</text></view><text>{{item.subtotalText}}</text></view></view>
+
+    <view class="detail-card"><text class="card-heading">收货与支付</text><view class="info-row"><text>收货人</text><text>{{order.customer}}</text></view><view class="info-row"><text>配送方式</text><text>{{order.delivery}}</text></view><view class="info-row"><text>收货地址</text><text>{{order.address}}</text></view><view class="info-row"><text>支付方式</text><text>{{order.payment || '待接入微信支付'}}</text></view><view wx:if="{{order.couponCode}}" class="info-row"><text>优惠券</text><text>{{order.couponCode}} · -{{order.discountText}}</text></view><view class="info-row total-row"><text>订单金额</text><text>{{order.totalText}}</text></view></view>
+
+    <view class="detail-card logistics-card"><view class="card-title"><text>物流进度</text><button class="refresh-button" loading="{{refreshing}}" disabled="{{refreshing}}" bindtap="refreshDetail">刷新</button></view><block wx:if="{{order.shipment}}"><view class="shipment-summary"><view><text>{{order.shipment.carrier_name}}</text><text>{{order.shipment.tracking_number}}</text></view><button bindtap="copyTracking">复制单号</button></view><view class="timeline" wx:if="{{order.shipmentEvents.length}}"><view class="timeline-row" wx:for="{{order.shipmentEvents}}" wx:key="id"><view class="timeline-dot"></view><view><text>{{item.status}} · {{item.description}}</text><text>{{item.location}} {{item.timeText}}</text></view></view></view><text wx:else class="empty-copy">物流轨迹同步后会显示在这里。</text></block><text wx:else class="empty-copy">{{order.preview ? '这是本地预览订单，不会生成真实物流。' : '商家发货后，可在这里查看物流公司、运单号和运输轨迹。'}}</text></view>
+
+    <view class="detail-card" wx:if="{{order.returns.length}}"><text class="card-heading">售后记录</text><view class="return-row" wx:for="{{order.returns}}" wx:key="id"><text>{{item.status}}</text><text>{{item.reason}}</text></view></view>
+    <view class="detail-card" wx:if="{{order.refunds.length}}"><text class="card-heading">退款进度</text><view class="refund-row" wx:for="{{order.refunds}}" wx:key="id"><view><text>{{item.statusText}}</text><text>{{item.timeText}}</text></view><text>{{item.amountText}}</text></view></view>
+    <view wx:if="{{order.cancelReason}}" class="cancel-note">取消说明：{{order.cancelReason}}</view>
+    <button wx:if="{{order.canAfterSale}}" class="primary-button after-sale-button" bindtap="openAfterSale">申请售后</button>
+    <button wx:if="{{order.canCancel}}" class="secondary-button cancel-button" loading="{{cancelling}}" disabled="{{cancelling}}" bindtap="cancelOrder">取消订单</button>
+  </block>
+  <view wx:elif="{{!loading}}" class="empty-state"><text class="empty-title">没有找到这笔订单</text><button class="primary-button" bindtap="browse">返回商品目录</button></view>
+</view>

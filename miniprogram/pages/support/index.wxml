@@ -1,0 +1,15 @@
+<view class="page-shell service-page">
+  <view class="service-head"><text class="eyebrow">CUSTOMER CARE</text><text>客户服务</text><text>直接提交表单，无需打开邮件客户端；正式模式会进入 PÚSY 客服收件箱。</text><text wx:if="{{previewMode}}" class="preview-badge">开发预览 · 不会写入后台</text></view>
+  <view class="service-form">
+    <label><text>姓名</text><input value="{{form.name}}" data-field="name" bindinput="updateField" maxlength="60" placeholder="怎么称呼你" /></label>
+    <label><text>手机号码</text><input type="number" value="{{form.phone}}" data-field="phone" bindinput="updateField" maxlength="11" placeholder="中国大陆手机号" /></label>
+    <label><text>问题类型</text><picker range="{{categories}}" value="{{categoryIndex}}" bindchange="chooseCategory"><view class="picker-value">{{form.category}} →</view></picker></label>
+    <label><text>希望联系方式</text><picker range="{{contactPreferences}}" value="{{contactIndex}}" bindchange="chooseContact"><view class="picker-value">{{form.contactPreference}} →</view></picker></label>
+    <label wx:if="{{form.contactPreference === '微信'}}"><text>微信号</text><input value="{{form.wechat}}" data-field="wechat" bindinput="updateField" maxlength="60" placeholder="用于客服联系" /></label>
+    <label wx:if="{{form.contactPreference === '电子邮箱'}}"><text>电子邮箱</text><input value="{{form.email}}" data-field="email" bindinput="updateField" maxlength="160" placeholder="name@example.com" /></label>
+    <label><text>关联订单号（选填）</text><input value="{{form.orderId}}" data-field="orderId" bindinput="updateField" maxlength="64" placeholder="PUSY-… 或 PREVIEW-…" /></label>
+    <label><text>问题说明</text><textarea value="{{form.message}}" data-field="message" bindinput="updateField" maxlength="1000" placeholder="请至少填写 10 个字，说明遇到的问题和希望的处理方式" /></label>
+    <button class="primary-button" loading="{{busy}}" disabled="{{busy}}" bindtap="submit">提交客服工单</button>
+  </view>
+  <view wx:if="{{tickets.length}}" class="ticket-section"><text class="section-title">本地预览记录</text><view wx:for="{{tickets}}" wx:key="id" class="ticket-card"><text>{{item.category}} · {{item.status}}</text><text>{{item.id}}</text><text>{{item.message}}</text></view></view>
+</view>

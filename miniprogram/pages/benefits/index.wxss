@@ -1,0 +1,29 @@
+.benefits-page { min-height: 100vh; padding-bottom: 60rpx; background: #fff; }
+.benefits-hero { padding: 62rpx 30rpx 46rpx; border-bottom: 1rpx solid #ccc; background: #fff; color: #111; }
+.benefits-hero > text:nth-child(2) { display: block; margin-top: 14rpx; font-size: 62rpx; letter-spacing: -4rpx; }
+.benefits-hero > text:nth-child(3) { display: block; margin-top: 18rpx; color: #777; font-size: 23rpx; line-height: 1.6; }
+.preview-badge { display: inline-flex; margin-top: 22rpx; padding: 10rpx 16rpx; background: #fff0f7; color: #b62567; font-size: 21rpx; }
+.tier-card { margin: 24rpx 28rpx; padding: 36rpx; background: #eb2f83; color: #fff; }
+.tier-card > view:first-child { display: flex; justify-content: space-between; align-items: flex-end; }
+.tier-card > view:first-child text:first-child { font-size: 38rpx; font-weight: 600; }
+.tier-card > text { display: block; margin-top: 18rpx; font-size: 22rpx; line-height: 1.5; }
+.progress-track { height: 10rpx; margin-top: 28rpx; background: rgba(255,255,255,.35); }
+.progress-track view { height: 100%; background: #fff; }
+.benefit-section { margin: 0 28rpx; padding: 38rpx 0; border-bottom: 1rpx solid #ccc; background: #fff; }
+.section-heading { display: flex; justify-content: space-between; margin-bottom: 24rpx; }
+.section-heading text:first-child { font-size: 32rpx; font-weight: 600; }
+.section-heading text:last-child { color: #888; font-size: 21rpx; }
+.coupon-card { margin-bottom: 14rpx; padding: 24rpx; border: 1rpx solid #eb2f83; border-left-width: 8rpx; background: #fff; }
+.coupon-card > view { display: flex; justify-content: space-between; gap: 20rpx; }
+.coupon-card > view:first-child text:first-child { color: #c61d69; font-size: 31rpx; font-weight: 600; }
+.coupon-card > view:last-child { margin-top: 14rpx; color: #777; font-size: 20rpx; }
+.ledger-list > view { display: flex; justify-content: space-between; align-items: center; padding: 20rpx 0; border-top: 1rpx solid #eee; }
+.ledger-list view view text { display: block; }
+.ledger-list view view text:last-child { margin-top: 6rpx; color: #999; font-size: 19rpx; }
+.ledger-list .positive { color: #dd2a7b; }
+.alert-card { display: grid; grid-template-columns: 96rpx 1fr auto; gap: 18rpx; align-items: center; padding: 16rpx 0; border-top: 1rpx solid #eee; }
+.alert-card image { width: 96rpx; height: 112rpx; background: #eee; }
+.alert-card view text { display: block; }
+.alert-card view text:last-child { margin-top: 8rpx; color: #888; font-size: 20rpx; }
+.alert-card button { min-height: 58rpx; padding: 0 18rpx; border: 1rpx solid #bbb; background: #fff; font-size: 20rpx; }
+.small-empty { padding: 30rpx 0; color: #888; font-size: 22rpx; line-height: 1.6; }

@@ -1,0 +1,12 @@
+<view class="page-shell address-page">
+  <view class="form-head"><text class="eyebrow">DELIVERY ADDRESS</text><text>收货地址</text><text>认证前保存在开发者工具本地，正式登录后可继续同步会员地址。</text></view>
+  <view class="address-form">
+    <label><text>收货人</text><input value="{{form.recipient}}" data-field="recipient" bindinput="updateField" placeholder="姓名" maxlength="50" /></label>
+    <label><text>手机号码</text><input type="number" value="{{form.phone}}" data-field="phone" bindinput="updateField" placeholder="中国大陆手机号" maxlength="11" /></label>
+    <label><text>订单通知邮箱</text><input value="{{form.email}}" data-field="email" bindinput="updateField" placeholder="name@example.com" maxlength="120" /></label>
+    <label><text>省 / 市 / 区</text><picker mode="region" value="{{region}}" bindchange="chooseRegion"><view class="picker-value">{{regionText || '请选择地区'}}</view></picker></label>
+    <label><text>详细地址</text><textarea value="{{form.detail}}" data-field="detail" bindinput="updateField" placeholder="街道、楼栋、门牌号" maxlength="160" /></label>
+    <label><text>邮政编码（选填）</text><input value="{{form.postcode}}" data-field="postcode" bindinput="updateField" placeholder="邮政编码" maxlength="12" /></label>
+    <button class="primary-button" loading="{{busy}}" disabled="{{busy}}" bindtap="save">保存并使用</button>
+  </view>
+</view>

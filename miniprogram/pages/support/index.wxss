@@ -1,0 +1,15 @@
+.service-page { min-height: 100vh; padding-bottom: 60rpx; background: #fff; }
+.service-head { padding: 62rpx 30rpx 46rpx; border-bottom: 1rpx solid #ccc; background: #fff; }
+.service-head > text:nth-child(2) { display: block; margin-top: 14rpx; font-size: 62rpx; letter-spacing: -4rpx; }
+.service-head > text:nth-child(3) { display: block; margin-top: 20rpx; color: #777; font-size: 23rpx; line-height: 1.6; }
+.preview-badge { display: inline-flex; margin-top: 22rpx; padding: 10rpx 16rpx; background: #fff0f7; color: #a52c64; font-size: 21rpx; }
+.service-form { margin: 28rpx; padding: 32rpx; border: 1rpx solid #aaa; background: #fff; }
+.service-form label { display: block; margin-bottom: 30rpx; }
+.service-form label > text { display: block; margin-bottom: 12rpx; color: #666; font-size: 22rpx; }
+.service-form input, .service-form textarea, .picker-value { width: 100%; min-height: 82rpx; padding: 22rpx 0; border-bottom: 1rpx solid #bbb; font-size: 28rpx; }
+.service-form textarea { height: 170rpx; }
+.ticket-section { margin: 28rpx; }
+.section-title { display: block; margin-bottom: 18rpx; font-size: 34rpx; }
+.ticket-card { margin-bottom: 14rpx; padding: 24rpx; border: 1rpx solid #ccc; background: #fff; }
+.ticket-card text { display: block; margin-top: 8rpx; color: #666; font-size: 21rpx; line-height: 1.5; }
+.ticket-card text:first-child { margin-top: 0; color: #111; font-size: 25rpx; }

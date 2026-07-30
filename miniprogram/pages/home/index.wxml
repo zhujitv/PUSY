@@ -1,11 +1,9 @@
 <view class="page-shell">
   <view class="shipping">订单满 ¥599 享免费配送</view>
   <view class="home-head">
+    <text class="home-market">中国商城</text>
     <text class="brand-word">púsy</text>
-    <view class="home-head-copy">
-      <text>中国官方商城</text>
-      <text class="preview-pill">开发预览</text>
-    </view>
+    <text class="preview-pill">{{dataStatus}}</text>
   </view>
 
   <swiper class="hero" indicator-dots="true" indicator-color="rgba(255,255,255,.55)" indicator-active-color="#ffffff" autoplay="true" interval="5500" circular="true">
@@ -33,9 +31,7 @@
       <text class="section-head-title">本周精选</text>
       <text class="section-link" bindtap="openAll">查看全部</text>
     </view>
-    <view class="product-grid">
-      <product-card wx:for="{{featured}}" wx:key="id" product="{{item}}" />
-    </view>
+    <scroll-view class="product-scroll" scroll-x="true" enhanced="true" show-scrollbar="false"><view class="product-grid"><view class="product-cell" wx:for="{{featured}}" wx:key="id"><product-card product="{{item}}" variant="feature" /></view></view></scroll-view>
 
     <view class="editorial">
       <image class="editorial-image" src="/assets/01.jpg" mode="aspectFill" />
@@ -51,9 +47,7 @@
       <text class="section-head-title">新品抵达</text>
       <text class="section-link" bindtap="openCategory" data-category="全部">更多新品</text>
     </view>
-    <view class="product-grid">
-      <product-card wx:for="{{newArrivals}}" wx:key="id" product="{{item}}" />
-    </view>
+    <scroll-view class="product-scroll" scroll-x="true" enhanced="true" show-scrollbar="false"><view class="product-grid"><view class="product-cell" wx:for="{{newArrivals}}" wx:key="id"><product-card product="{{item}}" variant="feature" /></view></view></scroll-view>
 
     <view class="service-row">
       <view><text class="service-no">01</text><text class="service-title">官方正品</text><text class="service-copy">中国官方渠道商品</text></view>

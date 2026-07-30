@@ -1,0 +1,12 @@
+<view class="page-shell after-sale-page">
+  <view class="after-sale-head"><text class="eyebrow">AFTER SALES</text><text>申请售后</text><text>提交后由客服审核处理。照片、视频或物流凭证会在需要时通过工单补充。</text><text wx:if="{{previewMode}}" class="preview-badge">开发预览 · 不退款、不改库存</text></view>
+  <view wx:if="{{result}}" class="result-card"><text class="result-symbol">✓</text><text>{{previewMode ? '预览售后单已生成' : '售后申请已提交'}}</text><text>{{result.id}}</text><text>{{result.status}}</text><button class="primary-button" bindtap="openOrders">返回订单</button></view>
+  <view wx:else class="after-sale-form">
+    <label><text>订单号</text><input value="{{form.orderId}}" data-field="orderId" bindinput="updateField" maxlength="64" placeholder="请选择订单或填写订单号" /></label>
+    <label><text>售后诉求</text><picker range="{{returnTypeLabels}}" value="{{typeIndex}}" bindchange="chooseType"><view class="picker-value">{{returnTypeLabels[typeIndex]}} →</view></picker></label>
+    <label><text>申请原因</text><picker range="{{reasons}}" value="{{reasonIndex}}" bindchange="chooseReason"><view class="picker-value">{{form.reason}} →</view></picker></label>
+    <label><text>补充说明</text><textarea value="{{form.details}}" data-field="details" bindinput="updateField" maxlength="1000" placeholder="请描述商品状态和希望的处理方式" /></label>
+    <view class="safe-note"><text>正式模式只允许为当前会员自己的已付款订单申请售后，服务器会再次核验订单状态。</text></view>
+    <button class="primary-button" loading="{{busy}}" disabled="{{busy}}" bindtap="submit">提交售后申请</button>
+  </view>
+</view>

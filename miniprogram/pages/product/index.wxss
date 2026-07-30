@@ -1,16 +1,21 @@
 .product-page { padding-bottom: 126rpx; }
-.gallery { height: 850rpx; background: #f4f3f1; }
+.gallery { height: 920rpx; margin: 12rpx; background: #f4f3f1; }
 .gallery-image { width: 100%; height: 100%; }
-.product-copy { padding: 38rpx 30rpx 20rpx; }
+.product-copy { padding: 46rpx 30rpx 20rpx; }
 .product-meta-line { display: flex; align-items: center; justify-content: space-between; }
-.product-badge { padding: 8rpx 14rpx; border-radius: 999rpx; background: #f4f2f0; color: #555; font-size: 20rpx; }
-.product-name { display: block; margin-top: 22rpx; font-size: 58rpx; line-height: 1; letter-spacing: -4rpx; }
+.product-badge { padding: 9rpx 16rpx; background: #eb2f83; color: #fff; font-size: 20rpx; }
+.product-name { display: block; margin-top: 24rpx; font-size: 62rpx; font-weight: 500; line-height: .98; letter-spacing: -4rpx; }
 .product-subtitle { display: block; margin-top: 18rpx; color: #6d6d6d; line-height: 1.5; }
-.product-price { display: block; margin-top: 26rpx; font-size: 34rpx; font-weight: 600; }
+.product-price { display: block; margin-top: 28rpx; font-size: 36rpx; font-weight: 600; }
+.favorite-action { min-height: 70rpx; margin-top: 24rpx; padding: 0 24rpx; border: 1rpx solid #bbb; background: #fff; color: #333; font-size: 23rpx; }
+.favorite-action.active { border-color: #eb2f83; background: #eb2f83; color: #fff; }
+.alert-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12rpx; margin-top: 12rpx; }
+.alert-actions button { min-height: 70rpx; padding: 0 10rpx; border: 1rpx solid #bbb; background: #fff; color: #333; font-size: 21rpx; }
+.alert-actions button.active { border-color: #eb2f83; background: #fff0f7; color: #b91f62; }
 .stock-note { display: flex; align-items: center; gap: 12rpx; margin-top: 28rpx; padding: 22rpx; background: #f4f8f3; color: #416449; font-size: 21rpx; line-height: 1.45; }
 .stock-dot { width: 13rpx; height: 13rpx; flex: 0 0 auto; border-radius: 50%; background: #54a268; }
 .highlight-row { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 28rpx; }
-.highlight-row text { padding: 12rpx 18rpx; border: 1rpx solid #ddd8d4; border-radius: 999rpx; font-size: 21rpx; }
+.highlight-row text { padding: 12rpx 18rpx; border: 1rpx solid #d0d0d0; border-radius: 0; font-size: 21rpx; }
 .quantity-row { display: flex; align-items: center; justify-content: space-between; margin-top: 42rpx; padding: 26rpx 0; border-top: 1rpx solid #e3e0dd; border-bottom: 1rpx solid #e3e0dd; }
 .quantity-control { display: grid; grid-template-columns: 64rpx 70rpx 64rpx; height: 64rpx; border: 1rpx solid #aaa; }
 .quantity-control button, .quantity-control text { display: flex; align-items: center; justify-content: center; background: #fff; }
@@ -19,15 +24,15 @@
 .detail-body { display: block; color: #555; line-height: 1.75; }
 .detail-spec { display: flex; align-items: center; justify-content: space-between; }
 .detail-spec .detail-title, .detail-spec .detail-body { margin: 0; }
-.related-section { padding: 54rpx 0 44rpx; background: #f6f5f3; }
-.related-title { display: block; padding: 0 30rpx 24rpx; font-size: 38rpx; }
+.related-section { padding: 64rpx 0 54rpx; border-top: 1rpx solid #ddd; background: #fff; }
+.related-title { display: block; padding: 0 30rpx 28rpx; font-size: 48rpx; font-weight: 500; letter-spacing: -2rpx; }
 .related-scroll { white-space: nowrap; }
 .related-inner { display: inline-flex; gap: 14rpx; padding: 0 30rpx; }
 .related-card { width: 280rpx; display: flex; flex-direction: column; white-space: normal; }
 .related-card image { width: 280rpx; height: 340rpx; margin-bottom: 15rpx; background: #eee; }
 .related-card text { font-size: 23rpx; line-height: 1.4; }
 .related-card text:last-child { margin-top: 8rpx; font-weight: 600; }
-.product-actions { position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: 1fr 1fr; padding: 14rpx 24rpx calc(14rpx + env(safe-area-inset-bottom)); border-top: 1rpx solid #e5e2df; background: rgba(255,255,255,.97); }
+.product-actions { position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: 1fr 1fr; padding: 12rpx 18rpx calc(12rpx + env(safe-area-inset-bottom)); border-top: 1rpx solid #ddd; background: rgba(255,255,255,.97); }
 .product-actions button { min-height: 88rpx; }
 .bag-action { border: 1rpx solid #111; background: #fff; color: #111; }
 .buy-action { background: #111; color: #fff; }

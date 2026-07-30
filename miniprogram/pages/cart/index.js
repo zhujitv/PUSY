@@ -1,6 +1,7 @@
 const { getCartView, removeFromCart, syncCartBadge, updateQuantity } = require("../../utils/cart");
+const { refreshCatalog } = require("../../utils/catalog");
 
-const FREE_SHIPPING_FEN = 59900;
+const FREE_SHIPPING_FEN = 60000;
 
 Page({
   data: {
@@ -11,6 +12,7 @@ Page({
 
   onShow() {
     this.refresh();
+    refreshCatalog().then(() => this.refresh());
   },
 
   refresh() {
@@ -44,11 +46,7 @@ Page({
   },
 
   checkout() {
-    wx.showModal({
-      title: "结算功能尚未开放",
-      content: "当前为小程序第一阶段开发预览。接通统一订单接口、库存校验和微信支付后即可正式结算。",
-      showCancel: false,
-      confirmText: "知道了"
-    });
+    if (!this.data.cart.items.length) return;
+    wx.navigateTo({ url: "/pages/checkout/index" });
   }
 });

@@ -1,0 +1,8 @@
+.result-page { min-height: 100vh; padding: 100rpx 34rpx 60rpx; background: #fff; text-align: center; }
+.result-symbol { width: 112rpx; height: 112rpx; display: flex; align-items: center; justify-content: center; margin: 0 auto 34rpx; border-radius: 0; background: #eb2f83; color: #fff; font-size: 56rpx; font-weight: 700; }
+.result-title { display: block; margin-top: 20rpx; font-size: 58rpx; font-weight: 500; letter-spacing: -3rpx; }
+.result-copy { display: block; margin: 24rpx auto 0; max-width: 620rpx; color: #666; line-height: 1.65; }
+.result-card { display: grid; grid-template-columns: 150rpx 1fr; gap: 18rpx; margin: 50rpx 0 30rpx; padding: 30rpx; border: 1rpx solid #aaa; background: #fff; text-align: left; }
+.result-card text:nth-child(odd) { color: #888; }
+.result-card text:nth-child(even) { word-break: break-all; font-weight: 600; }
+.result-page .secondary-button { margin-top: 16rpx; }

@@ -1,0 +1,6 @@
+<view class="page-shell favorites-page">
+  <view class="favorites-head"><text class="eyebrow">MY FAVORITES</text><text>我的收藏</text><text>喜欢的商品保存在当前设备，正式会员同步将在账号认证后启用。</text></view>
+  <view wx:if="{{products.length}}" class="favorites-meta"><text>{{dataStatus}}</text><text>{{products.length}}件商品</text></view>
+  <view wx:if="{{products.length}}" class="favorites-grid"><product-card wx:for="{{products}}" wx:key="id" product="{{item}}" /></view>
+  <view wx:elif="{{!loading}}" class="empty-state"><text class="empty-title">还没有收藏</text><text class="empty-copy">打开商品详情，点击“收藏商品”即可保存到这里。</text><button class="primary-button" bindtap="browse">发现商品</button></view>
+</view>

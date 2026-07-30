@@ -1,8 +1,8 @@
-.cart-page { padding-bottom: 50rpx; }
-.cart-head { position: relative; padding: 54rpx 30rpx 34rpx; border-bottom: 1rpx solid #e8e4e1; }
-.cart-title { display: block; margin-top: 14rpx; font-size: 66rpx; letter-spacing: -5rpx; }
+.cart-page { padding-bottom: calc(130rpx + env(safe-area-inset-bottom)); }
+.cart-head { position: relative; padding: 62rpx 30rpx 42rpx; border-bottom: 1rpx solid #ddd; }
+.cart-title { display: block; margin-top: 16rpx; font-size: 72rpx; font-weight: 500; letter-spacing: -5rpx; }
 .cart-count { position: absolute; right: 30rpx; bottom: 42rpx; color: #777; font-size: 23rpx; }
-.shipping-progress { margin: 28rpx 30rpx 0; padding: 26rpx; background: #fff1f7; color: #8d315d; font-size: 23rpx; }
+.shipping-progress { margin: 28rpx 30rpx 0; padding: 26rpx; border: 1rpx solid #f0a1c5; background: #fff; color: #8d315d; font-size: 23rpx; }
 .progress-track { height: 5rpx; margin-top: 18rpx; overflow: hidden; background: rgba(141,49,93,.18); }
 .progress-value { height: 100%; background: var(--pink); transition: width .2s ease; }
 .cart-list { padding: 0 30rpx; }
@@ -17,9 +17,9 @@
 .cart-quantity button, .cart-quantity text { display: flex; align-items: center; justify-content: center; padding: 0; background: #fff; }
 .cart-subtotal { font-weight: 600; }
 .cart-remove { align-self: flex-start; margin-top: 18rpx; color: #888; font-size: 21rpx; text-decoration: underline; }
-.cart-summary { margin: 36rpx 30rpx 0; padding: 30rpx; background: #f6f5f3; }
+.cart-summary { margin: 36rpx 30rpx 0; padding: 30rpx 0; border-top: 1rpx solid #111; background: #fff; }
 .cart-summary > view { display: flex; justify-content: space-between; margin-bottom: 18rpx; color: #555; font-size: 24rpx; }
 .cart-summary .cart-total { margin-top: 28rpx; padding-top: 25rpx; border-top: 1rpx solid #d7d3cf; color: #111; font-size: 32rpx; font-weight: 600; }
 .cart-tax { display: block; margin: 24rpx 0; color: #888; font-size: 20rpx; line-height: 1.55; }
 .cart-empty { padding-top: 170rpx; }
-.empty-symbol { display: block; margin-bottom: 50rpx; color: #ffacd1; font-size: 110rpx; font-weight: 700; letter-spacing: -9rpx; }
+.empty-symbol { display: block; margin-bottom: 50rpx; color: #eb2f83; font-size: 118rpx; font-weight: 700; letter-spacing: -9rpx; }

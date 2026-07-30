@@ -1,4 +1,5 @@
-const { findProduct } = require("../data/products");
+const { findProduct } = require("./catalog");
+const { refreshCustomTabBar } = require("./tab-bar");
 
 const CART_KEY = "pusy_cart_v1";
 
@@ -15,16 +16,21 @@ function saveCart(cart) {
 
 function addToCart(productId, quantity = 1) {
   const cart = getCart();
+  const product = findProduct(productId);
+  const maximum = product.inventoryVerified ? Math.max(0, Number(product.stock || 0)) : 20;
+  if (maximum < 1) return cart;
   const existing = cart.find((item) => item.productId === productId);
-  if (existing) existing.quantity += quantity;
-  else cart.push({ productId, quantity });
+  if (existing) existing.quantity = Math.min(maximum, existing.quantity + quantity);
+  else cart.push({ productId, quantity: Math.min(maximum, quantity) });
   return saveCart(cart);
 }
 
 function updateQuantity(productId, quantity) {
   const cart = getCart();
   const item = cart.find((entry) => entry.productId === productId);
-  if (item) item.quantity = Math.max(1, quantity);
+  const product = findProduct(productId);
+  const maximum = product.inventoryVerified ? Math.max(1, Number(product.stock || 1)) : 20;
+  if (item) item.quantity = Math.max(1, Math.min(maximum, quantity));
   return saveCart(cart);
 }
 
@@ -60,6 +66,7 @@ function syncCartBadge(cart = getCart()) {
   } catch (error) {
     // Tab bar may not be ready during the earliest launch phase.
   }
+  refreshCustomTabBar();
 }
 
 module.exports = {

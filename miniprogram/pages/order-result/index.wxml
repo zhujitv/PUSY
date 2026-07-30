@@ -1,0 +1,4 @@
+<view class="page-shell result-page">
+  <block wx:if="{{order}}"><text class="result-symbol">{{order.preview ? 'P' : '✓'}}</text><text class="eyebrow">{{order.preview ? 'PREVIEW ORDER' : 'ORDER CREATED'}}</text><text class="result-title">{{order.preview ? '预览订单已生成' : '订单已创建'}}</text><text class="result-copy">{{order.preview ? '这笔订单只保存在开发者工具本地，没有扣减真实库存，也不会发起付款。' : '订单已进入待付款状态，微信支付将在下一阶段接入。'}}</text><view class="result-card"><text>订单号</text><text>{{order.id}}</text><text>金额</text><text>{{order.totalText}}</text><text>状态</text><text>{{order.status}}</text></view><button class="primary-button" bindtap="openOrders">查看订单</button><button class="secondary-button" bindtap="browse">继续购物</button></block>
+  <view wx:else class="empty-state"><text class="empty-title">没有找到订单</text><button class="primary-button" bindtap="browse">返回商品目录</button></view>
+</view>

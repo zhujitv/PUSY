@@ -4,7 +4,17 @@
     "pages/category/index",
     "pages/cart/index",
     "pages/profile/index",
-    "pages/product/index"
+    "pages/product/index",
+    "pages/address/index",
+    "pages/checkout/index",
+    "pages/order-result/index",
+    "pages/orders/index",
+    "pages/order-detail/index",
+    "pages/favorites/index",
+    "pages/support/index",
+    "pages/after-sale/index",
+    "pages/benefits/index",
+    "pages/notifications/index"
   ],
   "window": {
     "navigationBarBackgroundColor": "#ffffff",
@@ -14,8 +24,9 @@
     "backgroundTextStyle": "light"
   },
   "tabBar": {
+    "custom": true,
     "color": "#7a7a7a",
-    "selectedColor": "#ff2f91",
+    "selectedColor": "#eb2f83",
     "backgroundColor": "#ffffff",
     "borderStyle": "black",
     "list": [

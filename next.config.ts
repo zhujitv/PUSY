@@ -39,6 +39,21 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    const productReplacements = {
+      "maslo-dlya-gub-black-chernyiy-100710": "maslo-dlya-gub-black-chernyiy-100779",
+      "maslo-dlya-gub-red-krasnyiy-100711": "maslo-dlya-gub-red-krasnyiy-100784",
+      "maslo-dlya-gub-chocolate-shokoladnyiy-100707": "maslo-dlya-gub-chocolate-shokoladnyiy-100782",
+      "maslo-dlya-gub-crystal-prozrachnyiy-100709": "maslo-dlya-gub-crystal-prozrachnyiy-100780",
+      "maslo-dlya-gub-apricot-abrikosovyiy-100708": "maslo-dlya-gub-apricot-1-100778",
+      "maslo-dlya-gub-purple-1-100706": "maslo-dlya-gub-purple-rozovyiy-100781",
+    };
+    return Object.entries(productReplacements).map(([source, destination]) => ({
+      source: `/products/${source}`,
+      destination: `/products/${destination}`,
+      permanent: true,
+    }));
+  },
 };
 
 export default nextConfig;

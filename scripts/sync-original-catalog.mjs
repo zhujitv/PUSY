@@ -8,12 +8,19 @@ const concurrency = 6;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function fetchText(url, attempts = 4) {
+  let lastError;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
-    const response = await fetch(url, { headers: { "user-agent": "PUSY.CN catalog synchronizer" } });
-    if (response.ok) return response.text();
-    if (attempt === attempts) throw new Error(`${response.status} ${url}`);
+    try {
+      const response = await fetch(url, { headers: { "user-agent": "PUSY.CN catalog synchronizer" } });
+      if (response.ok) return response.text();
+      lastError = new Error(`${response.status} ${url}`);
+    } catch (error) {
+      lastError = error;
+    }
+    if (attempt === attempts) break;
     await sleep(attempt * 700);
   }
+  throw new Error(`Failed to fetch ${url}: ${lastError?.message || lastError}`);
 }
 
 async function loadCache() {
@@ -31,17 +38,24 @@ async function translate(text) {
   url.searchParams.set("tl", "zh-CN");
   url.searchParams.set("dt", "t");
   url.searchParams.set("q", source);
+  let lastError;
   for (let attempt = 1; attempt <= 4; attempt += 1) {
-    const response = await fetch(url);
-    if (response.ok) {
-      const payload = await response.json();
-      const result = payload[0].map((part) => part[0]).join("").trim();
-      translationCache[source] = result;
-      await sleep(80);
-      return result;
+    try {
+      const response = await fetch(url);
+      if (response.ok) {
+        const payload = await response.json();
+        const result = payload[0].map((part) => part[0]).join("").trim();
+        translationCache[source] = result;
+        await sleep(80);
+        return result;
+      }
+      lastError = new Error(`HTTP ${response.status}`);
+    } catch (error) {
+      lastError = error;
     }
     await sleep(attempt * 900);
   }
+  console.warn(`Translation fallback used after repeated failure: ${lastError?.message || lastError}`);
   return source;
 }
 
@@ -57,6 +71,7 @@ function categoryName(value = "", slug = "") {
   if (/otpusk-dlya-sebya|vsye-vklycheno|krasivo-otdyhay/.test(category)) return "神秘礼盒";
   if (category.includes("набор") || category.includes("nabor") || category.includes("hodovoiy")) return "套装";
   if (category.includes("бров") || category.includes("brov")) return "眉妆";
+  if (category.includes("румян") || /rumyana|blush/.test(category)) return "彩妆";
   if (category.includes("волос") || category.includes("hair")) return "头发护理";
   if (category.includes("дом") || category.includes("home") || category.includes("vanny")) return "家居";
   if (category.includes("аксесс") || /kosmetich|polotenca|kist/.test(category)) return "配件";
@@ -64,6 +79,21 @@ function categoryName(value = "", slug = "") {
   if (category.includes("уход") || /lica|face|micell|umyv|tonik|piling|gidrofil|krem-dlya-lica/.test(category)) return "护肤";
   return "彩妆";
 }
+
+const productNameOverrides = new Map([
+  ["jidkie-rumyana-dlya-lica-peachland-100768", "Peachland 液体腮红"],
+  ["jidkie-rumyana-dlya-lica-sleepy-morning-pylnaya-roza-100769", "Sleepy Morning 液体腮红（灰粉色）"],
+  ["jidkie-rumyana-dlya-lica-smoochies-rozovyiy-100770", "Smoochies 液体腮红（粉色）"],
+  ["jidkie-rumyana-dlya-lica-toasty-korichnevyiy-100771", "Toasty 液体腮红（棕色）"],
+  ["maslo-dlya-gub-apricot-1-100778", "杏桃唇油"],
+  ["maslo-dlya-gub-black-chernyiy-100779", "黑色唇油"],
+  ["maslo-dlya-gub-chocolate-shokoladnyiy-100782", "巧克力唇油"],
+  ["maslo-dlya-gub-crystal-pink-svetlo-rozovyiy-100783", "晶透粉唇油"],
+  ["maslo-dlya-gub-crystal-prozrachnyiy-100780", "透明唇油"],
+  ["maslo-dlya-gub-purple-rozovyiy-100781", "粉紫唇油"],
+  ["maslo-dlya-gub-red-krasnyiy-100784", "红色唇油"],
+  ["uvlajnyayshchiiy-krem-dlya-ruk-pusy-ginger-verveine-100763", "生姜马鞭草保湿护手霜"],
+]);
 
 function characteristic(variant, slug) {
   return variant.characteristics?.find((item) => item.slug === slug)?.value || "";
@@ -73,7 +103,7 @@ async function normalizedVariants(groupingCharacteristics = []) {
   return Promise.all(groupingCharacteristics.map(async (group) => ({
     name: await translate(group.title || group.name || "规格"),
     options: await Promise.all((group.values || group.options || group.characteristics || []).map(async (option) => ({
-      label: await translate(option.title || option.value || option.name || ""),
+      label: normalizeVariantLabel(await translate(option.title || option.value || option.name || "")),
       sku: option.variant?.sku || option.sku || "",
       price: Number(option.variant?.finalPrice || option.finalPrice || 0),
       slug: option.variantUrl ? option.variantUrl.split("?")[0].split("/").pop() : undefined,
@@ -81,6 +111,21 @@ async function normalizedVariants(groupingCharacteristics = []) {
       color: option.color || undefined,
     }))),
   }))).then((groups) => groups.map((group) => ({ ...group, options: group.options.filter((option) => option.label) })).filter((group) => group.options.length));
+}
+
+function normalizeVariantLabel(label) {
+  const overrides = {
+    杏: "杏桃色",
+    红色的: "红色",
+    透明的: "透明",
+    粉色的: "粉色",
+    黑色的: "黑色",
+    巧克力: "巧克力色",
+    棕色的: "棕色",
+    桃: "蜜桃色",
+    尘土飞扬的玫瑰: "灰粉色",
+  };
+  return overrides[label] || label;
 }
 
 async function mapLimit(items, worker) {
@@ -109,11 +154,12 @@ const rawProducts = await mapLimit(urls, async (url, index) => {
   const description = await translate(variant.description || "");
   const usage = await translate(characteristic(variant, "sposob-primeneniya"));
   const name = await translate(variant.name);
+  const slug = new URL(url).pathname.split("/").pop();
   const images = (variant.mediaItems || []).filter((item) => item.type === "IMAGE" && item.payload?.filePath).sort((a, b) => a.displaySequence - b.displaySequence).map((item) => item.payload.filePath);
   console.log(`[${index + 1}/${urls.length}] ${variant.slug}`);
   return {
-    slug: new URL(url).pathname.split("/").pop(),
-    name: name.replace(/普西/g, "PÚSY").replace(/PUSY/g, "PÚSY"),
+    slug,
+    name: productNameOverrides.get(slug) || name.replace(/普西/g, "PÚSY").replace(/PUSY/g, "PÚSY"),
     price: Number(variant.finalPrice || 0),
     oldPrice: variant.price && Number(variant.price) !== Number(variant.finalPrice) ? Number(variant.price) : undefined,
     image: images[0] || "",

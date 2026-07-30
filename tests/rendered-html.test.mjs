@@ -52,7 +52,7 @@ test("requires checkout consent and exposes China compliance settings", async ()
 });
 
 test("matches the catalog scope while keeping inventory independently managed", async () => {
-  const [catalogJson, productPage, productActions, catalogClient, orderApi, sitemap, mobileCss] = await Promise.all([
+  const [catalogJson, productPage, productActions, catalogClient, orderApi, sitemap, mobileCss, nextConfig, imageFiles] = await Promise.all([
     read("app/data/products.generated.json"),
     read("app/products/[slug]/page.tsx"),
     read("app/products/[slug]/ProductActions.tsx"),
@@ -60,13 +60,24 @@ test("matches the catalog scope while keeping inventory independently managed", 
     read("app/api/orders/route.ts"),
     read("app/sitemap.ts"),
     read("app/globals.css"),
+    read("next.config.ts"),
+    readdir(new URL("../public/products/yandex/", import.meta.url)),
   ]);
   const products = JSON.parse(catalogJson);
-  assert.equal(products.length, 83);
-  assert.equal(new Set(products.map((product) => product.slug)).size, 83);
+  assert.equal(products.length, 88);
+  assert.equal(new Set(products.map((product) => product.slug)).size, 88);
   assert.ok(products.every((product) => product.stock === 0 && product.inventoryVerified === false));
   assert.ok(products.filter((product) => product.variants?.length).length >= 39);
   assert.ok(products.every((product) => product.images?.length >= 1));
+  assert.equal(products.find((product) => product.slug === "jidkie-rumyana-dlya-lica-peachland-100768")?.category, "彩妆");
+  assert.equal(products.find((product) => product.slug === "maslo-dlya-gub-crystal-pink-svetlo-rozovyiy-100783")?.name, "晶透粉唇油");
+  assert.ok(!products.some((product) => product.slug === "maslo-dlya-gub-black-chernyiy-100710"));
+  assert.match(nextConfig, /maslo-dlya-gub-black-chernyiy-100710/);
+  assert.match(nextConfig, /maslo-dlya-gub-black-chernyiy-100779/);
+  const localImages = new Set(imageFiles);
+  assert.ok(products.every((product) => [product.image, product.imageAlt, ...(product.images ?? [])]
+    .filter(Boolean)
+    .every((image) => image.startsWith("/products/yandex/") && localImages.has(image.split("/").at(-1)))));
   assert.equal(products.find((product) => product.slug === "pusy-home-sol-dlya-vanny-bath-salt-400g-100160")?.price, 810);
   assert.deepEqual(products.find((product) => product.slug === "nabor-hodovoiy-letniiy-vaiyb-100687") && {
     price: products.find((product) => product.slug === "nabor-hodovoiy-letniiy-vaiyb-100687").price,

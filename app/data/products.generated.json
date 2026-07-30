@@ -31,7 +31,7 @@
             "color": "#DECDB6"
           },
           {
-            "label": "棕色的",
+            "label": "棕色",
             "sku": "",
             "price": 0,
             "slug": "karandash-dlya-gub-pusy-cream-100460",
@@ -47,7 +47,7 @@
             "color": "#EFA2B9"
           },
           {
-            "label": "尘土飞扬的玫瑰",
+            "label": "灰粉色",
             "sku": "",
             "price": 0,
             "slug": "karandash-dlya-gub-pusy-mommy-100462",
@@ -106,7 +106,7 @@
             "color": "#DECDB6"
           },
           {
-            "label": "棕色的",
+            "label": "棕色",
             "sku": "",
             "price": 0,
             "slug": "karandash-dlya-gub-pusy-cream-100460",
@@ -122,7 +122,7 @@
             "color": "#EFA2B9"
           },
           {
-            "label": "尘土飞扬的玫瑰",
+            "label": "灰粉色",
             "sku": "",
             "price": 0,
             "slug": "karandash-dlya-gub-pusy-mommy-100462",
@@ -182,7 +182,7 @@
             "color": "#DECDB6"
           },
           {
-            "label": "棕色的",
+            "label": "棕色",
             "sku": "",
             "price": 0,
             "slug": "karandash-dlya-gub-pusy-cream-100460",
@@ -198,7 +198,7 @@
             "color": "#EFA2B9"
           },
           {
-            "label": "尘土飞扬的玫瑰",
+            "label": "灰粉色",
             "sku": "",
             "price": 0,
             "slug": "karandash-dlya-gub-pusy-mommy-100462",
@@ -264,7 +264,7 @@
             "color": "#F18D56"
           },
           {
-            "label": "棕色的",
+            "label": "棕色",
             "sku": "",
             "price": 0,
             "slug": "jele-dlya-gub-autumn-1-100675",
@@ -272,7 +272,7 @@
             "color": "#744E35"
           },
           {
-            "label": "粉色的",
+            "label": "粉色",
             "sku": "",
             "price": 0,
             "slug": "jele-dlya-gub-autumn-1-100675",
@@ -284,8 +284,93 @@
     ]
   },
   {
-    "slug": "maslo-dlya-gub-black-chernyiy-100710",
-    "name": "黑唇油",
+    "slug": "maslo-dlya-gub-purple-rozovyiy-100781",
+    "name": "粉紫唇油",
+    "price": 1010,
+    "image": "/products/yandex/r6ccm6j86qsg4rmdgtmtj9pdnxfgk9tz-8537dd9687.webp",
+    "imageAlt": "/products/yandex/mj2p5pjs4dbvf2snn6mwwttqtkmltk5c-b8a5ffb681.webp",
+    "images": [
+      "/products/yandex/r6ccm6j86qsg4rmdgtmtj9pdnxfgk9tz-8537dd9687.webp",
+      "/products/yandex/mj2p5pjs4dbvf2snn6mwwttqtkmltk5c-b8a5ffb681.webp",
+      "/products/yandex/cf7xskz9jct4tdgrsdpg78kbkf879jxl-9a0bf35896.webp",
+      "/products/yandex/5s9xpw5bwtmhwjnqtmkkqs6t75zsgbm9-da1531baaa.webp"
+    ],
+    "badge": "畅销",
+    "category": "彩妆",
+    "description": "一款为您的妆容增添表现力的色调，其质地呵护您的双唇。 \n\nPÚSY Purple Lip Oil 打造玻璃光泽，底色略带冷色调，强调唇部形状并增加唇部深度。它看起来令人印象深刻，但佩戴起来仍然轻便舒适。油配方有助于软化双唇、平滑表面并在视觉上增强丰盈度。 \n\n方便的涂抹器可让您准确、均匀地涂抹产品，只需几下即可打造整洁的妆容。",
+    "sku": "ПП53ЧЗ",
+    "volume": "4 毫升",
+    "ingredients": "Hydrogenated Polyisobutene, Polybutene, Ethylhexyl Palmitate, Pentaerythrityl Tetraisostearate, Caprylic/Capric Triglyceride, Tridecyl Trimellitate, Polyglyceryl-2 Triisostearate, Hydrogenated Styrene/Isoprene Copolymer, Simmondsia Chinensis (Jojoba) Seed Oil, Squalane, Prunus Amygdalus Dulcis (Sweet Almond) Oil, Helianthus Annuus (Sunflower) Seed Oil, Octyldodecanol, Bisabolol, Phenoxyethanol, Tocopheryl Acetate, Ethylhexylglycerin, Parfum, CI 15850, CI 42090",
+    "usage": "使用涂抹器将油涂抹到嘴唇上。",
+    "inventoryVerified": false,
+    "stock": 0,
+    "variants": [
+      {
+        "name": "色调",
+        "options": [
+          {
+            "label": "杏桃色",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-apricot-1-100778",
+            "image": "/products/yandex/d54v4wxhrxtlng4fmzjhs85fncf725wf-7835a31972.webp",
+            "color": "#F18D56"
+          },
+          {
+            "label": "红色",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-red-krasnyiy-100784",
+            "image": "/products/yandex/jrf25gdq7gh2jwb4r6m5fvj8vp6kfxxf-ac90e1c7e7.webp",
+            "color": "#AC2216"
+          },
+          {
+            "label": "透明",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-crystal-prozrachnyiy-100780",
+            "image": "/products/yandex/gdkw2bc9crrdgpfxwx96xlfj9g76g7fr-fbc7908d75.webp",
+            "color": "#FFFFFF"
+          },
+          {
+            "label": "粉色",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-purple-rozovyiy-100781",
+            "image": "/products/yandex/r6ccm6j86qsg4rmdgtmtj9pdnxfgk9tz-8537dd9687.webp",
+            "color": "#E86B90"
+          },
+          {
+            "label": "浅粉色",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-crystal-pink-svetlo-rozovyiy-100783",
+            "image": "/products/yandex/xw4bhtgpx9k8wmjsl68xqq498fhtnmfj-5f248a533f.webp",
+            "color": "#EFA2B9"
+          },
+          {
+            "label": "黑色",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-black-chernyiy-100779",
+            "image": "/products/yandex/nbr8v9tdxzmtq9nzrdtwsbtfgchs44zv-5dbda44f69.webp",
+            "color": "#000000"
+          },
+          {
+            "label": "巧克力色",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-chocolate-shokoladnyiy-100782",
+            "image": "/products/yandex/d2nnc4c6tpxkznrbpl2d7n4tvlj2px6m-4ecb318ba9.webp",
+            "color": "#4B3323"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "maslo-dlya-gub-black-chernyiy-100779",
+    "name": "黑色唇油",
     "price": 990,
     "image": "/products/yandex/nbr8v9tdxzmtq9nzrdtwsbtfgchs44zv-5dbda44f69.webp",
     "imageAlt": "/products/yandex/cwnzvwdlftcnqkd8mmnkmgz4jp4k8l6s-3f70a42218.webp",
@@ -309,50 +394,58 @@
         "name": "色调",
         "options": [
           {
-            "label": "杏",
+            "label": "杏桃色",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-apricot-abrikosovyiy-100708",
+            "slug": "maslo-dlya-gub-apricot-1-100778",
             "image": "/products/yandex/d54v4wxhrxtlng4fmzjhs85fncf725wf-7835a31972.webp",
             "color": "#F18D56"
           },
           {
-            "label": "红色的",
+            "label": "红色",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-red-krasnyiy-100711",
+            "slug": "maslo-dlya-gub-red-krasnyiy-100784",
             "image": "/products/yandex/jrf25gdq7gh2jwb4r6m5fvj8vp6kfxxf-ac90e1c7e7.webp",
             "color": "#AC2216"
           },
           {
-            "label": "透明的",
+            "label": "透明",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-crystal-prozrachnyiy-100709",
+            "slug": "maslo-dlya-gub-crystal-prozrachnyiy-100780",
             "image": "/products/yandex/gdkw2bc9crrdgpfxwx96xlfj9g76g7fr-fbc7908d75.webp",
             "color": "#FFFFFF"
           },
           {
-            "label": "粉色的",
+            "label": "粉色",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-purple-1-100706",
+            "slug": "maslo-dlya-gub-purple-rozovyiy-100781",
             "image": "/products/yandex/r6ccm6j86qsg4rmdgtmtj9pdnxfgk9tz-8537dd9687.webp",
             "color": "#E86B90"
           },
           {
-            "label": "黑色的",
+            "label": "浅粉色",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-black-chernyiy-100710",
+            "slug": "maslo-dlya-gub-crystal-pink-svetlo-rozovyiy-100783",
+            "image": "/products/yandex/xw4bhtgpx9k8wmjsl68xqq498fhtnmfj-5f248a533f.webp",
+            "color": "#EFA2B9"
+          },
+          {
+            "label": "黑色",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-black-chernyiy-100779",
             "image": "/products/yandex/nbr8v9tdxzmtq9nzrdtwsbtfgchs44zv-5dbda44f69.webp",
             "color": "#000000"
           },
           {
-            "label": "巧克力",
+            "label": "巧克力色",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-chocolate-shokoladnyiy-100707",
+            "slug": "maslo-dlya-gub-chocolate-shokoladnyiy-100782",
             "image": "/products/yandex/d2nnc4c6tpxkznrbpl2d7n4tvlj2px6m-4ecb318ba9.webp",
             "color": "#4B3323"
           }
@@ -361,8 +454,8 @@
     ]
   },
   {
-    "slug": "maslo-dlya-gub-red-krasnyiy-100711",
-    "name": "红唇油",
+    "slug": "maslo-dlya-gub-red-krasnyiy-100784",
+    "name": "红色唇油",
     "price": 1010,
     "image": "/products/yandex/jrf25gdq7gh2jwb4r6m5fvj8vp6kfxxf-ac90e1c7e7.webp",
     "imageAlt": "/products/yandex/xvklcwb464mzm7p6jh7gn4tsnpdmvc29-506c430c7f.webp",
@@ -386,50 +479,58 @@
         "name": "色调",
         "options": [
           {
-            "label": "杏",
+            "label": "杏桃色",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-apricot-abrikosovyiy-100708",
+            "slug": "maslo-dlya-gub-apricot-1-100778",
             "image": "/products/yandex/d54v4wxhrxtlng4fmzjhs85fncf725wf-7835a31972.webp",
             "color": "#F18D56"
           },
           {
-            "label": "红色的",
+            "label": "红色",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-red-krasnyiy-100711",
+            "slug": "maslo-dlya-gub-red-krasnyiy-100784",
             "image": "/products/yandex/jrf25gdq7gh2jwb4r6m5fvj8vp6kfxxf-ac90e1c7e7.webp",
             "color": "#AC2216"
           },
           {
-            "label": "透明的",
+            "label": "透明",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-crystal-prozrachnyiy-100709",
+            "slug": "maslo-dlya-gub-crystal-prozrachnyiy-100780",
             "image": "/products/yandex/gdkw2bc9crrdgpfxwx96xlfj9g76g7fr-fbc7908d75.webp",
             "color": "#FFFFFF"
           },
           {
-            "label": "粉色的",
+            "label": "粉色",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-purple-1-100706",
+            "slug": "maslo-dlya-gub-purple-rozovyiy-100781",
             "image": "/products/yandex/r6ccm6j86qsg4rmdgtmtj9pdnxfgk9tz-8537dd9687.webp",
             "color": "#E86B90"
           },
           {
-            "label": "黑色的",
+            "label": "浅粉色",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-black-chernyiy-100710",
+            "slug": "maslo-dlya-gub-crystal-pink-svetlo-rozovyiy-100783",
+            "image": "/products/yandex/xw4bhtgpx9k8wmjsl68xqq498fhtnmfj-5f248a533f.webp",
+            "color": "#EFA2B9"
+          },
+          {
+            "label": "黑色",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-black-chernyiy-100779",
             "image": "/products/yandex/nbr8v9tdxzmtq9nzrdtwsbtfgchs44zv-5dbda44f69.webp",
             "color": "#000000"
           },
           {
-            "label": "巧克力",
+            "label": "巧克力色",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-chocolate-shokoladnyiy-100707",
+            "slug": "maslo-dlya-gub-chocolate-shokoladnyiy-100782",
             "image": "/products/yandex/d2nnc4c6tpxkznrbpl2d7n4tvlj2px6m-4ecb318ba9.webp",
             "color": "#4B3323"
           }
@@ -469,7 +570,7 @@
             "color": "#DECDB6"
           },
           {
-            "label": "棕色的",
+            "label": "棕色",
             "sku": "",
             "price": 0,
             "slug": "karandash-dlya-gub-pusy-cream-100460",
@@ -485,7 +586,7 @@
             "color": "#EFA2B9"
           },
           {
-            "label": "尘土飞扬的玫瑰",
+            "label": "灰粉色",
             "sku": "",
             "price": 0,
             "slug": "karandash-dlya-gub-pusy-mommy-100462",
@@ -537,7 +638,7 @@
         "name": "色调",
         "options": [
           {
-            "label": "黑色的",
+            "label": "黑色",
             "sku": "",
             "price": 0,
             "slug": "kapsulnaya-tush-dlya-resnic-black-100670",
@@ -597,7 +698,7 @@
             "color": "#4B3323"
           },
           {
-            "label": "黑色的",
+            "label": "黑色",
             "sku": "",
             "price": 0,
             "slug": "klassicheskaya-tush-dlya-resnic-pusy-black-10-ml-100365",
@@ -630,6 +731,90 @@
     "inventoryVerified": false,
     "stock": 0,
     "variants": []
+  },
+  {
+    "slug": "maslo-dlya-gub-crystal-pink-svetlo-rozovyiy-100783",
+    "name": "晶透粉唇油",
+    "price": 1010,
+    "image": "/products/yandex/xw4bhtgpx9k8wmjsl68xqq498fhtnmfj-5f248a533f.webp",
+    "imageAlt": "/products/yandex/xrc42jh57k4gds4v5jgmbtklbmbfp25d-fb8a2526e6.webp",
+    "images": [
+      "/products/yandex/xw4bhtgpx9k8wmjsl68xqq498fhtnmfj-5f248a533f.webp",
+      "/products/yandex/xrc42jh57k4gds4v5jgmbtklbmbfp25d-fb8a2526e6.webp",
+      "/products/yandex/rzn7f5ksfq26p52864zzqqqtf7h99gbx-60acdb737e.webp",
+      "/products/yandex/7bjgbmjmwpxlg2gtdxwgrk8ftgxjnzxc-8c669878db.webp"
+    ],
+    "category": "彩妆",
+    "description": "一款为您的妆容增添表现力的色调，其质地呵护您的双唇。 PÚSY Crystal Pink Lip Oil 营造出玻璃般的光泽，带有轻微的冷色调底色，强调嘴唇的形状并增加嘴唇的深度。它看起来令人印象深刻，但佩戴起来仍然轻便舒适。 \n\n油配方有助于软化双唇、平滑表面并在视觉上增强丰盈度。方便的涂抹器可让您准确、均匀地涂抹产品，只需几下即可打造整洁的妆容。",
+    "sku": "ПП51ЧЗ",
+    "volume": "4 毫升",
+    "ingredients": "Hydrogenated Polyisobutene, Polybutene, Ethylhexyl Palmitate, Pentaerythrityl Tetraisostearate, Caprylic/Capric Triglyceride, Tridecyl Trimellitate, Polyglyceryl-2 Triisostearate, Hydrogenated Styrene/Isoprene Copolymer, Simmondsia Chinensis (Jojoba) Seed Oil, Squalane, Prunus Amygdalus Dulcis (Sweet Almond) Oil, Helianthus Annuus (Sunflower) Seed Oil, Octyldodecanol, Bisabolol, Phenoxyethanol, Tocopheryl Acetate, Ethylhexylglycerin, Parfum, CI 45410, CI 15850",
+    "usage": "使用涂抹器将油涂抹到嘴唇上。",
+    "inventoryVerified": false,
+    "stock": 0,
+    "variants": [
+      {
+        "name": "色调",
+        "options": [
+          {
+            "label": "杏桃色",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-apricot-1-100778",
+            "image": "/products/yandex/d54v4wxhrxtlng4fmzjhs85fncf725wf-7835a31972.webp",
+            "color": "#F18D56"
+          },
+          {
+            "label": "红色",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-red-krasnyiy-100784",
+            "image": "/products/yandex/jrf25gdq7gh2jwb4r6m5fvj8vp6kfxxf-ac90e1c7e7.webp",
+            "color": "#AC2216"
+          },
+          {
+            "label": "透明",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-crystal-prozrachnyiy-100780",
+            "image": "/products/yandex/gdkw2bc9crrdgpfxwx96xlfj9g76g7fr-fbc7908d75.webp",
+            "color": "#FFFFFF"
+          },
+          {
+            "label": "粉色",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-purple-rozovyiy-100781",
+            "image": "/products/yandex/r6ccm6j86qsg4rmdgtmtj9pdnxfgk9tz-8537dd9687.webp",
+            "color": "#E86B90"
+          },
+          {
+            "label": "浅粉色",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-crystal-pink-svetlo-rozovyiy-100783",
+            "image": "/products/yandex/xw4bhtgpx9k8wmjsl68xqq498fhtnmfj-5f248a533f.webp",
+            "color": "#EFA2B9"
+          },
+          {
+            "label": "黑色",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-black-chernyiy-100779",
+            "image": "/products/yandex/nbr8v9tdxzmtq9nzrdtwsbtfgchs44zv-5dbda44f69.webp",
+            "color": "#000000"
+          },
+          {
+            "label": "巧克力色",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-chocolate-shokoladnyiy-100782",
+            "image": "/products/yandex/d2nnc4c6tpxkznrbpl2d7n4tvlj2px6m-4ecb318ba9.webp",
+            "color": "#4B3323"
+          }
+        ]
+      }
+    ]
   },
   {
     "slug": "karandash-plamper-dlya-gub-pusy-chili-100455",
@@ -698,7 +883,7 @@
             "color": "#DECDB6"
           },
           {
-            "label": "棕色的",
+            "label": "棕色",
             "sku": "",
             "price": 0,
             "slug": "karandash-dlya-gub-pusy-cream-100460",
@@ -714,7 +899,7 @@
             "color": "#EFA2B9"
           },
           {
-            "label": "尘土飞扬的玫瑰",
+            "label": "灰粉色",
             "sku": "",
             "price": 0,
             "slug": "karandash-dlya-gub-pusy-mommy-100462",
@@ -899,7 +1084,7 @@
             "color": "#4B3323"
           },
           {
-            "label": "黑色的",
+            "label": "黑色",
             "sku": "",
             "price": 0,
             "slug": "klassicheskaya-tush-dlya-resnic-pusy-black-10-ml-100365",
@@ -911,7 +1096,7 @@
     ]
   },
   {
-    "slug": "maslo-dlya-gub-chocolate-shokoladnyiy-100707",
+    "slug": "maslo-dlya-gub-chocolate-shokoladnyiy-100782",
     "name": "巧克力唇油",
     "price": 1010,
     "image": "/products/yandex/d2nnc4c6tpxkznrbpl2d7n4tvlj2px6m-4ecb318ba9.webp",
@@ -936,50 +1121,58 @@
         "name": "色调",
         "options": [
           {
-            "label": "杏",
+            "label": "杏桃色",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-apricot-abrikosovyiy-100708",
+            "slug": "maslo-dlya-gub-apricot-1-100778",
             "image": "/products/yandex/d54v4wxhrxtlng4fmzjhs85fncf725wf-7835a31972.webp",
             "color": "#F18D56"
           },
           {
-            "label": "红色的",
+            "label": "红色",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-red-krasnyiy-100711",
+            "slug": "maslo-dlya-gub-red-krasnyiy-100784",
             "image": "/products/yandex/jrf25gdq7gh2jwb4r6m5fvj8vp6kfxxf-ac90e1c7e7.webp",
             "color": "#AC2216"
           },
           {
-            "label": "透明的",
+            "label": "透明",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-crystal-prozrachnyiy-100709",
+            "slug": "maslo-dlya-gub-crystal-prozrachnyiy-100780",
             "image": "/products/yandex/gdkw2bc9crrdgpfxwx96xlfj9g76g7fr-fbc7908d75.webp",
             "color": "#FFFFFF"
           },
           {
-            "label": "粉色的",
+            "label": "粉色",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-purple-1-100706",
+            "slug": "maslo-dlya-gub-purple-rozovyiy-100781",
             "image": "/products/yandex/r6ccm6j86qsg4rmdgtmtj9pdnxfgk9tz-8537dd9687.webp",
             "color": "#E86B90"
           },
           {
-            "label": "黑色的",
+            "label": "浅粉色",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-black-chernyiy-100710",
+            "slug": "maslo-dlya-gub-crystal-pink-svetlo-rozovyiy-100783",
+            "image": "/products/yandex/xw4bhtgpx9k8wmjsl68xqq498fhtnmfj-5f248a533f.webp",
+            "color": "#EFA2B9"
+          },
+          {
+            "label": "黑色",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-black-chernyiy-100779",
             "image": "/products/yandex/nbr8v9tdxzmtq9nzrdtwsbtfgchs44zv-5dbda44f69.webp",
             "color": "#000000"
           },
           {
-            "label": "巧克力",
+            "label": "巧克力色",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-chocolate-shokoladnyiy-100707",
+            "slug": "maslo-dlya-gub-chocolate-shokoladnyiy-100782",
             "image": "/products/yandex/d2nnc4c6tpxkznrbpl2d7n4tvlj2px6m-4ecb318ba9.webp",
             "color": "#4B3323"
           }
@@ -1129,88 +1322,12 @@
             "color": "#4B3323"
           },
           {
-            "label": "黑色的",
+            "label": "黑色",
             "sku": "",
             "price": 0,
             "slug": "klassicheskaya-tush-dlya-resnic-pusy-black-10-ml-100365",
             "image": "/products/yandex/szqwmx97nvbj9flfwmqgzlpqxpz4g457-38ef2acac8.webp",
             "color": "#000000"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "slug": "maslo-dlya-gub-crystal-prozrachnyiy-100709",
-    "name": "水晶唇油",
-    "price": 1010,
-    "image": "/products/yandex/gdkw2bc9crrdgpfxwx96xlfj9g76g7fr-fbc7908d75.webp",
-    "imageAlt": "/products/yandex/x7glt87bwnr7vbtj2fql4wlwfzwbsxfx-8da0a9a719.webp",
-    "images": [
-      "/products/yandex/gdkw2bc9crrdgpfxwx96xlfj9g76g7fr-fbc7908d75.webp",
-      "/products/yandex/x7glt87bwnr7vbtj2fql4wlwfzwbsxfx-8da0a9a719.webp",
-      "/products/yandex/ns5qngfz4vhhrcfq97fndm4ll46bxdv6-ed4b722342.webp"
-    ],
-    "badge": "畅销",
-    "category": "彩妆",
-    "description": "透明色调可增强双唇的自然美感，质感每日呵护双唇。 \n\nPÚSY 水晶唇油可打造光泽妆效，在视觉上使双唇更光滑、更整洁。这是最通用的选择，适合任何妆容 - 从简约到晚装。油配方可温和软化双唇，帮助应对干燥并带来舒适感。 \n\n轻盈的质地增添光泽和丰盈感，方便的涂抹器让您只需轻轻涂抹几下即可涂抹产品 - 即使没有镜子。",
-    "sku": "ПП52ЧЗ",
-    "volume": "4 毫升",
-    "ingredients": "Hydrogenated Polyisobutene, Ethylhexyl Palmitate, Polybutene, Pentaerythrityl Tetraisostearate, Tridecyl Trimellitate, Caprylic/Capric Triglyceride, Hydrogenated Styrene/Isoprene Copolymer, Polyglyceryl-2 Triisostearate, Simmondsia Chinensis (Jojoba) Seed Oil, Squalane, Prunus Amygdalus Dulcis (Sweet Almond) Oil, Helianthus Annuus (Sunflower) Seed Oil, Bisabolol, Phenoxyethanol, Tocopheryl Acetate, Ethylhexylglycerin, Parfum",
-    "usage": "使用涂抹器将油涂抹到嘴唇上。",
-    "inventoryVerified": false,
-    "stock": 0,
-    "variants": [
-      {
-        "name": "色调",
-        "options": [
-          {
-            "label": "杏",
-            "sku": "",
-            "price": 0,
-            "slug": "maslo-dlya-gub-apricot-abrikosovyiy-100708",
-            "image": "/products/yandex/d54v4wxhrxtlng4fmzjhs85fncf725wf-7835a31972.webp",
-            "color": "#F18D56"
-          },
-          {
-            "label": "红色的",
-            "sku": "",
-            "price": 0,
-            "slug": "maslo-dlya-gub-red-krasnyiy-100711",
-            "image": "/products/yandex/jrf25gdq7gh2jwb4r6m5fvj8vp6kfxxf-ac90e1c7e7.webp",
-            "color": "#AC2216"
-          },
-          {
-            "label": "透明的",
-            "sku": "",
-            "price": 0,
-            "slug": "maslo-dlya-gub-crystal-prozrachnyiy-100709",
-            "image": "/products/yandex/gdkw2bc9crrdgpfxwx96xlfj9g76g7fr-fbc7908d75.webp",
-            "color": "#FFFFFF"
-          },
-          {
-            "label": "粉色的",
-            "sku": "",
-            "price": 0,
-            "slug": "maslo-dlya-gub-purple-1-100706",
-            "image": "/products/yandex/r6ccm6j86qsg4rmdgtmtj9pdnxfgk9tz-8537dd9687.webp",
-            "color": "#E86B90"
-          },
-          {
-            "label": "黑色的",
-            "sku": "",
-            "price": 0,
-            "slug": "maslo-dlya-gub-black-chernyiy-100710",
-            "image": "/products/yandex/nbr8v9tdxzmtq9nzrdtwsbtfgchs44zv-5dbda44f69.webp",
-            "color": "#000000"
-          },
-          {
-            "label": "巧克力",
-            "sku": "",
-            "price": 0,
-            "slug": "maslo-dlya-gub-chocolate-shokoladnyiy-100707",
-            "image": "/products/yandex/d2nnc4c6tpxkznrbpl2d7n4tvlj2px6m-4ecb318ba9.webp",
-            "color": "#4B3323"
           }
         ]
       }
@@ -1248,7 +1365,7 @@
             "color": "#DECDB6"
           },
           {
-            "label": "棕色的",
+            "label": "棕色",
             "sku": "",
             "price": 0,
             "slug": "karandash-dlya-gub-pusy-cream-100460",
@@ -1264,7 +1381,7 @@
             "color": "#EFA2B9"
           },
           {
-            "label": "尘土飞扬的玫瑰",
+            "label": "灰粉色",
             "sku": "",
             "price": 0,
             "slug": "karandash-dlya-gub-pusy-mommy-100462",
@@ -1286,6 +1403,90 @@
             "slug": "karandash-dlya-gub-pusy-strawberry-100464",
             "image": "/products/yandex/cgc5lrm25r8xhvbc9mfhp8mkwds9p68k-2d69895734.webp",
             "color": "#F28FBE"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "maslo-dlya-gub-crystal-prozrachnyiy-100780",
+    "name": "透明唇油",
+    "price": 1010,
+    "image": "/products/yandex/gdkw2bc9crrdgpfxwx96xlfj9g76g7fr-fbc7908d75.webp",
+    "imageAlt": "/products/yandex/x7glt87bwnr7vbtj2fql4wlwfzwbsxfx-8da0a9a719.webp",
+    "images": [
+      "/products/yandex/gdkw2bc9crrdgpfxwx96xlfj9g76g7fr-fbc7908d75.webp",
+      "/products/yandex/x7glt87bwnr7vbtj2fql4wlwfzwbsxfx-8da0a9a719.webp",
+      "/products/yandex/ns5qngfz4vhhrcfq97fndm4ll46bxdv6-ed4b722342.webp"
+    ],
+    "badge": "畅销",
+    "category": "彩妆",
+    "description": "透明色调可增强双唇的自然美感，质感每日呵护双唇。 \n\nPÚSY 水晶唇油可打造光泽妆效，在视觉上使双唇更光滑、更整洁。这是最通用的选择，适合任何妆容 - 从简约到晚装。油配方可温和软化双唇，帮助应对干燥并带来舒适感。 \n\n轻盈的质地增添光泽和丰盈感，方便的涂抹器让您只需轻轻涂抹几下即可涂抹产品 - 即使没有镜子。",
+    "sku": "ПП52ЧЗ",
+    "volume": "4 毫升",
+    "ingredients": "Hydrogenated Polyisobutene, Ethylhexyl Palmitate, Polybutene, Pentaerythrityl Tetraisostearate, Tridecyl Trimellitate, Caprylic/Capric Triglyceride, Hydrogenated Styrene/Isoprene Copolymer, Polyglyceryl-2 Triisostearate, Simmondsia Chinensis (Jojoba) Seed Oil, Squalane, Prunus Amygdalus Dulcis (Sweet Almond) Oil, Helianthus Annuus (Sunflower) Seed Oil, Bisabolol, Phenoxyethanol, Tocopheryl Acetate, Ethylhexylglycerin, Parfum",
+    "usage": "使用涂抹器将油涂抹到嘴唇上。",
+    "inventoryVerified": false,
+    "stock": 0,
+    "variants": [
+      {
+        "name": "色调",
+        "options": [
+          {
+            "label": "杏桃色",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-apricot-1-100778",
+            "image": "/products/yandex/d54v4wxhrxtlng4fmzjhs85fncf725wf-7835a31972.webp",
+            "color": "#F18D56"
+          },
+          {
+            "label": "红色",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-red-krasnyiy-100784",
+            "image": "/products/yandex/jrf25gdq7gh2jwb4r6m5fvj8vp6kfxxf-ac90e1c7e7.webp",
+            "color": "#AC2216"
+          },
+          {
+            "label": "透明",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-crystal-prozrachnyiy-100780",
+            "image": "/products/yandex/gdkw2bc9crrdgpfxwx96xlfj9g76g7fr-fbc7908d75.webp",
+            "color": "#FFFFFF"
+          },
+          {
+            "label": "粉色",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-purple-rozovyiy-100781",
+            "image": "/products/yandex/r6ccm6j86qsg4rmdgtmtj9pdnxfgk9tz-8537dd9687.webp",
+            "color": "#E86B90"
+          },
+          {
+            "label": "浅粉色",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-crystal-pink-svetlo-rozovyiy-100783",
+            "image": "/products/yandex/xw4bhtgpx9k8wmjsl68xqq498fhtnmfj-5f248a533f.webp",
+            "color": "#EFA2B9"
+          },
+          {
+            "label": "黑色",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-black-chernyiy-100779",
+            "image": "/products/yandex/nbr8v9tdxzmtq9nzrdtwsbtfgchs44zv-5dbda44f69.webp",
+            "color": "#000000"
+          },
+          {
+            "label": "巧克力色",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-chocolate-shokoladnyiy-100782",
+            "image": "/products/yandex/d2nnc4c6tpxkznrbpl2d7n4tvlj2px6m-4ecb318ba9.webp",
+            "color": "#4B3323"
           }
         ]
       }
@@ -1343,8 +1544,8 @@
     ]
   },
   {
-    "slug": "maslo-dlya-gub-apricot-abrikosovyiy-100708",
-    "name": "杏唇油",
+    "slug": "maslo-dlya-gub-apricot-1-100778",
+    "name": "杏桃唇油",
     "price": 1010,
     "image": "/products/yandex/d54v4wxhrxtlng4fmzjhs85fncf725wf-7835a31972.webp",
     "imageAlt": "/products/yandex/mn2phzkzn9htkh6lt5hs4w525grcrl76-58e40ca42e.webp",
@@ -1367,50 +1568,58 @@
         "name": "色调",
         "options": [
           {
-            "label": "杏",
+            "label": "杏桃色",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-apricot-abrikosovyiy-100708",
+            "slug": "maslo-dlya-gub-apricot-1-100778",
             "image": "/products/yandex/d54v4wxhrxtlng4fmzjhs85fncf725wf-7835a31972.webp",
             "color": "#F18D56"
           },
           {
-            "label": "红色的",
+            "label": "红色",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-red-krasnyiy-100711",
+            "slug": "maslo-dlya-gub-red-krasnyiy-100784",
             "image": "/products/yandex/jrf25gdq7gh2jwb4r6m5fvj8vp6kfxxf-ac90e1c7e7.webp",
             "color": "#AC2216"
           },
           {
-            "label": "透明的",
+            "label": "透明",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-crystal-prozrachnyiy-100709",
+            "slug": "maslo-dlya-gub-crystal-prozrachnyiy-100780",
             "image": "/products/yandex/gdkw2bc9crrdgpfxwx96xlfj9g76g7fr-fbc7908d75.webp",
             "color": "#FFFFFF"
           },
           {
-            "label": "粉色的",
+            "label": "粉色",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-purple-1-100706",
+            "slug": "maslo-dlya-gub-purple-rozovyiy-100781",
             "image": "/products/yandex/r6ccm6j86qsg4rmdgtmtj9pdnxfgk9tz-8537dd9687.webp",
             "color": "#E86B90"
           },
           {
-            "label": "黑色的",
+            "label": "浅粉色",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-black-chernyiy-100710",
+            "slug": "maslo-dlya-gub-crystal-pink-svetlo-rozovyiy-100783",
+            "image": "/products/yandex/xw4bhtgpx9k8wmjsl68xqq498fhtnmfj-5f248a533f.webp",
+            "color": "#EFA2B9"
+          },
+          {
+            "label": "黑色",
+            "sku": "",
+            "price": 0,
+            "slug": "maslo-dlya-gub-black-chernyiy-100779",
             "image": "/products/yandex/nbr8v9tdxzmtq9nzrdtwsbtfgchs44zv-5dbda44f69.webp",
             "color": "#000000"
           },
           {
-            "label": "巧克力",
+            "label": "巧克力色",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-chocolate-shokoladnyiy-100707",
+            "slug": "maslo-dlya-gub-chocolate-shokoladnyiy-100782",
             "image": "/products/yandex/d2nnc4c6tpxkznrbpl2d7n4tvlj2px6m-4ecb318ba9.webp",
             "color": "#4B3323"
           }
@@ -1501,24 +1710,24 @@
     "variants": []
   },
   {
-    "slug": "maslo-dlya-gub-purple-1-100706",
-    "name": "紫色唇油",
-    "price": 1010,
-    "image": "/products/yandex/r6ccm6j86qsg4rmdgtmtj9pdnxfgk9tz-8537dd9687.webp",
-    "imageAlt": "/products/yandex/mj2p5pjs4dbvf2snn6mwwttqtkmltk5c-b8a5ffb681.webp",
+    "slug": "jidkie-rumyana-dlya-lica-peachland-100768",
+    "name": "Peachland 液体腮红",
+    "price": 990,
+    "image": "/products/yandex/jslnm8thjtk6lfsq6jj6kjqx4qm8bm5x-98ebb15785.webp",
+    "imageAlt": "/products/yandex/78gpjc27p4jghbctwr6mr5fgkzcrgbch-a7fd66063c.webp",
     "images": [
-      "/products/yandex/r6ccm6j86qsg4rmdgtmtj9pdnxfgk9tz-8537dd9687.webp",
-      "/products/yandex/mj2p5pjs4dbvf2snn6mwwttqtkmltk5c-b8a5ffb681.webp",
-      "/products/yandex/cf7xskz9jct4tdgrsdpg78kbkf879jxl-9a0bf35896.webp",
-      "/products/yandex/5s9xpw5bwtmhwjnqtmkkqs6t75zsgbm9-da1531baaa.webp"
+      "/products/yandex/jslnm8thjtk6lfsq6jj6kjqx4qm8bm5x-98ebb15785.webp",
+      "/products/yandex/78gpjc27p4jghbctwr6mr5fgkzcrgbch-a7fd66063c.webp",
+      "/products/yandex/4px59qqgqrwcnkpb5tcmsd82nmnsfjrz-d393747c63.webp",
+      "/products/yandex/l5d7lpgwm5tj9q945wrz22n6mj57v62r-efda455e1f.webp"
     ],
-    "badge": "畅销",
+    "badge": "新品",
     "category": "彩妆",
-    "description": "一款为您的妆容增添表现力的色调，其质地呵护您的双唇。 \n\nPÚSY Purple Lip Oil 打造玻璃光泽，底色略带冷色调，强调唇部形状并增加唇部深度。它看起来令人印象深刻，但佩戴起来仍然轻便舒适。油配方有助于软化双唇、平滑表面并在视觉上增强丰盈度。 \n\n方便的涂抹器可让您准确、均匀地涂抹产品，只需几下即可打造整洁的妆容。",
-    "sku": "ПП53ЧЗ",
-    "volume": "4 毫升",
-    "ingredients": "Hydrogenated Polyisobutene, Polybutene, Ethylhexyl Palmitate, Pentaerythrityl Tetraisostearate, Caprylic/Capric Triglyceride, Tridecyl Trimellitate, Polyglyceryl-2 Triisostearate, Hydrogenated Styrene/Isoprene Copolymer, Simmondsia Chinensis (Jojoba) Seed Oil, Squalane, Prunus Amygdalus Dulcis (Sweet Almond) Oil, Helianthus Annuus (Sunflower) Seed Oil, Octyldodecanol, Bisabolol, Phenoxyethanol, Tocopheryl Acetate, Ethylhexylglycerin, Parfum, CI 15850, CI 42090",
-    "usage": "使用涂抹器将油涂抹到嘴唇上。",
+    "description": "同样的腮红可以让你的脸看起来清新、容光焕发——即使早晨没有按计划开始。\n\n只需用手指、刷子或海绵等几个动作即可将浅水霜质地晕染开来。在皮肤上，它会与您的肤色融为一体，就像它自己的腮红一样。色调可以分层：一层是白天的半透明腮红，多一层是丰富的晚间颜色。\n\n腮红覆盖所有妆容：脸颊、颧骨、嘴唇和眼睑。柔软的涂抹器可以准确地涂抹您需要的量，因此消费非常经济，而且紧凑的瓶子可以安静地放在您的钱包里。\n\n摇动瓶子，用涂抹器拧开瓶盖，在脸颊上滴几滴并混合 - 如果您想让颜色更亮，只需重复即可。",
+    "sku": "ДЧЗ0064",
+    "volume": "5,5 毫升",
+    "ingredients": "Aqua，Isohexadecane，Isododecane，Dimethicone，Butylene Glycol，Tridecyl Trimellitate，Kaolin，Lauryl Peg-10 Tris(Trimethylsiloxy)Silylethyl Dimethicone, Polyglyceryl-2 Triisostearate，Trimethylsiloxysilicate，Mica，Disteardimonium Hectorite，Silica, Cetyl Peg/Ppg-10/1 Dimethicone，Sodium Chloride，Phenoxyethanol，Tribehenin，Sorbitan Sesquioleate，1,2-Hexanediol，Dimethicone/Vinyl Dimethicone Crosspolymer，Propylene Carbonate，Caprylyl Glycol，Tocopheryl Acetate，Xanthan Gum，Olea Europaea (Olive) Fruit Oil，Parfum，Sodium Hyaluronate，Benzyl Alcohol，Vanillin， CI 77891，CI 77492，CI 77491, CI 15850，CI 77499.",
+    "usage": "使用前，轻轻摇动瓶子，使用涂抹器涂抹一些，然后用海绵、刷子或指尖混合。",
     "inventoryVerified": false,
     "stock": 0,
     "variants": [
@@ -1526,52 +1735,36 @@
         "name": "色调",
         "options": [
           {
-            "label": "杏",
+            "label": "棕色",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-apricot-abrikosovyiy-100708",
-            "image": "/products/yandex/d54v4wxhrxtlng4fmzjhs85fncf725wf-7835a31972.webp",
+            "slug": "jidkie-rumyana-dlya-lica-toasty-korichnevyiy-100771",
+            "image": "/products/yandex/sprfgp7774zsv8fbcgxhczqxwdh6p6qx-6bff06c23e.webp",
+            "color": "#744E35"
+          },
+          {
+            "label": "蜜桃色",
+            "sku": "",
+            "price": 0,
+            "slug": "jidkie-rumyana-dlya-lica-peachland-100768",
+            "image": "/products/yandex/jslnm8thjtk6lfsq6jj6kjqx4qm8bm5x-98ebb15785.webp",
             "color": "#F18D56"
           },
           {
-            "label": "红色的",
+            "label": "灰粉色",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-red-krasnyiy-100711",
-            "image": "/products/yandex/jrf25gdq7gh2jwb4r6m5fvj8vp6kfxxf-ac90e1c7e7.webp",
-            "color": "#AC2216"
+            "slug": "jidkie-rumyana-dlya-lica-sleepy-morning-pylnaya-roza-100769",
+            "image": "/products/yandex/qlxn5wcdxg5xcp449hk6qljphc5h5txp-8c02c14270.webp",
+            "color": "#EFA2B9"
           },
           {
-            "label": "透明的",
+            "label": "粉色",
             "sku": "",
             "price": 0,
-            "slug": "maslo-dlya-gub-crystal-prozrachnyiy-100709",
-            "image": "/products/yandex/gdkw2bc9crrdgpfxwx96xlfj9g76g7fr-fbc7908d75.webp",
-            "color": "#FFFFFF"
-          },
-          {
-            "label": "粉色的",
-            "sku": "",
-            "price": 0,
-            "slug": "maslo-dlya-gub-purple-1-100706",
-            "image": "/products/yandex/r6ccm6j86qsg4rmdgtmtj9pdnxfgk9tz-8537dd9687.webp",
+            "slug": "jidkie-rumyana-dlya-lica-smoochies-rozovyiy-100770",
+            "image": "/products/yandex/72v8z5rcn66594sh8ztglfk9g8s686bs-40ce5da6c0.webp",
             "color": "#E86B90"
-          },
-          {
-            "label": "黑色的",
-            "sku": "",
-            "price": 0,
-            "slug": "maslo-dlya-gub-black-chernyiy-100710",
-            "image": "/products/yandex/nbr8v9tdxzmtq9nzrdtwsbtfgchs44zv-5dbda44f69.webp",
-            "color": "#000000"
-          },
-          {
-            "label": "巧克力",
-            "sku": "",
-            "price": 0,
-            "slug": "maslo-dlya-gub-chocolate-shokoladnyiy-100707",
-            "image": "/products/yandex/d2nnc4c6tpxkznrbpl2d7n4tvlj2px6m-4ecb318ba9.webp",
-            "color": "#4B3323"
           }
         ]
       }
@@ -1631,6 +1824,189 @@
             "price": 0,
             "slug": "kremovye-rumyana-pusy-pusyboy-25-gr-20-100360",
             "image": "/products/yandex/r6b4prrk2zv2g9z2f72c9stjhgn9x4hp-2896e9480e.webp",
+            "color": "#E86B90"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "jidkie-rumyana-dlya-lica-sleepy-morning-pylnaya-roza-100769",
+    "name": "Sleepy Morning 液体腮红（灰粉色）",
+    "price": 990,
+    "image": "/products/yandex/qlxn5wcdxg5xcp449hk6qljphc5h5txp-8c02c14270.webp",
+    "imageAlt": "/products/yandex/jpmt6qbw84xqrvfkkcdtvqg5p2c6qqq8-81315c417f.webp",
+    "images": [
+      "/products/yandex/qlxn5wcdxg5xcp449hk6qljphc5h5txp-8c02c14270.webp",
+      "/products/yandex/jpmt6qbw84xqrvfkkcdtvqg5p2c6qqq8-81315c417f.webp",
+      "/products/yandex/l84w5xv7thm5bjnvlgsw8prr9blxzjwp-08d348c3ac.webp",
+      "/products/yandex/w5x7x6w7fp2wpxm4jcp7m2xxkhn57c94-158e2703f8.webp"
+    ],
+    "badge": "新品",
+    "category": "彩妆",
+    "description": "同样的腮红可以让你的脸看起来清新、容光焕发——即使早晨没有按计划开始。\n\n只需用手指、刷子或海绵等几个动作即可将浅水霜质地晕染开来。在皮肤上，它会与您的肤色融为一体，就像它自己的腮红一样。色调可以分层：一层是白天的半透明腮红，多一层是丰富的晚间颜色。\n\n腮红覆盖所有妆容：脸颊、颧骨、嘴唇和眼睑。柔软的涂抹器可以准确地涂抹您需要的量，因此消费非常经济，而且紧凑的瓶子可以安静地放在您的钱包里。\n\n摇动瓶子，用涂抹器拧开瓶盖，在脸颊上滴几滴并混合 - 如果您想让颜色更亮，只需重复即可。",
+    "sku": "ДЧЗ0066",
+    "volume": "5,5 毫升",
+    "ingredients": "Aqua，Isohexadecane，Isododecane，Dimethicone，Butylene Glycol，Tridecyl Trimellitate，Kaolin，Lauryl Peg-10 Tris(Trimethylsiloxy)Silylethyl Dimethicone, Polyglyceryl-2 Triisostearate，Trimethylsiloxysilicate，Mica，Disteardimonium Hectorite，Silica, Cetyl Peg/Ppg-10/1 Dimethicone，Sodium Chloride，Phenoxyethanol，Tribehenin，Sorbitan Sesquioleate，1,2-Hexanediol，Dimethicone/Vinyl Dimethicone Crosspolymer，Propylene Carbonate，Caprylyl Glycol，Tocopheryl Acetate，Xanthan Gum，Olea Europaea (Olive) Fruit Oil，Parfum，Sodium Hyaluronate，Benzyl Alcohol，Vanillin， CI 77891，CI 77491, CI 77492，CI 15850，CI 15985, CI 77499.",
+    "usage": "使用前，轻轻摇动瓶子，使用涂抹器涂抹一些，然后用海绵、刷子或指尖混合。",
+    "inventoryVerified": false,
+    "stock": 0,
+    "variants": [
+      {
+        "name": "色调",
+        "options": [
+          {
+            "label": "棕色",
+            "sku": "",
+            "price": 0,
+            "slug": "jidkie-rumyana-dlya-lica-toasty-korichnevyiy-100771",
+            "image": "/products/yandex/sprfgp7774zsv8fbcgxhczqxwdh6p6qx-6bff06c23e.webp",
+            "color": "#744E35"
+          },
+          {
+            "label": "蜜桃色",
+            "sku": "",
+            "price": 0,
+            "slug": "jidkie-rumyana-dlya-lica-peachland-100768",
+            "image": "/products/yandex/jslnm8thjtk6lfsq6jj6kjqx4qm8bm5x-98ebb15785.webp",
+            "color": "#F18D56"
+          },
+          {
+            "label": "灰粉色",
+            "sku": "",
+            "price": 0,
+            "slug": "jidkie-rumyana-dlya-lica-sleepy-morning-pylnaya-roza-100769",
+            "image": "/products/yandex/qlxn5wcdxg5xcp449hk6qljphc5h5txp-8c02c14270.webp",
+            "color": "#EFA2B9"
+          },
+          {
+            "label": "粉色",
+            "sku": "",
+            "price": 0,
+            "slug": "jidkie-rumyana-dlya-lica-smoochies-rozovyiy-100770",
+            "image": "/products/yandex/72v8z5rcn66594sh8ztglfk9g8s686bs-40ce5da6c0.webp",
+            "color": "#E86B90"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "jidkie-rumyana-dlya-lica-smoochies-rozovyiy-100770",
+    "name": "Smoochies 液体腮红（粉色）",
+    "price": 990,
+    "image": "/products/yandex/72v8z5rcn66594sh8ztglfk9g8s686bs-40ce5da6c0.webp",
+    "imageAlt": "/products/yandex/2rw7cdnrsgk2dmxwqnzc7nzzj7htgrh8-9feb67dee8.webp",
+    "images": [
+      "/products/yandex/72v8z5rcn66594sh8ztglfk9g8s686bs-40ce5da6c0.webp",
+      "/products/yandex/2rw7cdnrsgk2dmxwqnzc7nzzj7htgrh8-9feb67dee8.webp",
+      "/products/yandex/5qpsfhq7rjwksllt47rw4tlg5gqrx2kr-0449229f66.webp",
+      "/products/yandex/qq2lcdkgsrzzfp2hp979kd8gs66d66qs-a08e3deec3.webp"
+    ],
+    "badge": "新品",
+    "category": "彩妆",
+    "description": "同样的腮红可以让你的脸看起来清新、容光焕发——即使早晨没有按计划开始。\n\n只需用手指、刷子或海绵等几个动作即可将浅水霜质地晕染开来。在皮肤上，它会与您的肤色融为一体，就像它自己的腮红一样。色调可以分层：一层是白天的半透明腮红，多一层是丰富的晚间颜色。\n\n腮红覆盖所有妆容：脸颊、颧骨、嘴唇和眼睑。柔软的涂抹器可以准确地涂抹您需要的量，因此消费非常经济，而且紧凑的瓶子可以安静地放在您的钱包里。\n\n摇动瓶子，用涂抹器拧开瓶盖，在脸颊上滴几滴并混合 - 如果您想让颜色更亮，只需重复即可。",
+    "sku": "ДЧЗ0065",
+    "volume": "5,5 毫升",
+    "ingredients": "Aqua，Isohexadecane，Isododecane，Dimethicone，Butylene Glycol，Tridecyl Trimellitate，Kaolin，Lauryl Peg-10 Tris(Trimethylsiloxy)Silylethyl Dimethicone, Polyglyceryl-2 Triisostearate，Trimethylsiloxysilicate，Mica，Disteardimonium Hectorite，Silica, Cetyl Peg/Ppg-10/1 Dimethicone，Sodium Chloride，Phenoxyethanol，Tribehenin，Sorbitan Sesquioleate，1,2-Hexanediol，Dimethicone/Vinyl Dimethicone Crosspolymer，Propylene Carbonate，Caprylyl Glycol，Tocopheryl Acetate，Xanthan Gum，Olea Europaea (Olive) Fruit Oil，Parfum，Sodium Hyaluronate，Benzyl Alcohol，Vanillin， CI 77891，CI 77492，CI 15850，CI 77499.",
+    "usage": "使用前，轻轻摇动瓶子，使用涂抹器涂抹一些，然后用海绵、刷子或指尖混合。",
+    "inventoryVerified": false,
+    "stock": 0,
+    "variants": [
+      {
+        "name": "色调",
+        "options": [
+          {
+            "label": "棕色",
+            "sku": "",
+            "price": 0,
+            "slug": "jidkie-rumyana-dlya-lica-toasty-korichnevyiy-100771",
+            "image": "/products/yandex/sprfgp7774zsv8fbcgxhczqxwdh6p6qx-6bff06c23e.webp",
+            "color": "#744E35"
+          },
+          {
+            "label": "蜜桃色",
+            "sku": "",
+            "price": 0,
+            "slug": "jidkie-rumyana-dlya-lica-peachland-100768",
+            "image": "/products/yandex/jslnm8thjtk6lfsq6jj6kjqx4qm8bm5x-98ebb15785.webp",
+            "color": "#F18D56"
+          },
+          {
+            "label": "灰粉色",
+            "sku": "",
+            "price": 0,
+            "slug": "jidkie-rumyana-dlya-lica-sleepy-morning-pylnaya-roza-100769",
+            "image": "/products/yandex/qlxn5wcdxg5xcp449hk6qljphc5h5txp-8c02c14270.webp",
+            "color": "#EFA2B9"
+          },
+          {
+            "label": "粉色",
+            "sku": "",
+            "price": 0,
+            "slug": "jidkie-rumyana-dlya-lica-smoochies-rozovyiy-100770",
+            "image": "/products/yandex/72v8z5rcn66594sh8ztglfk9g8s686bs-40ce5da6c0.webp",
+            "color": "#E86B90"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "jidkie-rumyana-dlya-lica-toasty-korichnevyiy-100771",
+    "name": "Toasty 液体腮红（棕色）",
+    "price": 990,
+    "image": "/products/yandex/sprfgp7774zsv8fbcgxhczqxwdh6p6qx-6bff06c23e.webp",
+    "imageAlt": "/products/yandex/pqqd8k9j9jx8ww2vf5dqd7g7r7pkw4bv-a311e692ba.webp",
+    "images": [
+      "/products/yandex/sprfgp7774zsv8fbcgxhczqxwdh6p6qx-6bff06c23e.webp",
+      "/products/yandex/pqqd8k9j9jx8ww2vf5dqd7g7r7pkw4bv-a311e692ba.webp",
+      "/products/yandex/bdc7bwzbrnfbwx8bp6w5tfqp7vm4zqfq-eab1f5f422.webp",
+      "/products/yandex/v8qtjfwxfrbkz5dwlnh9rgs4tfcd29j9-b252dfc77d.webp"
+    ],
+    "badge": "新品",
+    "category": "彩妆",
+    "description": "同样的腮红可以让你的脸看起来清新、容光焕发——即使早晨没有按计划开始。\n\n只需用手指、刷子或海绵等几个动作即可将浅水霜质地晕染开来。在皮肤上，它会与您的肤色融为一体，就像它自己的腮红一样。色调可以分层：一层是白天的半透明腮红，多一层是丰富的晚间颜色。\n\n腮红覆盖所有妆容：脸颊、颧骨、嘴唇和眼睑。柔软的涂抹器可以准确地涂抹您需要的量，因此消费非常经济，而且紧凑的瓶子可以安静地放在您的钱包里。\n\n摇动瓶子，用涂抹器拧开瓶盖，在脸颊上滴几滴并混合 - 如果您想让颜色更亮，只需重复即可。",
+    "sku": "ДЧЗ0063",
+    "volume": "5,5 毫升",
+    "ingredients": "Aqua，Isohexadecane，Isododecane，Dimethicone，Butylene Glycol，Tridecyl Trimellitate，Kaolin，Lauryl Peg-10 Tris(Trimethylsiloxy)Silylethyl Dimethicone, Polyglyceryl-2 Triisostearate，Trimethylsiloxysilicate，Mica，Disteardimonium Hectorite，Silica, Cetyl Peg/Ppg-10/1 Dimethicone，Sodium Chloride，Phenoxyethanol，Tribehenin，Sorbitan Sesquioleate，1,2-Hexanediol，Dimethicone/Vinyl Dimethicone Crosspolymer，Propylene Carbonate，Caprylyl Glycol，Tocopheryl Acetate，Xanthan Gum，Olea Europaea (Olive) Fruit Oil，Parfum，Sodium Hyaluronate，Benzyl Alcohol，Vanillin， CI 77891，CI 77492，CI 77491, CI 77499, CI 15850.",
+    "usage": "使用前，轻轻摇动瓶子，使用涂抹器涂抹一些，然后用海绵、刷子或指尖混合。",
+    "inventoryVerified": false,
+    "stock": 0,
+    "variants": [
+      {
+        "name": "色调",
+        "options": [
+          {
+            "label": "棕色",
+            "sku": "",
+            "price": 0,
+            "slug": "jidkie-rumyana-dlya-lica-toasty-korichnevyiy-100771",
+            "image": "/products/yandex/sprfgp7774zsv8fbcgxhczqxwdh6p6qx-6bff06c23e.webp",
+            "color": "#744E35"
+          },
+          {
+            "label": "蜜桃色",
+            "sku": "",
+            "price": 0,
+            "slug": "jidkie-rumyana-dlya-lica-peachland-100768",
+            "image": "/products/yandex/jslnm8thjtk6lfsq6jj6kjqx4qm8bm5x-98ebb15785.webp",
+            "color": "#F18D56"
+          },
+          {
+            "label": "灰粉色",
+            "sku": "",
+            "price": 0,
+            "slug": "jidkie-rumyana-dlya-lica-sleepy-morning-pylnaya-roza-100769",
+            "image": "/products/yandex/qlxn5wcdxg5xcp449hk6qljphc5h5txp-8c02c14270.webp",
+            "color": "#EFA2B9"
+          },
+          {
+            "label": "粉色",
+            "sku": "",
+            "price": 0,
+            "slug": "jidkie-rumyana-dlya-lica-smoochies-rozovyiy-100770",
+            "image": "/products/yandex/72v8z5rcn66594sh8ztglfk9g8s686bs-40ce5da6c0.webp",
             "color": "#E86B90"
           }
         ]
@@ -1964,7 +2340,7 @@
         "name": "色调",
         "options": [
           {
-            "label": "透明的",
+            "label": "透明",
             "sku": "",
             "price": 0,
             "slug": "rebrending-prozrachnyiy-super-gel-fiksator-dlya-broveiy-super-fix-brow-gel-pusy-5-ml-10-100344",
@@ -2042,7 +2418,7 @@
         "name": "色调",
         "options": [
           {
-            "label": "透明的",
+            "label": "透明",
             "sku": "",
             "price": 0,
             "slug": "rebrending-prozrachnyiy-gel-fiksator-dlya-jestkih-broveiy-pusy-5-ml-6-100345",
@@ -2243,7 +2619,7 @@
         "name": "色调",
         "options": [
           {
-            "label": "透明的",
+            "label": "透明",
             "sku": "",
             "price": 0,
             "slug": "rebrending-prozrachnyiy-gel-fiksator-dlya-broveiy-pusy-5ml-1-100347",
@@ -2342,7 +2718,7 @@
         "name": "色调",
         "options": [
           {
-            "label": "透明的",
+            "label": "透明",
             "sku": "",
             "price": 0,
             "slug": "rebrending-prozrachnyiy-gel-fiksator-dlya-broveiy-pusy-5ml-1-100347",
@@ -2622,28 +2998,6 @@
     ]
   },
   {
-    "slug": "gel-maslo-dlya-dusha-pusy-shower-body-oil-200ml-100164",
-    "name": "沐浴油",
-    "price": 1290,
-    "image": "/products/yandex/75kp2wwm6zgs8k4jl4dwfhjlxr676mnb-02bd796755.webp",
-    "imageAlt": "/products/yandex/xwjsw2rlqb6v6pnmcc98sc9lfmpj8lct-49e7b4cae7.webp",
-    "images": [
-      "/products/yandex/75kp2wwm6zgs8k4jl4dwfhjlxr676mnb-02bd796755.webp",
-      "/products/yandex/xwjsw2rlqb6v6pnmcc98sc9lfmpj8lct-49e7b4cae7.webp",
-      "/products/yandex/245pzwqxzgfklpnxqz5bm9ccf8k9kp6p-02b3b9c7b2.webp",
-      "/products/yandex/8xdttrqmx8z9bvmkn7bwgskchdrwd6hv-e4b42c888f.webp"
-    ],
-    "category": "身体护理",
-    "description": "PÚSY 沐浴油 - 在浴室进行 SPA 后的皮肤效果。细腻的凝胶油与水接触后会变成柔软的泡沫，尽可能细致地清洁皮肤 - 不会有干燥和紧绷的感觉。它不仅能清洁，还能让身体感觉整洁、光滑，就像经过昂贵的护理后一样。 \n\n大豆油、蓖麻油和荷荷巴油的复合物可滋养肌肤，使其柔软、有弹性、触感舒适。西兰花油有助于保护皮肤免受外部因素的影响，保持其健康、美丽的外观。 \n\n是的，没有油腻的薄膜：只有天鹅绒般的肌肤和淡淡的香气，让您想要更长久地感受它。",
-    "sku": "ПП07ЧЗ",
-    "volume": "200 毫升",
-    "ingredients": "Glycine Soja (Soybean) Oil, Ricinus Communis (Castor) Seed Oil, Caprylic/Capric Triglyceride, MIPA-Laureth Sulfate, Laureth-3, Polyglyceryl-3 Diisostearate, Parfum, Laureth-7 Citrate, PEG-7 Glyceryl Cocoate, Propylene Glycol, Brassica Oleracea Italica (Brocoli) Seed Oil, Simmondsia Chinensis (Jojoba) Seed Oil, Pentaerythrityl Tetra-di-t-butyl Hydroxyhydrocinnamate, Benzyl Benzoate.",
-    "usage": "将油涂抹在湿润的皮肤上。与水混合以获得柔软的泡沫。使用后彻底冲洗。仅供外部使用。",
-    "inventoryVerified": false,
-    "stock": 0,
-    "variants": []
-  },
-  {
     "slug": "skrab-dlya-tela-pusy-body-shimmering-scrub-250gr-100195",
     "name": "闪亮身体磨砂膏",
     "price": 1210,
@@ -2724,7 +3078,7 @@
         "name": "色调",
         "options": [
           {
-            "label": "粉色的",
+            "label": "粉色",
             "sku": "",
             "price": 0,
             "slug": "skrab-slaiym-dlya-tela-pusy-slime-scrub-250-g-100196",
@@ -2788,6 +3142,28 @@
     "volume": "200毫升",
     "ingredients": "Aqua, Dihydroxyacetone, Propylene Glycol, Dimethyl Isosorbide, Glycerin, Polysor-bate 20, Cocamidopropyl Betaine, Erythrulose, Panthenol, Centella Asiatica Extract, Mangifera Indica Fruit Extract, Carica Papaya Fruit Extract, Sodium Hyaluronate, Tilia Cordata Flower Water, Cupressus Sempervirens Leaf Water, Xanthan Gum, Ethylhexylglycerin, Phenoxyethanol, 1,2-hexanediol, Sodium Benzoate, Potassium Sorbate, Parfum, Benzyl Salicylate, Linalool, Limonene.",
     "usage": "为了获得均匀的晒黑效果，在使用产品之前，请用磨砂膏彻底清洁皮肤，并用面霜滋润皮肤。摇动瓶子，将少量慕斯挤到手套上。使用平滑的打圈动作，将自晒黑剂从下到上涂抹，直至完全吸收。避免与水接触，在产品完全干燥之前请勿接触织物（衣服）表面。建议4-6小时后用洗面奶洗掉自晒黑摩丝。晒黑效果可持续 5 至 10 天，具体取决于您的皮肤类型。为了获得更强烈的晒黑效果，请重复该过程。",
+    "inventoryVerified": false,
+    "stock": 0,
+    "variants": []
+  },
+  {
+    "slug": "uvlajnyayshchiiy-krem-dlya-ruk-pusy-ginger-verveine-100763",
+    "name": "生姜马鞭草保湿护手霜",
+    "price": 400,
+    "image": "/products/yandex/jb9rf6w242gcnfmnl2rw78dg5q89vmth-880cef155c.webp",
+    "imageAlt": "/products/yandex/plrqvbgwzbmc9hk9fb8ctrl9lk6kglgd-d37510633b.webp",
+    "images": [
+      "/products/yandex/jb9rf6w242gcnfmnl2rw78dg5q89vmth-880cef155c.webp",
+      "/products/yandex/plrqvbgwzbmc9hk9fb8ctrl9lk6kglgd-d37510633b.webp",
+      "/products/yandex/p26z8hf8jmtndpwwrhvvtwvhwpfbz6p4-ca1cf4dbf4.webp"
+    ],
+    "badge": "新品",
+    "category": "身体护理",
+    "description": "柠檬冰糕与姜饼有着千丝万缕的联系。这就是姜马鞭草的诞生。\n\n首先是柠檬和马鞭草的清新香气，然后是温暖的姜味，最后香气变得柔和、甜美和香草味。\n\n轻盈的质地可在几秒钟内被吸收，不会在手机屏幕、咖啡杯或键盘上留下油腻的薄膜或痕迹。您可以涂抹面霜，立即继续您的美丽生活。\n\n小心：这种气味会让你寻找任何借口再次涂抹面霜。 0% 定罪。 100%理解。",
+    "sku": "ДЧЗ0068",
+    "volume": "30 毫升",
+    "ingredients": "Aqua, Rosa Damascena Flower Water, Coco-Caprylate, Glycerin, Octyldodecanol, Butyrospermum Parkii (Shea) Butter, Cetearyl Alcohol, Glyceryl Stearate, PEG-100 Stearate, Cyclopentasiloxane, Dimethicone, Phenoxyethanol, Ethylhexylglycerin, Panthenol, Sodium Polyacrylate, Carbomer, Tocopheryl Acetate, Sodium Hyaluronate, Avena Sativa Leaf/Stalk Extract, Saccharomyces Ferment Lysate Filtrate, Citric Acid, Sodium Benzoate, Potassium Sorbate, Sodium Hydroxide, Parfum, Citral, Hexyl Cinnamal, Limonene, Linalool.",
+    "usage": "将乳霜涂抹在清洁双手的皮肤上，并通过按摩动作使其均匀分布。",
     "inventoryVerified": false,
     "stock": 0,
     "variants": []

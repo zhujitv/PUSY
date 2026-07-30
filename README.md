@@ -28,6 +28,7 @@ Node.js 版本要求：`>=22.13.0`。
 ### 正式支付接入
 
 - 微信支付：后台填写 AppID、商户号、平台公钥 ID 和商户证书序列号；服务器设置 `WECHAT_PAY_PRIVATE_KEY`、`WECHAT_PAY_PUBLIC_KEY`、`WECHAT_PAY_API_V3_KEY`。
+- 微信小程序：认证后设置 `WECHAT_MINIPROGRAM_APP_ID` 与 `WECHAT_MINIPROGRAM_APP_SECRET`；认证前保持小程序 `previewMode`，不得使用伪造 OpenID。
 - 支付宝：后台填写应用 ID 和商户号；服务器设置 `ALIPAY_PRIVATE_KEY`、`ALIPAY_PUBLIC_KEY`。
 - 两个渠道都切换为“正式环境”并在后台启用后，前台才允许发起真实扣款。
 - 微信支付回调为 `/api/payments/webhooks/wechat`，微信退款回调为 `/api/payments/webhooks/wechat/refund`；支付宝回调为 `/api/payments/webhooks/alipay`。

@@ -382,3 +382,15 @@ export const notificationDeliveryEvents = sqliteTable("notification_delivery_eve
   eventType: text("event_type").notNull(),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
+
+export const memberNotifications = sqliteTable("member_notifications", {
+  id: text("id").primaryKey(),
+  memberId: integer("member_id").notNull().references(() => members.id),
+  eventKey: text("event_key").notNull(),
+  notificationType: text("notification_type").notNull().default("system"),
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  link: text("link").notNull().default(""),
+  readAt: text("read_at"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});

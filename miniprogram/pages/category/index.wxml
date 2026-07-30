@@ -16,7 +16,7 @@
   </scroll-view>
 
   <view class="catalog-meta">
-    <text>{{activeCategory}}</text>
+    <text>{{activeCategory}} · {{dataStatus}}</text>
     <text>{{resultText}}</text>
   </view>
 

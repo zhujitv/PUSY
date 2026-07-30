@@ -4,13 +4,14 @@
     <text class="profile-kicker">PÚSY CLUB</text>
     <text class="profile-title">你的美，\n由你定义</text>
     <text class="profile-copy">登录后可在网站与小程序之间共享会员、订单、地址和售后记录。</text>
-    <button class="profile-login" bindtap="login">{{loggedIn ? loginStatus : '微信快捷登录'}}</button>
+    <view class="profile-login" role="button" aria-label="{{loggedIn ? memberName + '，' + loginStatus : '微信快捷登录'}}" bindtap="login">{{loginBusy ? '登录中…' : (loggedIn ? memberName + ' · ' + loginStatus : '微信快捷登录')}}</view>
   </view>
 
   <view class="member-card">
     <view>
       <text class="member-label">当前状态</text>
       <text class="member-value">{{loginStatus}}</text>
+      <text wx:if="{{memberSummary}}" class="member-label">{{memberSummary}}</text>
     </view>
     <view bindtap="openCart">
       <text class="member-label">购物袋</text>
@@ -21,7 +22,7 @@
   <view class="profile-services">
     <view wx:for="{{services}}" wx:key="key" class="service-item" bindtap="openService" data-key="{{item.key}}">
       <view>
-        <text class="service-label">{{item.label}}</text>
+        <view class="service-title-row"><text class="service-label">{{item.label}}</text><text wx:if="{{item.key === 'notifications' && notificationUnread}}" class="service-badge">{{notificationUnread > 99 ? '99+' : notificationUnread}}</text></view>
         <text class="service-caption">{{item.caption}}</text>
       </view>
       <text class="service-arrow">→</text>
@@ -29,7 +30,7 @@
   </view>
 
   <view class="preview-note">
-    <text class="preview-title">第一阶段开发预览</text>
-    <text>当前版本使用本地商品数据和本地购物袋。微信登录、PostgreSQL、正式库存、订单与支付将在后续通过统一API接入。</text>
+    <text class="preview-title">认证前开发模式</text>
+    <text>商品会优先连接本机统一 API，连接失败时自动使用内置数据。登录仅建立本地预览身份，不生成 OpenID；认证后配置服务器密钥即可切换真实微信登录。</text>
   </view>
 </view>

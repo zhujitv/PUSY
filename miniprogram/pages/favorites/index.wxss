@@ -1,0 +1,6 @@
+.favorites-page { min-height: 100vh; padding-bottom: 60rpx; background: #fff; }
+.favorites-head { padding: 62rpx 30rpx 44rpx; border-bottom: 1rpx solid #ccc; background: #fff; }
+.favorites-head > text:nth-child(2) { display: block; margin-top: 14rpx; font-size: 62rpx; letter-spacing: -4rpx; }
+.favorites-head > text:last-child { display: block; margin-top: 18rpx; color: #777; font-size: 22rpx; line-height: 1.6; }
+.favorites-meta { display: flex; justify-content: space-between; padding: 24rpx 28rpx 0; color: #777; font-size: 21rpx; }
+.favorites-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12rpx; padding: 24rpx 18rpx; }

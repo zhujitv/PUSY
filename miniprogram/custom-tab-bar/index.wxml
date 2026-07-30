@@ -1,0 +1,16 @@
+<view class="custom-tab-bar" role="tablist" aria-label="主导航">
+  <view
+    wx:for="{{items}}"
+    wx:key="pagePath"
+    class="tab-item {{selected === index ? 'active' : ''}}"
+    role="tab"
+    aria-selected="{{selected === index}}"
+    data-index="{{index}}"
+    bindtap="switchTab"
+    hover-class="tab-item-hover"
+  >
+    <text class="tab-label">{{item.text}}</text>
+    <text wx:if="{{index === 2 && cartBadge}}" class="tab-badge">{{cartBadge}}</text>
+    <text wx:if="{{index === 3 && notificationBadge}}" class="tab-badge">{{notificationBadge}}</text>
+  </view>
+</view>

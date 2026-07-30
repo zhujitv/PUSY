@@ -1,0 +1,21 @@
+<view class="page-shell checkout-page">
+  <view class="checkout-head"><text class="eyebrow">CHECKOUT</text><text>确认订单</text><text wx:if="{{previewMode}}" class="preview-badge">开发预览 · 不会扣库存或付款</text></view>
+
+  <view class="checkout-section address-card" bindtap="openAddress">
+    <view><text class="section-label">收货地址</text><text class="section-action">{{address ? '修改' : '填写'}} →</text></view>
+    <block wx:if="{{address}}"><text class="address-name">{{address.recipient}} · {{address.phone}}</text><text class="address-detail">{{addressText}}</text><text class="address-detail">{{address.email}}</text></block>
+    <text wx:else class="empty-address">请填写收货人、手机和详细地址</text>
+  </view>
+
+  <view class="checkout-section"><text class="section-label">配送方式</text><view class="delivery-list"><button wx:for="{{deliveryOptions}}" wx:key="*this" class="{{delivery === item ? 'active' : ''}}" data-delivery="{{item}}" bindtap="chooseDelivery">{{item}}</button></view></view>
+
+  <view class="checkout-section coupon-card"><view class="section-title-row"><text class="section-label">会员优惠券</text><text>{{couponNote}}</text></view><picker mode="selector" range="{{couponOptions}}" value="{{couponIndex}}" bindchange="chooseCoupon"><view class="coupon-picker">{{couponOptions[couponIndex]}}<text>选择 →</text></view></picker></view>
+
+  <view class="checkout-section"><view class="section-title-row"><text class="section-label">商品明细</text><text>{{cart.count}}件</text></view><view class="checkout-items"><view wx:for="{{cart.items}}" wx:key="productId"><image src="{{item.product.image}}" mode="aspectFill" /><view><text>{{item.product.name}}</text><text>{{item.product.priceText}} × {{item.quantity}}</text></view><text>{{item.subtotalText}}</text></view></view></view>
+
+  <view class="checkout-section totals"><view><text>商品小计</text><text>{{cart.totalText}}</text></view><view><text>配送费</text><text>{{shippingText}}</text></view><view><text>会员优惠</text><text class="discount-value">{{discountText}}</text></view><view class="total"><text>合计</text><text>{{totalText}}</text></view></view>
+
+  <view class="payment-note"><text>支付方式</text><text>微信支付</text><text wx:if="{{previewMode}}">当前只生成本地预览订单；认证和商户配置完成后再调起微信收银台。</text></view>
+  <button class="primary-button submit-order" loading="{{busy}}" disabled="{{busy || !cart.items.length}}" bindtap="submit">{{previewMode ? '提交预览订单' : '提交订单'}}</button>
+  <view class="safe-bottom"></view>
+</view>

@@ -1,8 +1,8 @@
-<view class="card" bindtap="openProduct">
+<view class="card card-{{variant}}" bindtap="openProduct">
   <view class="image-wrap">
     <image class="image" src="{{product.image}}" mode="aspectFill" lazy-load="true" />
     <text wx:if="{{product.badge}}" class="badge">{{product.badge}}</text>
-    <button class="quick-add" catchtap="add" aria-label="加入购物袋">＋</button>
+    <button class="quick-add" disabled="{{product.purchasable === false}}" catchtap="add" aria-label="{{product.purchasable === false ? '暂时缺货' : '加入购物袋'}}">{{product.purchasable === false ? '暂时缺货' : '加入购物袋'}}</button>
   </view>
   <view class="copy">
     <text class="category">{{product.category}}</text>

@@ -1,0 +1,16 @@
+.after-sale-page { min-height: 100vh; padding-bottom: 60rpx; background: #fff; }
+.after-sale-head { padding: 62rpx 30rpx 46rpx; border-bottom: 1rpx solid #ccc; background: #fff; }
+.after-sale-head > text:nth-child(2) { display: block; margin-top: 14rpx; font-size: 62rpx; letter-spacing: -4rpx; }
+.after-sale-head > text:nth-child(3) { display: block; margin-top: 20rpx; color: #777; font-size: 23rpx; line-height: 1.6; }
+.preview-badge { display: inline-flex; margin-top: 22rpx; padding: 10rpx 16rpx; background: #fff0f7; color: #a52c64; font-size: 21rpx; }
+.after-sale-form, .result-card { margin: 28rpx; padding: 32rpx; border: 1rpx solid #aaa; background: #fff; }
+.after-sale-form label { display: block; margin-bottom: 30rpx; }
+.after-sale-form label > text { display: block; margin-bottom: 12rpx; color: #666; font-size: 22rpx; }
+.after-sale-form input, .after-sale-form textarea, .picker-value { width: 100%; min-height: 82rpx; padding: 22rpx 0; border-bottom: 1rpx solid #bbb; font-size: 28rpx; }
+.after-sale-form textarea { height: 170rpx; }
+.safe-note { margin-bottom: 28rpx; padding: 22rpx; background: #f7f5f2; color: #666; font-size: 21rpx; line-height: 1.6; }
+.result-card { padding: 60rpx 34rpx; text-align: center; }
+.result-card > text { display: block; margin-top: 14rpx; }
+.result-card > text:nth-child(2) { font-size: 36rpx; font-weight: 600; }
+.result-card .primary-button { margin-top: 40rpx; }
+.result-symbol { color: #eb2f83; font-size: 70rpx; }

@@ -1,0 +1,31 @@
+.notification-page { min-height: 100vh; padding-bottom: 60rpx; background: #fff; }
+.notification-hero { padding: 62rpx 30rpx 46rpx; border-bottom: 1rpx solid #ccc; background: #fff; color: #111; }
+.hero-heading { display: flex; align-items: flex-end; justify-content: space-between; margin-top: 16rpx; }
+.hero-heading text:first-child { font-size: 62rpx; line-height: 1; letter-spacing: -4rpx; }
+.hero-heading text:last-child { padding-bottom: 7rpx; color: #eb2f83; font-size: 21rpx; }
+.hero-copy { display: block; max-width: 570rpx; margin-top: 24rpx; color: #777; font-size: 23rpx; line-height: 1.6; }
+.notification-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 25rpx 28rpx 19rpx; }
+.filter-group { display: flex; flex: 0 0 auto; gap: 12rpx; }
+.filter-pill { flex: 0 0 auto; min-width: 92rpx; height: 56rpx; display: flex; align-items: center; justify-content: center; padding: 0 20rpx; background: #e8e4e5; color: #777; font-size: 21rpx; line-height: 1; text-align: center; }
+.filter-pill.active { background: #111; color: #fff; }
+.read-all { color: #d92376; font-size: 22rpx; }
+.read-all.disabled { color: #aaa; }
+.notification-list { padding: 0 28rpx; }
+.notification-card { position: relative; margin-bottom: 0; padding: 32rpx 8rpx 30rpx 22rpx; border: 0; border-bottom: 1rpx solid #ddd; background: #fff; }
+.notification-card.is-unread { border-bottom-color: #e3a2c0; box-shadow: none; }
+.notification-card.is-unread::before { position: absolute; top: 0; bottom: 0; left: 0; width: 6rpx; background: #ff2f91; content: ""; }
+.notification-card.is-read { opacity: .78; }
+.card-meta { display: flex; align-items: center; justify-content: space-between; }
+.type-wrap { display: flex; align-items: center; gap: 11rpx; }
+.unread-dot { width: 12rpx; height: 12rpx; border-radius: 50%; background: #ff2f91; }
+.type-label { padding: 7rpx 12rpx; border: 1rpx solid #ccc; background: #fff; color: #665c60; font-size: 19rpx; }
+.type-benefit { background: #fff0f7; color: #bd2368; }
+.type-logistics { background: #eef5ff; color: #3f68a4; }
+.type-service { background: #fff5e9; color: #9a642a; }
+.type-product { background: #eef8f0; color: #47784f; }
+.time-label { color: #aaa; font-size: 19rpx; }
+.card-title { display: block; margin-top: 19rpx; font-size: 30rpx; font-weight: 600; line-height: 1.35; }
+.card-body { display: -webkit-box; overflow: hidden; margin-top: 12rpx; color: #6f696b; font-size: 22rpx; line-height: 1.65; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.card-link { display: block; margin-top: 21rpx; color: #d92376; font-size: 21rpx; }
+.message-empty { padding: 150rpx 46rpx; text-align: center; }
+.empty-mark { display: flex; width: 88rpx; height: 88rpx; align-items: center; justify-content: center; margin: 0 auto 28rpx; border-radius: 50%; background: #eadfe4; color: #a66480; font-size: 40rpx; }

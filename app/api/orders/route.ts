@@ -1,7 +1,7 @@
 import { getStoreDb } from "../../../db/store";
 import { getProduct } from "../../data/products";
 import { calculateCouponDiscount } from "../../../db/promotions";
-import { getPreviewMemberIdentity } from "../../../lib/preview-member-auth";
+import { getMemberIdentityFromRequest } from "../../../lib/preview-member-auth";
 import { sha256 } from "../../../lib/payments/crypto";
 import { releaseExpiredOrderReservations } from "../../../lib/orders/reservations";
 import { allowRequest, hasTrustedOrigin, rateLimitResponse, safeServerError } from "../../../lib/request-security";
@@ -25,8 +25,8 @@ export async function POST(request: Request) {
     const address = String(payload.address ?? "").trim().slice(0, 300);
     if (!customer || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !/^1[3-9]\d{9}$/.test(phone) || !address || !["标准快递", "顺丰速运", "门店自提"].includes(String(payload.delivery)) || !["支付宝", "微信支付"].includes(String(payload.payment)) || !payload.items?.length || payload.items.length > 50) return Response.json({ error: "订单信息不完整或格式无效" }, { status: 400 });
     const db = await getStoreDb();
-    const viewer = await getPreviewMemberIdentity();
-    const memberEmail = (viewer?.email ?? email).toLowerCase();
+    const viewer = await getMemberIdentityFromRequest(request);
+    const memberEmail = (viewer && !viewer.email.endsWith("@members.pusy.cn") ? viewer.email : email).toLowerCase();
     const resolvedItems: { slug: string; name: string; price: number; quantity: number; manageStock: boolean; description: string }[] = [];
     for (const line of payload.items) {
       const quantity = Math.round(Number(line.quantity));

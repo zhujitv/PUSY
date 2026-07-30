@@ -1,0 +1,37 @@
+<view class="page-shell notification-page">
+  <view class="notification-hero">
+    <text class="eyebrow">MESSAGE CENTER</text>
+    <view class="hero-heading">
+      <text>消息中心</text>
+      <text wx:if="{{unreadCount}}">{{unreadCount}}条未读</text>
+      <text wx:else>已全部读完</text>
+    </view>
+    <text class="hero-copy">订单、物流、退款、售后和会员权益，都集中在这里。</text>
+  </view>
+
+  <view class="notification-toolbar">
+    <view class="filter-group">
+      <view class="filter-pill {{activeFilter === 'all' ? 'active' : ''}}" role="button" aria-label="查看全部消息" data-filter="all" bindtap="selectFilter">全部</view>
+      <view class="filter-pill {{activeFilter === 'unread' ? 'active' : ''}}" role="button" aria-label="查看未读消息" data-filter="unread" bindtap="selectFilter">未读 {{unreadCount}}</view>
+    </view>
+    <text class="read-all {{unreadCount ? '' : 'disabled'}}" bindtap="markAll">全部已读</text>
+  </view>
+
+  <view wx:if="{{visibleNotifications.length}}" class="notification-list">
+    <view wx:for="{{visibleNotifications}}" wx:key="id" class="notification-card {{item.read ? 'is-read' : 'is-unread'}}" data-id="{{item.id}}" bindtap="openNotification">
+      <view class="card-meta">
+        <view class="type-wrap"><text wx:if="{{!item.read}}" class="unread-dot"></text><text class="type-label type-{{item.type}}">{{item.typeLabel}}</text></view>
+        <text class="time-label">{{item.timeText}}</text>
+      </view>
+      <text class="card-title">{{item.title}}</text>
+      <text class="card-body">{{item.body}}</text>
+      <text class="card-link">{{item.link ? '查看详情 →' : '阅读消息 →'}}</text>
+    </view>
+  </view>
+
+  <view wx:elif="{{!loading}}" class="message-empty">
+    <text class="empty-mark">✓</text>
+    <text class="empty-title">{{activeFilter === 'unread' ? '没有未读消息' : '暂时没有消息'}}</text>
+    <text class="empty-copy">新的订单与服务进度会及时出现在这里。</text>
+  </view>
+</view>

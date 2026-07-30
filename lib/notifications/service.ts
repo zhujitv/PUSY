@@ -14,11 +14,53 @@ type NotificationInput = {
   phone?: string;
   payload: Record<string, string>;
   scheduledAt?: string;
+  memberId?: number;
 };
 
 const retrySeconds = [30, 120, 600, 1800, 7200, 21600];
 const escapeHtml = (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
 const render = (source: string, payload: Record<string, string>, escape = false) => source.replace(/\{\{([A-Za-z0-9_]+)\}\}/g, (_, key: string) => escape ? escapeHtml(payload[key] ?? "") : payload[key] ?? "");
+const memberInboxTemplates = new Set(["order_confirmed", "order_shipped", "order_cancelled", "return_updated", "refund_completed", "payment_reminder", "repurchase_reminder", "new_product", "product_restock", "price_drop", "targeted_coupon"]);
+
+function inboxType(templateKey: string) {
+  if (["order_confirmed", "order_cancelled", "payment_reminder"].includes(templateKey)) return "order";
+  if (templateKey === "order_shipped") return "logistics";
+  if (["return_updated", "refund_completed"].includes(templateKey)) return "service";
+  if (templateKey === "targeted_coupon") return "benefit";
+  if (["product_restock", "price_drop", "new_product", "repurchase_reminder"].includes(templateKey)) return "product";
+  return "system";
+}
+
+function inboxLink(input: NotificationInput) {
+  if (input.entityType === "order") return `/pages/order-detail/index?id=${encodeURIComponent(input.entityId)}`;
+  if (input.entityType === "return" && input.payload.orderId) return `/pages/order-detail/index?id=${encodeURIComponent(input.payload.orderId)}`;
+  if (input.entityType === "refund" && input.payload.orderId) return `/pages/order-detail/index?id=${encodeURIComponent(input.payload.orderId)}`;
+  if (input.entityType === "product") return `/pages/product/index?id=${encodeURIComponent(input.entityId)}`;
+  if (input.templateKey === "targeted_coupon") return "/pages/benefits/index";
+  return "";
+}
+
+async function resolveNotificationMember(input: NotificationInput) {
+  if (!memberInboxTemplates.has(input.templateKey)) return null;
+  const db = await getStoreDb();
+  if (input.memberId) return db.prepare("SELECT id FROM members WHERE id = ? AND status != 'blocked' LIMIT 1").bind(input.memberId).first<{ id: number }>();
+  if (input.entityType === "member" && /^\d+$/.test(input.entityId)) return db.prepare("SELECT id FROM members WHERE id = ? AND status != 'blocked' LIMIT 1").bind(Number(input.entityId)).first<{ id: number }>();
+  const email = String(input.email || "").trim().toLowerCase();
+  const phone = String(input.phone || "").replace(/[\s-]/g, "");
+  if (!email && !phone) return null;
+  return db.prepare("SELECT id FROM members WHERE status != 'blocked' AND ((? != '' AND lower(email) = ?) OR (? != '' AND phone = ?)) ORDER BY CASE WHEN ? != '' AND lower(email) = ? THEN 0 ELSE 1 END LIMIT 1").bind(email, email, phone, phone, email, email).first<{ id: number }>();
+}
+
+async function enqueueMemberInbox(input: NotificationInput, template: NotificationTemplate) {
+  const member = await resolveNotificationMember(input);
+  if (!member) return;
+  const db = await getStoreDb();
+  const digest = await sha256(`${input.eventKey}:in-app:${member.id}`);
+  const id = `INBOX-${digest.slice(0, 24).toUpperCase()}`;
+  const title = render(template.email_subject || template.name, input.payload).trim().slice(0, 160) || template.name;
+  const body = render(template.email_body || template.sms_body, input.payload).trim().slice(0, 1200);
+  await db.prepare("INSERT INTO member_notifications (id, member_id, event_key, notification_type, title, body, link, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(member_id, event_key) DO NOTHING").bind(id, member.id, input.eventKey, inboxType(input.templateKey), title, body, inboxLink(input), input.scheduledAt ?? new Date().toISOString()).run();
+}
 
 function emailHtml(text: string, replyEnabled: boolean) {
   const footer = replyEnabled ? "如需帮助，直接回复此邮件即可联系 PUSY.CN 客服。" : "此邮件由 PUSY.CN 订单系统自动发送。";
@@ -35,6 +77,7 @@ export async function enqueueNotification(input: NotificationInput) {
   const db = await getStoreDb();
   const template = await db.prepare("SELECT * FROM notification_templates WHERE key = ? AND enabled = 1").bind(input.templateKey).first<NotificationTemplate>();
   if (!template) return [];
+  await enqueueMemberInbox(input, template);
   const settings = await db.prepare("SELECT * FROM notification_settings WHERE enabled = 1").all<NotificationSetting>();
   const created: string[] = [];
   for (const setting of settings.results) {

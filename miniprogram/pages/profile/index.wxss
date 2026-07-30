@@ -1,20 +1,22 @@
-.profile-page { padding-bottom: 60rpx; background: #f6f5f3; }
-.profile-hero { min-height: 720rpx; display: flex; flex-direction: column; padding: 44rpx 36rpx 52rpx; background: linear-gradient(155deg, #ff2f91 0%, #ff78b7 55%, #f6b7d5 100%); color: #fff; }
-.profile-brand { color: rgba(255,255,255,.92); }
+.profile-page { padding-bottom: calc(130rpx + env(safe-area-inset-bottom)); background: #fff; }
+.profile-hero { min-height: 630rpx; display: flex; flex-direction: column; padding: 48rpx 36rpx 52rpx; background: #f7a5ca; color: #111; }
+.profile-brand { color: #111; }
 .profile-kicker { margin-top: auto; font-size: 22rpx; letter-spacing: 4rpx; }
 .profile-title { margin-top: 20rpx; white-space: pre-line; font-size: 67rpx; line-height: .96; letter-spacing: -5rpx; }
-.profile-copy { max-width: 610rpx; margin-top: 24rpx; color: rgba(255,255,255,.88); line-height: 1.65; }
-.profile-login { width: 100%; min-height: 88rpx; margin-top: 34rpx; background: #fff; color: #111; font-weight: 600; }
-.member-card { display: grid; grid-template-columns: 1fr 1fr; gap: 1rpx; margin: -1rpx 28rpx 0; background: #dcd8d4; box-shadow: 0 18rpx 38rpx rgba(40,20,30,.08); }
+.profile-copy { max-width: 610rpx; margin-top: 24rpx; color: #513e47; line-height: 1.65; }
+.profile-login { align-self: stretch; width: 100%; min-height: 94rpx; display: flex; align-items: center; justify-content: center; margin-top: 36rpx; padding: 0 20rpx; background: #111; color: #fff; font-size: 23rpx; font-weight: 600; line-height: 1; text-align: center; white-space: nowrap; }
+.member-card { display: grid; grid-template-columns: 1fr 1fr; gap: 1rpx; margin: 0 18rpx; border: 1rpx solid #ccc; background: #ccc; }
 .member-card > view { min-height: 142rpx; display: flex; flex-direction: column; justify-content: center; padding: 24rpx; background: #fff; }
 .member-label { color: #888; font-size: 20rpx; }
 .member-value { margin-top: 10rpx; font-size: 24rpx; font-weight: 600; }
-.profile-services { margin: 30rpx 28rpx 0; background: #fff; }
+.profile-services { margin: 34rpx 18rpx 0; border-top: 1rpx solid #ccc; border-bottom: 1rpx solid #ccc; background: #fff; }
 .service-item { min-height: 130rpx; display: flex; align-items: center; justify-content: space-between; padding: 26rpx; border-bottom: 1rpx solid #e6e3e0; }
 .service-item:last-child { border-bottom: 0; }
 .service-item > view { display: flex; flex-direction: column; }
+.service-title-row { display: flex; flex-direction: row !important; align-items: center; gap: 14rpx; }
 .service-label { font-size: 28rpx; }
+.service-badge { display: flex; min-width: 34rpx; height: 34rpx; align-items: center; justify-content: center; padding: 0 9rpx; border-radius: 18rpx; background: #eb2f83; color: #fff; font-size: 18rpx; }
 .service-caption { margin-top: 8rpx; color: #888; font-size: 20rpx; }
 .service-arrow { font-size: 34rpx; }
-.preview-note { margin: 30rpx 28rpx 0; padding: 30rpx; border: 1rpx solid #e2b4c9; background: #fff3f8; color: #714255; line-height: 1.65; font-size: 22rpx; }
+.preview-note { margin: 30rpx 18rpx 0; padding: 30rpx; border: 1rpx solid #111; background: #111; color: #ccc; line-height: 1.65; font-size: 22rpx; }
 .preview-title { display: block; margin-bottom: 10rpx; color: #a52c64; font-weight: 600; }

@@ -418,6 +418,8 @@ test("audit guards member identity, financial transitions and concurrent refunds
   assert.match(accountApi, /该手机号码已关联其他会员账户/);
   assert.match(adminApi, /已支付订单不能直接取消/);
   assert.match(adminApi, /该状态由支付与退款系统自动维护/);
+  assert.match(adminApi, /WITH refund_totals AS/);
+  assert.match(adminApi, /\[api\/admin\] read failed/);
   assert.ok(adminApi.includes(String.raw`/^(https:\/\/|\/(?!\/))/.test(fileUrl)`));
   assert.match(adminUi, /orderStatusOptions/);
   assert.match(paymentApi, /status: 503, headers: \{ "set-cookie": paymentCookie\(orderId, token\)/);

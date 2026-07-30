@@ -170,23 +170,6 @@ footer { background: #0a0a0a; color: #fff; padding: 62px 3.5vw 35px; display: gr
 .related img { width: 100%; height: 32vw; max-height: 490px; object-fit: cover; background: #f4f4f4; }
 .related b { font-weight: 400; }
 
-/* About */
-.about-page { padding: 20px 2.5vw 100px; }
-.about-hero { min-height: 650px; display: grid; grid-template-columns: .8fr 1.2fr; align-items: end; gap: 4vw; padding-bottom: 80px; }
-.about-hero p { text-transform: uppercase; font-size: 12px; }
-.about-hero h1 { margin: 8px 0; font-size: clamp(58px, 8vw, 128px); line-height: .88; font-weight: 400; letter-spacing: -.065em; }
-.about-hero img { width: 100%; height: 650px; object-fit: cover; }
-.timeline { border-top: 1px solid #bbb; }
-.timeline article { display: grid; grid-template-columns: 1fr 1fr; gap: 8vw; align-items: center; padding: 72px 0; border-bottom: 1px solid #bbb; }
-.timeline article:nth-child(even) > div { order: 2; }
-.timeline article:nth-child(even) img { order: 1; }
-.timeline article > div { padding: 0 4vw; }
-.timeline span { color: var(--pink); font-size: 15px; }
-.timeline h2 { margin: 16px 0; font-size: clamp(36px, 4.5vw, 70px); line-height: 1; font-weight: 400; letter-spacing: -.05em; }
-.timeline p { max-width: 560px; line-height: 1.7; }
-.timeline img { width: 100%; height: 48vw; max-height: 680px; object-fit: cover; }
-.about-page blockquote { margin: 100px auto 20px; max-width: 1300px; text-align: center; font-size: clamp(40px, 6vw, 92px); line-height: 1; letter-spacing: -.055em; }
-
 /* Information pages */
 .info-page { padding: 65px 5vw 120px; }
 .info-page > header { display: grid; grid-template-columns: .4fr 1.1fr 1fr; gap: 4vw; align-items: start; padding-bottom: 75px; border-bottom: 1px solid #aaa; }
@@ -287,15 +270,15 @@ footer { background: #0a0a0a; color: #fff; padding: 62px 3.5vw 35px; display: gr
 .contact-form-result.success { color: #235c36; background: #edf8f0; }
 .contact-form-result small { color: inherit; }
 .contact-form-trap { position: absolute; left: -9999px; }
-.gift-page { display: grid; grid-template-columns: 1.25fr .75fr; min-height: 760px; }
-.gift-visual { min-height: 720px; display: grid; place-items: center; padding: 6vw; background: #f6b0d2; }
-.gift-card-art { width: min(100%, 700px); aspect-ratio: 1.58; padding: 45px; display: flex; flex-direction: column; border-radius: 20px; background: linear-gradient(135deg, #f52b89, #ff8ec0); box-shadow: 0 35px 70px rgba(118,0,52,.2); color: #fff; }
-.gift-card-art span { font-size: clamp(70px, 8vw, 130px); font-weight: 600; letter-spacing: -.08em; }
-.gift-card-art small { font-size: 14px; letter-spacing: .18em; }
-.gift-card-art b { margin-top: auto; font-size: 26px; font-weight: 400; }
-.gift-copy { padding: 7vw 4vw; }
-.gift-copy > p:first-child { text-transform: uppercase; font-size: 11px; }
-.gift-copy h1 { margin: 12px 0 35px; font-size: clamp(52px, 6vw, 90px); line-height: .9; font-weight: 400; letter-spacing: -.06em; }
+.gift-page { display: grid; grid-template-columns: 1.25fr .75fr; align-items: start; min-height: 0; }
+.gift-visual { width: 100%; height: clamp(480px, 45vw, 620px); display: grid; place-items: center; padding: clamp(34px, 4vw, 64px); background: #f6b0d2; }
+.gift-card-art { width: min(100%, 560px); aspect-ratio: 1.58; padding: clamp(28px, 3vw, 42px); display: flex; flex-direction: column; border-radius: 16px; background: linear-gradient(135deg, #f52b89, #ff8ec0); box-shadow: 0 24px 48px rgba(118,0,52,.18); color: #fff; }
+.gift-card-art span { font-size: clamp(64px, 6.4vw, 104px); font-weight: 600; letter-spacing: -.08em; line-height: .9; }
+.gift-card-art small { font-size: 12px; letter-spacing: .14em; }
+.gift-card-art b { margin-top: auto; font-size: 22px; font-weight: 400; }
+.gift-copy { padding: clamp(52px, 5vw, 78px) clamp(28px, 3.5vw, 54px) 72px; }
+.gift-copy > p:first-child { margin: 0 0 14px; font-size: clamp(14px, 1.05vw, 16px); letter-spacing: .03em; line-height: 1.4; }
+.gift-copy h1 { margin: 0 0 28px; font-size: clamp(44px, 4.7vw, 68px); line-height: 1; font-weight: 400; letter-spacing: -.05em; white-space: nowrap; }
 .gift-amounts { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
 .gift-amounts button { padding: 14px 8px; border: 1px solid #aaa; background: #fff; }
 .gift-amounts button.active { border-color: #000; background: #000; color: #fff; }
@@ -450,14 +433,6 @@ footer.pusy-footer .footer-links a { font-size: 16px; font-weight: 600; }
   .related { padding: 0 8px 65px; }
   .related > div { grid-template-columns: repeat(2, 1fr); }
   .related img { height: 64vw; }
-  .about-page { padding: 8px 8px 70px; }
-  .about-hero { grid-template-columns: 1fr; min-height: 0; padding-bottom: 55px; }
-  .about-hero h1 { font-size: 62px; }
-  .about-hero img { height: 118vw; }
-  .timeline article { grid-template-columns: 1fr; gap: 35px; padding: 50px 0; }
-  .timeline article:nth-child(even) > div, .timeline article:nth-child(even) img { order: initial; }
-  .timeline img { height: 115vw; }
-  .about-page blockquote { margin-top: 70px; font-size: 43px; }
   .info-page { padding: 46px 20px 75px; }
   .info-page > header { grid-template-columns: 1fr; gap: 20px; padding-bottom: 45px; }
   .info-page h1, .stores-page h1, .blog-page h1 { font-size: 50px; line-height: 1; }
@@ -479,10 +454,12 @@ footer.pusy-footer .footer-links a { font-size: 16px; font-weight: 600; }
   .contact-service-form { padding: 22px 18px; }
   .contact-service-form label.full { grid-column: auto; }
   .gift-page { grid-template-columns: 1fr; }
-  .gift-visual { min-height: 500px; padding: 35px 18px; }
-  .gift-card-art { padding: 27px; }
-  .gift-card-art span { font-size: 75px; }
-  .gift-copy { padding: 55px 22px; }
+  .gift-visual { height: clamp(330px, 82vw, 420px); padding: 30px 18px; }
+  .gift-card-art { padding: 24px; border-radius: 14px; }
+  .gift-card-art span { font-size: clamp(58px, 16vw, 84px); }
+  .gift-copy { padding: 44px 20px 58px; }
+  .gift-copy > p:first-child { margin-bottom: 12px; font-size: 14px; }
+  .gift-copy h1 { margin-bottom: 26px; font-size: clamp(42px, 10vw, 54px); line-height: 1.02; }
   .blog-page > section { grid-template-columns: 1fr; gap: 50px; }
   .blog-page article img { height: 120vw; }
 }

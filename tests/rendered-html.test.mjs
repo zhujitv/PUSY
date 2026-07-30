@@ -192,12 +192,48 @@ test("uses the pink PUSY wordmark as the domain icon", async () => {
   assert.match(manifest, /theme_color: "#ef398b"/);
 });
 
-test("about page uses valid local WebP assets", async () => {
-  const about = await read("app/about/page.tsx");
+test("about page presents an optimized, responsive brand story", async () => {
+  const [about, css, desktopHero, mobileHero, historyImage] = await Promise.all([
+    read("app/about/page.tsx"),
+    read("app/about/about.module.css"),
+    readFile(new URL("../public/assets/about-hero-2026.webp", import.meta.url)),
+    readFile(new URL("../public/assets/about-hero-mobile-2026.webp", import.meta.url)),
+    readFile(new URL("../public/assets/about-history-2026.webp", import.meta.url)),
+  ]);
+
   assert.match(about, /from "next\/image"/);
+  assert.match(about, /export const metadata/);
+  assert.match(about, /canonical: "\/about"/);
+  assert.match(about, /about\.module\.css/);
+  assert.match(about, /about-hero-2026\.webp/);
+  assert.match(about, /about-hero-mobile-2026\.webp/);
+  assert.match(about, /about-history-2026\.webp/);
   assert.match(about, /about-30\.webp/);
   assert.match(about, /about-36\.webp/);
+  assert.match(about, /<details/);
+  assert.match(about, /open=\{index === 0\}/);
+  assert.equal((about.match(/year: "202\d"/g) ?? []).length, 6);
+  assert.match(about, /href="\/stores-china"/);
+  assert.match(about, /href="\/catalog\/products"/);
+  assert.equal((about.match(/\bpriority\b/g) ?? []).length, 1);
+  assert.doesNotMatch(about, /unoptimized|loading="eager"/);
   assert.doesNotMatch(about, /src="\/assets\/30\.webp"/);
+  assert.match(css, /position: sticky/);
+  assert.match(css, /@media \(max-width: 760px\)/);
+  assert.match(css, /prefers-reduced-motion: reduce/);
+  assert.ok(desktopHero.byteLength > 100_000);
+  assert.ok(mobileHero.byteLength > 50_000);
+  assert.ok(historyImage.byteLength > 50_000);
+});
+
+test("gift card layout stays compact without title overlap", async () => {
+  const css = await read("app/globals.css");
+
+  assert.match(css, /\.gift-page \{[^}]*align-items: start;[^}]*min-height: 0;/);
+  assert.match(css, /\.gift-visual \{[^}]*height: clamp\(480px, 45vw, 620px\);/);
+  assert.match(css, /\.gift-copy > p:first-child \{[^}]*font-size: clamp\(14px, 1\.05vw, 16px\);[^}]*line-height: 1\.4;/);
+  assert.match(css, /\.gift-copy h1 \{[^}]*font-size: clamp\(44px, 4\.7vw, 68px\);[^}]*line-height: 1;[^}]*white-space: nowrap;/);
+  assert.match(css, /\.gift-visual \{ height: clamp\(330px, 82vw, 420px\);/);
 });
 
 test("commerce feature set covers discovery, cart, membership, reviews and content operations", async () => {

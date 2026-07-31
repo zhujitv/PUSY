@@ -264,7 +264,8 @@ test("storefront keeps mobile discovery and purchasing actions close at hand", a
     read("app/about/about.module.css"),
   ]);
 
-  assert.match(homepage, /featuredProducts = \[\.\.\.products\]\.sort/);
+  assert.match(homepage, /function availableFirst/);
+  assert.match(homepage, /setFeaturedProducts\(availableFirst\(body\.products as Product\[\]\)\.slice\(0, 8\)\)/);
   assert.match(homepage, /home-restock-link/);
   assert.match(catalog, /mobile-catalog-toolbar/);
   assert.match(catalog, /activeFilterLabels/);

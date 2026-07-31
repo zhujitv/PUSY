@@ -48,7 +48,7 @@ async function requestCode(payload: Record<string, unknown>) {
     if (!await codeTargetAllowed(identifier)) return rateLimitResponse();
     const member = await db.prepare("SELECT email, status FROM members WHERE lower(email) = ? AND email_verified = 1 LIMIT 1").bind(identifier).first<{ email: string; status: string }>();
     target = member && member.status !== "blocked" ? member.email.toLowerCase() : "";
-    if (!target) return Response.json({ ok: true, challengeId: crypto.randomUUID(), message: "如账户存在，验证码将发送至注册联系方式" });
+    if (!target) return privateJson({ code: "registration-required", error: "该邮箱尚未完成注册，请先获取注册验证码" }, { status: 404 });
   } else {
     const email = String(payload.email ?? "").trim().toLowerCase();
     const phone = normalizedPhone(payload.phone);

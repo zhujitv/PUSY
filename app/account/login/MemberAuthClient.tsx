@@ -14,6 +14,7 @@ export function MemberAuthClient({ referralCode = "", providers, socialStatus = 
   const [submitting, setSubmitting] = useState(false);
   const [requestingCode, setRequestingCode] = useState(false);
   const [challengeId, setChallengeId] = useState("");
+  const [prefillEmail, setPrefillEmail] = useState("");
 
   async function requestCode(event: React.MouseEvent<HTMLButtonElement>) {
     const form = event.currentTarget.form;
@@ -36,8 +37,13 @@ export function MemberAuthClient({ referralCode = "", providers, socialStatus = 
     const payload = Object.fromEntries(new FormData(form).entries());
     const response = await fetch("/api/account/auth", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "request-code", mode, ...payload }) });
     const body = await response.json().catch(() => ({}));
-    if (!response.ok) setError(body.error || "验证码发送失败");
-    else { setChallengeId(body.challengeId || ""); setMessage(body.message || "验证码已发送"); }
+    if (!response.ok) {
+      if (body.code === "registration-required") {
+        setPrefillEmail(String(payload.identifier ?? ""));
+        setMode("register");
+      }
+      setError(body.error || "验证码发送失败");
+    } else { setChallengeId(body.challengeId || ""); setMessage(body.message || "验证码已发送"); }
     setRequestingCode(false);
   }
 
@@ -106,7 +112,7 @@ export function MemberAuthClient({ referralCode = "", providers, socialStatus = 
       <form className="member-auth-form" onSubmit={submit}>
         {mode === "register" && <>
           <label>姓名<input name="name" autoComplete="name" placeholder="请输入姓名" required /></label>
-          <label>电子邮箱<input name="email" type="email" autoComplete="email" placeholder="name@example.com" required /></label>
+          <label>电子邮箱<input name="email" type="email" autoComplete="email" placeholder="name@example.com" defaultValue={prefillEmail} required /></label>
           <label>手机号码（选填）<input name="phone" type="tel" inputMode="numeric" autoComplete="tel" placeholder="可在会员中心稍后绑定" /></label>
           <label>邀请码（选填）<input name="referralCode" defaultValue={referralCode} maxLength={20} placeholder="好友分享链接会自动填写" /></label>
         </>}

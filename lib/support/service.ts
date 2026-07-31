@@ -1,6 +1,7 @@
 import { getStoreDb } from "../../db/store";
 import { sendEmail } from "../notifications/email";
 import type { NotificationSetting } from "../notifications/types";
+import { supportSlaDeadlines, validSupportPriority, type SupportPriority } from "./sla";
 
 type Attachment = {
   id: string;
@@ -93,7 +94,13 @@ export function supportReplyAddress(input: { threadId?: string; orderId?: string
   return `${local.toLowerCase().replace(/[^a-z0-9-]/g, "")}@${domain}`;
 }
 
-export async function ensureLinkedSupportThread(input: { orderId?: string; returnId?: string; actor: string }) {
+type SupportActor = { id: string; email: string; displayName: string };
+
+function reopenResolutionSql() {
+  return "resolution_due_at = CASE WHEN status = 'resolved' THEN ? ELSE resolution_due_at END, reopened_count = reopened_count + CASE WHEN status = 'resolved' THEN 1 ELSE 0 END, resolved_at = CASE WHEN status = 'resolved' THEN NULL ELSE resolved_at END";
+}
+
+export async function ensureLinkedSupportThread(input: { orderId?: string; returnId?: string; actor: SupportActor }) {
   const db = await getStoreDb();
   const returnId = bounded(input.returnId, 40).toUpperCase();
   const orderId = bounded(input.orderId, 60).toUpperCase();
@@ -103,20 +110,22 @@ export async function ensureLinkedSupportThread(input: { orderId?: string; retur
     const linkedReturn = await db.prepare("SELECT r.id, r.order_id, r.email, r.reason, r.details, r.support_thread_id, o.member_id, o.customer FROM returns r JOIN orders o ON o.id = r.order_id WHERE upper(r.id) = ? LIMIT 1").bind(returnId).first<{ id: string; order_id: string; email: string; reason: string; details: string; support_thread_id: string | null; member_id: number | null; customer: string }>();
     if (!linkedReturn) throw new Error("售后申请不存在");
     const existing = linkedReturn.support_thread_id
-      ? await db.prepare("SELECT id FROM support_threads WHERE id = ? AND deleted_at IS NULL LIMIT 1").bind(linkedReturn.support_thread_id).first<{ id: string }>()
-      : await db.prepare("SELECT id FROM support_threads WHERE return_id = ? AND deleted_at IS NULL ORDER BY last_message_at DESC LIMIT 1").bind(linkedReturn.id).first<{ id: string }>();
+      ? await db.prepare("SELECT id, priority FROM support_threads WHERE id = ? AND deleted_at IS NULL LIMIT 1").bind(linkedReturn.support_thread_id).first<{ id: string; priority: string }>()
+      : await db.prepare("SELECT id, priority FROM support_threads WHERE return_id = ? AND deleted_at IS NULL ORDER BY last_message_at DESC LIMIT 1").bind(linkedReturn.id).first<{ id: string; priority: string }>();
     if (existing) {
+      const { resolutionDueAt } = supportSlaDeadlines(validSupportPriority(existing.priority) ? existing.priority : "normal");
       await db.batch([
-        db.prepare("UPDATE support_threads SET archived_at = NULL, status = CASE WHEN status = 'resolved' THEN 'open' ELSE status END, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(existing.id),
+        db.prepare(`UPDATE support_threads SET archived_at = NULL, ${reopenResolutionSql()}, status = CASE WHEN status = 'resolved' THEN 'open' ELSE status END, assigned_admin_id = COALESCE(assigned_admin_id, ?), assigned_to = COALESCE(assigned_to, ?), updated_at = CURRENT_TIMESTAMP WHERE id = ?`).bind(resolutionDueAt, input.actor.id, input.actor.displayName || input.actor.email, existing.id),
         db.prepare("UPDATE returns SET support_thread_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(existing.id, linkedReturn.id),
       ]);
       return existing.id;
     }
     const threadId = id("TKT");
     const subject = `售后 ${linkedReturn.id} · ${linkedReturn.reason}`;
+    const deadlines = supportSlaDeadlines("normal");
     await db.batch([
-      db.prepare("INSERT INTO support_threads (id, mailbox, subject, customer_email, customer_name, member_id, order_id, return_id, status, assigned_to) VALUES (?, 'returns', ?, ?, ?, ?, ?, ?, 'open', ?)").bind(threadId, subject, linkedReturn.email, linkedReturn.customer, linkedReturn.member_id, linkedReturn.order_id, linkedReturn.id, input.actor),
-      db.prepare("INSERT INTO support_messages (id, thread_id, direction, source, from_email, to_email, subject, text_body) VALUES (?, ?, 'system', 'admin_link', ?, ?, ?, ?)").bind(id("MSG"), threadId, input.actor, linkedReturn.email, subject, `已从售后管理建立邮件沟通。\n售后原因：${linkedReturn.reason}${linkedReturn.details ? `\n客户说明：${bounded(linkedReturn.details, 4000)}` : ""}`),
+      db.prepare("INSERT INTO support_threads (id, mailbox, subject, customer_email, customer_name, member_id, order_id, return_id, status, assigned_to, assigned_admin_id, first_response_due_at, resolution_due_at) VALUES (?, 'returns', ?, ?, ?, ?, ?, ?, 'open', ?, ?, ?, ?)").bind(threadId, subject, linkedReturn.email, linkedReturn.customer, linkedReturn.member_id, linkedReturn.order_id, linkedReturn.id, input.actor.displayName || input.actor.email, input.actor.id, deadlines.firstResponseDueAt, deadlines.resolutionDueAt),
+      db.prepare("INSERT INTO support_messages (id, thread_id, direction, source, from_email, to_email, subject, text_body) VALUES (?, ?, 'system', 'admin_link', ?, ?, ?, ?)").bind(id("MSG"), threadId, input.actor.email, linkedReturn.email, subject, `已从售后管理建立邮件沟通。\n售后原因：${linkedReturn.reason}${linkedReturn.details ? `\n客户说明：${bounded(linkedReturn.details, 4000)}` : ""}`),
       db.prepare("UPDATE returns SET support_thread_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(threadId, linkedReturn.id),
     ]);
     return threadId;
@@ -124,16 +133,18 @@ export async function ensureLinkedSupportThread(input: { orderId?: string; retur
 
   const order = await db.prepare("SELECT id, member_id, customer, email FROM orders WHERE upper(id) = ? LIMIT 1").bind(orderId).first<{ id: string; member_id: number | null; customer: string; email: string }>();
   if (!order) throw new Error("订单不存在");
-  const existing = await db.prepare("SELECT id FROM support_threads WHERE order_id = ? AND deleted_at IS NULL ORDER BY CASE WHEN return_id IS NULL THEN 0 ELSE 1 END, last_message_at DESC LIMIT 1").bind(order.id).first<{ id: string }>();
+  const existing = await db.prepare("SELECT id, priority FROM support_threads WHERE order_id = ? AND deleted_at IS NULL ORDER BY CASE WHEN return_id IS NULL THEN 0 ELSE 1 END, last_message_at DESC LIMIT 1").bind(order.id).first<{ id: string; priority: string }>();
   if (existing) {
-    await db.prepare("UPDATE support_threads SET archived_at = NULL, status = CASE WHEN status = 'resolved' THEN 'open' ELSE status END, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(existing.id).run();
+    const { resolutionDueAt } = supportSlaDeadlines(validSupportPriority(existing.priority) ? existing.priority : "normal");
+    await db.prepare(`UPDATE support_threads SET archived_at = NULL, ${reopenResolutionSql()}, status = CASE WHEN status = 'resolved' THEN 'open' ELSE status END, assigned_admin_id = COALESCE(assigned_admin_id, ?), assigned_to = COALESCE(assigned_to, ?), updated_at = CURRENT_TIMESTAMP WHERE id = ?`).bind(resolutionDueAt, input.actor.id, input.actor.displayName || input.actor.email, existing.id).run();
     return existing.id;
   }
   const threadId = id("TKT");
   const subject = `订单 ${order.id} 客户沟通`;
+  const deadlines = supportSlaDeadlines("normal");
   await db.batch([
-    db.prepare("INSERT INTO support_threads (id, mailbox, subject, customer_email, customer_name, member_id, order_id, status, assigned_to) VALUES (?, 'service', ?, ?, ?, ?, ?, 'open', ?)").bind(threadId, subject, order.email, order.customer, order.member_id, order.id, input.actor),
-    db.prepare("INSERT INTO support_messages (id, thread_id, direction, source, from_email, to_email, subject, text_body) VALUES (?, ?, 'system', 'admin_link', ?, ?, ?, ?)").bind(id("MSG"), threadId, input.actor, order.email, subject, `已从订单 ${order.id} 建立客户邮件沟通，发送第一封回复后客户即可继续回复同一工单。`),
+    db.prepare("INSERT INTO support_threads (id, mailbox, subject, customer_email, customer_name, member_id, order_id, status, assigned_to, assigned_admin_id, first_response_due_at, resolution_due_at) VALUES (?, 'service', ?, ?, ?, ?, ?, 'open', ?, ?, ?, ?)").bind(threadId, subject, order.email, order.customer, order.member_id, order.id, input.actor.displayName || input.actor.email, input.actor.id, deadlines.firstResponseDueAt, deadlines.resolutionDueAt),
+    db.prepare("INSERT INTO support_messages (id, thread_id, direction, source, from_email, to_email, subject, text_body) VALUES (?, ?, 'system', 'admin_link', ?, ?, ?, ?)").bind(id("MSG"), threadId, input.actor.email, order.email, subject, `已从订单 ${order.id} 建立客户邮件沟通，发送第一封回复后客户即可继续回复同一工单。`),
   ]);
   return threadId;
 }
@@ -195,17 +206,18 @@ export async function ingestReceivedEmail(event: ResendReceivedEvent) {
     else order = returnOrder;
   }
 
+  type ThreadMatch = { id: string; customer_email: string; order_id: string | null; return_id: string | null; priority: SupportPriority };
   let thread = route.threadId
-    ? await db.prepare("SELECT id, customer_email, order_id, return_id FROM support_threads WHERE upper(id) = ? AND lower(customer_email) = ? LIMIT 1").bind(route.threadId, from.address).first<{ id: string; customer_email: string; order_id: string | null; return_id: string | null }>()
+    ? await db.prepare("SELECT id, customer_email, order_id, return_id, priority FROM support_threads WHERE upper(id) = ? AND lower(customer_email) = ? LIMIT 1").bind(route.threadId, from.address).first<ThreadMatch>()
     : null;
   if (!thread && linkedReturn?.support_thread_id) {
-    thread = await db.prepare("SELECT id, customer_email, order_id, return_id FROM support_threads WHERE id = ? AND lower(customer_email) = ? LIMIT 1").bind(linkedReturn.support_thread_id, from.address).first<{ id: string; customer_email: string; order_id: string | null; return_id: string | null }>();
+    thread = await db.prepare("SELECT id, customer_email, order_id, return_id, priority FROM support_threads WHERE id = ? AND lower(customer_email) = ? LIMIT 1").bind(linkedReturn.support_thread_id, from.address).first<ThreadMatch>();
   }
   if (!thread && order) {
-    thread = await db.prepare("SELECT id, customer_email, order_id, return_id FROM support_threads WHERE order_id = ? AND lower(customer_email) = ? AND status != 'resolved' ORDER BY last_message_at DESC LIMIT 1").bind(order.id, from.address).first<{ id: string; customer_email: string; order_id: string | null; return_id: string | null }>();
+    thread = await db.prepare("SELECT id, customer_email, order_id, return_id, priority FROM support_threads WHERE order_id = ? AND lower(customer_email) = ? AND status != 'resolved' ORDER BY last_message_at DESC LIMIT 1").bind(order.id, from.address).first<ThreadMatch>();
   }
   if (!thread) {
-    thread = await db.prepare("SELECT id, customer_email, order_id, return_id FROM support_threads WHERE lower(customer_email) = ? AND lower(subject) = lower(?) AND status != 'resolved' AND last_message_at::timestamp > CURRENT_TIMESTAMP - INTERVAL '30 days' ORDER BY last_message_at DESC LIMIT 1").bind(from.address, subject).first<{ id: string; customer_email: string; order_id: string | null; return_id: string | null }>();
+    thread = await db.prepare("SELECT id, customer_email, order_id, return_id, priority FROM support_threads WHERE lower(customer_email) = ? AND lower(subject) = lower(?) AND status != 'resolved' AND last_message_at::timestamp > CURRENT_TIMESTAMP - INTERVAL '30 days' ORDER BY last_message_at DESC LIMIT 1").bind(from.address, subject).first<ThreadMatch>();
   }
 
   let returnId = linkedReturn?.id ?? null;
@@ -218,14 +230,16 @@ export async function ingestReceivedEmail(event: ResendReceivedEvent) {
   }
 
   const threadId = thread?.id ?? id("TKT");
+  const threadPriority = thread && validSupportPriority(thread.priority) ? thread.priority : "normal";
+  const deadlines = supportSlaDeadlines(threadPriority, email.created_at || new Date());
   if (!thread) {
-    await db.prepare("INSERT INTO support_threads (id, mailbox, subject, customer_email, customer_name, member_id, order_id, return_id, status, last_message_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'unread', ?)").bind(threadId, route.mailbox, subject, from.address, from.name || member?.name || order?.customer || "", member?.id ?? order?.member_id ?? null, order?.id ?? null, returnId, email.created_at || new Date().toISOString()).run();
+    await db.prepare("INSERT INTO support_threads (id, mailbox, subject, customer_email, customer_name, member_id, order_id, return_id, status, first_response_due_at, resolution_due_at, last_message_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'unread', ?, ?, ?)").bind(threadId, route.mailbox, subject, from.address, from.name || member?.name || order?.customer || "", member?.id ?? order?.member_id ?? null, order?.id ?? null, returnId, deadlines.firstResponseDueAt, deadlines.resolutionDueAt, email.created_at || new Date().toISOString()).run();
   }
   if (returnId) await db.prepare("UPDATE returns SET support_thread_id = ?, attachments_json = CASE WHEN attachments_json = '[]' THEN ? ELSE attachments_json END, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(threadId, JSON.stringify(email.attachments ?? []), returnId).run();
 
   await db.batch([
     db.prepare("INSERT INTO support_messages (id, thread_id, direction, source, provider_email_id, provider_message_id, from_email, to_email, subject, text_body, html_body, headers_json, attachments_json, created_at) VALUES (?, ?, 'inbound', 'email', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").bind(id("MSG"), threadId, providerEmailId, bounded(email.message_id || event.data.message_id, 500) || null, from.address, route.recipient, bounded(email.subject, 300), text, html, JSON.stringify(email.headers ?? {}), JSON.stringify(email.attachments ?? []), email.created_at || new Date().toISOString()),
-    db.prepare("UPDATE support_threads SET status = 'unread', archived_at = NULL, deleted_at = NULL, mailbox = CASE WHEN ? = 'returns' THEN 'returns' ELSE mailbox END, member_id = COALESCE(member_id, ?), order_id = COALESCE(order_id, ?), return_id = COALESCE(return_id, ?), last_message_at = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(route.mailbox, member?.id ?? order?.member_id ?? null, order?.id ?? null, returnId, email.created_at || new Date().toISOString(), threadId),
+    db.prepare(`UPDATE support_threads SET ${reopenResolutionSql()}, status = 'unread', archived_at = NULL, deleted_at = NULL, mailbox = CASE WHEN ? = 'returns' THEN 'returns' ELSE mailbox END, member_id = COALESCE(member_id, ?), order_id = COALESCE(order_id, ?), return_id = COALESCE(return_id, ?), last_message_at = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`).bind(deadlines.resolutionDueAt, route.mailbox, member?.id ?? order?.member_id ?? null, order?.id ?? null, returnId, email.created_at || new Date().toISOString(), threadId),
   ]);
   return { threadId, duplicate: false };
 }
@@ -235,8 +249,9 @@ export async function createWebsiteReturnThread(input: { returnId: string; order
   const threadId = id("TKT");
   const messageId = id("MSG");
   const subject = `售后申请 ${input.returnId} · ${input.reason}`;
+  const deadlines = supportSlaDeadlines("normal");
   await db.batch([
-    db.prepare("INSERT INTO support_threads (id, mailbox, subject, customer_email, customer_name, member_id, order_id, return_id, status) VALUES (?, 'returns', ?, ?, ?, ?, ?, ?, 'unread')").bind(threadId, subject, input.email, input.customer, input.memberId, input.orderId, input.returnId),
+    db.prepare("INSERT INTO support_threads (id, mailbox, subject, customer_email, customer_name, member_id, order_id, return_id, status, first_response_due_at, resolution_due_at) VALUES (?, 'returns', ?, ?, ?, ?, ?, ?, 'unread', ?, ?)").bind(threadId, subject, input.email, input.customer, input.memberId, input.orderId, input.returnId, deadlines.firstResponseDueAt, deadlines.resolutionDueAt),
     db.prepare("INSERT INTO support_messages (id, thread_id, direction, source, from_email, to_email, subject, text_body) VALUES (?, ?, 'inbound', 'website', ?, ?, ?, ?)").bind(messageId, threadId, input.email, supportReplyAddress({ mailbox: "returns" }), subject, input.details || input.reason),
     db.prepare("UPDATE returns SET support_thread_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(threadId, input.returnId),
     db.prepare("INSERT INTO return_events (id, return_id, event_type, to_status, note, actor) VALUES (?, ?, 'created', '待审核', ?, 'customer')").bind(id("REV"), input.returnId, input.reason),
@@ -250,14 +265,15 @@ export async function createWebsiteSupportThread(input: { name: string; phone: s
   const subject = `${bounded(input.category, 40)} · ${bounded(input.name, 60)}`;
   const orderNote = input.submittedOrderId ? input.orderId ? `\n关联订单：${input.orderId}` : `\n客户填写订单号：${bounded(input.submittedOrderId, 64)}（联系方式未匹配，未自动关联）` : "";
   const body = `首选联系方式：${bounded(input.contactPreference, 20)}\n手机：${bounded(input.phone, 20)}${input.wechat ? `\n微信：${bounded(input.wechat, 60)}` : ""}${input.email ? `\n邮箱：${bounded(input.email, 160)}` : ""}${orderNote}\n\n${bounded(input.message, 4000)}`;
+  const deadlines = supportSlaDeadlines("normal");
   await db.batch([
-    db.prepare("INSERT INTO support_threads (id, mailbox, subject, customer_email, customer_name, customer_phone, customer_wechat, member_id, order_id, status) VALUES (?, 'service', ?, ?, ?, ?, ?, ?, ?, 'unread')").bind(threadId, subject, input.email, input.name, input.phone, input.wechat, input.memberId, input.orderId),
+    db.prepare("INSERT INTO support_threads (id, mailbox, subject, customer_email, customer_name, customer_phone, customer_wechat, member_id, order_id, status, first_response_due_at, resolution_due_at) VALUES (?, 'service', ?, ?, ?, ?, ?, ?, ?, 'unread', ?, ?)").bind(threadId, subject, input.email, input.name, input.phone, input.wechat, input.memberId, input.orderId, deadlines.firstResponseDueAt, deadlines.resolutionDueAt),
     db.prepare("INSERT INTO support_messages (id, thread_id, direction, source, from_email, to_email, subject, text_body) VALUES (?, ?, 'inbound', 'website', ?, ?, ?, ?)").bind(id("MSG"), threadId, input.email, supportReplyAddress({ mailbox: "service" }), subject, body),
   ]);
   return threadId;
 }
 
-export async function sendSupportReply(threadId: string, message: string, actor: string) {
+export async function sendSupportReply(threadId: string, message: string, actor: SupportActor) {
   const text = bounded(message, 10_000);
   if (!text) throw new Error("请填写回复内容");
   const db = await getStoreDb();
@@ -284,8 +300,8 @@ export async function sendSupportReply(threadId: string, message: string, actor:
     headers,
   });
   await db.batch([
-    db.prepare("INSERT INTO support_messages (id, thread_id, direction, source, provider_email_id, from_email, to_email, subject, text_body, headers_json) VALUES (?, ?, 'outbound', 'admin', ?, ?, ?, ?, ?, ?)").bind(messageRecordId, thread.id, providerId, setting.sender_address, thread.customer_email, `Re: ${thread.subject}`, text, JSON.stringify({ ...headers, actor })),
-    db.prepare("UPDATE support_threads SET status = 'pending', assigned_to = COALESCE(assigned_to, ?), last_message_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(actor, thread.id),
+    db.prepare("INSERT INTO support_messages (id, thread_id, direction, source, provider_email_id, from_email, to_email, subject, text_body, headers_json) VALUES (?, ?, 'outbound', 'admin', ?, ?, ?, ?, ?, ?)").bind(messageRecordId, thread.id, providerId, setting.sender_address, thread.customer_email, `Re: ${thread.subject}`, text, JSON.stringify({ ...headers, actor: actor.email })),
+    db.prepare("UPDATE support_threads SET status = 'pending', assigned_admin_id = COALESCE(assigned_admin_id, ?), assigned_to = COALESCE(assigned_to, ?), first_responded_at = COALESCE(first_responded_at, CURRENT_TIMESTAMP), last_message_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(actor.id, actor.displayName || actor.email, thread.id),
   ]);
   return providerId;
 }

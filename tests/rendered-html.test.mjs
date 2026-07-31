@@ -547,6 +547,30 @@ test("customer inbox links verified order replies, returns and protected attachm
   assert.match(env, /RESEND_INBOUND_DOMAIN/);
 });
 
+test("support desk provides account assignment, SLA tracking and customer 360 context", async () => {
+  const [supportAdmin, adminApi, supportService, migration, schema] = await Promise.all([
+    read("app/admin/SupportAdmin.tsx"),
+    read("app/api/admin/route.ts"),
+    read("lib/support/service.ts"),
+    read("db/migrations/2026-07-31-support-sla-customer360.sql"),
+    read("db/railway-postgres.sql"),
+  ]);
+  assert.match(supportAdmin, /客服 SLA 概览/);
+  assert.match(supportAdmin, /客户 360/);
+  assert.match(supportAdmin, /name="assignedAdminId"/);
+  assert.match(supportAdmin, /最近订单/);
+  assert.match(supportAdmin, /售后记录/);
+  assert.match(adminApi, /role IN \('owner','operations','customer_service'\)/);
+  assert.match(adminApi, /supportCustomerOrders/);
+  assert.match(adminApi, /supportCustomerReturns/);
+  assert.match(adminApi, /所选负责人不存在、已停用或没有客服权限/);
+  assert.match(supportService, /first_responded_at = COALESCE/);
+  assert.match(supportService, /reopened_count/);
+  assert.match(migration, /first_response_due_at/);
+  assert.match(migration, /resolution_due_at/);
+  assert.match(schema, /support_threads_assignee_idx/);
+});
+
 test("admin workspace uses grouped navigation and responsive branded UI", async () => {
   const [admin, login, css] = await Promise.all([
     read("app/admin/AdminClient.tsx"),

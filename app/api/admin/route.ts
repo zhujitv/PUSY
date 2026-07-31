@@ -14,12 +14,12 @@ import { notifyProductChange, runGrowthAutomations } from "../../../lib/growth/a
 import { addShipmentEvent, shipOrder } from "../../../lib/logistics/service";
 import { cancelOrder } from "../../../lib/orders/cancellation";
 import { paymentReconciliation } from "../../../lib/payments/reconciliation";
+import { supportSlaDeadlines, validSupportPriority } from "../../../lib/support/sla";
 
 const orderStatuses = ["待付款", "支付失败", "待处理", "已确认", "配货中", "已发货", "已完成", "退款中", "部分退款", "已退款", "已取消"];
 const memberStatuses = ["active", "vip", "blocked"];
 const returnStatuses = ["待审核", "已批准", "补发处理中", "退款中", "已退款", "已拒绝", "已关闭"];
 const supportStatuses = ["unread", "open", "pending", "resolved"];
-const supportPriorities = ["low", "normal", "high", "urgent"];
 const invoiceStatuses = ["pending", "processing", "issued", "rejected", "cancelled"];
 const supportOperations = ["mark-read", "mark-unread", "star", "unstar", "archive", "unarchive", "trash", "restore", "delete-permanent"];
 const partnershipStatuses = ["待联系", "洽谈中", "已合作", "已拒绝", "已关闭"];
@@ -65,7 +65,12 @@ export async function GET(request: Request) {
       rowsIf(can("system.manage") && wants("notifications"), "SELECT * FROM notification_jobs ORDER BY created_at DESC LIMIT 500"),
       rowsIf(marketingVisible && wants("reviews"), "SELECT * FROM product_reviews ORDER BY created_at DESC LIMIT 500"),
       can("content.manage") && wants("content") ? getContentWorkspace() : Promise.resolve({ current: {}, revisions: [] }),
-      rowsIf(supportVisible && wants("support", "orders"), "SELECT st.*, m.name AS member_name, o.status AS order_status, r.status AS return_status FROM support_threads st LEFT JOIN members m ON m.id = st.member_id LEFT JOIN orders o ON o.id = st.order_id LEFT JOIN returns r ON r.id = st.return_id ORDER BY st.last_message_at DESC LIMIT 500"),
+      rowsIf(supportVisible && wants("support", "orders"), `SELECT st.*, m.name AS member_name, m.total_orders AS member_total_orders, m.total_spent AS member_total_spent,
+        m.points_balance AS member_points_balance, m.lifetime_points AS member_lifetime_points, m.tier AS member_tier, m.status AS member_status,
+        COALESCE((SELECT string_agg(DISTINCT ct.name, ', ') FROM member_tag_assignments mta JOIN customer_tags ct ON ct.id = mta.tag_id WHERE mta.member_id = m.id), '') AS member_tags,
+        o.status AS order_status, r.status AS return_status
+        FROM support_threads st LEFT JOIN members m ON m.id = st.member_id LEFT JOIN orders o ON o.id = st.order_id LEFT JOIN returns r ON r.id = st.return_id
+        ORDER BY st.last_message_at DESC LIMIT 500`),
       rowsIf(supportVisible && wants("support"), "SELECT * FROM (SELECT id, thread_id, direction, source, provider_email_id, from_email, to_email, subject, text_body, attachments_json, created_at FROM support_messages ORDER BY created_at DESC LIMIT 1000) recent ORDER BY created_at ASC"),
       rowsIf(supportVisible && wants("support"), "SELECT * FROM (SELECT * FROM return_events ORDER BY created_at DESC LIMIT 1000) recent ORDER BY created_at ASC"),
       rowsIf(financeVisible && wants("invoices"), "SELECT i.*, o.customer, o.email AS customer_email FROM invoices i JOIN orders o ON o.id = i.order_id ORDER BY i.requested_at DESC LIMIT 500"),
@@ -80,6 +85,19 @@ export async function GET(request: Request) {
       rowsIf(can("orders.read") && wants("orders"), "SELECT * FROM shipment_events ORDER BY event_time DESC LIMIT 1000"),
       financeVisible && wants("payments") ? paymentReconciliation() : Promise.resolve({ items: [], summary: { paymentCount: 0, paidFen: 0, refundedFen: 0, netFen: 0, anomalyCount: 0 } }),
     ]);
+    const [supportAgentsResult, supportCustomerOrdersResult, supportCustomerReturnsResult] = supportVisible && wants("support") ? await Promise.all([
+      db.prepare("SELECT id, email, display_name, role FROM admin_users WHERE status = 'active' AND role IN ('owner','operations','customer_service') ORDER BY CASE role WHEN 'owner' THEN 0 WHEN 'operations' THEN 1 ELSE 2 END, display_name").all(),
+      db.prepare(`SELECT o.id, o.member_id, o.customer, o.email, o.total, o.status, o.delivery, o.payment, o.created_at,
+        s.carrier_name, s.tracking_number, s.status AS shipment_status
+        FROM orders o LEFT JOIN shipments s ON s.order_id = o.id
+        WHERE EXISTS (SELECT 1 FROM support_threads st WHERE st.deleted_at IS NULL AND (st.order_id = o.id OR st.member_id = o.member_id OR (st.customer_email <> '' AND lower(st.customer_email) = lower(o.email))))
+        ORDER BY o.created_at DESC LIMIT 1000`).all(),
+      db.prepare(`SELECT r.id, r.order_id, r.email, r.reason, r.request_type, r.status, r.refund_id, r.created_at, o.member_id
+        FROM returns r JOIN orders o ON o.id = r.order_id
+        WHERE EXISTS (SELECT 1 FROM support_threads st WHERE st.deleted_at IS NULL AND (st.return_id = r.id OR st.order_id = r.order_id OR st.member_id = o.member_id OR (st.customer_email <> '' AND lower(st.customer_email) = lower(r.email))))
+        ORDER BY r.created_at DESC LIMIT 500`).all(),
+    ]) : [{ results: [] }, { results: [] }, { results: [] }];
+    const legacySupportAgent = legacyAdminConfigured() ? [{ id: "legacy-owner", email: (process.env.ADMIN_EMAIL || "admin@pusy.cn").trim().toLowerCase(), display_name: "主管理员", role: "owner" }] : [];
     const statValues = stats && typeof stats === "object" ? stats : {};
     const [growthMembers, growthTags, growthSegments, couponAssignments, automationRuns, growthStats] = marketingVisible && wants("growth") ? await Promise.all([
       db.prepare(`SELECT m.id, m.name, m.email, m.phone, m.status, m.total_orders, m.total_spent, m.points_balance, m.lifetime_points, m.tier,
@@ -123,6 +141,9 @@ export async function GET(request: Request) {
       returnEvents: supportVisible ? returnEvents.results : [],
       invoices: financeVisible ? invoices.results : [],
       cannedReplies: supportVisible ? cannedReplies.results : [],
+      supportAgents: supportVisible ? [...legacySupportAgent, ...supportAgentsResult.results] : [],
+      supportCustomerOrders: supportVisible ? supportCustomerOrdersResult.results : [],
+      supportCustomerReturns: supportVisible ? supportCustomerReturnsResult.results : [],
       analytics: can("analytics.read") ? { orderStatuses: orderStatusAnalytics.results, topProducts: topProducts.results, customers: customerAnalytics ?? {}, returns: returnAnalytics ?? {} } : { orderStatuses: [], topProducts: [], customers: {}, returns: {} },
       supportReceiving: supportVisible ? { domain: supportReceivingDomain(), configured: Boolean(supportReceivingDomain() && process.env.RESEND_API_KEY && process.env.RESEND_RECEIVING_API_KEY && process.env.RESEND_WEBHOOK_SECRET) } : { domain: "", configured: false },
       region: can("system.manage") ? { ...chinaRegion, complianceReady: chinaComplianceReady } : {},
@@ -346,10 +367,30 @@ export async function POST(request: Request) {
     } else if (action === "update-support-thread") {
       const status = String(payload.status ?? "");
       const priority = String(payload.priority ?? "normal");
-      if (!supportStatuses.includes(status) || !supportPriorities.includes(priority)) return Response.json({ error: "工单状态或优先级无效" }, { status: 400 });
+      if (!supportStatuses.includes(status) || !validSupportPriority(priority)) return Response.json({ error: "工单状态或优先级无效" }, { status: 400 });
       const dueAt = String(payload.dueAt ?? "").trim();
       if (dueAt && Number.isNaN(Date.parse(dueAt))) return Response.json({ error: "处理时限无效" }, { status: 400 });
-      const result = await db.prepare("UPDATE support_threads SET status = ?, priority = ?, assigned_to = ?, due_at = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL").bind(status, priority, String(payload.assignedTo ?? "").trim().slice(0, 120) || null, dueAt || null, String(payload.id)).run();
+      const threadId = String(payload.id ?? "");
+      const current = await db.prepare("SELECT id, status, priority, first_response_due_at, resolution_due_at, first_responded_at, resolved_at, reopened_count FROM support_threads WHERE id = ? AND deleted_at IS NULL LIMIT 1").bind(threadId).first<{ id: string; status: string; priority: string; first_response_due_at: string | null; resolution_due_at: string | null; first_responded_at: string | null; resolved_at: string | null; reopened_count: number }>();
+      if (!current) return Response.json({ error: "客服工单不存在" }, { status: 404 });
+      const assignedAdminId = String(payload.assignedAdminId ?? "").trim();
+      let assignedTo: string | null = null;
+      if (assignedAdminId) {
+        if (assignedAdminId === "legacy-owner" && legacyAdminConfigured()) assignedTo = "主管理员";
+        else {
+          const assignee = await db.prepare("SELECT display_name, email FROM admin_users WHERE id = ? AND status = 'active' AND role IN ('owner','operations','customer_service') LIMIT 1").bind(assignedAdminId).first<{ display_name: string; email: string }>();
+          if (!assignee) return Response.json({ error: "所选负责人不存在、已停用或没有客服权限" }, { status: 400 });
+          assignedTo = assignee.display_name || assignee.email;
+        }
+      }
+      const deadlines = supportSlaDeadlines(priority);
+      const priorityChanged = current.priority !== priority;
+      const firstRespondedAt = current.first_responded_at ?? (payload.firstResponded === "yes" ? new Date().toISOString() : null);
+      const firstResponseDueAt = firstRespondedAt ? current.first_response_due_at : priorityChanged || !current.first_response_due_at ? deadlines.firstResponseDueAt : current.first_response_due_at;
+      const resolutionDueAt = status === "resolved" ? current.resolution_due_at : current.status === "resolved" || priorityChanged || !current.resolution_due_at ? deadlines.resolutionDueAt : current.resolution_due_at;
+      const resolvedAt = status === "resolved" ? current.resolved_at || new Date().toISOString() : null;
+      const reopenedCount = Number(current.reopened_count || 0) + (current.status === "resolved" && status !== "resolved" ? 1 : 0);
+      const result = await db.prepare("UPDATE support_threads SET status = ?, priority = ?, assigned_admin_id = ?, assigned_to = ?, due_at = ?, first_response_due_at = ?, first_responded_at = ?, resolution_due_at = ?, resolved_at = ?, reopened_count = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL").bind(status, priority, assignedAdminId || null, assignedTo, dueAt || null, firstResponseDueAt, firstRespondedAt, resolutionDueAt, resolvedAt, reopenedCount, threadId).run();
       if (!result.meta.changes) return Response.json({ error: "客服工单不存在" }, { status: 404 });
     } else if (action === "add-support-note") {
       const threadId = String(payload.id ?? "");
@@ -389,9 +430,9 @@ export async function POST(request: Request) {
                       : db.prepare("DELETE FROM support_threads WHERE id = ? AND deleted_at IS NOT NULL").bind(id));
       await db.batch(statements);
     } else if (action === "reply-support-thread") {
-      await sendSupportReply(String(payload.id), String(payload.message ?? ""), actor.email);
+      await sendSupportReply(String(payload.id), String(payload.message ?? ""), actor);
     } else if (action === "open-linked-support-thread") {
-      const threadId = await ensureLinkedSupportThread({ orderId: String(payload.orderId ?? ""), returnId: String(payload.returnId ?? ""), actor: actor.email });
+      const threadId = await ensureLinkedSupportThread({ orderId: String(payload.orderId ?? ""), returnId: String(payload.returnId ?? ""), actor });
       payload.id = threadId;
       await completeAdminAudit(auditId, "succeeded");
       auditCompleted = true;

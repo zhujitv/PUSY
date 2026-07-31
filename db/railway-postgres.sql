@@ -561,9 +561,15 @@ CREATE TABLE IF NOT EXISTS support_threads (
   status TEXT NOT NULL DEFAULT 'unread',
   priority TEXT NOT NULL DEFAULT 'normal',
   assigned_to TEXT,
+  assigned_admin_id TEXT,
   starred SMALLINT NOT NULL DEFAULT 0,
   archived_at TEXT,
   deleted_at TEXT,
+  first_response_due_at TEXT,
+  resolution_due_at TEXT,
+  first_responded_at TEXT,
+  resolved_at TEXT,
+  reopened_count INTEGER NOT NULL DEFAULT 0,
   last_message_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP::TEXT),
   created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP::TEXT),
   updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP::TEXT)
@@ -602,6 +608,12 @@ ALTER TABLE support_threads ADD COLUMN IF NOT EXISTS archived_at TEXT;
 ALTER TABLE support_threads ADD COLUMN IF NOT EXISTS deleted_at TEXT;
 ALTER TABLE support_threads ADD COLUMN IF NOT EXISTS customer_phone TEXT NOT NULL DEFAULT '';
 ALTER TABLE support_threads ADD COLUMN IF NOT EXISTS customer_wechat TEXT NOT NULL DEFAULT '';
+ALTER TABLE support_threads ADD COLUMN IF NOT EXISTS assigned_admin_id TEXT;
+ALTER TABLE support_threads ADD COLUMN IF NOT EXISTS first_response_due_at TEXT;
+ALTER TABLE support_threads ADD COLUMN IF NOT EXISTS resolution_due_at TEXT;
+ALTER TABLE support_threads ADD COLUMN IF NOT EXISTS first_responded_at TEXT;
+ALTER TABLE support_threads ADD COLUMN IF NOT EXISTS resolved_at TEXT;
+ALTER TABLE support_threads ADD COLUMN IF NOT EXISTS reopened_count INTEGER NOT NULL DEFAULT 0;
 
 CREATE TABLE IF NOT EXISTS return_events (
   id TEXT PRIMARY KEY,
@@ -654,6 +666,9 @@ CREATE TABLE IF NOT EXISTS support_canned_replies (
 CREATE INDEX IF NOT EXISTS invoices_member_idx ON invoices (member_id, requested_at DESC);
 CREATE INDEX IF NOT EXISTS invoices_status_idx ON invoices (status, requested_at DESC);
 CREATE INDEX IF NOT EXISTS support_threads_due_idx ON support_threads (due_at, status);
+CREATE INDEX IF NOT EXISTS support_threads_assignee_idx ON support_threads (assigned_admin_id, status, last_message_at DESC);
+CREATE INDEX IF NOT EXISTS support_threads_first_response_sla_idx ON support_threads (first_response_due_at, status);
+CREATE INDEX IF NOT EXISTS support_threads_resolution_sla_idx ON support_threads (resolution_due_at, status);
 
 CREATE TABLE IF NOT EXISTS admin_users (
   id TEXT PRIMARY KEY,

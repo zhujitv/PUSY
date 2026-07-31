@@ -4,6 +4,7 @@ import { readFile, readdir } from "node:fs/promises";
 import { createGiftCardCode } from "../lib/gift-cards.ts";
 import { roleCan } from "../lib/admin-permissions.ts";
 import { hasTrustedOrigin } from "../lib/request-origin.ts";
+import { supportSlaDeadlines } from "../lib/support/sla.ts";
 
 const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
@@ -39,6 +40,18 @@ test("客服表单只按已登录会员身份关联订单", async () => {
   assert.match(support, /member_id = \?/);
   assert.match(support, /viewer\.memberId/);
   assert.doesNotMatch(support, /phone = \? OR/);
+});
+
+test("客服 SLA 按优先级生成首响和解决时限", () => {
+  const start = "2026-07-31T00:00:00.000Z";
+  assert.deepEqual(supportSlaDeadlines("urgent", start), {
+    firstResponseDueAt: "2026-07-31T01:00:00.000Z",
+    resolutionDueAt: "2026-07-31T04:00:00.000Z",
+  });
+  assert.deepEqual(supportSlaDeadlines("normal", start), {
+    firstResponseDueAt: "2026-07-31T08:00:00.000Z",
+    resolutionDueAt: "2026-08-02T00:00:00.000Z",
+  });
 });
 
 test("管理员会话、手机号身份和仓库权限均已加固", async () => {

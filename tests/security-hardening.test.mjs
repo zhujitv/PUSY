@@ -131,7 +131,10 @@ test("后台登录在 Vercel 转发主机和 PUSY 主域之间仍能校验同源
   assert.equal(hasTrustedOrigin(new Request("https://deployment.vercel.app/api/admin/auth", {
     headers: { origin: "https://pusy.cn", "sec-fetch-site": "same-origin" },
   })), true);
+  assert.equal(hasTrustedOrigin(new Request("https://internal-runtime.local/api/admin/auth", {
+    headers: { origin: "null", "sec-fetch-site": "same-origin" },
+  })), true);
   assert.equal(hasTrustedOrigin(new Request("https://pusy.cn/api/admin/auth", {
-    headers: { origin: "https://attacker.example" },
+    headers: { origin: "https://attacker.example", "sec-fetch-site": "cross-site" },
   })), false);
 });

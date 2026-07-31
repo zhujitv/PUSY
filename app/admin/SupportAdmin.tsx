@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { formatCnyFromRub } from "../data/products";
 
 export type SupportThread = {
@@ -127,6 +127,7 @@ export function SupportAdmin({ threads, messages, returnEvents, cannedReplies, r
   const [checked, setChecked] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [replyText, setReplyText] = useState("");
+  const pendingReply = useRef<{ threadId: string; message: string; requestId: string } | null>(null);
   const [renderedAt, setRenderedAt] = useState(() => Date.now());
   useEffect(() => {
     const timer = window.setInterval(() => setRenderedAt(Date.now()), 60_000);
@@ -221,8 +222,15 @@ export function SupportAdmin({ threads, messages, returnEvents, cannedReplies, r
     if (!selected) return;
     const message = replyText.trim();
     if (!message) return;
+    const currentRequest = pendingReply.current?.threadId === selected.id && pendingReply.current.message === message
+      ? pendingReply.current
+      : { threadId: selected.id, message, requestId: crypto.randomUUID() };
+    pendingReply.current = currentRequest;
     setBusy(true);
-    if (await onAct({ action: "reply-support-thread", id: selected.id, message })) setReplyText("");
+    if (await onAct({ action: "reply-support-thread", id: selected.id, message, requestId: currentRequest.requestId })) {
+      pendingReply.current = null;
+      setReplyText("");
+    }
     setBusy(false);
   }
 

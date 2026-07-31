@@ -430,7 +430,7 @@ export async function POST(request: Request) {
                       : db.prepare("DELETE FROM support_threads WHERE id = ? AND deleted_at IS NOT NULL").bind(id));
       await db.batch(statements);
     } else if (action === "reply-support-thread") {
-      await sendSupportReply(String(payload.id), String(payload.message ?? ""), actor);
+      await sendSupportReply(String(payload.id), String(payload.message ?? ""), actor, String(payload.requestId ?? ""));
     } else if (action === "open-linked-support-thread") {
       const threadId = await ensureLinkedSupportThread({ orderId: String(payload.orderId ?? ""), returnId: String(payload.returnId ?? ""), actor });
       payload.id = threadId;

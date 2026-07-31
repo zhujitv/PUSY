@@ -532,6 +532,10 @@ test("customer inbox links verified order replies, returns and protected attachm
   assert.match(returnApi, /createWebsiteReturnThread/);
   assert.match(supportService, /lower\(email\) = \?/);
   assert.match(supportService, /In-Reply-To/);
+  assert.match(supportAdmin, /requestId: crypto\.randomUUID\(\)/);
+  assert.match(supportService, /support-reply-\$\{normalizedRequestId\}/);
+  assert.match(supportService, /CURRENT_TIMESTAMP::TEXT/);
+  assert.doesNotMatch(supportService, /COALESCE\(first_responded_at, CURRENT_TIMESTAMP\)/);
   assert.match(supportService, /ensureLinkedSupportThread/);
   assert.match(supportService, /订单 .*建立客户邮件沟通/);
   assert.match(admin, /邮件联系客户/);
@@ -565,7 +569,7 @@ test("support desk provides account assignment, SLA tracking and customer 360 co
   assert.match(adminApi, /supportCustomerOrders/);
   assert.match(adminApi, /supportCustomerReturns/);
   assert.match(adminApi, /所选负责人不存在、已停用或没有客服权限/);
-  assert.match(supportService, /first_responded_at = COALESCE/);
+  assert.match(supportService, /first_responded_at = COALESCE\(first_responded_at, CURRENT_TIMESTAMP::TEXT\)/);
   assert.match(supportService, /reopened_count/);
   assert.match(migration, /first_response_due_at/);
   assert.match(migration, /resolution_due_at/);

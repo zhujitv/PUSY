@@ -548,12 +548,13 @@ test("customer inbox links verified order replies, returns and protected attachm
 });
 
 test("support desk provides account assignment, SLA tracking and customer 360 context", async () => {
-  const [supportAdmin, adminApi, supportService, migration, schema] = await Promise.all([
+  const [supportAdmin, adminApi, supportService, migration, schema, css] = await Promise.all([
     read("app/admin/SupportAdmin.tsx"),
     read("app/api/admin/route.ts"),
     read("lib/support/service.ts"),
     read("db/migrations/2026-07-31-support-sla-customer360.sql"),
     read("db/railway-postgres.sql"),
+    read("app/globals.css"),
   ]);
   assert.match(supportAdmin, /客服 SLA 概览/);
   assert.match(supportAdmin, /客户 360/);
@@ -569,6 +570,10 @@ test("support desk provides account assignment, SLA tracking and customer 360 co
   assert.match(migration, /first_response_due_at/);
   assert.match(migration, /resolution_due_at/);
   assert.match(schema, /support_threads_assignee_idx/);
+  assert.doesNotMatch(supportAdmin, /<footer>/);
+  assert.match(css, /@container support-admin/);
+  assert.match(css, /@container support-conversation/);
+  assert.match(css, /support-reply-actions/);
 });
 
 test("admin workspace uses grouped navigation and responsive branded UI", async () => {

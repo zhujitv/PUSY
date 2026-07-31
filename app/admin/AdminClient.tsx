@@ -79,31 +79,46 @@ export function AdminClient({ viewer, canSignOut }: { viewer: AdminViewer; canSi
   const [query, setQuery] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [contentDirty, setContentDirty] = useState(false);
   const can = (permission: AdminPermission) => viewer.permissions.includes(permission);
 
-  const load = useCallback(async (view: string) => {
-    setLoading(true);
+  useEffect(() => {
+    if (message !== "已保存") return;
+    const timeout = window.setTimeout(() => setMessage(""), 3_000);
+    return () => window.clearTimeout(timeout);
+  }, [message]);
+
+  const load = useCallback(async (view: string, options: { silent?: boolean; preserveMessage?: boolean } = {}) => {
+    const silent = Boolean(options.silent);
+    if (!silent) setLoading(true);
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), 20_000);
     try {
       const response = await fetch(`/api/admin?view=${encodeURIComponent(view)}`, { cache: "no-store", signal: controller.signal });
       const body = await response.json().catch(() => ({}));
       if (!response.ok) setMessage(body.error || "加载失败，请稍后重试");
-      else { setData(body); setMessage(""); }
+      else { setData(body); if (!options.preserveMessage) setMessage(""); }
     } catch (error) {
       setMessage(error instanceof DOMException && error.name === "AbortError" ? "读取商城数据超时，请刷新页面重试" : "无法连接商城数据，请刷新页面重试");
     } finally {
       window.clearTimeout(timeout);
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
   useEffect(() => { queueMicrotask(() => { void load(defaultTab); }); }, [defaultTab, load]);
   async function act(payload: Record<string, unknown>) {
     setMessage("正在保存…");
-    const response = await fetch("/api/admin", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
-    const body = await response.json();
-    if (!response.ok) { setMessage(body.error || "保存失败"); return false; }
-    setMessage("已保存"); await load(tab); return true;
+    try {
+      const response = await fetch("/api/admin", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) { setMessage(body.error || "保存失败"); return false; }
+      setMessage("已保存");
+      await load(tab, { silent: true, preserveMessage: true });
+      return true;
+    } catch {
+      setMessage("无法连接后台，请检查网络后重试");
+      return false;
+    }
   }
   async function saveProduct(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -129,7 +144,14 @@ export function AdminClient({ viewer, canSignOut }: { viewer: AdminViewer; canSi
     setTab("support");
     setMessage("已打开关联邮件工单，可直接回复客户");
   }
-  function changeTab(next: string) { setTab(next); setQuery(""); if (next !== "support") setSupportFocus(""); void load(next); }
+  function changeTab(next: string) {
+    if (tab === "content" && next !== tab && contentDirty && !window.confirm("当前内容还有未保存修改，确定离开吗？")) return;
+    setContentDirty(false);
+    setTab(next);
+    setQuery("");
+    if (next !== "support") setSupportFocus("");
+    void load(next);
+  }
 
   const normalized = query.trim().toLowerCase();
   const filtered = useMemo(() => {
@@ -152,16 +174,17 @@ export function AdminClient({ viewer, canSignOut }: { viewer: AdminViewer; canSi
   }, [data, normalized]);
 
   const tabMeta = adminTabMeta[tab];
+  const messageIsError = /失败|无法|超时|错误/.test(message);
   return <main className="admin-shell">
     <aside className="admin-sidebar"><div className="admin-sidebar-brand"><a className="admin-brand" href="/">PUSY.CN</a><span>ADMIN</span></div><p>中国区商城管理后台</p><nav aria-label="后台功能导航">{adminNavGroups.map((group) => { const items = group.items.filter(([key]) => can(tabPermissions[key])); return items.length ? <section className="admin-nav-group" key={group.label}><b>{group.label}</b>{items.map(([key,label,icon]) => <button className={tab === key ? "active" : ""} aria-current={tab === key ? "page" : undefined} onClick={() => changeTab(key)} key={key}><i aria-hidden="true">{icon}</i><span>{label}</span>{key === "support" && Boolean(data?.stats?.unread_support) && <em className="admin-nav-count">{data?.stats?.unread_support}</em>}</button>)}</section> : null; })}</nav><div className="admin-viewer"><i>{viewer.displayName.slice(0, 1).toUpperCase()}</i><span><small>{adminRoleLabels[viewer.role]}</small><b>{viewer.displayName}</b></span>{canSignOut && <a href="/admin/logout">退出</a>}</div><a className="admin-store-link" href="/">查看商城 <span>↗</span></a></aside>
     <section className="admin-main"><header><div><p>{tabMeta.eyebrow} / PUSY.CN</p><h1>{tabMeta.title}</h1><span>{tabMeta.description}</span></div></header>
       {!['overview','analytics','settings','content','admins','audit'].includes(tab) && <div className="admin-search"><i aria-hidden="true">⌕</i><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={searchPlaceholders[tab] ?? "搜索当前列表"} aria-label="搜索当前列表" /><span>{query ? `${tab === "support" ? data?.supportThreads.filter((item) => `${item.id} ${item.subject} ${item.customer_email} ${item.customer_phone ?? ""} ${item.customer_wechat ?? ""} ${item.order_id ?? ""} ${item.return_id ?? ""}`.toLowerCase().includes(normalized)).length : tab === "orders" ? filtered.orders.length : tab === "invoices" ? filtered.invoices.length : tab === "payments" ? filtered.payments.length + filtered.refunds.length : tab === "notifications" ? filtered.notificationJobs.length : tab === "members" ? filtered.members.length : tab === "products" ? filtered.products.length : tab === "reviews" ? filtered.reviews.length : tab === "returns" ? filtered.returns.length : tab === "partnerships" ? filtered.retailPartnerships.length : tab === "marketing" ? filtered.coupons.length + filtered.giftCards.length : filtered.subscribers.length} 条结果` : ""}</span></div>}
-      {message && <div className="admin-message">{message}</div>}
+      {message && <div className={`admin-message ${messageIsError ? "error" : ""}`} role={messageIsError ? "alert" : "status"} aria-live={messageIsError ? "assertive" : "polite"} aria-atomic="true">{message}</div>}
       {loading ? <div className="admin-loading"><i /><b>正在读取商城数据</b><span>正在同步当前模块的数据…</span></div> : data && <>
         {tab === "overview" && <div className="admin-overview"><section className="stat-grid"><article><span>累计订单</span><b>{data.stats?.order_count ?? 0}</b></article><article><span>累计销售额</span><b>{formatCnyFromRub(data.stats?.revenue ?? 0)}</b></article><article><span>平均客单价</span><b>{formatCnyFromRub(Math.round(data.stats?.avg_order_value ?? 0))}</b></article><article><span>待处理订单</span><b>{data.stats?.pending_count ?? 0}</b></article><article><span>待核验库存</span><b>{data.stats?.unverified_inventory_count ?? 0}</b></article><article><span>低库存商品</span><b>{data.stats?.low_stock_count ?? 0}</b></article><article><span>待审核售后</span><b>{data.stats?.pending_returns ?? 0}</b></article><article><span>待联系合作</span><b>{data.stats?.pending_partnerships ?? 0}</b></article></section><RevenueChart points={data.revenueTrend} /><section className="admin-panel"><div className="admin-panel-title"><h2>最新订单</h2><button onClick={() => changeTab("orders")}>查看全部</button></div><OrderTable orders={data.orders.slice(0, 6)} canManage={can("orders.manage")} canSupport={can("support.manage")} onOpen={setSelectedOrder} onSupport={(orderId) => void openLinkedSupport({ orderId })} onStatus={(id,status) => act({ action:"update-order-status", id, status })} /></section></div>}
         {tab === "analytics" && <AnalyticsAdmin analytics={data.analytics} />}
         {tab === "growth" && <GrowthAdmin data={data.growth} onAct={act} />}
-        {tab === "content" && <ContentAdmin key={data.contentRevisions.find((item) => item.status === "published")?.id ?? "content"} content={data.content} revisions={data.contentRevisions} onAct={act} />}
+        {tab === "content" && <ContentAdmin key={data.contentRevisions.find((item) => item.status === "published")?.id ?? "content"} content={data.content} revisions={data.contentRevisions} onAct={act} onDirtyChange={setContentDirty} />}
         {tab === "settings" && <ChinaRegionAdmin settings={data.region} providers={data.providers} onOpenPayments={() => changeTab("payments")} />}
         {tab === "orders" && <OrderManagement orders={filtered.orders} shipments={data.shipments} shipmentEvents={data.shipmentEvents} canManage={can("orders.manage") || can("orders.fulfill")} canFullManage={can("orders.manage")} canSupport={can("support.manage")} onOpen={setSelectedOrder} onSupport={(orderId) => void openLinkedSupport({ orderId })} onStatus={(id,status) => act({ action:"update-order-status", id, status })} onAct={act} />}
         {tab === "invoices" && <InvoiceAdmin invoices={filtered.invoices} onAct={act} />}

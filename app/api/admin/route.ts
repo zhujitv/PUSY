@@ -591,8 +591,9 @@ export async function POST(request: Request) {
       auditCompleted = true;
     }
     const conflict = error instanceof Error && /unique/i.test(error.message);
+    const contentValidation = error instanceof Error && /^(定时发布时间必须晚于当前时间|内容版本不存在|只能删除草稿或待发布版本)$/.test(error.message);
     console.error("[api/admin] action failed", { message: error instanceof Error ? error.message : String(error), code: typeof error === "object" && error && "code" in error ? String(error.code) : undefined });
-    return safeServerError(conflict ? "相同名称、商品编号或邮箱的数据已经存在" : "后台操作失败，请稍后再试", conflict ? 409 : 500);
+    return safeServerError(contentValidation ? error.message : conflict ? "相同名称、商品编号或邮箱的数据已经存在" : "后台操作失败，请稍后再试", contentValidation ? 400 : conflict ? 409 : 500);
   } finally {
     if (auditId && !auditCompleted) await completeAdminAudit(auditId, "failed", "请求校验未通过或操作未完成").catch(() => undefined);
   }

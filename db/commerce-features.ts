@@ -101,7 +101,7 @@ export async function getSiteContent() {
 export async function getContentWorkspace() {
   const db = await getStoreDb();
   const current = await getSiteContent();
-  const revisions = await db.prepare("SELECT id, title, status, publish_at, published_at, created_by, created_at, updated_at FROM content_revisions ORDER BY created_at DESC LIMIT 30").all();
+  const revisions = await db.prepare("SELECT id, title, snapshot_json, status, publish_at, published_at, created_by, created_at, updated_at FROM content_revisions WHERE status = 'published' OR id IN (SELECT id FROM content_revisions ORDER BY created_at DESC LIMIT 100) ORDER BY created_at DESC").all();
   return { current, revisions: revisions.results };
 }
 

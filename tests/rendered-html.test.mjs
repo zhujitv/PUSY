@@ -508,7 +508,7 @@ test("customer service and business cooperation use website forms instead of ema
   assert.match(home, /href="\/contact">客户服务/);
   assert.match(home, /\/stores-china#retail-partnership/);
   assert.match(chrome, /href="\/contact">客户服务/);
-  assert.match(contactPage, /无需打开邮件客户端/);
+  assert.doesNotMatch(contactPage, /咨询与退换货共用一个入口/);
   assert.match(contactForm, /提交客服工单/);
   assert.match(contactForm, /手机号码/);
   assert.match(contactForm, /电子邮箱（选填）/);
@@ -535,6 +535,15 @@ test("customer service and business cooperation use website forms instead of ema
   assert.match(migration, /ADD COLUMN IF NOT EXISTS customer_wechat/);
   assert.match(schema, /customer_phone TEXT NOT NULL DEFAULT ''/);
   assert.match(schema, /customer_wechat TEXT NOT NULL DEFAULT ''/);
+});
+
+test("customer service title stays compact and on one line", async () => {
+  const [contactPage, styles] = await Promise.all([
+    read("app/contact/page.tsx"),
+    read("app/globals.css"),
+  ]);
+  assert.match(contactPage, /className="contact-page"/);
+  assert.match(styles, /\.info-page\.contact-page h1 \{[^}]*font-size: clamp\(38px, 4\.5vw, 68px\);[^}]*white-space: nowrap;/s);
 });
 
 test("customer inbox links verified order replies, returns and protected attachments", async () => {

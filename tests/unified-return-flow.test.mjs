@@ -21,7 +21,9 @@ test("退换货合并到在线客服并支持验证后多订单选择", async ()
   assert.match(contact, /selectedReturnOrder/);
   assert.match(contact, /选择需要售后的商品/);
   assert.match(contact, /action: "submit-return"/);
-  assert.match(contactPage, /咨询与退换货共用一个入口/);
+  assert.match(contactPage, /title="在线联系客服"/);
+  assert.match(contactPage, /contact-service-intro/);
+  assert.doesNotMatch(contactPage, /咨询与退换货共用一个入口/);
   assert.doesNotMatch(returnPage, /ReturnForm/);
   assert.match(returnPage, /contact\?category=售后问题/);
   assert.match(account, /contact\?category=/);

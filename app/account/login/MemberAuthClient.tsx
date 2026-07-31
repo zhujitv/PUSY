@@ -4,7 +4,7 @@ import { useState } from "react";
 
 type Mode = "login" | "register";
 
-export function MemberAuthClient() {
+export function MemberAuthClient({ referralCode = "" }: { referralCode?: string }) {
   const [mode, setMode] = useState<Mode>("login");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -80,6 +80,7 @@ export function MemberAuthClient() {
           <label>姓名<input name="name" autoComplete="name" placeholder="请输入姓名" required /></label>
           <label>手机号码<input name="phone" type="tel" inputMode="numeric" autoComplete="tel" placeholder="请输入中国大陆手机号" required /></label>
           <label>电子邮箱<input name="email" type="email" autoComplete="email" placeholder="name@example.com" required /></label>
+          <label>邀请码（选填）<input name="referralCode" defaultValue={referralCode} maxLength={20} placeholder="好友分享链接会自动填写" /></label>
         </>}
         {mode === "login" && <label>手机号或邮箱<input name="identifier" autoComplete="username" placeholder="请输入手机号或邮箱" required /></label>}
         <label>验证码

@@ -5,6 +5,7 @@ import type { PaymentProviderName, PaymentStatus, ProviderConfig, RefundStatus }
 import { notifyGiftCards, notifyOrderConfirmed, notifyRefundCompleted } from "../notifications/business";
 import { commitPaidOrder, refreshOrderMemberTotals, releaseExpiredOrderReservations, restockCancelledPaidOrder } from "../orders/reservations";
 import { syncOrderPoints } from "../growth/loyalty";
+import { syncPaidOrderGrowth } from "../growth/member-program";
 
 type DbPayment = { id: string; order_id: string; provider: PaymentProviderName; merchant_trade_no: string; provider_transaction_id: string | null; amount_fen: number; status: PaymentStatus; checkout_url: string | null; code_url: string | null; attempts: number };
 type DbRefund = { id: string; payment_id: string; order_id: string; provider: PaymentProviderName; merchant_refund_no: string; provider_refund_id: string | null; amount_fen: number; reason: string; status: RefundStatus; attempts: number };
@@ -100,7 +101,7 @@ export async function applyPaymentStatus(payment: DbPayment, status: PaymentStat
   ]);
   if (resolvedStatus === "paid" && payment.status !== "paid") {
     await commitPaidOrder(payment.order_id);
-    await Promise.all([notifyOrderConfirmed(payment.order_id), notifyGiftCards(payment.order_id), syncOrderPoints(payment.order_id)]).catch(() => undefined);
+    await Promise.all([notifyOrderConfirmed(payment.order_id), notifyGiftCards(payment.order_id), syncOrderPoints(payment.order_id), syncPaidOrderGrowth(payment.order_id)]).catch(() => undefined);
   }
   await refreshOrderMemberTotals(payment.order_id);
   if (["paid", "partially_refunded", "refunded"].includes(resolvedStatus)) await syncOrderPoints(payment.order_id).catch(() => undefined);

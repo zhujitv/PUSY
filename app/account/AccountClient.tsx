@@ -17,7 +17,10 @@ type PointsEntry = { id: number; points: number; balance_after: number; reason: 
 type MemberCoupon = { id: number; code: string; kind: string; value: number; minimum: number; ends_at?: string; status: string; assigned_at: string };
 type ProductAlert = { id: number; product_slug: string; product_name: string; image: string; alert_type: string; target_price?: number; price: number; stock: number; last_notified_at?: string; created_at: string };
 type MemberTag = { id: number; name: string; color: string };
-type AccountData = { member: Member; profile: MemberProfile; addresses: Address[]; orders: Order[]; orderItems: OrderItem[]; returns: ReturnItem[]; invoices: Invoice[]; pointsLedger: PointsEntry[]; coupons: MemberCoupon[]; productAlerts: ProductAlert[]; tags: MemberTag[]; shipments: Shipment[]; shipmentEvents: ShipmentEvent[] };
+type GrowthTask = { key: string; title: string; description: string; points: number; completed: boolean; repeatable?: boolean; count?: number };
+type MemberBenefit = { key: string; title: string; description: string; configured: boolean; granted: boolean };
+type GrowthSummary = { tasks: GrowthTask[]; checkin: { completedToday: boolean; streak: number }; referral: { code: string; link: string; pending: number; rewarded: number; friendReward: number; inviterReward: number }; benefits: MemberBenefit[] };
+type AccountData = { member: Member; profile: MemberProfile; addresses: Address[]; orders: Order[]; orderItems: OrderItem[]; returns: ReturnItem[]; invoices: Invoice[]; pointsLedger: PointsEntry[]; coupons: MemberCoupon[]; productAlerts: ProductAlert[]; tags: MemberTag[]; shipments: Shipment[]; shipmentEvents: ShipmentEvent[]; growth: GrowthSummary };
 
 export function AccountClient({ viewer, email }: { viewer: string; email: string }) {
   const { wishlist, toggleWishlist, addToCart } = useStore();
@@ -42,7 +45,7 @@ export function AccountClient({ viewer, email }: { viewer: string; email: string
     const response = await fetch("/api/account", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
     const body = await response.json();
     if (!response.ok) { setMessage(body.error || "保存失败"); return false; }
-    setMessage("已保存"); await load(); return true;
+    setMessage(body.message || "已保存"); await load(); return true;
   }
   async function saveProfile(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -59,7 +62,7 @@ export function AccountClient({ viewer, email }: { viewer: string; email: string
   async function saveAddress(event: React.FormEvent<HTMLFormElement>) { event.preventDefault(); const form = new FormData(event.currentTarget); const ok = await act({ action: "save-address", id: editingAddress?.id, isDefault: form.get("isDefault") === "on", ...Object.fromEntries(form.entries()) }); if (ok) { setEditingAddress(null); setCreatingAddress(false); } }
   const firstName = useMemo(() => data?.profile.nickname || data?.member.name || viewer, [data, viewer]);
   const savedProducts = accountProducts.filter((product) => wishlist.includes(product.slug));
-  const nav = [["overview","账户总览"],["club","会员权益"],["profile","个人资料"],["addresses","收货地址"],["wishlist","我的收藏"],["orders","我的订单"],["invoices","发票管理"],["returns","售后进度"]];
+  const nav = [["overview","账户总览"],["club","会员权益"],["growth","任务与邀请"],["profile","个人资料"],["addresses","收货地址"],["wishlist","我的收藏"],["orders","我的订单"],["invoices","发票管理"],["returns","售后进度"]];
 
   return <main className="member-page">
     <header className="member-hero"><div><p>PÚSY CLUB</p><h1>你好，{firstName}</h1><span>从这里管理个人资料、地址、订单和售后申请。</span></div><div className="member-identity"><i>✓</i><span>已验证账户<b>{email}</b></span><a href="/account/logout">退出登录</a></div></header>
@@ -68,6 +71,7 @@ export function AccountClient({ viewer, email }: { viewer: string; email: string
       {loading && !data ? <div className="member-loading">正在读取会员资料…</div> : data && <>
         {tab === "overview" && <div className="member-overview"><div className="member-stat-grid"><article><span>可用积分</span><b>{data.member.points_balance}</b></article><article><span>会员等级</span><b>{tierName(data.member.tier)}</b></article><article><span>累计订单</span><b>{data.member.total_orders}</b></article><article><span>累计消费</span><b>{formatCnyFromRub(data.member.total_spent)}</b></article></div><section className="member-section"><div className="member-section-title"><h2>最近订单</h2><button onClick={() => setTab("orders")}>查看全部</button></div>{data.orders.length ? <OrderList orders={data.orders.slice(0, 3)} items={data.orderItems} /> : <Empty title="还没有订单" copy="完成第一笔订单后，可在这里持续查看配送状态。" href="/catalog/products" link="浏览商品" />}</section></div>}
         {tab === "club" && <MembershipPanel data={data} onAct={act} />}
+        {tab === "growth" && <MemberGrowthPanel growth={data.growth} onAct={act} onProfile={() => setTab("profile")} />}
         {tab === "profile" && <ProfilePanel member={data.member} profile={data.profile} onSubmit={saveProfile} onPhoneVerified={() => void load()} />}
         {tab === "addresses" && <section className="member-section"><div className="member-section-title"><div><p>结账时可快速选择</p><h2>收货地址</h2></div><button onClick={() => { setEditingAddress(null); setCreatingAddress(true); }}>＋ 新增地址</button></div>{data.addresses.length ? <div className="address-grid">{data.addresses.map((address) => <article key={address.id} className={address.is_default ? "default" : ""}><div><span>{address.label}</span>{Boolean(address.is_default) && <em>默认</em>}</div><h3>{address.recipient}</h3><p>{address.phone}</p><p>{address.province} {address.city} {address.district}<br />{address.detail} {address.postcode}</p><footer><button onClick={() => setEditingAddress(address)}>编辑</button>{!address.is_default && <button onClick={() => act({ action:"set-default-address", id:address.id })}>设为默认</button>}<button className="danger" onClick={() => act({ action:"delete-address", id:address.id })}>删除</button></footer></article>)}</div> : <Empty title="还没有收货地址" copy="保存常用地址，结账时填写会更轻松。" onClick={() => setCreatingAddress(true)} link="新增地址" />}</section>}
         {tab === "wishlist" && <section className="member-section"><div className="member-section-title"><div><p>{savedProducts.length} 件商品</p><h2>我的收藏</h2></div><a href="/catalog/products">继续发现</a></div>{savedProducts.length ? <div className="member-wishlist-grid">{savedProducts.map((product) => <article key={product.slug}><a href={`/products/${product.slug}`}><Image src={product.image} alt={product.name} width={700} height={727} sizes="(max-width: 700px) 50vw, 25vw" /><h3>{product.name}</h3></a><p>{formatCnyFromRub(product.price)}</p><div><button disabled={!product.inventoryVerified || (product.stock ?? 0) < 1} onClick={() => addToCart(product)}>加入购物袋</button><button onClick={() => toggleWishlist(product.slug)}>移除</button></div></article>)}</div> : <Empty title="还没有收藏商品" copy="在商品卡片或详情页点击心形按钮，商品会保存在这里。" href="/catalog/products" link="浏览商品" />}</section>}
@@ -90,6 +94,25 @@ function parseSelections(value: string) {
 const tierNames: Record<string, string> = { bronze: "新锐会员", silver: "银卡会员", gold: "金卡会员", diamond: "钻石会员" };
 function tierName(value: string) { return tierNames[value] ?? "新锐会员"; }
 const tierSteps = [{ key: "bronze", minimum: 0 }, { key: "silver", minimum: 500 }, { key: "gold", minimum: 2000 }, { key: "diamond", minimum: 5000 }];
+
+function MemberGrowthPanel({ growth, onAct, onProfile }: { growth: GrowthSummary; onAct: (payload: Record<string, unknown>) => Promise<boolean>; onProfile: () => void }) {
+  const [copyMessage, setCopyMessage] = useState("");
+  async function copyInvite() {
+    try { await navigator.clipboard.writeText(growth.referral.link); setCopyMessage("邀请链接已复制"); }
+    catch { setCopyMessage("复制失败，请手动复制链接"); }
+  }
+  async function shareInvite() {
+    if (!navigator.share) return copyInvite();
+    try { await navigator.share({ title: "加入 PÚSY CLUB", text: `使用我的邀请码 ${growth.referral.code} 注册，完成首单双方都能获得积分。`, url: growth.referral.link }); }
+    catch { /* 用户取消分享时不显示错误 */ }
+  }
+  return <div className="growth-member-stack">
+    <section className="member-growth-hero"><div><p>MEMBER MISSIONS</p><h2>做喜欢的事，<br />顺便赚积分。</h2><span>签到、完善资料、分享真实体验或邀请好友，都能积累会员积分。</span></div><article><span>今日签到</span><b>{growth.checkin.completedToday ? `连续 ${growth.checkin.streak} 天` : "等待签到"}</b><button disabled={growth.checkin.completedToday} onClick={() => void onAct({ action: "daily-checkin" })}>{growth.checkin.completedToday ? "今天已签到" : "签到领积分"}</button></article></section>
+    <section className="member-section"><div className="member-section-title"><div><p>{growth.tasks.filter((task) => task.completed).length} 项已完成</p><h2>会员任务中心</h2></div></div><div className="member-task-grid">{growth.tasks.map((task) => <article className={task.completed ? "completed" : ""} key={task.key}><i>{task.completed ? "✓" : "+"}</i><div><b>{task.title}</b><p>{task.description}</p>{task.repeatable && task.count ? <small>已成功完成 {task.count} 次</small> : null}</div><strong>+{task.points}</strong></article>)}</div></section>
+    <section className="member-section referral-program"><div className="member-section-title"><div><p>好友完成首单后双方自动到账</p><h2>邀请好友奖励</h2></div><span>已奖励 {growth.referral.rewarded} 人</span></div><div className="referral-layout"><div className="referral-qr"><Image src="/api/account/referral-qr" alt="PÚSY CLUB 邀请二维码" width={440} height={440} unoptimized /></div><div className="referral-copy"><span>你的专属邀请码</span><strong>{growth.referral.code}</strong><p>好友完成首单后，你获得 <b>{growth.referral.inviterReward} 积分</b>，好友获得 <b>{growth.referral.friendReward} 积分</b>。</p><label>专属邀请链接<input readOnly value={growth.referral.link} onFocus={(event) => event.currentTarget.select()} /></label><div><button onClick={() => void copyInvite()}>复制链接</button><button className="secondary" onClick={() => void shareInvite()}>分享邀请</button></div>{copyMessage && <small>{copyMessage}</small>}<footer><span>{growth.referral.pending} 位好友等待完成首单</span><span>{growth.referral.rewarded} 位好友已完成奖励</span></footer></div></div></section>
+    <section className="member-section"><div className="member-section-title"><div><p>生日、周年与等级专属资格</p><h2>本年度会员权益</h2></div></div><div className="member-benefit-grid">{growth.benefits.map((benefit) => <article className={benefit.granted ? "active" : ""} key={benefit.key}><i>{benefit.granted ? "✓" : "◇"}</i><b>{benefit.title}</b><p>{benefit.description}</p><span>{benefit.granted ? "已解锁" : benefit.configured ? "尚未解锁" : "需要完善生日资料"}</span>{!benefit.configured && <button onClick={onProfile}>完善资料</button>}</article>)}</div></section>
+  </div>;
+}
 
 function MembershipPanel({ data, onAct }: { data: AccountData; onAct: (payload: Record<string, unknown>) => Promise<boolean> }) {
   const currentIndex = Math.max(0, tierSteps.findIndex((item) => item.key === data.member.tier));

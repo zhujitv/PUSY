@@ -513,6 +513,13 @@ footer.pusy-footer .footer-links a { font-size: 16px; font-weight: 600; }
 .review-form button { width: 100%; border: 0; padding: 14px; background: #111; color: #fff; }
 .review-message { color: #9b1c56; font-size: 13px; }
 .review-form > small { display: block; margin-top: 12px; color: #777; line-height: 1.5; }
+.review-upload input { padding: 9px !important; }
+.review-upload span { color: #888; font-size: 10px; line-height: 1.5; }
+.review-image-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 150px)); gap: 8px; margin: 16px 0; }
+.review-image-grid img { width: 100%; aspect-ratio: 1; object-fit: cover; background: #f4f1f2; }
+.review-image-grid.editing button { position: relative; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.review-image-grid.editing i { position: absolute; top: 5px; right: 5px; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; color: #fff; background: rgba(0,0,0,.72); font-style: normal; }
+.review-image-grid.admin { grid-template-columns: repeat(3, 110px); }
 .catalog-filter-panel { display: grid; grid-template-columns: 1.6fr repeat(5, minmax(120px, .8fr)); align-items: end; gap: 10px; margin: 0 1.2vw 20px; padding: 18px; border-radius: 10px; background: #f4f1f2; }
 .catalog-filter-panel label { display: grid; gap: 6px; font-size: 13px; }
 .catalog-filter-panel input, .catalog-filter-panel select { min-width: 0; border: 1px solid #d6d0d2; border-radius: 5px; padding: 11px; background: #fff; }
@@ -845,6 +852,48 @@ body.overlay-open { overflow: hidden; }
 .product-alert-actions small { width: 100%; color: #777; }
 
 .membership-stack, .growth-admin-stack { display: grid; gap: 18px; }
+.growth-member-stack { display: grid; gap: 18px; }
+.member-growth-hero { min-height: 310px; display: grid; grid-template-columns: 1fr 270px; gap: 36px; align-items: end; padding: 38px; color: #fff; background: linear-gradient(125deg, #23161c, #7b244d 68%, #ee3c8c); overflow: hidden; }
+.member-growth-hero p { margin: 0 0 22px; color: #ff90c2; font-size: 11px; letter-spacing: .18em; }
+.member-growth-hero h2 { margin: 0 0 20px; font-size: clamp(38px, 5vw, 66px); line-height: .92; font-weight: 400; letter-spacing: -.05em; }
+.member-growth-hero > div > span { max-width: 560px; display: block; color: #e8d9df; line-height: 1.7; }
+.member-growth-hero article { display: grid; gap: 13px; padding: 24px; color: #171316; background: rgba(255,255,255,.94); }
+.member-growth-hero article span { color: #8a7880; font-size: 11px; }
+.member-growth-hero article b { font-size: 24px; font-weight: 500; }
+.member-growth-hero article button { min-height: 46px; border: 0; color: #fff; background: #171316; }
+.member-growth-hero article button:disabled { color: #777; background: #e9e5e6; }
+.member-task-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.member-task-grid article { min-height: 130px; display: grid; grid-template-columns: 38px 1fr auto; gap: 14px; align-items: start; padding: 20px; border: 1px solid #e3dfe0; background: #fff; }
+.member-task-grid article.completed { border-color: #ef398b; background: #fff8fb; }
+.member-task-grid i { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; color: #777; background: #f1efef; font-style: normal; }
+.member-task-grid article.completed i { color: #fff; background: #ef398b; }
+.member-task-grid b { display: block; margin: 3px 0 8px; font-size: 15px; }
+.member-task-grid p { margin: 0; color: #777; font-size: 11px; line-height: 1.55; }
+.member-task-grid small { display: block; margin-top: 7px; color: #bd2e6e; }
+.member-task-grid strong { color: #ef398b; font-size: 14px; font-weight: 500; }
+.referral-layout { display: grid; grid-template-columns: minmax(220px, 310px) 1fr; gap: 34px; padding: 26px; background: #f6f2f3; }
+.referral-qr { padding: 18px; background: #fff; }
+.referral-qr img { width: 100%; height: auto; display: block; }
+.referral-copy { display: flex; flex-direction: column; justify-content: center; }
+.referral-copy > span { color: #8b7d82; font-size: 11px; }
+.referral-copy > strong { margin: 8px 0 15px; color: #ef398b; font-size: 38px; letter-spacing: .09em; }
+.referral-copy p { max-width: 570px; margin: 0 0 22px; color: #554c50; line-height: 1.7; }
+.referral-copy label { display: grid; gap: 7px; color: #777; font-size: 10px; }
+.referral-copy input { width: 100%; padding: 13px; border: 1px solid #d8cfd3; background: #fff; }
+.referral-copy > div { display: flex; gap: 8px; margin-top: 12px; }
+.referral-copy button { min-height: 42px; padding: 0 20px; border: 1px solid #171316; color: #fff; background: #171316; }
+.referral-copy button.secondary { color: #171316; background: #fff; }
+.referral-copy > small { margin-top: 10px; color: #bd2e6e; }
+.referral-copy footer { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 25px; color: #777; font-size: 10px; }
+.member-benefit-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; }
+.member-benefit-grid article { min-height: 210px; display: flex; flex-direction: column; align-items: flex-start; padding: 22px; border: 1px solid #e1dcde; }
+.member-benefit-grid article.active { color: #fff; border-color: #351321; background: #351321; }
+.member-benefit-grid i { color: #ef398b; font-size: 22px; font-style: normal; }
+.member-benefit-grid b { margin: 30px 0 10px; font-size: 17px; }
+.member-benefit-grid p { margin: 0 0 20px; color: #777; font-size: 11px; line-height: 1.6; }
+.member-benefit-grid article.active p { color: #d8c3cb; }
+.member-benefit-grid span { margin-top: auto; color: #ef398b; font-size: 10px; }
+.member-benefit-grid button { margin-top: 10px; padding: 7px 10px; border: 1px solid #111; background: #fff; font-size: 10px; }
 .membership-card { position: relative; min-height: 260px; padding: 34px; color: #fff; border-radius: 4px; overflow: hidden; display: grid; grid-template-columns: 1fr auto; gap: 30px; background: linear-gradient(135deg, #282322, #725d55); }
 .membership-card::after { content: "P"; position: absolute; right: -10px; top: -70px; font: 300px/1 serif; color: rgba(255,255,255,.07); }
 .membership-card.tier-silver { background: linear-gradient(135deg, #52565c, #a7adb3); }
@@ -1585,6 +1634,13 @@ body.overlay-open { overflow: hidden; }
   .member-stat-grid article { min-height: 115px; }
   .membership-card { min-height: 230px; padding: 24px; }
   .tier-benefit-grid, .member-coupon-grid { grid-template-columns: 1fr; }
+  .member-growth-hero { min-height: 0; grid-template-columns: 1fr; padding: 28px 20px; }
+  .member-growth-hero article { margin-top: 18px; }
+  .member-task-grid { grid-template-columns: 1fr; }
+  .referral-layout { grid-template-columns: 1fr; padding: 16px; }
+  .referral-qr { max-width: 300px; }
+  .referral-copy > strong { font-size: 29px; }
+  .member-benefit-grid { grid-template-columns: 1fr 1fr; }
   .growth-two-column, .growth-form { grid-template-columns: 1fr; }
   .growth-form.compact { grid-template-columns: 1fr; }
   .growth-form .wide { grid-column: auto; }

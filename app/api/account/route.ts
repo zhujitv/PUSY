@@ -4,6 +4,7 @@ import { getPreviewMemberIdentity } from "../../../lib/preview-member-auth";
 import { ensureMemberProfile } from "../../../db/member-profile";
 import { hasTrustedOrigin, privateJson, safeServerError } from "../../../lib/request-security";
 import { cancelOrder } from "../../../lib/orders/cancellation";
+import { dailyCheckin, memberGrowthSummary, syncProfileCompletionTask } from "../../../lib/growth/member-program";
 
 const genderValues = new Set(["", "female", "male", "undisclosed"]);
 const skinTypeValues = new Set(["", "normal", "dry", "oily", "combination", "sensitive"]);
@@ -30,12 +31,13 @@ async function identity() {
   return getPreviewMemberIdentity();
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const viewer = await identity();
     if (!viewer) return privateJson({ error: "请先登录会员账户" }, { status: 401 });
     const member = await ensureMember(viewer);
     await ensureMemberProfile(member.id);
+    const growth = await memberGrowthSummary(member.id, new URL(request.url).origin);
     const db = await getStoreDb();
     const [profile, addresses, orders, orderItems, returns, invoices, pointsLedger, coupons, productAlerts, tags, shipments, shipmentEvents] = await Promise.all([
       db.prepare("SELECT * FROM member_profiles WHERE member_id = ?").bind(member.id).first(),
@@ -51,7 +53,8 @@ export async function GET() {
       db.prepare("SELECT s.* FROM shipments s JOIN orders o ON o.id = s.order_id WHERE o.member_id = ? ORDER BY s.shipped_at DESC").bind(member.id).all(),
       db.prepare("SELECT se.* FROM shipment_events se JOIN shipments s ON s.id = se.shipment_id JOIN orders o ON o.id = s.order_id WHERE o.member_id = ? ORDER BY se.event_time DESC").bind(member.id).all(),
     ]);
-    return Response.json({ member, profile, addresses: addresses.results, orders: orders.results, orderItems: orderItems.results, returns: returns.results, invoices: invoices.results, pointsLedger: pointsLedger.results, coupons: coupons.results, productAlerts: productAlerts.results, tags: tags.results, shipments: shipments.results, shipmentEvents: shipmentEvents.results, canSignOut: true }, { headers: { "cache-control": "private, no-store" } });
+    const refreshedMember = await db.prepare("SELECT * FROM members WHERE id = ? LIMIT 1").bind(member.id).first() ?? member;
+    return Response.json({ member: refreshedMember, profile, addresses: addresses.results, orders: orders.results, orderItems: orderItems.results, returns: returns.results, invoices: invoices.results, pointsLedger: pointsLedger.results, coupons: coupons.results, productAlerts: productAlerts.results, tags: tags.results, shipments: shipments.results, shipmentEvents: shipmentEvents.results, growth, canSignOut: true }, { headers: { "cache-control": "private, no-store" } });
   } catch {
     return safeServerError("读取会员资料失败，请稍后再试");
   }
@@ -83,6 +86,9 @@ export async function POST(request: Request) {
         db.prepare("UPDATE members SET name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(name, member.id),
         db.prepare(`UPDATE member_profiles SET nickname = ?, gender = ?, birthday = ?, wechat = ?, province = ?, city = ?, occupation = ?, skin_type = ?, skin_concerns = ?, preferred_categories = ?, bio = ?, email_marketing = ?, sms_marketing = ?, updated_at = CURRENT_TIMESTAMP WHERE member_id = ?`).bind(nickname, gender, birthday, text(payload.wechat, 50), text(payload.province, 30), text(payload.city, 30), text(payload.occupation, 50), skinType, JSON.stringify(skinConcerns), JSON.stringify(preferredCategories), text(payload.bio, 200), payload.emailMarketing ? 1 : 0, payload.smsMarketing ? 1 : 0, member.id),
       ]);
+      await syncProfileCompletionTask(member.id);
+    } else if (action === "daily-checkin") {
+      return Response.json({ ok: true, ...(await dailyCheckin(member.id)) });
     } else if (action === "save-address") {
       const limits: Record<string, number> = { label: 20, recipient: 50, phone: 20, province: 30, city: 30, district: 30, detail: 200, postcode: 12 };
       const values = ["label", "recipient", "phone", "province", "city", "district", "detail", "postcode"].map((key) => text(payload[key], limits[key]));

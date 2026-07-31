@@ -568,7 +568,12 @@ export async function POST(request: Request) {
     } else if (action === "update-review-status") {
       const status = String(payload.status ?? "");
       if (!["pending", "approved", "rejected"].includes(status)) return Response.json({ error: "评价状态无效" }, { status: 400 });
-      await db.prepare("UPDATE product_reviews SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(status, Number(payload.id)).run();
+      const reviewId = Number(payload.id);
+      await db.prepare("UPDATE product_reviews SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(status, reviewId).run();
+      if (status === "approved") {
+        const review = await db.prepare("SELECT member_id FROM product_reviews WHERE id = ? LIMIT 1").bind(reviewId).first<{ member_id: number | null }>();
+        if (review?.member_id) await (await import("../../../lib/growth/member-program")).syncReviewTasks(review.member_id, reviewId);
+      }
     } else if (action === "update-site-content" || action === "save-content-draft" || action === "schedule-site-content") {
       const content = payload.content && typeof payload.content === "object" ? payload.content as Record<string, unknown> : {};
       await saveContentRevision({ title: String(payload.title ?? "首页内容版本"), content, status: action === "update-site-content" ? "published" : action === "schedule-site-content" ? "scheduled" : "draft", publishAt: String(payload.publishAt ?? ""), actor: actor.email });

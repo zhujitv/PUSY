@@ -5,6 +5,7 @@ import { emailConfigured, sendEmail } from "../../../../lib/notifications/email"
 import { sendSms, smsConfigured } from "../../../../lib/notifications/sms";
 import type { NotificationSetting } from "../../../../lib/notifications/types";
 import { allowRequest, allowRequestForIdentity, hasTrustedOrigin, privateJson, rateLimitResponse, safeServerError } from "../../../../lib/request-security";
+import { registerReferral } from "../../../../lib/growth/member-program";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phonePattern = /^1[3-9]\d{9}$/;
@@ -94,6 +95,7 @@ async function verify(payload: Record<string, unknown>) {
     await db.prepare("UPDATE member_verification_codes SET consumed_at = CURRENT_TIMESTAMP WHERE id = ? AND consumed_at IS NULL").bind(id).requireChanges("验证码已经使用").run();
     await db.prepare("INSERT INTO members (name, email, phone, email_verified, phone_verified) VALUES (?, ?, ?, 1, 0) ON CONFLICT(email) DO UPDATE SET name = excluded.name, phone = excluded.phone, email_verified = 1, phone_verified = 0, updated_at = CURRENT_TIMESTAMP").bind(name, email, phone).run();
     member = await db.prepare("SELECT id, name, email, status FROM members WHERE email = ? LIMIT 1").bind(email).first<AuthMember>();
+    if (member) await registerReferral(member.id, String(payload.referralCode ?? "")).catch(() => undefined);
   } else {
     await db.prepare("UPDATE member_verification_codes SET consumed_at = CURRENT_TIMESTAMP WHERE id = ? AND consumed_at IS NULL").bind(id).requireChanges("验证码已经使用").run();
     member = await db.prepare("SELECT id, name, email, status FROM members WHERE lower(email) = ? OR phone = ? LIMIT 1").bind(challenge.target, challenge.target).first<AuthMember>();

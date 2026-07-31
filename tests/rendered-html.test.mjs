@@ -355,7 +355,8 @@ test("member center always exposes a working sign-out entry", async () => {
   assert.match(logout, /clearPreviewMemberCookie/);
   assert.match(login, /会员登录/);
   assert.match(login, /注册会员/);
-  assert.match(login, /手机号或邮箱/);
+  assert.match(login, /邮箱地址/);
+  assert.match(login, /手机号码（选填）/);
   assert.match(authApi, /member_verification_codes/);
   assert.match(authApi, /crypto\.getRandomValues/);
   assert.doesNotMatch(authApi, /123456|MEMBER_VERIFICATION_CODE/);

@@ -971,6 +971,18 @@ body.overlay-open { overflow: hidden; }
 .phone-verification > div input { width: 160px; min-height: 42px; background: #fff; }
 .phone-verification button { min-height: 42px; padding: 0 16px; border: 1px solid #111; color: #fff; background: #111; }
 .phone-verification button:disabled { opacity: .55; }
+.social-account-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.social-account-grid article { min-height: 92px; display: grid; grid-template-columns: 48px 1fr auto; gap: 14px; align-items: center; padding: 18px; border: 1px solid #ddd; background: #fafafa; }
+.social-account-grid article > i { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; color: #fff; background: #999; font-style: normal; font-weight: 600; }
+.social-account-grid article.wechat > i { background: #12ad65; }
+.social-account-grid article.alipay > i { background: #1677ff; }
+.social-account-grid article > div { display: grid; gap: 5px; }
+.social-account-grid article b { font-size: 14px; font-weight: 500; }
+.social-account-grid article span { color: #888; font-size: 10px; }
+.social-account-grid article button { min-height: 38px; padding: 0 13px; border: 1px solid #222; background: #fff; font-size: 11px; }
+.social-account-grid article.linked { border-color: #c9dfd0; background: #f4faf6; }
+.social-account-grid article.linked button { color: #8f3758; border-color: #d7a4b8; }
+.social-account-grid article button:disabled { color: #aaa; border-color: #ddd; }
 .member-form > button, .member-save { justify-self: start; min-width: 190px; min-height: 50px; border: 0; color: #fff; background: #111; }
 .member-form label.check { display: flex; flex-direction: row; align-items: center; }
 .member-form label.check input { width: 18px; min-height: 18px; }
@@ -1095,6 +1107,7 @@ body.overlay-open { overflow: hidden; }
 .member-auth-heading > p { margin: 0 0 8px; color: #ef398b; font-size: var(--section-eyebrow-size); letter-spacing: .08em; }
 .member-auth-heading h2 { margin: 0 0 10px; font-size: 30px; font-weight: 400; letter-spacing: -.035em; }
 .member-auth-heading > span { color: #777; font-size: 12px; }
+.member-auth-social-notice { margin: 18px 0 -12px; padding: 11px 12px; color: #72512d; background: #fff7e9; font-size: 11px; line-height: 1.6; }
 .member-auth-form { display: grid; gap: 17px; margin-top: 32px; }
 .member-auth-form > label { display: grid; gap: 8px; color: #555; font-size: 12px; }
 .member-auth-form input { width: 100%; height: 50px; padding: 0 14px; border: 1px solid #bbb; border-radius: 0; background: #fff; font: inherit; outline: 0; }
@@ -1110,7 +1123,44 @@ body.overlay-open { overflow: hidden; }
 .member-auth-message { color: #24623d; background: #edf8f1; }
 .member-auth-submit { min-height: 52px; border: 0; color: #fff; background: #111; font-size: 13px; }
 .member-auth-submit:disabled { opacity: .55; }
+.member-auth-bind-choice { margin: 0; padding: 0; border: 0; }
+.member-auth-bind-choice legend { margin-bottom: 8px; color: #555; font-size: 12px; }
+.member-auth-bind-choice > p { margin: 0 0 11px; color: #888; font-size: 10px; line-height: 1.55; }
+.member-auth-bind-choice > div { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+.member-auth-bind-choice label { position: relative; min-width: 0; cursor: pointer; }
+.member-auth-bind-choice input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.member-auth-bind-choice label > span { min-height: 86px; display: grid; grid-template-columns: 30px 1fr; grid-template-rows: auto auto; gap: 2px 8px; align-items: center; padding: 12px 9px; border: 1px solid #ddd; background: #fafafa; }
+.member-auth-bind-choice label > span i { grid-row: 1 / 3; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; color: #fff; background: #777; font-style: normal; font-size: 11px; }
+.member-auth-bind-choice label.wechat > span i { background: #12ad65; }
+.member-auth-bind-choice label.alipay > span i { background: #1677ff; }
+.member-auth-bind-choice label > span b { overflow: hidden; font-size: 11px; font-weight: 500; white-space: nowrap; }
+.member-auth-bind-choice label > span small { color: #999; font-size: 9px; line-height: 1.35; }
+.member-auth-bind-choice label.active > span { border-color: #111; box-shadow: inset 0 0 0 1px #111; background: #fff; }
+.member-auth-bind-choice label:has(input:disabled) { cursor: not-allowed; opacity: .5; }
+.member-social-login { display: grid; gap: 12px; margin-top: 23px; }
+.member-social-login > span { display: flex; align-items: center; gap: 10px; color: #999; font-size: 10px; }
+.member-social-login > span::before, .member-social-login > span::after { content: ""; flex: 1; height: 1px; background: #e1e1e1; }
+.member-social-login > div { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.member-social-login button { min-height: 46px; display: flex; justify-content: center; align-items: center; gap: 8px; border: 1px solid #ccc; background: #fff; font-size: 12px; }
+.member-social-login button i { width: 25px; height: 25px; display: grid; place-items: center; border-radius: 50%; color: #fff; background: #777; font-style: normal; font-size: 10px; }
+.member-social-login button.wechat i { background: #12ad65; }
+.member-social-login button.alipay i { background: #1677ff; }
+.member-social-login button:disabled { color: #aaa; background: #f7f7f7; }
 .member-auth-switch { width: 100%; margin-top: 18px; padding: 10px; border: 0; color: #777; background: transparent; font-size: 11px; }
+.member-welcome-bind { display: grid; grid-template-columns: minmax(260px, .8fr) 1.2fr; gap: 28px; align-items: center; margin-bottom: 18px; padding: 28px 30px; color: #fff; background: #181818; }
+.member-welcome-bind p { margin: 0 0 8px; color: #ff67aa; font-size: 10px; letter-spacing: .1em; }
+.member-welcome-bind h2 { margin: 0 0 9px; font-size: 27px; font-weight: 400; }
+.member-welcome-bind > div:first-child > span { color: #bbb; font-size: 11px; line-height: 1.65; }
+.member-welcome-bind > div:last-child { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.member-welcome-bind button { min-height: 64px; display: flex; gap: 11px; align-items: center; padding: 11px 14px; border: 1px solid #555; color: #fff; background: #242424; text-align: left; }
+.member-welcome-bind button > i { width: 32px; height: 32px; display: grid; flex: 0 0 auto; place-items: center; border-radius: 50%; background: #777; font-style: normal; }
+.member-welcome-bind button.wechat > i { background: #12ad65; }
+.member-welcome-bind button.alipay > i { background: #1677ff; }
+.member-welcome-bind button > span { display: grid; gap: 3px; }
+.member-welcome-bind button b { font-size: 12px; font-weight: 500; }
+.member-welcome-bind button small { color: #aaa; font-size: 9px; }
+.member-welcome-bind button:disabled { opacity: .55; }
+.member-welcome-bind button.skip { grid-column: 1 / -1; min-height: 38px; justify-content: center; border: 0; color: #bbb; background: transparent; text-align: center; }
 .article-page header { display: grid; grid-template-columns: .35fr 1.2fr .65fr; gap: 4vw; align-items: end; padding-bottom: 55px; }
 .article-page header h1 { margin: 0; }
 .article-page header span { padding-bottom: 10px; font-size: 17px; line-height: 1.55; }
@@ -1653,6 +1703,8 @@ body.overlay-open { overflow: hidden; }
   .profile-form { padding: 0 18px 28px; }
   .profile-form fieldset { padding: 28px 0; }
   .profile-consent { grid-template-columns: 1fr; }
+  .social-account-grid { grid-template-columns: 1fr; }
+  .social-account-grid article { grid-template-columns: 42px 1fr auto; padding: 15px 12px; }
   .profile-form-footer { align-items: stretch; flex-direction: column; }
   .profile-form-footer button { width: 100%; }
   .member-order-list summary { grid-template-columns: 1fr auto; }
@@ -1666,6 +1718,9 @@ body.overlay-open { overflow: hidden; }
   .member-auth-intro ul { margin-top: 80px; }
   .member-auth-card { width: calc(100% - 24px); margin: 12px; padding: 28px 20px; }
   .member-auth-heading h2 { font-size: 28px; }
+  .member-auth-bind-choice > div { grid-template-columns: 1fr; }
+  .member-auth-bind-choice label > span { min-height: 64px; }
+  .member-welcome-bind { grid-template-columns: 1fr; padding: 24px 18px; }
   .article-hero { height: 115vw; }
   .admin-login-page { grid-template-columns: 1fr; }
   .admin-login-intro { min-height: 300px; padding: 38px 24px; }

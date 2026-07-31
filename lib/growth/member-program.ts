@@ -237,7 +237,7 @@ export async function memberGrowthSummary(memberId: number, origin: string) {
   return {
     tasks: [
       { key: "daily_checkin", title: "每日签到", description: "每天签到获得 5 积分，连续 7 天额外获得 15 积分", points: MEMBER_TASK_POINTS.dailyCheckin, completed: Boolean(todayCheckin), repeatable: true },
-      { key: "complete_profile", title: "完善会员资料", description: "完善基本资料、验证手机并填写美妆档案", points: MEMBER_TASK_POINTS.completeProfile, completed: completed.has("complete_profile") },
+      { key: "complete_profile", title: "完善会员资料", description: "完善基本资料、联系电话与美妆档案", points: MEMBER_TASK_POINTS.completeProfile, completed: completed.has("complete_profile") },
       { key: "first_order", title: "完成会员首单", description: "首次成功付款后自动发放", points: MEMBER_TASK_POINTS.firstOrder, completed: completed.has("first_order") },
       { key: "first_review", title: "发表首次评价", description: "评价审核通过后自动发放", points: MEMBER_TASK_POINTS.firstReview, completed: completed.has("first_review") },
       { key: "photo_review", title: "上传首次图片评价", description: "评价图片审核通过后自动发放", points: MEMBER_TASK_POINTS.photoReview, completed: completed.has("photo_review") },

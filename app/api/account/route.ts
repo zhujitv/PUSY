@@ -5,6 +5,7 @@ import { ensureMemberProfile } from "../../../db/member-profile";
 import { hasTrustedOrigin, privateJson, safeServerError } from "../../../lib/request-security";
 import { cancelOrder } from "../../../lib/orders/cancellation";
 import { dailyCheckin, memberGrowthSummary, syncProfileCompletionTask } from "../../../lib/growth/member-program";
+import { isSocialProvider, socialProviderAvailability } from "../../../lib/auth/social-oauth";
 
 const genderValues = new Set(["", "female", "male", "undisclosed"]);
 const skinTypeValues = new Set(["", "normal", "dry", "oily", "combination", "sensitive"]);
@@ -39,7 +40,7 @@ export async function GET(request: Request) {
     await ensureMemberProfile(member.id);
     const growth = await memberGrowthSummary(member.id, new URL(request.url).origin);
     const db = await getStoreDb();
-    const [profile, addresses, orders, orderItems, returns, invoices, pointsLedger, coupons, productAlerts, tags, shipments, shipmentEvents] = await Promise.all([
+    const [profile, addresses, orders, orderItems, returns, invoices, pointsLedger, coupons, productAlerts, tags, shipments, shipmentEvents, socialAccounts] = await Promise.all([
       db.prepare("SELECT * FROM member_profiles WHERE member_id = ?").bind(member.id).first(),
       db.prepare("SELECT * FROM member_addresses WHERE member_id = ? ORDER BY is_default DESC, id DESC").bind(member.id).all(),
       db.prepare("SELECT o.*, COUNT(oi.id) AS item_count FROM orders o LEFT JOIN order_items oi ON oi.order_id = o.id WHERE o.member_id = ? GROUP BY o.id ORDER BY o.created_at DESC").bind(member.id).all(),
@@ -52,9 +53,10 @@ export async function GET(request: Request) {
       db.prepare("SELECT t.id, t.name, t.color FROM member_tag_assignments a JOIN customer_tags t ON t.id = a.tag_id WHERE a.member_id = ? ORDER BY t.name").bind(member.id).all(),
       db.prepare("SELECT s.* FROM shipments s JOIN orders o ON o.id = s.order_id WHERE o.member_id = ? ORDER BY s.shipped_at DESC").bind(member.id).all(),
       db.prepare("SELECT se.* FROM shipment_events se JOIN shipments s ON s.id = se.shipment_id JOIN orders o ON o.id = s.order_id WHERE o.member_id = ? ORDER BY se.event_time DESC").bind(member.id).all(),
+      db.prepare("SELECT provider, created_at, updated_at FROM member_social_accounts WHERE member_id = ? ORDER BY provider").bind(member.id).all(),
     ]);
     const refreshedMember = await db.prepare("SELECT * FROM members WHERE id = ? LIMIT 1").bind(member.id).first() ?? member;
-    return Response.json({ member: refreshedMember, profile, addresses: addresses.results, orders: orders.results, orderItems: orderItems.results, returns: returns.results, invoices: invoices.results, pointsLedger: pointsLedger.results, coupons: coupons.results, productAlerts: productAlerts.results, tags: tags.results, shipments: shipments.results, shipmentEvents: shipmentEvents.results, growth, canSignOut: true }, { headers: { "cache-control": "private, no-store" } });
+    return Response.json({ member: refreshedMember, profile, addresses: addresses.results, orders: orders.results, orderItems: orderItems.results, returns: returns.results, invoices: invoices.results, pointsLedger: pointsLedger.results, coupons: coupons.results, productAlerts: productAlerts.results, tags: tags.results, shipments: shipments.results, shipmentEvents: shipmentEvents.results, socialAccounts: socialAccounts.results, socialProviders: socialProviderAvailability(), growth, canSignOut: true }, { headers: { "cache-control": "private, no-store" } });
   } catch {
     return safeServerError("读取会员资料失败，请稍后再试");
   }
@@ -89,6 +91,11 @@ export async function POST(request: Request) {
       await syncProfileCompletionTask(member.id);
     } else if (action === "daily-checkin") {
       return Response.json({ ok: true, ...(await dailyCheckin(member.id)) });
+    } else if (action === "unlink-social") {
+      const provider = text(payload.provider, 20);
+      if (!isSocialProvider(provider)) return Response.json({ error: "账号类型无效" }, { status: 400 });
+      await db.prepare("DELETE FROM member_social_accounts WHERE member_id = ? AND provider = ?").bind(member.id, provider).run();
+      return Response.json({ ok: true, message: `已解除${provider === "wechat" ? "微信" : "支付宝"}绑定，邮箱登录不受影响` });
     } else if (action === "save-address") {
       const limits: Record<string, number> = { label: 20, recipient: 50, phone: 20, province: 30, city: 30, district: 30, detail: 200, postcode: 12 };
       const values = ["label", "recipient", "phone", "province", "city", "district", "detail", "postcode"].map((key) => text(payload[key], limits[key]));

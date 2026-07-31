@@ -44,21 +44,18 @@ async function requestCode(payload: Record<string, unknown>) {
   let target = "";
   if (mode === "login") {
     const identifier = String(payload.identifier ?? "").trim().toLowerCase();
-    if (!identifier) return Response.json({ error: "请输入手机号或邮箱" }, { status: 400 });
-    const phone = normalizedPhone(identifier);
-    const targetKey = emailPattern.test(identifier) ? identifier : phone;
-    if (!emailPattern.test(identifier) && !phonePattern.test(phone)) return Response.json({ error: "请输入有效的手机号或邮箱" }, { status: 400 });
-    if (!await codeTargetAllowed(targetKey)) return rateLimitResponse();
-    const member = await db.prepare("SELECT email, phone, status FROM members WHERE (lower(email) = ? AND email_verified = 1) OR (regexp_replace(phone, '[[:space:]-]', '', 'g') = ? AND phone_verified = 1) LIMIT 1").bind(identifier, phone).first<{ email: string; phone: string; status: string }>();
-    target = member && member.status !== "blocked" ? (emailPattern.test(identifier) ? member.email.toLowerCase() : member.phone) : "";
+    if (!emailPattern.test(identifier)) return Response.json({ error: "请输入有效的注册邮箱" }, { status: 400 });
+    if (!await codeTargetAllowed(identifier)) return rateLimitResponse();
+    const member = await db.prepare("SELECT email, status FROM members WHERE lower(email) = ? AND email_verified = 1 LIMIT 1").bind(identifier).first<{ email: string; status: string }>();
+    target = member && member.status !== "blocked" ? member.email.toLowerCase() : "";
     if (!target) return Response.json({ ok: true, challengeId: crypto.randomUUID(), message: "如账户存在，验证码将发送至注册联系方式" });
   } else {
     const email = String(payload.email ?? "").trim().toLowerCase();
     const phone = normalizedPhone(payload.phone);
-    if (!emailPattern.test(email) || !phonePattern.test(phone)) return Response.json({ error: "请填写有效的邮箱和中国大陆手机号" }, { status: 400 });
+    if (!emailPattern.test(email) || (phone && !phonePattern.test(phone))) return Response.json({ error: "请填写有效的邮箱；手机号如填写需为中国大陆号码" }, { status: 400 });
     if (!await codeTargetAllowed(email)) return rateLimitResponse();
     const existingEmail = await db.prepare("SELECT id, email_verified FROM members WHERE lower(email) = ? LIMIT 1").bind(email).first<{ id: number; email_verified: number }>();
-    const existingPhone = await db.prepare("SELECT id FROM members WHERE regexp_replace(phone, '[[:space:]-]', '', 'g') = ? LIMIT 1").bind(phone).first<{ id: number }>();
+    const existingPhone = phone ? await db.prepare("SELECT id FROM members WHERE regexp_replace(phone, '[[:space:]-]', '', 'g') = ? LIMIT 1").bind(phone).first<{ id: number }>() : null;
     if (existingEmail?.email_verified || (existingPhone && existingPhone.id !== existingEmail?.id)) return Response.json({ ok: true, challengeId: crypto.randomUUID(), message: "如资料可用于注册，验证码将发送至邮箱" });
     target = email;
   }
@@ -91,14 +88,14 @@ async function verify(payload: Record<string, unknown>) {
     const email = String(payload.email ?? "").trim().toLowerCase();
     const phone = normalizedPhone(payload.phone);
     const consent = payload.consent === "on";
-    if (name.length < 2 || !emailPattern.test(email) || !phonePattern.test(phone) || !consent || email !== challenge.target) return Response.json({ error: "注册资料无效，请重新获取验证码" }, { status: 400 });
+    if (name.length < 2 || !emailPattern.test(email) || (phone && !phonePattern.test(phone)) || !consent || email !== challenge.target) return Response.json({ error: "注册资料无效，请重新获取验证码" }, { status: 400 });
     await db.prepare("UPDATE member_verification_codes SET consumed_at = CURRENT_TIMESTAMP WHERE id = ? AND consumed_at IS NULL").bind(id).requireChanges("验证码已经使用").run();
     await db.prepare("INSERT INTO members (name, email, phone, email_verified, phone_verified) VALUES (?, ?, ?, 1, 0) ON CONFLICT(email) DO UPDATE SET name = excluded.name, phone = excluded.phone, email_verified = 1, phone_verified = 0, updated_at = CURRENT_TIMESTAMP").bind(name, email, phone).run();
     member = await db.prepare("SELECT id, name, email, status FROM members WHERE email = ? LIMIT 1").bind(email).first<AuthMember>();
     if (member) await registerReferral(member.id, String(payload.referralCode ?? "")).catch(() => undefined);
   } else {
     await db.prepare("UPDATE member_verification_codes SET consumed_at = CURRENT_TIMESTAMP WHERE id = ? AND consumed_at IS NULL").bind(id).requireChanges("验证码已经使用").run();
-    member = await db.prepare("SELECT id, name, email, status FROM members WHERE lower(email) = ? OR phone = ? LIMIT 1").bind(challenge.target, challenge.target).first<AuthMember>();
+    member = await db.prepare("SELECT id, name, email, status FROM members WHERE lower(email) = ? LIMIT 1").bind(challenge.target).first<AuthMember>();
   }
   if (!member || member.status === "blocked") return Response.json({ error: "账户不可用" }, { status: 403 });
   return Response.json({ ok: true, message: mode === "register" ? "注册成功，正在进入会员中心" : `欢迎回来，${member.name}` }, { headers: { "set-cookie": await createMemberSession(member.id), "cache-control": "no-store" } });

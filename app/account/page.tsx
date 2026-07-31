@@ -7,8 +7,9 @@ import { AccountClient } from "./AccountClient";
 export const metadata: Metadata = { title: "会员中心｜PUSY.CN", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
-export default async function AccountPage() {
+export default async function AccountPage({ searchParams }: { searchParams: Promise<{ welcome?: string; social?: string; provider?: string }> }) {
   const viewer = await getPreviewMemberIdentity();
   if (!viewer) redirect("/account/login");
-  return <PageShell><AccountClient viewer={viewer.displayName} email={viewer.email} /></PageShell>;
+  const { welcome = "", social = "", provider = "" } = await searchParams;
+  return <PageShell><AccountClient viewer={viewer.displayName} email={viewer.email} showWelcome={welcome === "1"} socialStatus={social} socialProvider={provider} /></PageShell>;
 }

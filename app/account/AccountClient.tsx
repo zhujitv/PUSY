@@ -17,12 +17,15 @@ type PointsEntry = { id: number; points: number; balance_after: number; reason: 
 type MemberCoupon = { id: number; code: string; kind: string; value: number; minimum: number; ends_at?: string; status: string; assigned_at: string };
 type ProductAlert = { id: number; product_slug: string; product_name: string; image: string; alert_type: string; target_price?: number; price: number; stock: number; last_notified_at?: string; created_at: string };
 type MemberTag = { id: number; name: string; color: string };
+type SocialProvider = "wechat" | "alipay";
+type SocialAccount = { provider: SocialProvider; created_at: string; updated_at: string };
+type SocialProviderState = { provider: SocialProvider; label: string; configured: boolean };
 type GrowthTask = { key: string; title: string; description: string; points: number; completed: boolean; repeatable?: boolean; count?: number };
 type MemberBenefit = { key: string; title: string; description: string; configured: boolean; granted: boolean };
 type GrowthSummary = { tasks: GrowthTask[]; checkin: { completedToday: boolean; streak: number }; referral: { code: string; link: string; pending: number; rewarded: number; friendReward: number; inviterReward: number }; benefits: MemberBenefit[] };
-type AccountData = { member: Member; profile: MemberProfile; addresses: Address[]; orders: Order[]; orderItems: OrderItem[]; returns: ReturnItem[]; invoices: Invoice[]; pointsLedger: PointsEntry[]; coupons: MemberCoupon[]; productAlerts: ProductAlert[]; tags: MemberTag[]; shipments: Shipment[]; shipmentEvents: ShipmentEvent[]; growth: GrowthSummary };
+type AccountData = { member: Member; profile: MemberProfile; addresses: Address[]; orders: Order[]; orderItems: OrderItem[]; returns: ReturnItem[]; invoices: Invoice[]; pointsLedger: PointsEntry[]; coupons: MemberCoupon[]; productAlerts: ProductAlert[]; tags: MemberTag[]; shipments: Shipment[]; shipmentEvents: ShipmentEvent[]; socialAccounts: SocialAccount[]; socialProviders: SocialProviderState[]; growth: GrowthSummary };
 
-export function AccountClient({ viewer, email }: { viewer: string; email: string }) {
+export function AccountClient({ viewer, email, showWelcome = false, socialStatus = "", socialProvider = "" }: { viewer: string; email: string; showWelcome?: boolean; socialStatus?: string; socialProvider?: string }) {
   const { wishlist, toggleWishlist, addToCart } = useStore();
   const [tab, setTab] = useState("overview");
   const [data, setData] = useState<AccountData | null>(null);
@@ -63,16 +66,22 @@ export function AccountClient({ viewer, email }: { viewer: string; email: string
   const firstName = useMemo(() => data?.profile.nickname || data?.member.name || viewer, [data, viewer]);
   const savedProducts = accountProducts.filter((product) => wishlist.includes(product.slug));
   const nav = [["overview","账户总览"],["club","会员权益"],["growth","任务与邀请"],["profile","个人资料"],["addresses","收货地址"],["wishlist","我的收藏"],["orders","我的订单"],["invoices","发票管理"],["returns","售后进度"]];
+  const socialLabel = socialProvider === "wechat" ? "微信" : socialProvider === "alipay" ? "支付宝" : "第三方账号";
+  const socialFeedback = socialStatus === "bound" ? `${socialLabel}绑定成功，以后可以使用该账号快捷登录。`
+    : socialStatus === "failed" ? `${socialLabel}绑定失败，请重新尝试。`
+      : socialStatus === "cancelled" ? `已取消${socialLabel}授权。`
+        : socialStatus === "not-configured" ? `${socialLabel}授权尚未完成平台配置。` : "";
 
   return <main className="member-page">
     <header className="member-hero"><div><p>PÚSY CLUB</p><h1>你好，{firstName}</h1><span>从这里管理个人资料、地址、订单和售后申请。</span></div><div className="member-identity"><i>✓</i><span>已验证账户<b>{email}</b></span><a href="/account/logout">退出登录</a></div></header>
     <div className="member-layout"><aside><nav>{nav.map(([key,label]) => <button key={key} className={tab === key ? "active" : ""} onClick={() => setTab(key)}>{label}</button>)}</nav><a href="/catalog/products">继续购物 →</a></aside><section className="member-content">
       {message && <div className="member-message">{message}</div>}
+      {socialFeedback && <div className={`member-message ${socialStatus === "bound" ? "success" : ""}`}>{socialFeedback}</div>}
       {loading && !data ? <div className="member-loading">正在读取会员资料…</div> : data && <>
-        {tab === "overview" && <div className="member-overview"><div className="member-stat-grid"><article><span>可用积分</span><b>{data.member.points_balance}</b></article><article><span>会员等级</span><b>{tierName(data.member.tier)}</b></article><article><span>累计订单</span><b>{data.member.total_orders}</b></article><article><span>累计消费</span><b>{formatCnyFromRub(data.member.total_spent)}</b></article></div><section className="member-section"><div className="member-section-title"><h2>最近订单</h2><button onClick={() => setTab("orders")}>查看全部</button></div>{data.orders.length ? <OrderList orders={data.orders.slice(0, 3)} items={data.orderItems} /> : <Empty title="还没有订单" copy="完成第一笔订单后，可在这里持续查看配送状态。" href="/catalog/products" link="浏览商品" />}</section></div>}
+        {tab === "overview" && <div className="member-overview">{showWelcome && <SocialBindingPrompt accounts={data.socialAccounts} providers={data.socialProviders} onProfile={() => setTab("profile")} />}<div className="member-stat-grid"><article><span>可用积分</span><b>{data.member.points_balance}</b></article><article><span>会员等级</span><b>{tierName(data.member.tier)}</b></article><article><span>累计订单</span><b>{data.member.total_orders}</b></article><article><span>累计消费</span><b>{formatCnyFromRub(data.member.total_spent)}</b></article></div><section className="member-section"><div className="member-section-title"><h2>最近订单</h2><button onClick={() => setTab("orders")}>查看全部</button></div>{data.orders.length ? <OrderList orders={data.orders.slice(0, 3)} items={data.orderItems} /> : <Empty title="还没有订单" copy="完成第一笔订单后，可在这里持续查看配送状态。" href="/catalog/products" link="浏览商品" />}</section></div>}
         {tab === "club" && <MembershipPanel data={data} onAct={act} />}
         {tab === "growth" && <MemberGrowthPanel growth={data.growth} onAct={act} onProfile={() => setTab("profile")} />}
-        {tab === "profile" && <ProfilePanel member={data.member} profile={data.profile} onSubmit={saveProfile} onPhoneVerified={() => void load()} />}
+        {tab === "profile" && <ProfilePanel member={data.member} profile={data.profile} socialAccounts={data.socialAccounts} socialProviders={data.socialProviders} onSubmit={saveProfile} onPhoneVerified={() => void load()} onAct={act} />}
         {tab === "addresses" && <section className="member-section"><div className="member-section-title"><div><p>结账时可快速选择</p><h2>收货地址</h2></div><button onClick={() => { setEditingAddress(null); setCreatingAddress(true); }}>＋ 新增地址</button></div>{data.addresses.length ? <div className="address-grid">{data.addresses.map((address) => <article key={address.id} className={address.is_default ? "default" : ""}><div><span>{address.label}</span>{Boolean(address.is_default) && <em>默认</em>}</div><h3>{address.recipient}</h3><p>{address.phone}</p><p>{address.province} {address.city} {address.district}<br />{address.detail} {address.postcode}</p><footer><button onClick={() => setEditingAddress(address)}>编辑</button>{!address.is_default && <button onClick={() => act({ action:"set-default-address", id:address.id })}>设为默认</button>}<button className="danger" onClick={() => act({ action:"delete-address", id:address.id })}>删除</button></footer></article>)}</div> : <Empty title="还没有收货地址" copy="保存常用地址，结账时填写会更轻松。" onClick={() => setCreatingAddress(true)} link="新增地址" />}</section>}
         {tab === "wishlist" && <section className="member-section"><div className="member-section-title"><div><p>{savedProducts.length} 件商品</p><h2>我的收藏</h2></div><a href="/catalog/products">继续发现</a></div>{savedProducts.length ? <div className="member-wishlist-grid">{savedProducts.map((product) => <article key={product.slug}><a href={`/products/${product.slug}`}><Image src={product.image} alt={product.name} width={700} height={727} sizes="(max-width: 700px) 50vw, 25vw" /><h3>{product.name}</h3></a><p>{formatCnyFromRub(product.price)}</p><div><button disabled={!product.inventoryVerified || (product.stock ?? 0) < 1} onClick={() => addToCart(product)}>加入购物袋</button><button onClick={() => toggleWishlist(product.slug)}>移除</button></div></article>)}</div> : <Empty title="还没有收藏商品" copy="在商品卡片或详情页点击心形按钮，商品会保存在这里。" href="/catalog/products" link="浏览商品" />}</section>}
         {tab === "orders" && <section className="member-section"><div className="member-section-title"><div><p>{data.orders.length} 笔订单</p><h2>我的订单</h2></div></div>{data.orders.length ? <OrderList orders={data.orders} items={data.orderItems} shipments={data.shipments} shipmentEvents={data.shipmentEvents} onAct={act} /> : <Empty title="还没有订单" copy="你的线上订单会安全保存在这里。" href="/catalog/products" link="开始购物" />}</section>}
@@ -94,6 +103,24 @@ function parseSelections(value: string) {
 const tierNames: Record<string, string> = { bronze: "新锐会员", silver: "银卡会员", gold: "金卡会员", diamond: "钻石会员" };
 function tierName(value: string) { return tierNames[value] ?? "新锐会员"; }
 const tierSteps = [{ key: "bronze", minimum: 0 }, { key: "silver", minimum: 500 }, { key: "gold", minimum: 2000 }, { key: "diamond", minimum: 5000 }];
+
+function startSocialAuthorization(provider: SocialProvider, returnTo = "/account") {
+  window.location.href = `/api/account/social/${provider}?mode=bind&returnTo=${encodeURIComponent(returnTo)}`;
+}
+
+function SocialBindingPrompt({ accounts, providers, onProfile }: { accounts: SocialAccount[]; providers: SocialProviderState[]; onProfile: () => void }) {
+  return <section className="member-welcome-bind"><div><p>邮箱认证成功</p><h2>欢迎加入 PÚSY CLUB</h2><span>你可以绑定一个常用账号，以后登录会更快捷；这一步可以跳过。</span></div><div>{providers.map((provider) => {
+    const linked = accounts.some((account) => account.provider === provider.provider);
+    return <button type="button" className={provider.provider} disabled={linked || !provider.configured} onClick={() => startSocialAuthorization(provider.provider, "/account?welcome=1")} key={provider.provider}><i>{provider.provider === "wechat" ? "微" : "支"}</i><span><b>{linked ? `已绑定${provider.label}` : `绑定${provider.label}`}</b><small>{linked ? "可用于快捷登录" : provider.configured ? "通过官方页面安全授权" : "等待平台配置"}</small></span></button>;
+  })}<button type="button" className="skip" onClick={onProfile}>暂不绑定，完善资料 →</button></div></section>;
+}
+
+function SocialAccountsPanel({ accounts, providers, onAct }: { accounts: SocialAccount[]; providers: SocialProviderState[]; onAct: (payload: Record<string, unknown>) => Promise<boolean> }) {
+  return <div className="social-account-grid">{providers.map((provider) => {
+    const account = accounts.find((item) => item.provider === provider.provider);
+    return <article className={`${provider.provider} ${account ? "linked" : ""}`} key={provider.provider}><i>{provider.provider === "wechat" ? "微" : "支"}</i><div><b>{provider.label}</b><span>{account ? `已绑定 · ${new Date(account.created_at).toLocaleDateString("zh-CN")}` : provider.configured ? "尚未绑定" : "等待平台配置"}</span></div>{account ? <button type="button" onClick={() => { if (window.confirm(`确认解除${provider.label}绑定？邮箱登录不会受到影响。`)) void onAct({ action: "unlink-social", provider: provider.provider }); }}>解除绑定</button> : <button type="button" disabled={!provider.configured} onClick={() => startSocialAuthorization(provider.provider)}>{provider.configured ? "立即绑定" : "暂不可用"}</button>}</article>;
+  })}</div>;
+}
 
 function MemberGrowthPanel({ growth, onAct, onProfile }: { growth: GrowthSummary; onAct: (payload: Record<string, unknown>) => Promise<boolean>; onProfile: () => void }) {
   const [copyMessage, setCopyMessage] = useState("");
@@ -128,7 +155,7 @@ function MembershipPanel({ data, onAct }: { data: AccountData; onAct: (payload: 
   </div>;
 }
 
-function ProfilePanel({ member, profile, onSubmit, onPhoneVerified }: { member: Member; profile: MemberProfile; onSubmit: (event: React.FormEvent<HTMLFormElement>) => void; onPhoneVerified: () => void }) {
+function ProfilePanel({ member, profile, socialAccounts, socialProviders, onSubmit, onPhoneVerified, onAct }: { member: Member; profile: MemberProfile; socialAccounts: SocialAccount[]; socialProviders: SocialProviderState[]; onSubmit: (event: React.FormEvent<HTMLFormElement>) => void; onPhoneVerified: () => void; onAct: (payload: Record<string, unknown>) => Promise<boolean> }) {
   const selectedConcerns = parseSelections(profile.skin_concerns);
   const selectedCategories = parseSelections(profile.preferred_categories);
   const completionValues = [member.name, member.phone, profile.nickname, profile.gender, profile.birthday, profile.province, profile.city, profile.skin_type];
@@ -152,13 +179,15 @@ function ProfilePanel({ member, profile, onSubmit, onPhoneVerified }: { member: 
         <label className="full">登录邮箱<input value={member.email} disabled /><small>登录邮箱已完成验证。如需更换，请联系客户服务进行身份核验。</small></label>
       </div></fieldset>
 
-      <fieldset><legend><span>02</span><div><b>美妆档案</b><small>选填，用于优化商品推荐，不影响正常购物</small></div></legend><div className="member-form">
+      <fieldset><legend><span>02</span><div><b>账号与登录</b><small>邮箱是主认证方式，微信与支付宝绑定均为选填</small></div></legend><SocialAccountsPanel accounts={socialAccounts} providers={socialProviders} onAct={onAct} /></fieldset>
+
+      <fieldset><legend><span>03</span><div><b>美妆档案</b><small>选填，用于优化商品推荐，不影响正常购物</small></div></legend><div className="member-form">
         <label>肤质<select name="skinType" defaultValue={profile.skin_type}><option value="">请选择</option><option value="normal">中性肌</option><option value="dry">干性肌</option><option value="oily">油性肌</option><option value="combination">混合肌</option><option value="sensitive">敏感肌</option></select></label>
         <div className="profile-choice full"><span>主要护理诉求</span><div>{skinConcerns.map((item) => <label key={item}><input type="checkbox" name="skinConcerns" value={item} defaultChecked={selectedConcerns.includes(item)} />{item}</label>)}</div></div>
         <div className="profile-choice full"><span>感兴趣的品类</span><div>{preferredCategories.map((item) => <label key={item}><input type="checkbox" name="preferredCategories" value={item} defaultChecked={selectedCategories.includes(item)} />{item}</label>)}</div></div>
       </div></fieldset>
 
-      <fieldset><legend><span>03</span><div><b>联系与偏好</b><small>补充常用地区与联系方式</small></div></legend><div className="member-form">
+      <fieldset><legend><span>04</span><div><b>联系与偏好</b><small>补充常用地区与联系方式</small></div></legend><div className="member-form">
         <label>所在省份<input name="province" maxLength={30} autoComplete="address-level1" defaultValue={profile.province} placeholder="例如：上海市" /></label>
         <label>所在城市<input name="city" maxLength={30} autoComplete="address-level2" defaultValue={profile.city} placeholder="例如：上海市" /></label>
         <label>微信号<input name="wechat" maxLength={50} defaultValue={profile.wechat} placeholder="选填" /></label>
@@ -190,8 +219,8 @@ function PhoneVerification({ member, onVerified }: { member: Member; onVerified:
   }
 
   return <div className="phone-verification full">
-    <label>手机号码 <small>{member.phone_verified ? "已验证，可用于登录" : "尚未验证，暂不能用于登录"}</small><input type="tel" maxLength={20} autoComplete="tel" value={phone} onChange={(event) => { setPhone(event.target.value); setChallengeId(""); }} placeholder="请输入中国大陆手机号" required /></label>
-    <div><button type="button" disabled={busy} onClick={() => void submit("request-phone-code")}>{busy ? "处理中…" : member.phone_verified && phone === member.phone ? "更换并验证" : "发送短信验证码"}</button>{challengeId && <><input aria-label="手机验证码" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={(event) => setCode(event.target.value)} placeholder="6 位验证码" /><button type="button" disabled={busy || code.length !== 6} onClick={() => void submit("verify-phone")}>确认验证</button></>}</div>
+    <label>手机号码（选填） <small>{member.phone_verified ? "已验证，用于配送和售后联系" : "不影响邮箱登录，可稍后验证"}</small><input type="tel" maxLength={20} autoComplete="tel" value={phone} onChange={(event) => { setPhone(event.target.value); setChallengeId(""); }} placeholder="请输入中国大陆手机号" /></label>
+    <div><button type="button" disabled={busy || !phone} onClick={() => void submit("request-phone-code")}>{busy ? "处理中…" : member.phone_verified && phone === member.phone ? "更换并验证" : "发送短信验证码"}</button>{challengeId && <><input aria-label="手机验证码" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={(event) => setCode(event.target.value)} placeholder="6 位验证码" /><button type="button" disabled={busy || code.length !== 6} onClick={() => void submit("verify-phone")}>确认验证</button></>}</div>
     {message && <small role="status">{message}</small>}
   </div>;
 }

@@ -360,6 +360,8 @@ test("member center always exposes a working sign-out entry", async () => {
   assert.match(authApi, /member_verification_codes/);
   assert.match(authApi, /crypto\.getRandomValues/);
   assert.doesNotMatch(authApi, /123456|MEMBER_VERIFICATION_CODE/);
+  assert.doesNotMatch(accountClient, /会员编号|会员 #/);
+  assert.match(accountClient, /PÚSY CLUB 会员/);
 });
 
 test("member profile supports complete personal and beauty preferences", async () => {

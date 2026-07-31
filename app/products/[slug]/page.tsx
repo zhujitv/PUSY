@@ -119,7 +119,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <p className="product-price">{formatCnyFromRub(product.price)} {product.oldPrice && <del>{formatCnyFromRub(product.oldPrice)}</del>}</p>
         <p className={`product-inventory ${product.inventoryVerified && (product.stock ?? 0) > 0 ? "available" : ""}`}>{inventoryText}</p>
         {(product.sku || product.volume) && <dl className="product-specs">{product.sku && <><dt>商品编号</dt><dd>{product.sku}</dd></>}{product.volume && <><dt>规格容量</dt><dd>{product.volume}</dd></>}</dl>}
-        <p className="product-desc">{product.description}</p>
         {product.variants?.map((group) => <section className="product-variants" key={group.name}><h2>{group.name}</h2><div>{group.options.map((option) => option.slug ? <a className={option.slug === product.slug ? "active" : ""} href={`/products/${option.slug}`} key={`${option.label}-${option.slug}`}>{option.color && <i style={{ backgroundColor: option.color }} />}{option.label}</a> : <span key={option.label}>{option.color && <i style={{ backgroundColor: option.color }} />}{option.label}</span>)}</div></section>)}
         <ProductActions product={product} />
         <div className="product-notes">

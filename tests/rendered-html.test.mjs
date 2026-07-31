@@ -252,6 +252,35 @@ test("gift card layout stays compact without title overlap", async () => {
   assert.match(css, /\.gift-visual \{ height: clamp\(330px, 82vw, 420px\); min-height: 0; place-items: center;/);
 });
 
+test("storefront keeps mobile discovery and purchasing actions close at hand", async () => {
+  const [homepage, catalog, productPage, productActions, chrome, giftCard, css, aboutCss] = await Promise.all([
+    read("app/page.tsx"),
+    read("app/components/CatalogClient.tsx"),
+    read("app/products/[slug]/page.tsx"),
+    read("app/products/[slug]/ProductActions.tsx"),
+    read("app/components/SiteChrome.tsx"),
+    read("app/gift-card/page.tsx"),
+    read("app/globals.css"),
+    read("app/about/about.module.css"),
+  ]);
+
+  assert.match(homepage, /featuredProducts = \[\.\.\.products\]\.sort/);
+  assert.match(homepage, /home-restock-link/);
+  assert.match(catalog, /mobile-catalog-toolbar/);
+  assert.match(catalog, /activeFilterLabels/);
+  assert.match(catalog, /return bAvailable - aAvailable/);
+  assert.match(catalog, />到货提醒<\/a>/);
+  assert.ok(productPage.indexOf("<ProductActions") < productPage.indexOf('className="product-notes"'));
+  assert.doesNotMatch(productPage, /className="product-desc"/);
+  assert.match(productActions, /mobile-purchase-bar/);
+  assert.match(productActions, /runPrimaryAction/);
+  assert.match(chrome, /header-primary-nav/);
+  assert.match(giftCard, /gift-benefits/);
+  assert.match(css, /@media \(max-width: 700px\)[\s\S]*\.catalog-filter-panel\.is-open \{ display: grid; \}/);
+  assert.match(css, /\.mobile-purchase-bar \{ position: fixed;/);
+  assert.match(aboutCss, /height: clamp\(400px, 38vw, 560px\)/);
+});
+
 test("gift card product links always open the dedicated gift card page", async () => {
   const [productsData, catalog, catalogPage, cart, store, productPage] = await Promise.all([
     read("app/data/products.ts"),

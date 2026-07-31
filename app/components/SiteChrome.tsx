@@ -15,7 +15,7 @@ export function SiteHeader() {
   return <>
     <div className="shipping-bar">实体商品满 {formatCnyFromRub(FREE_STANDARD_SHIPPING_THRESHOLD)} 免标准快递费</div>
     <header className="site-header subpage-header">
-      <button className="icon-button menu-button" aria-label="打开菜单" onClick={() => setOpen(!open)}><span /><span /></button>
+      <div className="header-leading"><button className="icon-button menu-button" aria-label="打开菜单" onClick={() => setOpen(!open)}><span /><span /></button><nav className="header-primary-nav" aria-label="主要商品分类">{nav.slice(0, 4).map(([label, href]) => <a href={href} key={href}>{label}</a>)}</nav></div>
       <a className="brand" href="/" aria-label="PÚSY 首页">púsy</a>
       <div className="header-actions"><button className="header-symbol" onClick={() => setSearchOpen(true)} aria-label="搜索"><HeaderIcon name="search" /></button><a className="header-symbol" href="/wishlist" aria-label="收藏"><HeaderIcon name="heart" /></a><a className="header-symbol account-symbol" href="/account" aria-label="账户"><HeaderIcon name="account" /></a><button className="bag-button" onClick={() => setCartOpen(true)} aria-label={`购物袋，${cartCount} 件商品`}><HeaderIcon name="bag" /><b>{cartCount}</b></button></div>
     </header>

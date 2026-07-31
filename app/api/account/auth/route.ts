@@ -56,7 +56,8 @@ async function requestCode(payload: Record<string, unknown>) {
     if (!await codeTargetAllowed(email)) return rateLimitResponse();
     const existingEmail = await db.prepare("SELECT id, email_verified FROM members WHERE lower(email) = ? LIMIT 1").bind(email).first<{ id: number; email_verified: number }>();
     const existingPhone = phone ? await db.prepare("SELECT id FROM members WHERE regexp_replace(phone, '[[:space:]-]', '', 'g') = ? LIMIT 1").bind(phone).first<{ id: number }>() : null;
-    if (existingEmail?.email_verified || (existingPhone && existingPhone.id !== existingEmail?.id)) return Response.json({ ok: true, challengeId: crypto.randomUUID(), message: "如资料可用于注册，验证码将发送至邮箱" });
+    if (existingEmail?.email_verified) return privateJson({ error: "该邮箱已经注册，请切换到会员登录获取验证码" }, { status: 409 });
+    if (existingPhone && existingPhone.id !== existingEmail?.id) return privateJson({ error: "该手机号已经关联其他会员，请更换手机号或暂不填写" }, { status: 409 });
     target = email;
   }
 
@@ -66,7 +67,15 @@ async function requestCode(payload: Record<string, unknown>) {
   await db.prepare("UPDATE member_verification_codes SET consumed_at = CURRENT_TIMESTAMP WHERE target = ? AND purpose = ? AND consumed_at IS NULL").bind(target, mode).run();
   await db.prepare("INSERT INTO member_verification_codes (id, target, purpose, code_hash, expires_at) VALUES (?, ?, ?, ?, ?)").bind(id, target, mode, await sha256(`${id}:${code}`), expiresAt).run();
   try { await deliverCode(target, code); }
-  catch { await db.prepare("DELETE FROM member_verification_codes WHERE id = ?").bind(id).run(); return safeServerError("验证码暂时无法发送，请稍后再试", 503); }
+  catch (error) {
+    console.error("[member-auth] verification delivery failed", {
+      mode,
+      channel: emailPattern.test(target) ? "email" : "sms",
+      error: error instanceof Error ? error.message : String(error),
+    });
+    await db.prepare("DELETE FROM member_verification_codes WHERE id = ?").bind(id).run();
+    return safeServerError("验证码暂时无法发送，请稍后再试", 503);
+  }
   return Response.json({ ok: true, challengeId: id, message: mode === "login" ? "如账户存在，验证码将发送至注册联系方式" : `验证码已发送至${emailPattern.test(target) ? "邮箱" : "手机"}` });
 }
 
@@ -154,6 +163,7 @@ export async function POST(request: Request) {
     response.headers.set("cache-control", "private, no-store");
     return response;
   } catch (error) {
+    console.error("[member-auth] request failed", { error: error instanceof Error ? error.message : String(error) });
     const conflict = error instanceof Error && /unique/i.test(error.message);
     return safeServerError(conflict ? "该邮箱或手机号已经注册" : "会员操作失败，请稍后再试", conflict ? 409 : 500);
   }

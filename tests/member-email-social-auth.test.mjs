@@ -18,6 +18,9 @@ test("会员注册和登录以邮箱验证码为主且手机号选填", async ()
   assert.match(route, /\(phone && !phonePattern\.test\(phone\)\)/);
   assert.match(route, /WHERE lower\(email\) = \? AND email_verified = 1/);
   assert.doesNotMatch(route, /OR \(regexp_replace\(phone/);
+  assert.match(route, /该邮箱已经注册，请切换到会员登录获取验证码/);
+  assert.match(route, /verification delivery failed/);
+  assert.doesNotMatch(route, /如资料可用于注册，验证码将发送至邮箱/);
 });
 
 test("微信和支付宝绑定使用独立表并且不保存授权令牌", async () => {

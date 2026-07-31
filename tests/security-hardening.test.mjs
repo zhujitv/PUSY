@@ -76,3 +76,41 @@ test("后台按当前模块加载数据，而不是一次读取全部业务表",
   assert.match(adminUi, /\/api\/admin\?view=/);
   assert.match(adminUi, /load\(next\)/);
 });
+
+test("安全审计修复覆盖会员关联、认证限流、支付同步与私有缓存", async () => {
+  const [orders, requestSecurity, adminAuth, adminLogin, memberAuth, paymentApi, paymentUi, accountApi, config, proxy, ignore] = await Promise.all([
+    read("app/api/orders/route.ts"),
+    read("lib/request-security.ts"),
+    read("lib/admin-auth.ts"),
+    read("app/api/admin/auth/route.ts"),
+    read("app/api/account/auth/route.ts"),
+    read("app/api/payments/route.ts"),
+    read("app/checkout/payment/PaymentClient.tsx"),
+    read("app/api/account/route.ts"),
+    read("next.config.ts"),
+    read("proxy.ts"),
+    read(".gitignore"),
+  ]);
+
+  assert.match(orders, /const memberId = viewer\?\.memberId \?\? null/);
+  assert.doesNotMatch(orders, /SELECT id FROM members WHERE email/);
+  assert.doesNotMatch(orders, /INSERT INTO members/);
+  assert.match(requestSecurity, /allowRequestForIdentity/);
+  assert.match(requestSecurity, /private, no-store/);
+  assert.match(adminAuth, /ADMIN_PASSWORD \?\? ""\)\.length >= 12/);
+  assert.match(adminAuth, /export function legacyAdminConfigured/);
+  assert.match(adminLogin, /admin-login-account/);
+  assert.match(memberAuth, /member-code-target-10m/);
+  assert.match(memberAuth, /member-code-target-day/);
+  assert.doesNotMatch(memberAuth, /已经注册，请直接登录/);
+  assert.match(paymentApi, /payload\.action === "sync"/);
+  assert.match(paymentApi, /sync-payment-order/);
+  assert.doesNotMatch(paymentApi, /searchParams\.get\("sync"\)/);
+  assert.match(paymentUi, /action: "sync"/);
+  assert.match(accountApi, /privateJson\(\{ error: "请先登录会员账户"/);
+  assert.match(config, /sri: \{ algorithm: "sha256" \}/);
+  assert.match(proxy, /matcher: \["\/admin\/:path\*", "\/account\/:path\*"\]/);
+  assert.match(proxy, /nonce-\$\{nonce\}/);
+  assert.doesNotMatch(proxy, /script-src[^;]*unsafe-inline/);
+  assert.match(ignore, /project\.private\.config\.json/);
+});

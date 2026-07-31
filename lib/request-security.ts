@@ -15,8 +15,8 @@ export function hasTrustedOrigin(request: Request) {
   }
 }
 
-export async function allowRequest(request: Request, scope: string, limit: number, windowSeconds: number) {
-  const key = await sha256(`${scope}:${requestIp(request)}`);
+async function allowRateLimit(keyMaterial: string, limit: number, windowSeconds: number) {
+  const key = await sha256(keyMaterial);
   const db = await getStoreDb();
   const result = await db.prepare(`
     INSERT INTO rate_limits (key, request_count, window_started_at)
@@ -35,10 +35,25 @@ export async function allowRequest(request: Request, scope: string, limit: numbe
   return Number(result?.request_count ?? limit + 1) <= limit;
 }
 
+export async function allowRequest(request: Request, scope: string, limit: number, windowSeconds: number) {
+  return allowRateLimit(`${scope}:ip:${requestIp(request)}`, limit, windowSeconds);
+}
+
+export async function allowRequestForIdentity(scope: string, identity: string, limit: number, windowSeconds: number) {
+  const normalized = identity.trim().toLowerCase().slice(0, 320) || "unknown";
+  return allowRateLimit(`${scope}:identity:${normalized}`, limit, windowSeconds);
+}
+
 export function rateLimitResponse() {
-  return Response.json({ error: "请求过于频繁，请稍后再试" }, { status: 429, headers: { "retry-after": "60" } });
+  return privateJson({ error: "请求过于频繁，请稍后再试" }, { status: 429, headers: { "retry-after": "60" } });
 }
 
 export function safeServerError(message: string, status = 500) {
-  return Response.json({ error: message }, { status });
+  return privateJson({ error: message }, { status });
+}
+
+export function privateJson(data: unknown, init: ResponseInit = {}) {
+  const responseHeaders = new Headers(init.headers);
+  responseHeaders.set("cache-control", "private, no-store");
+  return Response.json(data, { ...init, headers: responseHeaders });
 }

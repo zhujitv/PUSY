@@ -4,7 +4,7 @@ import { sha256 } from "../../../../lib/payments/crypto";
 import { emailConfigured, sendEmail } from "../../../../lib/notifications/email";
 import { sendSms, smsConfigured } from "../../../../lib/notifications/sms";
 import type { NotificationSetting } from "../../../../lib/notifications/types";
-import { allowRequest, hasTrustedOrigin, rateLimitResponse, safeServerError } from "../../../../lib/request-security";
+import { allowRequest, allowRequestForIdentity, hasTrustedOrigin, privateJson, rateLimitResponse, safeServerError } from "../../../../lib/request-security";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phonePattern = /^1[3-9]\d{9}$/;
@@ -13,6 +13,14 @@ type AuthMember = { id: number; name: string; email: string; status: string };
 
 function normalizedPhone(value: unknown) { return String(value ?? "").replace(/\s|-/g, ""); }
 function randomCode() { const values = new Uint32Array(1); crypto.getRandomValues(values); return String(100000 + (values[0] % 900000)); }
+
+async function codeTargetAllowed(target: string) {
+  const [shortWindow, dailyWindow] = await Promise.all([
+    allowRequestForIdentity("member-code-target-10m", target, 3, 10 * 60),
+    allowRequestForIdentity("member-code-target-day", target, 10, 24 * 60 * 60),
+  ]);
+  return shortWindow && dailyWindow;
+}
 
 async function deliverCode(target: string, code: string) {
   const db = await getStoreDb();
@@ -37,6 +45,9 @@ async function requestCode(payload: Record<string, unknown>) {
     const identifier = String(payload.identifier ?? "").trim().toLowerCase();
     if (!identifier) return Response.json({ error: "请输入手机号或邮箱" }, { status: 400 });
     const phone = normalizedPhone(identifier);
+    const targetKey = emailPattern.test(identifier) ? identifier : phone;
+    if (!emailPattern.test(identifier) && !phonePattern.test(phone)) return Response.json({ error: "请输入有效的手机号或邮箱" }, { status: 400 });
+    if (!await codeTargetAllowed(targetKey)) return rateLimitResponse();
     const member = await db.prepare("SELECT email, phone, status FROM members WHERE (lower(email) = ? AND email_verified = 1) OR (regexp_replace(phone, '[[:space:]-]', '', 'g') = ? AND phone_verified = 1) LIMIT 1").bind(identifier, phone).first<{ email: string; phone: string; status: string }>();
     target = member && member.status !== "blocked" ? (emailPattern.test(identifier) ? member.email.toLowerCase() : member.phone) : "";
     if (!target) return Response.json({ ok: true, challengeId: crypto.randomUUID(), message: "如账户存在，验证码将发送至注册联系方式" });
@@ -44,9 +55,10 @@ async function requestCode(payload: Record<string, unknown>) {
     const email = String(payload.email ?? "").trim().toLowerCase();
     const phone = normalizedPhone(payload.phone);
     if (!emailPattern.test(email) || !phonePattern.test(phone)) return Response.json({ error: "请填写有效的邮箱和中国大陆手机号" }, { status: 400 });
+    if (!await codeTargetAllowed(email)) return rateLimitResponse();
     const existingEmail = await db.prepare("SELECT id, email_verified FROM members WHERE lower(email) = ? LIMIT 1").bind(email).first<{ id: number; email_verified: number }>();
     const existingPhone = await db.prepare("SELECT id FROM members WHERE regexp_replace(phone, '[[:space:]-]', '', 'g') = ? LIMIT 1").bind(phone).first<{ id: number }>();
-    if (existingEmail?.email_verified || (existingPhone && existingPhone.id !== existingEmail?.id)) return Response.json({ error: "该邮箱或手机号已经注册，请直接登录" }, { status: 409 });
+    if (existingEmail?.email_verified || (existingPhone && existingPhone.id !== existingEmail?.id)) return Response.json({ ok: true, challengeId: crypto.randomUUID(), message: "如资料可用于注册，验证码将发送至邮箱" });
     target = email;
   }
 
@@ -98,6 +110,7 @@ async function requestPhoneCode(payload: Record<string, unknown>) {
   const db = await getStoreDb();
   const duplicate = await db.prepare("SELECT id FROM members WHERE regexp_replace(phone, '[[:space:]-]', '', 'g') = ? AND id != ? LIMIT 1").bind(phone, viewer.memberId).first();
   if (duplicate) return Response.json({ error: "该手机号码已关联其他会员账户" }, { status: 409 });
+  if (!await codeTargetAllowed(phone)) return rateLimitResponse();
   const id = crypto.randomUUID();
   const code = randomCode();
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
@@ -131,14 +144,16 @@ async function verifyPhone(payload: Record<string, unknown>) {
 
 export async function POST(request: Request) {
   try {
-    if (!hasTrustedOrigin(request)) return Response.json({ error: "请求来源无效" }, { status: 403 });
+    if (!hasTrustedOrigin(request)) return privateJson({ error: "请求来源无效" }, { status: 403 });
     if (!await allowRequest(request, "member-auth", 10, 10 * 60)) return rateLimitResponse();
     const payload = await request.json() as Record<string, unknown>;
     const action = String(payload.action ?? "");
-    if (action === "request-code") return requestCode(payload);
-    if (action === "request-phone-code") return requestPhoneCode(payload);
-    if (action === "verify-phone") return verifyPhone(payload);
-    return verify(payload);
+    const response = action === "request-code" ? await requestCode(payload)
+      : action === "request-phone-code" ? await requestPhoneCode(payload)
+        : action === "verify-phone" ? await verifyPhone(payload)
+          : await verify(payload);
+    response.headers.set("cache-control", "private, no-store");
+    return response;
   } catch (error) {
     const conflict = error instanceof Error && /unique/i.test(error.message);
     return safeServerError(conflict ? "该邮箱或手机号已经注册" : "会员操作失败，请稍后再试", conflict ? 409 : 500);

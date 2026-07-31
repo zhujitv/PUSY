@@ -42,3 +42,6 @@ tsconfig.tsbuildinfo
 /.wrangler/
 /outputs/
 /work/
+
+# WeChat DevTools local/private settings
+project.private.config.json

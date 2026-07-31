@@ -2,7 +2,7 @@ import { ensureMember } from "../../../db/member-account";
 import { getStoreDb } from "../../../db/store";
 import { getPreviewMemberIdentity } from "../../../lib/preview-member-auth";
 import { ensureMemberProfile } from "../../../db/member-profile";
-import { hasTrustedOrigin, safeServerError } from "../../../lib/request-security";
+import { hasTrustedOrigin, privateJson, safeServerError } from "../../../lib/request-security";
 import { cancelOrder } from "../../../lib/orders/cancellation";
 
 const genderValues = new Set(["", "female", "male", "undisclosed"]);
@@ -33,7 +33,7 @@ async function identity() {
 export async function GET() {
   try {
     const viewer = await identity();
-    if (!viewer) return Response.json({ error: "请先登录会员账户" }, { status: 401 });
+    if (!viewer) return privateJson({ error: "请先登录会员账户" }, { status: 401 });
     const member = await ensureMember(viewer);
     await ensureMemberProfile(member.id);
     const db = await getStoreDb();
@@ -59,9 +59,9 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    if (!hasTrustedOrigin(request)) return Response.json({ error: "请求来源无效" }, { status: 403 });
+    if (!hasTrustedOrigin(request)) return privateJson({ error: "请求来源无效" }, { status: 403 });
     const viewer = await identity();
-    if (!viewer) return Response.json({ error: "请先登录会员账户" }, { status: 401 });
+    if (!viewer) return privateJson({ error: "请先登录会员账户" }, { status: 401 });
     const member = await ensureMember(viewer);
     if (member.status === "blocked") return Response.json({ error: "该会员账户已停用" }, { status: 403 });
     await ensureMemberProfile(member.id);

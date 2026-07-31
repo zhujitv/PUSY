@@ -16,7 +16,7 @@ Node.js 版本要求：`>=22.13.0`。
 ## 上线前必需配置
 
 - `DATABASE_URL`：PostgreSQL 连接地址。
-- `ADMIN_PASSWORD`：至少 8 位的独立后台密码。
+- `ADMIN_PASSWORD`：至少 12 位的独立后台密码；完成具名管理员迁移后可移除该旧主管理员密码。
 - `ADMIN_SESSION_SECRET`：至少 32 个随机字符，用于签发后台会话。
 - 邮件验证码：启用数据库中的 email 通知渠道，并设置 `RESEND_API_KEY` 与发件地址。
 - 或短信验证码：启用 sms 通知渠道，并设置 `SMS_API_URL`、`SMS_API_KEY`。

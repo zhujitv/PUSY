@@ -13,7 +13,9 @@ export function PaymentClient() {
   const [params, setParams] = useState({ orderId: "", provider: "" });
 
   const load = useCallback(async (orderId: string, sync = false) => {
-    const response = await fetch(`/api/payments?orderId=${encodeURIComponent(orderId)}${sync ? "&sync=1" : ""}`, { cache: "no-store" });
+    const response = sync
+      ? await fetch("/api/payments", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "sync", orderId }) })
+      : await fetch(`/api/payments?orderId=${encodeURIComponent(orderId)}`, { cache: "no-store" });
     const body = await response.json();
     if (!response.ok) { setError(body.error || "支付状态读取失败"); return null; }
     setPayment(body.payment); setError(body.payment.last_error || ""); return body.payment as Payment;

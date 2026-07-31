@@ -43,12 +43,16 @@ function cookieValue(cookieHeader: string, name: string) {
 }
 
 export function adminAuthConfigured() {
-  return Boolean(secret() && (process.env.ADMIN_PASSWORD ?? "").length >= 8);
+  return Boolean(secret());
+}
+
+export function legacyAdminConfigured() {
+  return Boolean(secret() && (process.env.ADMIN_PASSWORD ?? "").length >= 12);
 }
 
 export async function verifyAdminPassword(password: string) {
   const configured = process.env.ADMIN_PASSWORD ?? "";
-  if (!adminAuthConfigured()) return false;
+  if (!legacyAdminConfigured()) return false;
   const [actual, expected] = await Promise.all([
     crypto.subtle.digest("SHA-256", bytes(password)),
     crypto.subtle.digest("SHA-256", bytes(configured)),
@@ -92,13 +96,16 @@ async function sessionVersion(identity: AdminIdentity) {
 export async function verifyAdminCredentials(email: string, password: string): Promise<AdminIdentity | null> {
   const normalizedEmail = email.trim().toLowerCase().slice(0, 160);
   const owner = legacyOwner();
+  if (normalizedEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+    const db = await getStoreDb();
+    const user = await db.prepare("SELECT id, email, display_name, role, status, password_hash, password_salt, session_version FROM admin_users WHERE email = ? LIMIT 1").bind(normalizedEmail).first<AdminUserRow>();
+    if (user && user.status === "active" && validAdminRole(user.role) && await verifyStoredPassword(password, user.password_hash, user.password_salt)) {
+      await db.prepare("UPDATE admin_users SET last_login_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(user.id).run();
+      return { id: user.id, email: user.email, displayName: user.display_name, role: user.role, permissions: permissionsForRole(user.role), sessionVersion: Number(user.session_version) };
+    }
+  }
   if ((!normalizedEmail || normalizedEmail === owner.email) && await verifyAdminPassword(password)) return owner;
-  if (!normalizedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) return null;
-  const db = await getStoreDb();
-  const user = await db.prepare("SELECT id, email, display_name, role, status, password_hash, password_salt, session_version FROM admin_users WHERE email = ? LIMIT 1").bind(normalizedEmail).first<AdminUserRow>();
-  if (!user || user.status !== "active" || !validAdminRole(user.role) || !await verifyStoredPassword(password, user.password_hash, user.password_salt)) return null;
-  await db.prepare("UPDATE admin_users SET last_login_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(user.id).run();
-  return { id: user.id, email: user.email, displayName: user.display_name, role: user.role, permissions: permissionsForRole(user.role), sessionVersion: Number(user.session_version) };
+  return null;
 }
 
 export async function adminSessionCookie(identity: AdminIdentity) {
@@ -118,6 +125,7 @@ export async function getAdminIdentity(): Promise<AdminIdentity | null> {
     if (!parsed.email || !parsed.version || !parsed.expires || parsed.expires <= Date.now()) return null;
     const id = parsed.id || "legacy-owner";
     if (id === "legacy-owner") {
+      if (!legacyAdminConfigured()) return null;
       const owner = { ...legacyOwner(), email: parsed.email };
       return equal(parsed.version, await sessionVersion(owner)) ? owner : null;
     }

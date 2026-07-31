@@ -1,5 +1,5 @@
 import { getStoreDb } from "../../../db/store";
-import { createAdminPasswordHash, getAdminIdentity } from "../../../lib/admin-auth";
+import { createAdminPasswordHash, getAdminIdentity, legacyAdminConfigured } from "../../../lib/admin-auth";
 import { createPayment, createRefund, paymentProviderState, retryRefund, syncPayment, syncRefund } from "../../../lib/payments/service";
 import type { PaymentProviderName } from "../../../lib/payments/types";
 import { notificationChannelState, processDueNotifications, processNotificationJob } from "../../../lib/notifications/service";
@@ -126,7 +126,7 @@ export async function GET(request: Request) {
       analytics: can("analytics.read") ? { orderStatuses: orderStatusAnalytics.results, topProducts: topProducts.results, customers: customerAnalytics ?? {}, returns: returnAnalytics ?? {} } : { orderStatuses: [], topProducts: [], customers: {}, returns: {} },
       supportReceiving: supportVisible ? { domain: supportReceivingDomain(), configured: Boolean(supportReceivingDomain() && process.env.RESEND_API_KEY && process.env.RESEND_RECEIVING_API_KEY && process.env.RESEND_WEBHOOK_SECRET) } : { domain: "", configured: false },
       region: can("system.manage") ? { ...chinaRegion, complianceReady: chinaComplianceReady } : {},
-      adminUsers: can("admins.manage") ? [{ id: "legacy-owner", email: (process.env.ADMIN_EMAIL || "admin@pusy.cn").trim().toLowerCase(), display_name: "主管理员", role: "owner", status: "active", last_login_at: null, created_at: "", updated_at: "" }, ...adminUsers.results] : [],
+      adminUsers: can("admins.manage") ? [...(legacyAdminConfigured() ? [{ id: "legacy-owner", email: (process.env.ADMIN_EMAIL || "admin@pusy.cn").trim().toLowerCase(), display_name: "主管理员", role: "owner", status: "active", last_login_at: null, created_at: "", updated_at: "" }] : []), ...adminUsers.results] : [],
       auditLogs: can("audit.read") ? auditLogs.results : [],
       shipments: can("orders.read") ? shipments.results : [],
       shipmentEvents: can("orders.read") ? shipmentEvents.results : [],
@@ -160,7 +160,7 @@ export async function POST(request: Request) {
       const role = String(payload.role ?? "");
       const password = String(payload.password ?? "");
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !displayName || !validAdminRole(role)) return Response.json({ error: "请填写有效的员工账号、姓名和角色" }, { status: 400 });
-      if (email === (process.env.ADMIN_EMAIL || "admin@pusy.cn").trim().toLowerCase()) return Response.json({ error: "该邮箱已由服务器主管理员使用" }, { status: 409 });
+      if (legacyAdminConfigured() && email === (process.env.ADMIN_EMAIL || "admin@pusy.cn").trim().toLowerCase()) return Response.json({ error: "该邮箱已由服务器主管理员使用" }, { status: 409 });
       const credentials = await createAdminPasswordHash(password);
       const id = `ADM-${crypto.randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase()}`;
       await db.prepare("INSERT INTO admin_users (id, email, display_name, role, password_hash, password_salt) VALUES (?, ?, ?, ?, ?, ?)").bind(id, email, displayName, role, credentials.hash, credentials.salt).run();

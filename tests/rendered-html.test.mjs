@@ -395,14 +395,20 @@ test("reserves order resources atomically and commits them only after payment", 
 });
 
 test("uses real WebP assets and applies baseline response hardening", async () => {
-  const [config, exportApi, commerceSchema, profileSchema] = await Promise.all([
+  const [config, proxy, exportApi, commerceSchema, profileSchema] = await Promise.all([
     read("next.config.ts"),
+    read("proxy.ts"),
     read("app/api/admin/export/route.ts"),
     read("db/commerce-features.ts"),
     read("db/member-profile.ts"),
   ]);
   assert.match(config, /Content-Security-Policy/);
   assert.match(config, /X-Content-Type-Options/);
+  assert.match(config, /sri: \{ algorithm: "sha256" \}/);
+  assert.match(config, /script-src-attr 'none'/);
+  assert.match(proxy, /nonce-\$\{nonce\}/);
+  assert.match(proxy, /'strict-dynamic'/);
+  assert.doesNotMatch(proxy, /script-src[^;]*unsafe-inline/);
   assert.match(exportApi, /\^\[=\+\\-@\]/);
   assert.doesNotMatch(commerceSchema, /CREATE TABLE/);
   assert.doesNotMatch(profileSchema, /CREATE TABLE/);
@@ -648,8 +654,9 @@ test("audit guards member identity, financial transitions and concurrent refunds
     read("db/migrations/2026-07-30-z-audit-integrity.sql"),
   ]);
   assert.doesNotMatch(orders, /ON CONFLICT\(email\) DO UPDATE SET name = excluded\.name, phone = excluded\.phone/);
-  assert.match(orders, /viewer\?\.memberId/);
-  assert.match(orders, /INSERT INTO members \(name, email, phone\) VALUES \(\?, \?, ''\)/);
+  assert.match(orders, /const memberId = viewer\?\.memberId \?\? null/);
+  assert.doesNotMatch(orders, /INSERT INTO members/);
+  assert.doesNotMatch(orders, /SELECT id FROM members WHERE email/);
   assert.match(orders, /validGiftCardSlug/);
   assert.match(shipping, /gift-card-\(1000\|3000\|5000\|10000\)/);
   assert.doesNotMatch(accountApi, /SELECT \* FROM invoices WHERE member_id/);

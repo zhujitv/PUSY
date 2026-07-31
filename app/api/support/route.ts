@@ -23,6 +23,7 @@ export async function POST(request: Request) {
     const message = String(payload.message ?? "").trim().slice(0, 4000);
 
     if (!name || !categories.includes(category) || !contactPreferences.includes(contactPreference) || message.length < 10) return Response.json({ error: "请完整填写姓名、问题类型、联系方式和问题说明" }, { status: 400 });
+    if (category === "售后问题") return Response.json({ error: "请在在线客服表单中验证下单邮箱并选择交易订单后提交售后申请" }, { status: 409 });
     if (!/^1[3-9]\d{9}$/.test(phone)) return Response.json({ error: "请输入有效的中国大陆手机号码" }, { status: 400 });
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return Response.json({ error: "电子邮箱格式不正确，或留空使用手机联系" }, { status: 400 });
     if (contactPreference === "微信" && !wechat) return Response.json({ error: "选择微信联系时请填写微信号" }, { status: 400 });

@@ -483,7 +483,7 @@ test("retail partnership requests use an online form, admin workflow and notific
 });
 
 test("customer service and business cooperation use website forms instead of email-client links", async () => {
-  const [home, chrome, contactPage, contactForm, supportApi, supportService, supportAdmin, storesPage, partnershipForm, returnsPage, returnForm, details, privacy, cookie, payment, sitemap, migration, schema] = await Promise.all([
+  const [home, chrome, contactPage, contactForm, supportApi, supportService, supportAdmin, storesPage, partnershipForm, returnsPage, returnApi, details, privacy, cookie, payment, sitemap, migration, schema] = await Promise.all([
     read("app/page.tsx"),
     read("app/components/SiteChrome.tsx"),
     read("app/contact/page.tsx"),
@@ -494,7 +494,7 @@ test("customer service and business cooperation use website forms instead of ema
     read("app/stores-china/page.tsx"),
     read("app/stores-china/RetailPartnershipForm.tsx"),
     read("app/return/page.tsx"),
-    read("app/return/ReturnForm.tsx"),
+    read("app/api/returns/route.ts"),
     read("app/details/page.tsx"),
     read("app/privacy/page.tsx"),
     read("app/cookie/page.tsx"),
@@ -503,7 +503,7 @@ test("customer service and business cooperation use website forms instead of ema
     read("db/migrations/2026-07-30-zzz-support-web-form.sql"),
     read("db/railway-postgres.sql"),
   ]);
-  const customerFacing = [home, chrome, contactPage, contactForm, storesPage, partnershipForm, returnsPage, returnForm, details, privacy, cookie, payment].join("\n");
+  const customerFacing = [home, chrome, contactPage, contactForm, storesPage, partnershipForm, returnsPage, details, privacy, cookie, payment].join("\n");
   assert.doesNotMatch(customerFacing, /mailto:/i);
   assert.match(home, /href="\/contact">客户服务/);
   assert.match(home, /\/stores-china#retail-partnership/);
@@ -525,7 +525,11 @@ test("customer service and business cooperation use website forms instead of ema
   assert.match(supportAdmin, /客户未填写电子邮箱/);
   assert.match(storesPage, /id="retail-partnership"/);
   assert.match(partnershipForm, /提交合作申请/);
-  assert.match(returnForm, /客服审核后会通过工单与你联系/);
+  assert.match(contactForm, /isAfterSales/);
+  assert.match(contactForm, /验证并查询订单/);
+  assert.match(contactForm, /selectedReturnOrder/);
+  assert.match(returnApi, /createWebsiteReturnCase/);
+  assert.match(returnsPage, /在线联系客服/);
   assert.match(sitemap, /"\/contact"/);
   assert.match(migration, /ADD COLUMN IF NOT EXISTS customer_phone/);
   assert.match(migration, /ADD COLUMN IF NOT EXISTS customer_wechat/);
@@ -563,7 +567,7 @@ test("customer inbox links verified order replies, returns and protected attachm
   assert.match(webhook, /email\.received/);
   assert.match(attachmentApi, /getAdminIdentity/);
   assert.match(attachmentApi, /attachments_json/);
-  assert.match(returnApi, /createWebsiteReturnThread/);
+  assert.match(returnApi, /createWebsiteReturnCase/);
   assert.match(supportService, /lower\(email\) = \?/);
   assert.match(supportService, /In-Reply-To/);
   assert.match(supportAdmin, /requestId: crypto\.randomUUID\(\)/);

@@ -1,7 +1,7 @@
 import { getStoreDb } from "../../../../db/store";
 import { createMemberSession, getPreviewMemberIdentity } from "../../../../lib/preview-member-auth";
 import { sha256 } from "../../../../lib/payments/crypto";
-import { emailConfigured, sendEmail } from "../../../../lib/notifications/email";
+import { sendVerificationEmail } from "../../../../lib/notifications/verification-email";
 import { sendSms, smsConfigured } from "../../../../lib/notifications/sms";
 import type { NotificationSetting } from "../../../../lib/notifications/types";
 import { allowRequest, allowRequestForIdentity, hasTrustedOrigin, privateJson, rateLimitResponse, safeServerError } from "../../../../lib/request-security";
@@ -26,12 +26,11 @@ async function codeTargetAllowed(target: string) {
 async function deliverCode(target: string, code: string) {
   const db = await getStoreDb();
   const channel = emailPattern.test(target) ? "email" : "sms";
-  const setting = await db.prepare("SELECT * FROM notification_settings WHERE channel = ? LIMIT 1").bind(channel).first<NotificationSetting>();
-  if (!setting) throw new Error("验证码通知渠道尚未配置");
   if (channel === "email") {
-    if (!emailConfigured(setting)) throw new Error("邮件验证码渠道尚未启用");
-    await sendEmail(setting, { to: target, subject: "PUSY.CN 会员验证码", html: `<p>你的 PUSY.CN 验证码是：</p><p style="font-size:30px;font-weight:700;letter-spacing:6px">${code}</p><p>验证码 10 分钟内有效，请勿转发给他人。</p>`, idempotencyKey: `AUTH-${crypto.randomUUID()}` });
+    await sendVerificationEmail({ to: target, code, subject: "PUSY.CN 会员验证码", intro: "你的 PUSY.CN 会员验证码是：", idempotencyKey: `AUTH-${crypto.randomUUID()}` });
   } else {
+    const setting = await db.prepare("SELECT * FROM notification_settings WHERE channel = ? LIMIT 1").bind(channel).first<NotificationSetting>();
+    if (!setting) throw new Error("验证码通知渠道尚未配置");
     if (!smsConfigured(setting)) throw new Error("短信验证码渠道尚未启用");
     await sendSms(setting, { to: target, message: `PUSY.CN 验证码：${code}，10分钟内有效，请勿转发。`, idempotencyKey: `AUTH-${crypto.randomUUID()}` });
   }

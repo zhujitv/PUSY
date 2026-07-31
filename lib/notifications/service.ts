@@ -60,7 +60,11 @@ export async function processNotificationJob(id: string) {
   if (!setting || !template || !setting.enabled || !template.enabled) throw new Error("通知渠道或模板已停用");
   const payload = JSON.parse(job.payload_json) as Record<string, string>;
   try {
-    const replyTo = job.entity_type === "order" || payload.orderId ? supportReplyAddress({ orderId: payload.orderId || job.entity_id }) : supportReplyAddress({ mailbox: "service" });
+    const replyTo = job.entity_type === "return" && payload.returnId
+      ? supportReplyAddress({ returnId: payload.returnId })
+      : job.entity_type === "order" || payload.orderId
+        ? supportReplyAddress({ orderId: payload.orderId || job.entity_id })
+        : supportReplyAddress({ mailbox: "service" });
     const providerId = job.channel === "email"
       ? await sendEmail(setting, { to: job.recipient, subject: render(template.email_subject, payload), html: emailHtml(render(template.email_body, payload, true), Boolean(replyTo)), idempotencyKey: job.id, replyTo: replyTo || undefined })
       : await sendSms(setting, { to: job.recipient, message: render(template.sms_body, payload), idempotencyKey: job.id });

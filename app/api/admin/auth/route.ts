@@ -14,8 +14,8 @@ function loginRedirect(request: Request, error = "", sessionCookie = "") {
 }
 
 export async function POST(request: Request) {
-  if (!hasTrustedOrigin(request)) return privateJson({ error: "请求来源无效" }, { status: 403 });
   const isBrowserForm = browserFormRequest(request);
+  if (!hasTrustedOrigin(request)) return isBrowserForm ? loginRedirect(request, "origin-invalid") : privateJson({ error: "请求来源无效" }, { status: 403 });
   const payload = isBrowserForm
     ? Object.fromEntries(await request.formData()) as { email?: string; password?: string }
     : await request.json().catch(() => ({})) as { email?: string; password?: string };

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import { createGiftCardCode } from "../lib/gift-cards.ts";
 import { roleCan } from "../lib/admin-permissions.ts";
+import { hasTrustedOrigin } from "../lib/request-origin.ts";
 
 const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
@@ -118,4 +119,19 @@ test("安全审计修复覆盖会员关联、认证限流、支付同步与私�
   assert.match(proxy, /Referrer-Policy", "no-referrer"/);
   assert.doesNotMatch(proxy, /script-src[^;]*unsafe-inline/);
   assert.match(ignore, /project\.private\.config\.json/);
+});
+
+test("后台登录在 Vercel 转发主机和 PUSY 主域之间仍能校验同源", () => {
+  assert.equal(hasTrustedOrigin(new Request("https://deployment.vercel.app/api/admin/auth", {
+    headers: { origin: "https://pusy.cn", "x-forwarded-host": "pusy.cn" },
+  })), true);
+  assert.equal(hasTrustedOrigin(new Request("https://pusy.cn/api/admin/auth", {
+    headers: { origin: "https://www.pusy.cn" },
+  })), true);
+  assert.equal(hasTrustedOrigin(new Request("https://deployment.vercel.app/api/admin/auth", {
+    headers: { origin: "https://pusy.cn", "sec-fetch-site": "same-origin" },
+  })), true);
+  assert.equal(hasTrustedOrigin(new Request("https://pusy.cn/api/admin/auth", {
+    headers: { origin: "https://attacker.example" },
+  })), false);
 });

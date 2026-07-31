@@ -1,18 +1,10 @@
 import { sha256 } from "./payments/crypto";
 import { getStoreDb } from "../db/store";
 
+export { hasTrustedOrigin } from "./request-origin";
+
 export function requestIp(request: Request) {
   return (request.headers.get("x-forwarded-for")?.split(",")[0] || request.headers.get("x-real-ip") || "unknown").trim();
-}
-
-export function hasTrustedOrigin(request: Request) {
-  const origin = request.headers.get("origin");
-  if (!origin) return true;
-  try {
-    return new URL(origin).host === new URL(request.url).host;
-  } catch {
-    return false;
-  }
 }
 
 async function allowRateLimit(keyMaterial: string, limit: number, windowSeconds: number) {

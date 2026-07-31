@@ -82,10 +82,19 @@ export function AdminClient({ viewer, canSignOut }: { viewer: AdminViewer; canSi
 
   const load = useCallback(async (view: string) => {
     setLoading(true);
-    const response = await fetch(`/api/admin?view=${encodeURIComponent(view)}`, { cache: "no-store" });
-    const body = await response.json();
-    if (!response.ok) setMessage(body.error || "加载失败"); else setData(body);
-    setLoading(false);
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 20_000);
+    try {
+      const response = await fetch(`/api/admin?view=${encodeURIComponent(view)}`, { cache: "no-store", signal: controller.signal });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) setMessage(body.error || "加载失败，请稍后重试");
+      else { setData(body); setMessage(""); }
+    } catch (error) {
+      setMessage(error instanceof DOMException && error.name === "AbortError" ? "读取商城数据超时，请刷新页面重试" : "无法连接商城数据，请刷新页面重试");
+    } finally {
+      window.clearTimeout(timeout);
+      setLoading(false);
+    }
   }, []);
   useEffect(() => { queueMicrotask(() => { void load(defaultTab); }); }, [defaultTab, load]);
   async function act(payload: Record<string, unknown>) {

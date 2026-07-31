@@ -3,9 +3,6 @@ import type { NextConfig } from "next";
 const developmentScriptPolicy = process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : "";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    sri: { algorithm: "sha256" },
-  },
   images: {
     remotePatterns: [{ protocol: "https", hostname: "avatars.mds.yandex.net", pathname: "/get-yastore/**" }],
   },

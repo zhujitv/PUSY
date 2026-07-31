@@ -404,7 +404,7 @@ test("uses real WebP assets and applies baseline response hardening", async () =
   ]);
   assert.match(config, /Content-Security-Policy/);
   assert.match(config, /X-Content-Type-Options/);
-  assert.match(config, /sri: \{ algorithm: "sha256" \}/);
+  assert.doesNotMatch(config, /sri:/);
   assert.match(config, /script-src-attr 'none'/);
   assert.match(proxy, /nonce-\$\{nonce\}/);
   assert.match(proxy, /'strict-dynamic'/);

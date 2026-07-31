@@ -78,11 +78,12 @@ test("后台按当前模块加载数据，而不是一次读取全部业务表",
 });
 
 test("安全审计修复覆盖会员关联、认证限流、支付同步与私有缓存", async () => {
-  const [orders, requestSecurity, adminAuth, adminLogin, memberAuth, paymentApi, paymentUi, accountApi, config, proxy, ignore] = await Promise.all([
+  const [orders, requestSecurity, adminAuth, adminLogin, adminLoginUi, memberAuth, paymentApi, paymentUi, accountApi, config, proxy, ignore] = await Promise.all([
     read("app/api/orders/route.ts"),
     read("lib/request-security.ts"),
     read("lib/admin-auth.ts"),
     read("app/api/admin/auth/route.ts"),
+    read("app/admin/login/AdminLoginClient.tsx"),
     read("app/api/account/auth/route.ts"),
     read("app/api/payments/route.ts"),
     read("app/checkout/payment/PaymentClient.tsx"),
@@ -100,6 +101,9 @@ test("安全审计修复覆盖会员关联、认证限流、支付同步与私�
   assert.match(adminAuth, /ADMIN_PASSWORD \?\? ""\)\.length >= 12/);
   assert.match(adminAuth, /export function legacyAdminConfigured/);
   assert.match(adminLogin, /admin-login-account/);
+  assert.match(adminLogin, /request\.formData\(\)/);
+  assert.match(adminLogin, /status: 303/);
+  assert.match(adminLoginUi, /method="post" action="\/api\/admin\/auth"/);
   assert.match(memberAuth, /member-code-target-10m/);
   assert.match(memberAuth, /member-code-target-day/);
   assert.doesNotMatch(memberAuth, /已经注册，请直接登录/);
@@ -111,6 +115,7 @@ test("安全审计修复覆盖会员关联、认证限流、支付同步与私�
   assert.match(config, /sri: \{ algorithm: "sha256" \}/);
   assert.match(proxy, /matcher: \["\/admin\/:path\*", "\/account\/:path\*"\]/);
   assert.match(proxy, /nonce-\$\{nonce\}/);
+  assert.match(proxy, /Referrer-Policy", "no-referrer"/);
   assert.doesNotMatch(proxy, /script-src[^;]*unsafe-inline/);
   assert.match(ignore, /project\.private\.config\.json/);
 });

@@ -6,7 +6,9 @@ import { AdminLoginClient } from "./AdminLoginClient";
 export const metadata: Metadata = { title: "管理后台登录｜PUSY.CN", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
-export default async function AdminLoginPage() {
+export default async function AdminLoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   if (await getAdminIdentity()) redirect("/admin");
-  return <AdminLoginClient configured={adminAuthConfigured()} />;
+  const error = (await searchParams).error;
+  const initialError = error === "rate-limited" ? "登录尝试过于频繁，请稍后再试" : error ? "账号或密码不正确" : "";
+  return <AdminLoginClient configured={adminAuthConfigured()} initialError={initialError} />;
 }

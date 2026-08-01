@@ -95,7 +95,7 @@
   .profile-avatar { width: 66px; height: 66px; font-size: 26px; }
   .profile-avatar-editor { align-items: flex-start; }
   .profile-avatar-preview { width: 66px; height: 66px; }
-  .profile-completion { grid-column: 1 / -1; }
+  .profile-completion { grid-column: 1 / -1; padding: 16px; }
   .profile-form { padding: 0 18px 28px; }
   .profile-form fieldset { padding: 28px 0; }
   .profile-consent { grid-template-columns: 1fr; }

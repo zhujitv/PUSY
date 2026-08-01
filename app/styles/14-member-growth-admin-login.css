@@ -62,18 +62,21 @@
 .member-form label.check { display: flex; flex-direction: row; align-items: center; }
 .member-form label.check input { width: 18px; min-height: 18px; }
 .member-profile-section { padding: 0; overflow: hidden; }
-.profile-summary { min-height: 180px; display: grid; grid-template-columns: auto 1fr minmax(240px, .7fr); gap: 22px; align-items: center; padding: 32px 38px; color: #fff; background: #181818; }
-.profile-avatar { width: 92px; height: 92px; display: grid; place-items: center; border-radius: 50%; color: #111; background: #ff67aa; font-size: 36px; font-weight: 500; }
+.profile-summary { position: relative; min-height: 190px; display: grid; grid-template-columns: auto 1fr minmax(240px, .7fr); gap: 24px; align-items: center; padding: 34px 38px; overflow: hidden; color: #392a30; background: radial-gradient(circle at 92% 8%, rgba(255,255,255,.92), transparent 25%), radial-gradient(circle at 5% 115%, rgba(235,91,151,.15), transparent 38%), linear-gradient(130deg, #fffafc 0%, #f8e8ef 58%, #efd4df 100%); }
+.profile-summary::after { content: ""; position: absolute; width: 250px; height: 250px; right: -95px; top: -145px; border: 1px solid rgba(173,92,126,.13); border-radius: 50%; box-shadow: 0 0 0 42px rgba(255,255,255,.16), 0 0 0 84px rgba(173,92,126,.025); pointer-events: none; }
+.profile-summary > * { position: relative; z-index: 1; }
+.profile-avatar { width: 96px; height: 96px; display: grid; place-items: center; border: 4px solid rgba(255,255,255,.85); border-radius: 50%; color: #fff; background: linear-gradient(145deg, #f767a7, #db347e); box-shadow: 0 12px 30px rgba(172,52,104,.2); font-size: 36px; font-weight: 500; }
 .profile-avatar.has-image, .profile-avatar-preview.has-image { overflow: hidden; background: #f3edf0; }
 .profile-avatar img, .profile-avatar-preview img { width: 100%; height: 100%; display: block; object-fit: cover; }
-.profile-summary p { margin: 0 0 8px; color: #999; font-size: 10px; letter-spacing: .08em; }
-.profile-summary h2 { margin: 0 0 8px; font-size: 30px; font-weight: 400; }
-.profile-summary span { color: #ccc; font-size: 12px; }
-.profile-completion { display: grid; gap: 9px; }
+.profile-summary p { margin: 0 0 9px; color: #aa5279; font-size: 10px; letter-spacing: .1em; }
+.profile-summary h2 { margin: 0 0 9px; color: #35272d; font-size: 31px; font-weight: 450; }
+.profile-summary span { color: #78666d; font-size: 12px; }
+.profile-completion { display: grid; gap: 10px; padding: 20px; border: 1px solid rgba(193,129,156,.2); border-radius: 16px; background: rgba(255,255,255,.58); backdrop-filter: blur(8px); }
 .profile-completion > span { display: flex; justify-content: space-between; }
-.profile-completion > div { height: 5px; overflow: hidden; background: #444; }
-.profile-completion i { height: 100%; display: block; background: #ff4b9d; transition: width .25s ease; }
-.profile-completion small { color: #999; font-size: 10px; }
+.profile-completion > span b { color: #cc2d73; }
+.profile-completion > div { height: 7px; overflow: hidden; border-radius: 999px; background: #ead9e0; }
+.profile-completion i { height: 100%; display: block; border-radius: inherit; background: linear-gradient(90deg, #ef5a9d, #d92d7a); box-shadow: 0 0 12px rgba(226,54,129,.22); transition: width .25s ease; }
+.profile-completion small { color: #968188; font-size: 10px; }
 .profile-form { padding: 8px 38px 38px; }
 .profile-form fieldset { margin: 0; padding: 32px 0 36px; border: 0; border-bottom: 1px solid #ddd; }
 .profile-form legend { width: 100%; display: flex; gap: 14px; align-items: flex-start; margin-bottom: 26px; padding: 0; }
@@ -87,7 +90,7 @@
 .profile-avatar-editor b { font-size: 14px; font-weight: 500; }
 .profile-avatar-editor span { color: #888; font-size: 10px; }
 .profile-avatar-editor > div > div { display: flex; gap: 8px; margin-top: 5px; }
-.profile-avatar-editor label, .profile-avatar-editor button { min-height: 35px; padding: 0 13px; border: 1px solid #222; display: grid; place-items: center; color: #fff; background: #222; font-size: 10px; cursor: pointer; }
+.profile-avatar-editor label, .profile-avatar-editor button { min-height: 35px; padding: 0 13px; border: 1px solid #dc3a81; border-radius: 999px; display: grid; place-items: center; color: #fff; background: #dc3a81; font-size: 10px; cursor: pointer; }
 .profile-avatar-editor button { color: #333; border-color: #d7cdd1; background: #fff; }
 .profile-avatar-editor input[type="file"] { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .profile-avatar-editor small[role="alert"] { color: #bd2e6e; font-size: 10px; }

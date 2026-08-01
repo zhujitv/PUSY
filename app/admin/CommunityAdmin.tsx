@@ -2,57 +2,9 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import type { CommunityInsights, CommunityModerationPost, CommunityReport } from "./admin-types";
 
-export type CommunityModerationPost = {
-  id: string;
-  member_id: number;
-  author_public_id: string;
-  author_name: string;
-  author_account_type: "member" | "official";
-  author_official_label: string;
-  creator_status: "active" | "restricted";
-  title: string;
-  body: string;
-  status: "pending" | "approved" | "rejected" | "hidden";
-  moderation_note: string;
-  moderated_by?: string;
-  moderated_at?: string;
-  published_at?: string;
-  created_at: string;
-  media_ids: string[];
-  products: Array<{ slug: string; name: string; image: string; price: number; verified_purchase: boolean }>;
-  promotion_placement: "featured" | "pinned" | "";
-  promotion_rank: number;
-  promotion_note: string;
-  impression_count: number;
-  product_click_count: number;
-  add_to_cart_count: number;
-  campaign_title: string;
-  campaign_entry_status: string;
-};
-
-export type CommunityInsights = {
-  summary: { impressions: number; productClicks: number; addToCarts: number; measuredPosts: number };
-  products: Array<{ productSlug: string; productName: string; productClicks: number; addToCarts: number }>;
-};
-
-export type CommunityReport = {
-  id: string;
-  entity_type: "post" | "comment";
-  entity_id: string;
-  post_id: string;
-  comment_id: string | null;
-  reason: "spam" | "abuse" | "misinformation" | "commercial" | "other";
-  detail: string;
-  status: "pending" | "resolved" | "dismissed";
-  resolution_note: string;
-  reporter_name: string;
-  target_author_name: string;
-  target_excerpt: string;
-  reviewed_by: string | null;
-  reviewed_at: string | null;
-  created_at: string;
-};
+export type { CommunityInsights, CommunityModerationPost, CommunityReport } from "./admin-types";
 
 const statusNames = { pending: "待审核", approved: "公开显示", rejected: "拒绝公开", hidden: "已隐藏" } as const;
 const reportReasonNames = { spam: "垃圾或重复内容", abuse: "攻击、骚扰或不友善", misinformation: "虚假或误导信息", commercial: "未标注商业推广", other: "其他问题" } as const;

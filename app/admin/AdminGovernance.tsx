@@ -1,31 +1,9 @@
 "use client";
 
 import { adminRoleLabels, adminRoles, type AdminRole } from "../../lib/admin-permissions";
+import type { AdminAuditLog, AdminUser } from "./admin-types";
 
-export type AdminUser = {
-  id: string;
-  email: string;
-  display_name: string;
-  role: AdminRole;
-  status: "active" | "disabled";
-  last_login_at?: string;
-  created_at: string;
-  updated_at: string;
-};
-
-export type AdminAuditLog = {
-  id: number;
-  admin_id: string;
-  actor_email: string;
-  actor_role: AdminRole;
-  action: string;
-  entity_id: string;
-  summary: string;
-  request_ip: string;
-  outcome: "attempted" | "succeeded" | "failed";
-  error_text: string;
-  created_at: string;
-};
+export type { AdminAuditLog, AdminUser } from "./admin-types";
 
 const roleDescriptions: Record<AdminRole, string> = {
   owner: "拥有全部权限，可管理账号、支付和系统设置。",

@@ -1,9 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
-
-const root = new URL("../", import.meta.url);
-const read = (path) => readFile(new URL(path, root), "utf8");
+import { readSource as read } from "./helpers/read-source.mjs";
 
 test("会员注册和登录以邮箱验证码为主且手机号选填", async () => {
   const [client, route] = await Promise.all([

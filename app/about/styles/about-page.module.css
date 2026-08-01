@@ -1,0 +1,10 @@
+.page {
+  --about-bg: #fbfaf8;
+  --about-ink: #171416;
+  --about-muted: #6c6669;
+  --about-line: rgba(23, 20, 22, 0.2);
+  --about-pink: #ff1688;
+  overflow: clip;
+  background: var(--about-bg);
+  color: var(--about-ink);
+}

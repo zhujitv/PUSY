@@ -1,9 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
-
-const root = new URL("../", import.meta.url);
-const read = (path) => readFile(new URL(path, root), "utf8");
+import { readSource as read } from "./helpers/read-source.mjs";
 
 test("退换货合并到在线客服并支持验证后多订单选择", async () => {
   const [contact, contactPage, returnPage, account, returnsApi, supportApi] = await Promise.all([

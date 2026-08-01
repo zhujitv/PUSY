@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { readSource } from "./helpers/read-source.mjs";
 
 import {
   calculatePhysicalSubtotal,
@@ -47,8 +48,8 @@ test("checkout, server and logistics all enforce the shared fulfillment policy",
     readFile(new URL("../app/checkout/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/orders/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../lib/logistics/service.ts", import.meta.url), "utf8"),
-    readFile(new URL("../app/admin/AdminClient.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/api/admin/route.ts", import.meta.url), "utf8"),
+    readSource("app/admin/AdminClient.tsx"),
+    readSource("app/api/admin/route.ts"),
     readFile(new URL("../db/migrations/2026-07-30-zzzzzzzzzzzzzzzzzz-shipping-policy.sql", import.meta.url), "utf8"),
     readFile(new URL("../miniprogram/pages/cart/index.js", import.meta.url), "utf8"),
     readFile(new URL("../miniprogram/pages/home/index.wxml", import.meta.url), "utf8"),

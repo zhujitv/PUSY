@@ -1,0 +1,52 @@
+@media (max-width: 900px) {
+  .shipping-bar { height: 38px; font-size: 12px; }
+  .site-header { height: 64px; padding: 0 16px; }
+  .home-header { top: 38px; }
+  .home-header.is-scrolled { top: 0; }
+  .brand { font-size: 36px; }
+  .header-actions { gap: 12px; }
+  .header-symbol, .header-actions .header-symbol { width: 26px; height: 26px; }
+  .account-symbol { display: none; }
+  .bag-button { width: 26px; height: 26px; }
+  .bag-button::before { content: none; }
+  .nav-row { top: 102px; padding: 28px 22px; }
+  .hero { height: 430px; min-height: 430px; margin-bottom: 40px; }
+  .hero-slide img { object-position: 61% center; }
+  .hero-copy { left: 56px; right: 18px; top: 92px; bottom: auto; color: #354359; }
+  .campaign-mark { margin-bottom: 18px; font-size: 27px; }
+  .hero h1 { max-width: 320px; font-size: 42px; }
+  .hero-copy > p { max-width: 270px; font-size: 18px; }
+  .prize-panel { position: absolute; top: 225px; left: -34px; width: min(92vw, 365px); margin: 0; grid-template-columns: .75fr 1.25fr; padding: 13px 14px; border-radius: 17px; }
+  .prize-panel > div + div { padding-left: 14px; }
+  .prize-panel b { font-size: 15px; }
+  .prize-panel small { font-size: 10px; }
+  .hero-slide--box::after { -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 62%, transparent 92%); mask-image: linear-gradient(90deg, #000 0%, #000 62%, transparent 92%); }
+  .hero-copy--box { left: 22px; right: 18px; top: 50%; bottom: auto; width: auto; transform: translateY(-50%); color: #fff; }
+  .hero-copy--box > p { color: rgba(255,255,255,.92); font-size: 15px; }
+  .hero-copy--box h1 { max-width: 310px; margin-bottom: 22px; font-size: 36px; }
+  .hero-copy--box .outline-button { padding: 12px 28px; }
+  .hero-slide--box img { object-position: center; }
+  .hero-arrow { width: 38px; height: 38px; font-size: 27px; }
+  .hero-arrow--prev { left: 10px; right: auto; }
+  .hero-arrow--next { right: 10px; }
+  .hero-dots { bottom: 12px; }
+  .section-heading { padding: 0 18px 18px; }
+  .section-heading h2, .stories-section h2 { font-size: 27px; }
+  .product-grid { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 72vw; padding: 0 18px; }
+  .product-image-wrap { height: auto; aspect-ratio: 1 / .95; }
+  .product-card h3 { min-height: 54px; padding: 14px 16px 3px; font-size: 16px; }
+  .product-card .price { padding: 0 16px 17px; }
+  .category-grid { display: grid; grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 84vw; gap: 8px; padding: 0 18px 68px; overflow-x: auto; scrollbar-width: none; }
+  .category-card { height: auto; min-height: 0; aspect-ratio: 1; }
+  .category-card span { font-size: 16px; }
+  .stories-section { padding-left: 18px; }
+  .story-grid { grid-auto-columns: 78vw; gap: 12px; padding-right: 18px; }
+  .story-card { height: 110vw; min-height: 410px; }
+  footer.pusy-footer { min-height: 680px; padding: 32px 20px 24px; grid-template-columns: 1fr; grid-template-rows: auto auto auto auto; gap: 35px; }
+  .footer-contact-line { flex-direction: column; gap: 16px; font-size: 12px; }
+  .footer-contact-line > div { flex-wrap: wrap; gap: 10px 20px; }
+  .footer-logo, footer.pusy-footer .footer-logo { align-self: start; font-size: 44vw; }
+  footer.pusy-footer .footer-links { grid-template-columns: 1fr 1fr; gap: 25px; }
+  footer.pusy-footer .footer-links a { font-size: 13px; }
+  .footer-subscribe { width: 100%; }
+}

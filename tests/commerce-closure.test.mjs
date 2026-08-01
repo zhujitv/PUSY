@@ -1,9 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
-
-const root = new URL("../", import.meta.url);
-const read = (path) => readFile(new URL(path, root), "utf8");
+import { readSource as read } from "./helpers/read-source.mjs";
 
 test("交易闭环包含库存流水、运单轨迹和完整售后字段", async () => {
   const [migration, schema] = await Promise.all([

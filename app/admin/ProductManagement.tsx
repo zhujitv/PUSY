@@ -3,18 +3,9 @@
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { formatCnyFromRub } from "../data/products";
+import type { AdminProduct, ProductCategory } from "./admin-types";
 
-export type AdminProduct = {
-  id: number; slug: string; name: string; category: string; category_id?: number; description: string;
-  image: string; image_alt?: string; badge?: string; price: number; old_price?: number; stock: number;
-  low_stock_threshold: number; inventory_verified: number; sku?: string; volume?: string; ingredients?: string;
-  usage?: string; status: string;
-};
-
-export type ProductCategory = {
-  id: number; name: string; slug: string; parent_id?: number | null; parent_name?: string | null;
-  description: string; sort_order: number; status: "active" | "disabled"; product_count: number;
-};
+export type { AdminProduct, ProductCategory } from "./admin-types";
 
 type Props = {
   products: AdminProduct[];

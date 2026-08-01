@@ -1,9 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
-
-const root = new URL("../", import.meta.url);
-const read = (path) => readFile(new URL(path, root), "utf8");
+import { readSource as read } from "./helpers/read-source.mjs";
 
 test("商品分类拥有独立数据表、层级、排序和启停状态", async () => {
   const migration = await read("db/migrations/2026-07-30-zzzzzzzzzz-product-categories.sql");

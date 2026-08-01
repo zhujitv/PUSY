@@ -1,10 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import { MEMBER_TASK_POINTS } from "../lib/growth/member-program-rules.ts";
-
-const root = new URL("../", import.meta.url);
-const read = (path) => readFile(new URL(path, root), "utf8");
+import { readSource as read } from "./helpers/read-source.mjs";
 
 test("会员任务奖励数值明确且邀请双方均有奖励", () => {
   assert.equal(MEMBER_TASK_POINTS.dailyCheckin, 5);

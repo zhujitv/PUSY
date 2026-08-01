@@ -1,10 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import { needsContentDiscardWarning, resolveContentSubmitIntent } from "../lib/content-studio-safety.js";
-
-const root = new URL("../", import.meta.url);
-const read = (path) => readFile(new URL(path, root), "utf8");
+import { readSource as read } from "./helpers/read-source.mjs";
 
 test("内容工作台包含草稿、定时发布、版本历史和并发发布保护", async () => {
   const [migration, service, adminApi, permissions] = await Promise.all([

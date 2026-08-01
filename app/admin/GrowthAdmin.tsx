@@ -1,13 +1,9 @@
 "use client";
 
 import { formatCnyFromRub } from "../data/products";
+import type { GrowthData } from "./admin-types";
 
-export type GrowthMember = { id: number; name: string; email: string; phone: string; status: string; total_orders: number; total_spent: number; points_balance: number; lifetime_points: number; tier: string; tags: string; tag_ids: string; email_marketing: number; sms_marketing: number };
-export type GrowthTag = { id: number; name: string; color: string; description: string; member_count: number };
-export type GrowthSegment = { id: number; name: string; description: string; filter_json: string; updated_at: string };
-export type CouponAssignment = { id: number; coupon_id: number; member_id: number; code: string; member_name: string; email: string; status: string; assigned_at: string; used_at?: string };
-export type AutomationRun = { id: string; automation_key: string; status: string; matched_count: number; queued_count: number; error_text: string; started_at: string; finished_at?: string };
-export type GrowthData = { members: GrowthMember[]; tags: GrowthTag[]; segments: GrowthSegment[]; couponAssignments: CouponAssignment[]; automationRuns: AutomationRun[]; stats: { total_members?: number; silver_members?: number; gold_members?: number; diamond_members?: number; points_outstanding?: number } };
+export type { AutomationRun, CouponAssignment, GrowthData, GrowthMember, GrowthSegment, GrowthTag } from "./admin-types";
 
 const tierNames: Record<string, string> = { bronze: "新锐", silver: "银卡", gold: "金卡", diamond: "钻石" };
 

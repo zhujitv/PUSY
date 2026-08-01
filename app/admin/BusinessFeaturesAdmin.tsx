@@ -1,21 +1,9 @@
 "use client";
 
 import { formatCnyFromRub } from "../data/products";
+import type { AdminInvoice, AnalyticsData } from "./admin-types";
 
-export type AdminInvoice = {
-  id: string; order_id: string; member_id: number; customer: string; customer_email: string;
-  invoice_type: "personal" | "company"; title: string; tax_number: string; recipient_email: string;
-  amount: number; status: "pending" | "processing" | "issued" | "rejected" | "cancelled";
-  invoice_number: string; file_url: string; rejection_reason: string; admin_note: string;
-  requested_at: string; issued_at?: string;
-};
-
-export type AnalyticsData = {
-  orderStatuses: Array<{ status: string; count: number; revenue: number }>;
-  topProducts: Array<{ product_slug: string; product_name: string; quantity: number; revenue: number }>;
-  customers: { new_members_30d?: number; repeat_members?: number; purchasing_members?: number; total_members?: number };
-  returns: { total_returns?: number; returns_30d?: number; refund_returns?: number };
-};
+export type { AdminInvoice, AnalyticsData } from "./admin-types";
 
 const invoiceStatusLabels: Record<string, string> = { pending: "待审核", processing: "开票中", issued: "已开具", rejected: "已驳回", cancelled: "已取消" };
 

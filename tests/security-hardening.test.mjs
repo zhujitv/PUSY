@@ -1,13 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFile, readdir } from "node:fs/promises";
+import { readdir } from "node:fs/promises";
 import { createGiftCardCode } from "../lib/gift-cards.ts";
 import { roleCan } from "../lib/admin-permissions.ts";
 import { hasTrustedOrigin } from "../lib/request-origin.ts";
 import { supportSlaDeadlines } from "../lib/support/sla.ts";
+import { readSource as read } from "./helpers/read-source.mjs";
 
 const root = new URL("../", import.meta.url);
-const read = (path) => readFile(new URL(path, root), "utf8");
 
 test("数据库迁移顺序会先创建客服基础表，并使用校验台账", async () => {
   const files = (await readdir(new URL("db/migrations/", root))).filter((file) => file.endsWith(".sql")).sort();

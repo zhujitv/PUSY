@@ -1,111 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { formatCnyFromRub } from "../data/products";
+import { Customer360 } from "./SupportCustomer360";
+import { active, appendIndex, attachments, fileSize, folderLabels, priorityLabels, slaState, statusLabels } from "./support-utils";
+import type { CannedReply, Folder, ManageOperation, ReturnEvent, SupportAgent, SupportCustomerOrder, SupportCustomerReturn, SupportMessage, SupportReceiving, SupportThread, SupportViewer } from "./support-types";
 
-export type SupportThread = {
-  id: string;
-  mailbox: string;
-  subject: string;
-  customer_email: string;
-  customer_name: string;
-  customer_phone?: string;
-  customer_wechat?: string;
-  member_id?: number;
-  member_name?: string;
-  order_id?: string;
-  order_status?: string;
-  return_id?: string;
-  return_status?: string;
-  status: "unread" | "open" | "pending" | "resolved";
-  priority: "low" | "normal" | "high" | "urgent";
-  assigned_to?: string;
-  assigned_admin_id?: string;
-  due_at?: string;
-  first_response_due_at?: string;
-  resolution_due_at?: string;
-  first_responded_at?: string;
-  resolved_at?: string;
-  reopened_count: number;
-  member_total_orders?: number;
-  member_total_spent?: number;
-  member_points_balance?: number;
-  member_lifetime_points?: number;
-  member_tier?: string;
-  member_status?: string;
-  member_tags?: string;
-  starred: number;
-  archived_at?: string;
-  deleted_at?: string;
-  last_message_at: string;
-  created_at: string;
-};
-
-export type SupportMessage = {
-  id: string;
-  thread_id: string;
-  direction: "inbound" | "outbound" | "system";
-  source: string;
-  provider_email_id?: string;
-  from_email: string;
-  to_email: string;
-  subject: string;
-  text_body: string;
-  attachments_json: string;
-  created_at: string;
-};
-
-export type ReturnEvent = { id: string; return_id: string; event_type: string; from_status?: string; to_status?: string; note: string; actor: string; created_at: string };
-type Attachment = { id: string; filename: string; content_type?: string; size?: number };
-type SupportReceiving = { domain: string; configured: boolean };
-type CannedReply = { id: number; title: string; content: string };
-export type SupportAgent = { id: string; email: string; display_name: string; role: string };
-export type SupportCustomerOrder = { id: string; member_id?: number; customer: string; email: string; total: number; status: string; delivery: string; payment: string; carrier_name?: string; tracking_number?: string; shipment_status?: string; created_at: string };
-export type SupportCustomerReturn = { id: string; order_id: string; member_id?: number; email: string; reason: string; request_type: string; status: string; refund_id?: string; created_at: string };
-type SupportViewer = { id: string; email: string; displayName: string };
-type Folder = "inbox" | "unread" | "handling" | "unassigned" | "due-soon" | "overdue" | "starred" | "archived" | "trash";
-type ManageOperation = "mark-read" | "mark-unread" | "star" | "unstar" | "archive" | "unarchive" | "trash" | "restore" | "delete-permanent";
-
-const statusLabels = { unread: "未读", open: "处理中", pending: "等待客户", resolved: "已解决" };
-const priorityLabels = { low: "低", normal: "普通", high: "高", urgent: "紧急" };
-const folderLabels: Array<[Folder, string]> = [["inbox", "收件箱"], ["unread", "未读"], ["handling", "处理中"], ["unassigned", "待分配"], ["due-soon", "即将超时"], ["overdue", "已超时"], ["starred", "星标"], ["archived", "已归档"], ["trash", "垃圾箱"]];
-
-function attachments(value: string) { try { return JSON.parse(value) as Attachment[]; } catch { return []; } }
-function fileSize(value = 0) { if (!value) return ""; if (value < 1024) return `${value} B`; if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`; return `${(value / 1024 / 1024).toFixed(1)} MB`; }
-function active(thread: SupportThread) { return !thread.archived_at && !thread.deleted_at; }
-function appendIndex<K, V>(index: Map<K, V[]>, key: K, value: V) { const items = index.get(key); if (items) items.push(value); else index.set(key, [value]); }
-
-function slaState(thread: SupportThread, now: number) {
-  if (thread.status === "resolved") return { key: "resolved", label: "已完成 SLA", date: thread.resolved_at };
-  const awaitingFirstResponse = !thread.first_responded_at;
-  const date = awaitingFirstResponse ? thread.first_response_due_at : thread.resolution_due_at;
-  if (!date) return { key: "unset", label: "未设置 SLA", date: "" };
-  const remaining = new Date(date).getTime() - now;
-  const phase = awaitingFirstResponse ? "首响" : "解决";
-  if (remaining < 0) return { key: "overdue", label: `${phase}已超时`, date };
-  if (remaining <= 2 * 60 * 60 * 1000) return { key: "due-soon", label: `${phase}即将到期`, date };
-  return { key: "on-track", label: `${phase}时限内`, date };
-}
-
-const tierLabels: Record<string, string> = { bronze: "青铜会员", silver: "白银会员", gold: "黄金会员", diamond: "钻石会员" };
-
-function Customer360({ thread, orders, returns, previousTickets }: { thread: SupportThread; orders: SupportCustomerOrder[]; returns: SupportCustomerReturn[]; previousTickets: number }) {
-  const tags = (thread.member_tags || "").split(",").map((tag) => tag.trim()).filter(Boolean);
-  return <aside className="support-customer-360">
-    <header><span>客户 360</span><h3>{thread.member_name || thread.customer_name || "访客客户"}</h3><p>{thread.member_id ? `会员 #${thread.member_id}` : "尚未绑定会员账号"}</p></header>
-    <section className="support-customer-summary">
-      <div><span>会员等级</span><b>{tierLabels[thread.member_tier || ""] || "普通客户"}</b></div>
-      <div><span>积分余额</span><b>{thread.member_points_balance ?? 0}</b></div>
-      <div><span>累计订单</span><b>{thread.member_total_orders ?? orders.length}</b></div>
-      <div><span>累计消费</span><b>{formatCnyFromRub(thread.member_total_spent ?? 0)}</b></div>
-    </section>
-    <section><h4>联系方式</h4><p>{thread.customer_phone || "未填写手机"}</p><p>{thread.customer_wechat ? `微信：${thread.customer_wechat}` : "未填写微信"}</p><p>{thread.customer_email || "未填写邮箱"}</p></section>
-    <section><h4>客户标签</h4><div className="support-customer-tags">{tags.length ? tags.map((tag) => <span key={tag}>{tag}</span>) : <small>暂无标签</small>}</div></section>
-    <section><h4>最近订单</h4><div className="support-customer-history">{orders.slice(0, 5).map((order) => <article key={order.id}><div><b>{order.id}</b><time>{new Date(order.created_at).toLocaleDateString("zh-CN")}</time></div><p>{order.status} · {formatCnyFromRub(order.total)}</p>{order.tracking_number && <small>{order.carrier_name} {order.tracking_number} · {order.shipment_status}</small>}</article>)}{!orders.length && <small>暂无订单记录</small>}</div></section>
-    <section><h4>售后记录</h4><div className="support-customer-history">{returns.slice(0, 4).map((item) => <article key={item.id}><div><b>{item.id}</b><time>{new Date(item.created_at).toLocaleDateString("zh-CN")}</time></div><p>{item.status} · {item.reason}</p></article>)}{!returns.length && <small>暂无售后记录</small>}</div></section>
-    <div className="support-customer-footer"><span>历史工单</span><b>{previousTickets} 个</b></div>
-  </aside>;
-}
+export type { ReturnEvent, SupportAgent, SupportCustomerOrder, SupportCustomerReturn, SupportMessage, SupportThread } from "./support-types";
 
 export function SupportAdmin({ threads, messages, returnEvents, cannedReplies, receiving, agents, customerOrders, customerReturns, query, viewer, focusThreadId, onAct }: {
   threads: SupportThread[];

@@ -1,0 +1,135 @@
+.china {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 24px;
+  min-height: 600px;
+  padding: clamp(52px, 5vw, 78px) clamp(24px, 3vw, 52px);
+  background: var(--about-pink);
+  color: var(--about-ink);
+}
+
+.chinaYear {
+  grid-column: 1 / span 6;
+  align-self: end;
+  margin: 0;
+  font-size: clamp(150px, 20vw, 330px);
+  letter-spacing: -0.08em;
+  line-height: 0.72;
+}
+
+.chinaCopy {
+  grid-column: 7 / span 6;
+  align-self: center;
+  max-width: 620px;
+}
+
+.chinaCopy h2 {
+  margin: 18px 0 28px;
+  font-size: clamp(44px, 5.2vw, 84px);
+  font-weight: 400;
+  letter-spacing: -0.065em;
+  line-height: 0.92;
+  white-space: nowrap;
+}
+
+.chinaBody {
+  margin: 0;
+  max-width: 550px;
+  font-size: clamp(16px, 1.4vw, 20px);
+  line-height: 1.7;
+}
+
+.mission {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(88px, 9vw, 142px) clamp(24px, 5vw, 84px);
+  text-align: center;
+}
+
+.mission h2 {
+  margin: 22px 0 0;
+  font-size: clamp(54px, 8vw, 128px);
+  font-weight: 400;
+  letter-spacing: -0.07em;
+  line-height: 0.88;
+  white-space: nowrap;
+}
+
+.mission blockquote {
+  max-width: 860px;
+  margin: clamp(36px, 4vw, 58px) auto 36px;
+  color: #403a3d;
+  font-size: clamp(20px, 2.1vw, 31px);
+  letter-spacing: -0.02em;
+  line-height: 1.55;
+}
+
+.closingMedia {
+  width: 100%;
+  aspect-ratio: 12 / 5;
+  overflow: hidden;
+  background: #e8dcdf;
+}
+
+.closingMedia img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 42%;
+}
+
+@media (max-width: 1050px) {
+  .china {
+    min-height: 620px;
+  }
+
+  .chinaYear {
+    grid-column: 1 / span 6;
+  }
+
+  .chinaCopy {
+    grid-column: 7 / span 6;
+  }
+}
+
+@media (max-width: 760px) {
+  .china {
+    display: flex;
+    min-height: auto;
+    flex-direction: column;
+    gap: 58px;
+    padding: 62px 16px 68px;
+  }
+
+  .chinaYear {
+    align-self: flex-start;
+    font-size: 38vw;
+  }
+
+  .chinaCopy h2 {
+    margin-top: 18px;
+    font-size: 61px;
+    text-wrap: balance;
+    white-space: normal;
+  }
+
+  .mission {
+    padding: 82px 16px;
+  }
+
+  .mission h2 {
+    font-size: 61px;
+    text-wrap: balance;
+    white-space: normal;
+  }
+
+  .mission blockquote {
+    margin: 36px auto 32px;
+    font-size: 19px;
+  }
+
+  .closingMedia {
+    aspect-ratio: 16 / 9;
+  }
+}

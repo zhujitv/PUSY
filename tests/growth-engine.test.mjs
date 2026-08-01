@@ -1,10 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import { pointsFromStoredAmount, tierForLifetimePoints } from "../lib/growth/loyalty-rules.ts";
-
-const root = new URL("../", import.meta.url);
-const read = (path) => readFile(new URL(path, root), "utf8");
+import { readSource as read } from "./helpers/read-source.mjs";
 
 test("会员积分按人民币实付金额累计并按门槛升级", () => {
   assert.equal(pointsFromStoredAmount(833), 99);

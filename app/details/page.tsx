@@ -1,5 +1,8 @@
 import { InfoPage } from "../components/InfoPage";
 import { chinaComplianceReady, chinaRegion } from "../../lib/china-region";
+import { publicPageMetadata } from "../../lib/site-metadata";
+
+export const metadata = publicPageMetadata("/details", "经营者信息｜PUSY.CN", "PUSY.CN 中国电子商务经营主体、客户服务与网站备案信息。");
 
 export default function DetailsPage() {
   return <InfoPage eyebrow="中国经营信息" title="经营者信息" intro="本页用于公示 PUSY.CN 中国电子商务经营主体、联系方式与网站备案信息。">

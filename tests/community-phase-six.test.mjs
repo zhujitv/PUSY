@@ -29,7 +29,8 @@ test("phase six closes the foreground interaction and return loop", () => {
   assert.match(communityPageSource, /CommunityHabitCard/);
   assert.match(communityPageSource, /TopicFollowButton/);
   assert.match(communityPageSource, /community-load-more/);
-  assert.match(communityPageSource, /score_follow/);
+  assert.match(communityPageSource, /viewer_has_followed_topic/);
+  assert.match(communityPageSource, /pagination_cursor/);
 });
 
 test("phase six gives administrators an audited community operations center", () => {

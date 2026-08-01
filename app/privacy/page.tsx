@@ -1,5 +1,8 @@
 import { InfoPage } from "../components/InfoPage";
 import { chinaRegion } from "../../lib/china-region";
+import { publicPageMetadata } from "../../lib/site-metadata";
+
+export const metadata = publicPageMetadata("/privacy", "隐私政策｜PUSY.CN", "了解 PUSY.CN 如何依据中国适用法律处理和保护用户个人信息。");
 
 export default function PrivacyPage() {
   return <InfoPage eyebrow="中国法律信息" title="隐私政策" intro="我们依据《中华人民共和国个人信息保护法》等适用法律处理中国大陆用户的个人信息，并遵循合法、正当、必要和诚信原则。">

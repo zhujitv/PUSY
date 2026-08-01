@@ -1,5 +1,6 @@
 import { getStoreDb } from "../../db/store";
 import { serializePost, type CommunityMember, type CommunityPostRow } from "./post-types";
+import { decodeCommunityPostCursor, encodeCommunityPostCursor, type CommunityPostSort } from "./post-cursor";
 
 const postSelect = `
   SELECT p.id, p.member_id, p.title, p.body, p.status, p.moderation_note, p.published_at, p.created_at, p.updated_at,
@@ -27,6 +28,8 @@ const postSelect = `
       WHERE linked_product.post_id = p.id), '[]'::json) AS products,
     COALESCE(promotion.placement, '') AS promotion_placement,
     COALESCE(promotion.sort_order, 0)::INTEGER AS promotion_rank,
+    CASE COALESCE(promotion.placement, '') WHEN 'pinned' THEN 2 WHEN 'featured' THEN 1 ELSE 0 END::INTEGER AS sort_placement,
+    COALESCE(p.published_at, p.created_at)::timestamp AS sort_time,
     (SELECT COUNT(*) FROM community_follows followers WHERE followers.followed_member_id = p.member_id)::INTEGER AS follower_count,
     EXISTS(SELECT 1 FROM community_follows viewer_follow
       WHERE viewer_follow.follower_member_id = ? AND viewer_follow.followed_member_id = p.member_id) AS viewer_is_following,
@@ -36,7 +39,10 @@ const postSelect = `
     EXISTS(SELECT 1 FROM community_post_likes viewer_like
       WHERE viewer_like.post_id = p.id AND viewer_like.member_id = ?) AS viewer_has_liked,
     EXISTS(SELECT 1 FROM community_post_bookmarks viewer_bookmark
-      WHERE viewer_bookmark.post_id = p.id AND viewer_bookmark.member_id = ?) AS viewer_has_bookmarked
+      WHERE viewer_bookmark.post_id = p.id AND viewer_bookmark.member_id = ?) AS viewer_has_bookmarked,
+    EXISTS(SELECT 1 FROM community_post_topics viewer_post_topic
+      JOIN community_topic_follows viewer_topic_follow ON viewer_topic_follow.topic_id = viewer_post_topic.topic_id
+      WHERE viewer_post_topic.post_id = p.id AND viewer_topic_follow.member_id = ?) AS viewer_has_followed_topic
   FROM community_posts p
   JOIN members m ON m.id = p.member_id AND m.status != 'blocked'
   JOIN community_profiles cp ON cp.member_id = m.id AND cp.status = 'active'
@@ -52,8 +58,9 @@ const postGroup = `
 export async function listCommunityPosts(input: { publicId?: string; viewerMemberId?: number; topicSlug?: string; productSlug?: string; query?: string; feed?: "all" | "following" | "bookmarks"; sort?: "featured" | "latest" | "popular"; cursor?: string; limit?: number } = {}) {
   const db = await getStoreDb();
   const limit = Math.min(48, Math.max(1, Math.round(input.limit ?? 24)));
+  const sort: CommunityPostSort = input.sort === "latest" || input.sort === "popular" ? input.sort : "featured";
   let where = "WHERE p.status = 'approved'";
-  const values: unknown[] = [input.viewerMemberId ?? 0, input.viewerMemberId ?? 0, input.viewerMemberId ?? 0];
+  const values: unknown[] = [input.viewerMemberId ?? 0, input.viewerMemberId ?? 0, input.viewerMemberId ?? 0, input.viewerMemberId ?? 0];
   if (input.publicId) {
     const profile = await getCommunityMember(input.publicId);
     if (!profile) return [];
@@ -109,34 +116,53 @@ export async function listCommunityPosts(input: { publicId?: string; viewerMembe
     )`;
     values.push(input.viewerMemberId ?? 0);
   }
-  if (input.cursor) {
-    const [cursorTime, cursorId] = input.cursor.split("|");
-    if (/^\d{4}-\d{2}-\d{2}/.test(cursorTime ?? "") && /^PST-[A-Z0-9]{12}$/.test(cursorId ?? "")) {
-      where += `${where ? " AND" : "WHERE"} (COALESCE(p.published_at, p.created_at)::timestamp, p.id) < (?::timestamp, ?)`;
-      values.push(cursorTime, cursorId);
-    }
+  const cursor = decodeCommunityPostCursor(input.cursor, sort);
+  const cursorWhere = cursor ? sort === "latest"
+    ? "WHERE (ranked.sort_time, ranked.id) < (?::timestamp, ?)"
+    : sort === "popular"
+      ? "WHERE (ranked.like_count, ranked.comment_count, ranked.bookmark_count, ranked.sort_time, ranked.id) < (?, ?, ?, ?::timestamp, ?)"
+      : `WHERE (ranked.sort_placement, ranked.viewer_is_following::integer, ranked.viewer_has_followed_topic::integer,
+          ranked.promotion_rank, ranked.comment_count, ranked.like_count, ranked.bookmark_count, ranked.sort_time, ranked.id)
+        < (?, ?, ?, ?, ?, ?, ?, ?::timestamp, ?)`
+    : "";
+  if (cursor) {
+    if (sort === "latest") values.push(cursor.time, cursor.id);
+    else if (sort === "popular") values.push(cursor.likeCount, cursor.commentCount, cursor.bookmarkCount, cursor.time, cursor.id);
+    else values.push(cursor.placement, cursor.followsAuthor, cursor.followsTopic, cursor.promotionRank, cursor.commentCount, cursor.likeCount, cursor.bookmarkCount, cursor.time, cursor.id);
   }
   values.push(limit);
-  const viewerScoreId = Number.isInteger(input.viewerMemberId) && Number(input.viewerMemberId) > 0 ? Number(input.viewerMemberId) : 0;
-  const order = input.sort === "latest"
-    ? "COALESCE(p.published_at, p.created_at)::timestamp DESC"
-    : input.sort === "popular"
-      ? "like_count DESC, comment_count DESC, bookmark_count DESC, COALESCE(p.published_at, p.created_at)::timestamp DESC"
-      : `CASE COALESCE(promotion.placement, '') WHEN 'pinned' THEN 0 WHEN 'featured' THEN 1 ELSE 2 END,
-        CASE WHEN EXISTS(SELECT 1 FROM community_follows score_follow WHERE score_follow.follower_member_id = ${viewerScoreId} AND score_follow.followed_member_id = p.member_id) THEN 0 ELSE 1 END,
-        CASE WHEN EXISTS(SELECT 1 FROM community_post_topics score_pt JOIN community_topic_follows score_tf ON score_tf.topic_id = score_pt.topic_id WHERE score_pt.post_id = p.id AND score_tf.member_id = ${viewerScoreId}) THEN 0 ELSE 1 END,
-        COALESCE(promotion.sort_order, 0) DESC, comment_count DESC, like_count DESC, bookmark_count DESC,
-        COALESCE(p.published_at, p.created_at)::timestamp DESC`;
-  const rows = await db.prepare(`${postSelect} ${where} ${postGroup} ORDER BY ${order} LIMIT ?`)
+  const order = sort === "latest"
+    ? "ranked.sort_time DESC, ranked.id DESC"
+    : sort === "popular"
+      ? "ranked.like_count DESC, ranked.comment_count DESC, ranked.bookmark_count DESC, ranked.sort_time DESC, ranked.id DESC"
+      : `ranked.sort_placement DESC, ranked.viewer_is_following DESC, ranked.viewer_has_followed_topic DESC,
+        ranked.promotion_rank DESC, ranked.comment_count DESC, ranked.like_count DESC, ranked.bookmark_count DESC,
+        ranked.sort_time DESC, ranked.id DESC`;
+  const rows = await db.prepare(`SELECT ranked.* FROM (${postSelect} ${where} ${postGroup}) ranked ${cursorWhere} ORDER BY ${order} LIMIT ?`)
     .bind(...values)
     .all<CommunityPostRow>();
-  return rows.results.map(serializePost);
+  return rows.results.map((row) => ({
+    ...serializePost(row),
+    pagination_cursor: encodeCommunityPostCursor({
+      version: 1,
+      sort,
+      placement: Number(row.sort_placement),
+      followsAuthor: row.viewer_is_following ? 1 : 0,
+      followsTopic: row.viewer_has_followed_topic ? 1 : 0,
+      promotionRank: Number(row.promotion_rank),
+      commentCount: Number(row.comment_count),
+      likeCount: Number(row.like_count),
+      bookmarkCount: Number(row.bookmark_count),
+      time: new Date(row.sort_time).toISOString(),
+      id: row.id,
+    }),
+  }));
 }
 
 export async function getCommunityPost(id: string, viewerMemberId?: number) {
   const db = await getStoreDb();
   const row = await db.prepare(`${postSelect} WHERE p.id = ? AND (p.status = 'approved' OR p.member_id = ?) AND p.status != 'hidden' ${postGroup} LIMIT 1`)
-    .bind(viewerMemberId ?? 0, viewerMemberId ?? 0, viewerMemberId ?? 0, id, viewerMemberId ?? 0)
+    .bind(viewerMemberId ?? 0, viewerMemberId ?? 0, viewerMemberId ?? 0, viewerMemberId ?? 0, id, viewerMemberId ?? 0)
     .first<CommunityPostRow>();
   return row ? serializePost(row) : null;
 }

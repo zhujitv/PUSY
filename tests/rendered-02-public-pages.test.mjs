@@ -71,8 +71,9 @@ test("gift card layout stays compact without title overlap", async () => {
 });
 
 test("storefront keeps mobile discovery and purchasing actions close at hand", async () => {
-  const [homepage, catalog, productPage, productActions, chrome, giftCard, css, aboutCss] = await Promise.all([
+  const [homepage, homepageClient, catalog, productPage, productActions, chrome, giftCard, css, aboutCss] = await Promise.all([
     read("app/page.tsx"),
+    read("app/HomeClient.tsx"),
     read("app/components/CatalogClient.tsx"),
     read("app/products/[slug]/page.tsx"),
     read("app/products/[slug]/ProductActions.tsx"),
@@ -83,8 +84,9 @@ test("storefront keeps mobile discovery and purchasing actions close at hand", a
   ]);
 
   assert.match(homepage, /function availableFirst/);
-  assert.match(homepage, /setFeaturedProducts\(availableFirst\(body\.products as Product\[\]\)\.slice\(0, 8\)\)/);
-  assert.match(homepage, /home-restock-link/);
+  assert.match(homepage, /getPublicProducts\(\)/);
+  assert.match(homepage, /featuredProducts=\{availableFirst\(productRows\)\.slice\(0, 8\)\}/);
+  assert.match(homepageClient, /home-restock-link/);
   assert.match(catalog, /mobile-catalog-toolbar/);
   assert.match(catalog, /activeFilterLabels/);
   assert.match(catalog, /return bAvailable - aAvailable/);

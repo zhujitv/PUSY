@@ -30,6 +30,7 @@ export type CommunityPost = {
   bookmark_count: number;
   viewer_has_liked: boolean;
   viewer_has_bookmarked: boolean;
+  pagination_cursor?: string;
 };
 
 export type CommunityMember = {
@@ -46,7 +47,14 @@ export type CommunityMember = {
   viewer_is_following: boolean;
 };
 
-export type CommunityPostRow = Omit<CommunityPost, "media_ids" | "topics" | "products"> & { media_ids: unknown; topics: unknown; products: unknown };
+export type CommunityPostRow = Omit<CommunityPost, "media_ids" | "topics" | "products" | "pagination_cursor"> & {
+  media_ids: unknown;
+  topics: unknown;
+  products: unknown;
+  sort_placement: number;
+  sort_time: string | Date;
+  viewer_has_followed_topic: boolean;
+};
 
 export function mediaIds(value: unknown) {
   if (Array.isArray(value)) return value.map(String).filter(Boolean).slice(0, 4);
@@ -60,6 +68,7 @@ export function mediaIds(value: unknown) {
 }
 
 export function serializePost(row: CommunityPostRow): CommunityPost {
+  const post = Object.fromEntries(Object.entries(row).filter(([key]) => !["sort_placement", "sort_time", "viewer_has_followed_topic"].includes(key))) as Omit<CommunityPostRow, "sort_placement" | "sort_time" | "viewer_has_followed_topic">;
   let topics: CommunityPost["topics"] = [];
   const value = typeof row.topics === "string" ? (() => { try { return JSON.parse(row.topics); } catch { return []; } })() : row.topics;
   if (Array.isArray(value)) topics = value.filter((item) => item && typeof item === "object").map((item) => ({
@@ -68,7 +77,7 @@ export function serializePost(row: CommunityPostRow): CommunityPost {
     name: String((item as Record<string, unknown>).name ?? ""),
   })).filter((item) => item.id && item.slug && item.name).slice(0, 3);
   return {
-    ...row,
+    ...post,
     member_id: Number(row.member_id),
     media_ids: mediaIds(row.media_ids),
     topics,

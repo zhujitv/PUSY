@@ -51,15 +51,26 @@ export async function enqueueNotification(input: NotificationInput) {
 
 export async function processNotificationJob(id: string) {
   const db = await getStoreDb();
-  const job = await db.prepare("SELECT * FROM notification_jobs WHERE id = ?").bind(id).first<NotificationJob>();
-  if (!job) throw new Error("通知任务不存在");
-  if (job.status === "sent") return job;
-  if (new Date(job.scheduled_at).getTime() > Date.now()) return job;
-  const setting = await db.prepare("SELECT * FROM notification_settings WHERE channel = ?").bind(job.channel).first<NotificationSetting>();
-  const template = await db.prepare("SELECT * FROM notification_templates WHERE key = ?").bind(job.template_key).first<NotificationTemplate>();
-  if (!setting || !template || !setting.enabled || !template.enabled) throw new Error("通知渠道或模板已停用");
-  const payload = JSON.parse(job.payload_json) as Record<string, string>;
+  const job = await db.prepare(`UPDATE notification_jobs
+    SET status = 'processing', updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+      AND scheduled_at::timestamp <= CURRENT_TIMESTAMP
+      AND (next_retry_at IS NULL OR next_retry_at::timestamp <= CURRENT_TIMESTAMP)
+      AND (
+        status IN ('queued', 'failed')
+        OR (status = 'processing' AND updated_at::timestamp <= CURRENT_TIMESTAMP - INTERVAL '15 minutes')
+      )
+    RETURNING *`).bind(id).first<NotificationJob>();
+  if (!job) {
+    const existing = await db.prepare("SELECT * FROM notification_jobs WHERE id = ?").bind(id).first<NotificationJob>();
+    if (!existing) throw new Error("通知任务不存在");
+    return existing;
+  }
   try {
+    const setting = await db.prepare("SELECT * FROM notification_settings WHERE channel = ?").bind(job.channel).first<NotificationSetting>();
+    const template = await db.prepare("SELECT * FROM notification_templates WHERE key = ?").bind(job.template_key).first<NotificationTemplate>();
+    if (!setting || !template || !setting.enabled || !template.enabled) throw new Error("通知渠道或模板已停用");
+    const payload = JSON.parse(job.payload_json) as Record<string, string>;
     const replyTo = job.entity_type === "return" && payload.returnId
       ? supportReplyAddress({ returnId: payload.returnId })
       : job.entity_type === "order" || payload.orderId
@@ -80,7 +91,15 @@ export async function processNotificationJob(id: string) {
 
 export async function processDueNotifications(limit = 50) {
   const db = await getStoreDb();
-  const jobs = await db.prepare("SELECT id FROM notification_jobs WHERE scheduled_at::timestamp <= CURRENT_TIMESTAMP AND (next_retry_at IS NULL OR next_retry_at::timestamp <= CURRENT_TIMESTAMP) ORDER BY created_at LIMIT ?").bind(Math.min(limit, 100)).all<{ id: string }>();
+  const jobs = await db.prepare(`SELECT id FROM notification_jobs
+    WHERE scheduled_at::timestamp <= CURRENT_TIMESTAMP
+      AND (next_retry_at IS NULL OR next_retry_at::timestamp <= CURRENT_TIMESTAMP)
+      AND (
+        status IN ('queued', 'failed')
+        OR (status = 'processing' AND updated_at::timestamp <= CURRENT_TIMESTAMP - INTERVAL '15 minutes')
+      )
+    ORDER BY COALESCE(next_retry_at, scheduled_at)::timestamp, created_at::timestamp, id
+    LIMIT ?`).bind(Math.min(limit, 100)).all<{ id: string }>();
   const results = [];
   for (const job of jobs.results) results.push(await processNotificationJob(job.id).then(() => ({ id: job.id, ok: true })).catch((error) => ({ id: job.id, ok: false, error: error instanceof Error ? error.message : "发送失败" })));
   return results;

@@ -1,6 +1,9 @@
 import { InfoPage } from "../components/InfoPage";
 import { getPreviewMemberIdentity } from "../../lib/preview-member-auth";
 import { ContactForm } from "./ContactForm";
+import { publicPageMetadata } from "../../lib/site-metadata";
+
+export const metadata = publicPageMetadata("/contact", "在线客服｜PUSY.CN", "联系 PUSY.CN 中国客户服务，处理订单、配送、支付、退换货、会员账户及隐私问题。");
 
 export default async function ContactPage({ searchParams }: { searchParams: Promise<{ category?: string; orderId?: string }> }) {
   const params = await searchParams;

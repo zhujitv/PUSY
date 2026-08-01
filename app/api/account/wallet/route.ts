@@ -1,7 +1,7 @@
 import { getStoreDb } from "../../../../db/store";
 import { sendVerificationEmail } from "../../../../lib/notifications/verification-email";
 import { sha256 } from "../../../../lib/payments/crypto";
-import { getPreviewMemberIdentity } from "../../../../lib/preview-member-auth";
+import { getPreviewMemberIdentity, revokeOtherMemberSessions } from "../../../../lib/preview-member-auth";
 import { allowRequest, allowRequestForIdentity, hasTrustedOrigin, privateJson, rateLimitResponse, safeServerError } from "../../../../lib/request-security";
 import { setMemberLoginPassword, setMemberPaymentPassword } from "../../../../lib/wallet/security";
 import { getMemberWallet } from "../../../../lib/wallet/service";
@@ -64,8 +64,10 @@ export async function POST(request: Request) {
     if (action !== "set-account-password" && action !== "set-payment-password") return privateJson({ error: "财务安全操作无效" }, { status: 400 });
     await consumeSecurityCode(viewer.email, purpose, String(payload.challengeId ?? ""), String(payload.code ?? ""));
     const input = { memberId: viewer.memberId, currentPassword: String(payload.currentPassword ?? ""), newPassword: String(payload.newPassword ?? "") };
-    if (action === "set-account-password") await setMemberLoginPassword(input);
-    else await setMemberPaymentPassword(input);
+    if (action === "set-account-password") {
+      await setMemberLoginPassword(input);
+      await revokeOtherMemberSessions(viewer.memberId);
+    } else await setMemberPaymentPassword(input);
     return privateJson({ ok: true, message: purpose === "payment-password" ? "支付密码已更新" : "账户密码已更新" });
   } catch (error) {
     const message = error instanceof Error ? error.message : "财务安全操作失败";

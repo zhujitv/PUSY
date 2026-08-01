@@ -7,13 +7,13 @@ const read = (path) => readFile(new URL(path, root), "utf8");
 
 test("首页与内页共用同一页脚内容并保留首页订阅配置", async () => {
   const [home, chrome] = await Promise.all([
-    read("app/page.tsx"),
+    read("app/HomeClient.tsx"),
     read("app/components/SiteChrome.tsx"),
   ]);
 
   assert.match(home, /import \{ SiteFooter \}/);
-  assert.match(home, /newsletterTitle=\{homeContent\.newsletter_title \|\| defaultHomeContent\.newsletter_title\}/);
-  assert.match(home, /newsletterSuccess=\{homeContent\.newsletter_success \|\| defaultHomeContent\.newsletter_success\}/);
+  assert.match(home, /newsletterTitle=\{homeContent\.newsletter_title\}/);
+  assert.match(home, /newsletterSuccess=\{homeContent\.newsletter_success\}/);
   assert.match(home, /source="homepage"/);
   assert.doesNotMatch(home, /<footer className="pusy-footer"/);
   assert.match(chrome, /href="\/community">PÚSY CLUB 社区/);

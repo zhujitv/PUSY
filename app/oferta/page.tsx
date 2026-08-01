@@ -1,5 +1,8 @@
 import { InfoPage } from "../components/InfoPage";
 import { chinaRegion } from "../../lib/china-region";
+import { publicPageMetadata } from "../../lib/site-metadata";
+
+export const metadata = publicPageMetadata("/oferta", "用户服务与销售条款｜PUSY.CN", "适用于中国大陆消费者购买 PUSY.CN 商品和使用会员、礼品卡及售后服务的条款。");
 
 export default function OfferPage() { return <InfoPage eyebrow="中国法律信息" title="用户服务与销售条款" intro="本条款适用于中国大陆消费者通过 PUSY.CN 购买商品和使用会员、礼品卡及售后服务。">
   <h2>一、经营者与适用范围</h2><p>商品销售者为<a href="/details">经营者信息</a>页面公示的中国运营主体。本条款不排除或限制消费者依法享有的权利；与强制性法律规定不一致的，以法律规定为准。</p>

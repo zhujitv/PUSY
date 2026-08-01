@@ -127,7 +127,7 @@ test("安全审计修复覆盖会员关联、认证限流、支付同步与私�
   assert.match(paymentUi, /action: "sync"/);
   assert.match(accountApi, /privateJson\(\{ error: "请先登录会员账户"/);
   assert.doesNotMatch(config, /sri:/);
-  assert.match(proxy, /matcher: \["\/admin\/:path\*", "\/account\/:path\*"\]/);
+  assert.match(proxy, /matcher: \["\/admin\/:path\*", "\/account\/:path\*", "\/community\/:path\*"\]/);
   assert.match(proxy, /nonce-\$\{nonce\}/);
   assert.match(proxy, /Referrer-Policy", "no-referrer"/);
   assert.doesNotMatch(proxy, /script-src[^;]*unsafe-inline/);

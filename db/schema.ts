@@ -1,8 +1,10 @@
 import { sql } from "drizzle-orm";
-import { blob, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { customType, integer, pgTable, serial, text } from "drizzle-orm/pg-core";
 
-export const products = sqliteTable("products", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+const bytea = customType<{ data: Buffer }>({ dataType: () => "bytea" });
+
+export const products = pgTable("products", {
+  id: serial("id").primaryKey(),
   slug: text("slug").notNull().unique(),
   name: text("name").notNull(),
   category: text("category").notNull(),
@@ -14,7 +16,7 @@ export const products = sqliteTable("products", {
   price: integer("price").notNull(),
   oldPrice: integer("old_price"),
   stock: integer("stock").notNull().default(0),
-  inventoryVerified: integer("inventory_verified", { mode: "boolean" }).notNull().default(false),
+  inventoryVerified: integer("inventory_verified").notNull().default(0),
   imagesJson: text("images_json").notNull().default("[]"),
   variantsJson: text("variants_json").notNull().default("[]"),
   sku: text("sku"),
@@ -22,16 +24,12 @@ export const products = sqliteTable("products", {
   ingredients: text("ingredients"),
   usage: text("usage"),
   status: text("status").notNull().default("active"),
-  accountType: text("account_type").notNull().default("member"),
-  officialLabel: text("official_label").notNull().default(""),
-  creatorStatus: text("creator_status").notNull().default("active"),
-  rewardBlockedAt: text("reward_blocked_at"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const productCategories = sqliteTable("product_categories", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const productCategories = pgTable("product_categories", {
+  id: serial("id").primaryKey(),
   name: text("name").notNull().unique(),
   slug: text("slug").notNull().unique(),
   parentId: integer("parent_id"),
@@ -42,8 +40,8 @@ export const productCategories = sqliteTable("product_categories", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const members = sqliteTable("members", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const members = pgTable("members", {
+  id: serial("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   phone: text("phone").notNull().default(""),
@@ -54,7 +52,7 @@ export const members = sqliteTable("members", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const memberVerificationCodes = sqliteTable("member_verification_codes", {
+export const memberVerificationCodes = pgTable("member_verification_codes", {
   id: text("id").primaryKey(),
   target: text("target").notNull(),
   purpose: text("purpose").notNull(),
@@ -65,21 +63,21 @@ export const memberVerificationCodes = sqliteTable("member_verification_codes", 
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const memberSessions = sqliteTable("member_sessions", {
+export const memberSessions = pgTable("member_sessions", {
   tokenHash: text("token_hash").primaryKey(),
   memberId: integer("member_id").notNull().references(() => members.id),
   expiresAt: text("expires_at").notNull(),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const memberCredentials = sqliteTable("member_credentials", {
+export const memberCredentials = pgTable("member_credentials", {
   memberId: integer("member_id").primaryKey().references(() => members.id),
   loginPasswordHash: text("login_password_hash").notNull(),
   loginPasswordSalt: text("login_password_salt").notNull(),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const memberWallets = sqliteTable("member_wallets", {
+export const memberWallets = pgTable("member_wallets", {
   memberId: integer("member_id").primaryKey().references(() => members.id),
   availableBalanceFen: integer("available_balance_fen").notNull().default(0),
   frozenBalanceFen: integer("frozen_balance_fen").notNull().default(0),
@@ -93,13 +91,13 @@ export const memberWallets = sqliteTable("member_wallets", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const rateLimits = sqliteTable("rate_limits", {
+export const rateLimits = pgTable("rate_limits", {
   key: text("key").primaryKey(),
   requestCount: integer("request_count").notNull().default(0),
   windowStartedAt: text("window_started_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const memberProfiles = sqliteTable("member_profiles", {
+export const memberProfiles = pgTable("member_profiles", {
   memberId: integer("member_id").primaryKey().references(() => members.id),
   nickname: text("nickname").notNull().default(""),
   gender: text("gender").notNull().default(""),
@@ -112,13 +110,13 @@ export const memberProfiles = sqliteTable("member_profiles", {
   skinConcerns: text("skin_concerns").notNull().default("[]"),
   preferredCategories: text("preferred_categories").notNull().default("[]"),
   bio: text("bio").notNull().default(""),
-  emailMarketing: integer("email_marketing", { mode: "boolean" }).notNull().default(false),
-  smsMarketing: integer("sms_marketing", { mode: "boolean" }).notNull().default(false),
+  emailMarketing: integer("email_marketing").notNull().default(0),
+  smsMarketing: integer("sms_marketing").notNull().default(0),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const memberAddresses = sqliteTable("member_addresses", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const memberAddresses = pgTable("member_addresses", {
+  id: serial("id").primaryKey(),
   memberId: integer("member_id").notNull().references(() => members.id),
   label: text("label").notNull().default("家"),
   recipient: text("recipient").notNull(),
@@ -128,12 +126,12 @@ export const memberAddresses = sqliteTable("member_addresses", {
   district: text("district").notNull().default(""),
   detail: text("detail").notNull(),
   postcode: text("postcode").notNull().default(""),
-  isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
+  isDefault: integer("is_default").notNull().default(0),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const orders = sqliteTable("orders", {
+export const orders = pgTable("orders", {
   id: text("id").primaryKey(),
   memberId: integer("member_id").references(() => members.id),
   customer: text("customer").notNull(),
@@ -147,15 +145,15 @@ export const orders = sqliteTable("orders", {
   couponCode: text("coupon_code"),
   paymentTokenHash: text("payment_token_hash").notNull().default(""),
   reservationExpiresAt: text("reservation_expires_at"),
-  resourcesReleased: integer("resources_released", { mode: "boolean" }).notNull().default(false),
-  resourcesCommitted: integer("resources_committed", { mode: "boolean" }).notNull().default(false),
+  resourcesReleased: integer("resources_released").notNull().default(0),
+  resourcesCommitted: integer("resources_committed").notNull().default(0),
   status: text("status").notNull().default("待付款"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const orderItems = sqliteTable("order_items", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const orderItems = pgTable("order_items", {
+  id: serial("id").primaryKey(),
   orderId: text("order_id").notNull().references(() => orders.id),
   productSlug: text("product_slug").notNull(),
   productName: text("product_name").notNull(),
@@ -163,15 +161,15 @@ export const orderItems = sqliteTable("order_items", {
   unitPrice: integer("unit_price").notNull(),
 });
 
-export const subscribers = sqliteTable("subscribers", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const subscribers = pgTable("subscribers", {
+  id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
   source: text("source").notNull().default("website"),
   status: text("status").notNull().default("active"),
   subscribedAt: text("subscribed_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const retailPartnerships = sqliteTable("retail_partnerships", {
+export const retailPartnerships = pgTable("retail_partnerships", {
   id: text("id").primaryKey(),
   contactName: text("contact_name").notNull(),
   phone: text("phone").notNull(),
@@ -186,8 +184,8 @@ export const retailPartnerships = sqliteTable("retail_partnerships", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const coupons = sqliteTable("coupons", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const coupons = pgTable("coupons", {
+  id: serial("id").primaryKey(),
   code: text("code").notNull().unique(),
   kind: text("kind").notNull().default("percent"),
   value: integer("value").notNull(),
@@ -200,7 +198,7 @@ export const coupons = sqliteTable("coupons", {
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const returns = sqliteTable("returns", {
+export const returns = pgTable("returns", {
   id: text("id").primaryKey(),
   orderId: text("order_id").notNull().references(() => orders.id),
   email: text("email").notNull(),
@@ -213,7 +211,7 @@ export const returns = sqliteTable("returns", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const supportThreads = sqliteTable("support_threads", {
+export const supportThreads = pgTable("support_threads", {
   id: text("id").primaryKey(),
   mailbox: text("mailbox").notNull().default("service"),
   subject: text("subject").notNull(),
@@ -240,15 +238,15 @@ export const supportThreads = sqliteTable("support_threads", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const supportCannedReplies = sqliteTable("support_canned_replies", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const supportCannedReplies = pgTable("support_canned_replies", {
+  id: serial("id").primaryKey(),
   title: text("title").notNull().unique(),
   content: text("content").notNull(),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const invoices = sqliteTable("invoices", {
+export const invoices = pgTable("invoices", {
   id: text("id").primaryKey(),
   orderId: text("order_id").notNull().unique().references(() => orders.id),
   memberId: integer("member_id").notNull().references(() => members.id),
@@ -267,7 +265,7 @@ export const invoices = sqliteTable("invoices", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const supportMessages = sqliteTable("support_messages", {
+export const supportMessages = pgTable("support_messages", {
   id: text("id").primaryKey(),
   threadId: text("thread_id").notNull().references(() => supportThreads.id),
   direction: text("direction").notNull(),
@@ -284,7 +282,7 @@ export const supportMessages = sqliteTable("support_messages", {
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const returnEvents = sqliteTable("return_events", {
+export const returnEvents = pgTable("return_events", {
   id: text("id").primaryKey(),
   returnId: text("return_id").notNull().references(() => returns.id),
   eventType: text("event_type").notNull(),
@@ -295,7 +293,7 @@ export const returnEvents = sqliteTable("return_events", {
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const giftCards = sqliteTable("gift_cards", {
+export const giftCards = pgTable("gift_cards", {
   code: text("code").primaryKey(),
   orderId: text("order_id").notNull().references(() => orders.id),
   initialBalance: integer("initial_balance").notNull(),
@@ -308,10 +306,10 @@ export const giftCards = sqliteTable("gift_cards", {
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const paymentProviders = sqliteTable("payment_providers", {
+export const paymentProviders = pgTable("payment_providers", {
   provider: text("provider").primaryKey(),
   displayName: text("display_name").notNull(),
-  enabled: integer("enabled", { mode: "boolean" }).notNull().default(false),
+  enabled: integer("enabled").notNull().default(0),
   mode: text("mode").notNull().default("production"),
   appId: text("app_id").notNull().default(""),
   merchantId: text("merchant_id").notNull().default(""),
@@ -320,7 +318,7 @@ export const paymentProviders = sqliteTable("payment_providers", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const payments = sqliteTable("payments", {
+export const payments = pgTable("payments", {
   id: text("id").primaryKey(),
   orderId: text("order_id").notNull().references(() => orders.id),
   provider: text("provider").notNull(),
@@ -341,19 +339,19 @@ export const payments = sqliteTable("payments", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const paymentEvents = sqliteTable("payment_events", {
+export const paymentEvents = pgTable("payment_events", {
   id: text("id").primaryKey(),
   paymentId: text("payment_id").references(() => payments.id),
   provider: text("provider").notNull(),
   eventType: text("event_type").notNull(),
   payloadDigest: text("payload_digest").notNull(),
-  verified: integer("verified", { mode: "boolean" }).notNull().default(false),
+  verified: integer("verified").notNull().default(0),
   result: text("result").notNull(),
   message: text("message").notNull().default(""),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const refunds = sqliteTable("refunds", {
+export const refunds = pgTable("refunds", {
   id: text("id").primaryKey(),
   paymentId: text("payment_id").notNull().references(() => payments.id),
   orderId: text("order_id").notNull().references(() => orders.id),
@@ -363,7 +361,7 @@ export const refunds = sqliteTable("refunds", {
   amountFen: integer("amount_fen").notNull(),
   walletAmountFen: integer("wallet_amount_fen").notNull().default(0),
   externalAmountFen: integer("external_amount_fen").notNull().default(0),
-  walletCredited: integer("wallet_credited", { mode: "boolean" }).notNull().default(false),
+  walletCredited: integer("wallet_credited").notNull().default(0),
   reason: text("reason").notNull(),
   status: text("status").notNull().default("pending"),
   attempts: integer("attempts").notNull().default(0),
@@ -373,8 +371,8 @@ export const refunds = sqliteTable("refunds", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const memberWalletLedger = sqliteTable("member_wallet_ledger", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const memberWalletLedger = pgTable("member_wallet_ledger", {
+  id: serial("id").primaryKey(),
   memberId: integer("member_id").notNull().references(() => members.id),
   paymentId: text("payment_id").references(() => payments.id),
   orderId: text("order_id").references(() => orders.id),
@@ -389,27 +387,27 @@ export const memberWalletLedger = sqliteTable("member_wallet_ledger", {
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const notificationSettings = sqliteTable("notification_settings", {
+export const notificationSettings = pgTable("notification_settings", {
   channel: text("channel").primaryKey(),
   displayName: text("display_name").notNull(),
-  enabled: integer("enabled", { mode: "boolean" }).notNull().default(false),
+  enabled: integer("enabled").notNull().default(0),
   provider: text("provider").notNull(),
   senderName: text("sender_name").notNull().default("PUSY.CN"),
   senderAddress: text("sender_address").notNull().default(""),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const notificationTemplates = sqliteTable("notification_templates", {
+export const notificationTemplates = pgTable("notification_templates", {
   key: text("key").primaryKey(),
   name: text("name").notNull(),
   emailSubject: text("email_subject").notNull().default(""),
   emailBody: text("email_body").notNull().default(""),
   smsBody: text("sms_body").notNull().default(""),
-  enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
+  enabled: integer("enabled").notNull().default(1),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const notificationJobs = sqliteTable("notification_jobs", {
+export const notificationJobs = pgTable("notification_jobs", {
   id: text("id").primaryKey(),
   eventKey: text("event_key").notNull(),
   entityType: text("entity_type").notNull(),
@@ -429,24 +427,31 @@ export const notificationJobs = sqliteTable("notification_jobs", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const notificationDeliveryEvents = sqliteTable("notification_delivery_events", {
+export const notificationDeliveryEvents = pgTable("notification_delivery_events", {
   id: text("id").primaryKey(),
   providerMessageId: text("provider_message_id").notNull(),
   eventType: text("event_type").notNull(),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const communityProfiles = sqliteTable("community_profiles", {
+export const communityProfiles = pgTable("community_profiles", {
   memberId: integer("member_id").primaryKey().references(() => members.id),
   publicId: text("public_id").notNull().unique(),
   displayName: text("display_name").notNull(),
   bio: text("bio").notNull().default(""),
   status: text("status").notNull().default("active"),
+  accountType: text("account_type").notNull().default("member"),
+  officialLabel: text("official_label").notNull().default(""),
+  creatorStatus: text("creator_status").notNull().default("active"),
+  rewardBlockedAt: text("reward_blocked_at"),
+  commentStatus: text("comment_status").notNull().default("active"),
+  restrictedUntil: text("restricted_until"),
+  restrictionNote: text("restriction_note").notNull().default(""),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const communityPosts = sqliteTable("community_posts", {
+export const communityPosts = pgTable("community_posts", {
   id: text("id").primaryKey(),
   memberId: integer("member_id").notNull().references(() => members.id),
   clientRequestId: text("client_request_id").notNull(),
@@ -463,18 +468,18 @@ export const communityPosts = sqliteTable("community_posts", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const communityPostMedia = sqliteTable("community_post_media", {
+export const communityPostMedia = pgTable("community_post_media", {
   id: text("id").primaryKey(),
   postId: text("post_id").notNull().references(() => communityPosts.id),
   position: integer("position").notNull().default(0),
   mimeType: text("mime_type").notNull(),
   byteSize: integer("byte_size").notNull(),
-  bytes: blob("bytes").notNull(),
+  bytes: bytea("bytes").notNull(),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const communityModerationEvents = sqliteTable("community_moderation_events", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const communityModerationEvents = pgTable("community_moderation_events", {
+  id: serial("id").primaryKey(),
   postId: text("post_id").notNull().references(() => communityPosts.id),
   fromStatus: text("from_status").notNull(),
   toStatus: text("to_status").notNull(),
@@ -484,29 +489,31 @@ export const communityModerationEvents = sqliteTable("community_moderation_event
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const communityFollows = sqliteTable("community_follows", {
+export const communityFollows = pgTable("community_follows", {
   followerMemberId: integer("follower_member_id").notNull().references(() => members.id),
   followedMemberId: integer("followed_member_id").notNull().references(() => members.id),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const communityTopics = sqliteTable("community_topics", {
+export const communityTopics = pgTable("community_topics", {
   id: text("id").primaryKey(),
   slug: text("slug").notNull().unique(),
   name: text("name").notNull(),
   description: text("description").notNull().default(""),
   status: text("status").notNull().default("draft"),
+  sortOrder: integer("sort_order").notNull().default(0),
+  featured: integer("featured").notNull().default(0),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const communityPostTopics = sqliteTable("community_post_topics", {
+export const communityPostTopics = pgTable("community_post_topics", {
   postId: text("post_id").notNull().references(() => communityPosts.id),
   topicId: text("topic_id").notNull().references(() => communityTopics.id),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const communityNotifications = sqliteTable("community_notifications", {
+export const communityNotifications = pgTable("community_notifications", {
   id: text("id").primaryKey(),
   recipientMemberId: integer("recipient_member_id").notNull().references(() => members.id),
   eventKey: text("event_key").notNull(),
@@ -520,19 +527,19 @@ export const communityNotifications = sqliteTable("community_notifications", {
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const communityPostLikes = sqliteTable("community_post_likes", {
+export const communityPostLikes = pgTable("community_post_likes", {
   postId: text("post_id").notNull().references(() => communityPosts.id),
   memberId: integer("member_id").notNull().references(() => members.id),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const communityPostBookmarks = sqliteTable("community_post_bookmarks", {
+export const communityPostBookmarks = pgTable("community_post_bookmarks", {
   postId: text("post_id").notNull().references(() => communityPosts.id),
   memberId: integer("member_id").notNull().references(() => members.id),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const communityComments = sqliteTable("community_comments", {
+export const communityComments = pgTable("community_comments", {
   id: text("id").primaryKey(),
   postId: text("post_id").notNull().references(() => communityPosts.id),
   memberId: integer("member_id").notNull().references(() => members.id),
@@ -543,7 +550,7 @@ export const communityComments = sqliteTable("community_comments", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const communityReports = sqliteTable("community_reports", {
+export const communityReports = pgTable("community_reports", {
   id: text("id").primaryKey(),
   reporterMemberId: integer("reporter_member_id").notNull().references(() => members.id),
   entityType: text("entity_type").notNull(),
@@ -560,8 +567,8 @@ export const communityReports = sqliteTable("community_reports", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const communityReportEvents = sqliteTable("community_report_events", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const communityReportEvents = pgTable("community_report_events", {
+  id: serial("id").primaryKey(),
   reportId: text("report_id").notNull().references(() => communityReports.id),
   fromStatus: text("from_status").notNull(),
   toStatus: text("to_status").notNull(),
@@ -572,14 +579,14 @@ export const communityReportEvents = sqliteTable("community_report_events", {
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const communityPostProducts = sqliteTable("community_post_products", {
+export const communityPostProducts = pgTable("community_post_products", {
   postId: text("post_id").notNull().references(() => communityPosts.id),
   productSlug: text("product_slug").notNull().references(() => products.slug),
   position: integer("position").notNull().default(0),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const communityPostPromotions = sqliteTable("community_post_promotions", {
+export const communityPostPromotions = pgTable("community_post_promotions", {
   postId: text("post_id").primaryKey().references(() => communityPosts.id),
   placement: text("placement").notNull(),
   sortOrder: integer("sort_order").notNull().default(0),
@@ -589,8 +596,8 @@ export const communityPostPromotions = sqliteTable("community_post_promotions", 
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const communityContentEvents = sqliteTable("community_content_events", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const communityContentEvents = pgTable("community_content_events", {
+  id: serial("id").primaryKey(),
   eventKey: text("event_key").notNull().unique(),
   eventType: text("event_type").notNull(),
   postId: text("post_id").notNull().references(() => communityPosts.id),
@@ -599,7 +606,7 @@ export const communityContentEvents = sqliteTable("community_content_events", {
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const communityCampaigns = sqliteTable("community_campaigns", {
+export const communityCampaigns = pgTable("community_campaigns", {
   id: text("id").primaryKey(),
   slug: text("slug").notNull().unique(),
   title: text("title").notNull(),
@@ -616,8 +623,8 @@ export const communityCampaigns = sqliteTable("community_campaigns", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const communityPostVersions = sqliteTable("community_post_versions", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const communityPostVersions = pgTable("community_post_versions", {
+  id: serial("id").primaryKey(),
   postId: text("post_id").notNull().references(() => communityPosts.id),
   version: integer("version").notNull(),
   title: text("title").notNull().default(""),
@@ -632,7 +639,7 @@ export const communityPostVersions = sqliteTable("community_post_versions", {
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const communityCampaignEntries = sqliteTable("community_campaign_entries", {
+export const communityCampaignEntries = pgTable("community_campaign_entries", {
   campaignId: text("campaign_id").notNull().references(() => communityCampaigns.id),
   postId: text("post_id").notNull().references(() => communityPosts.id),
   memberId: integer("member_id").notNull().references(() => members.id),
@@ -644,8 +651,8 @@ export const communityCampaignEntries = sqliteTable("community_campaign_entries"
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const communityRewardGrants = sqliteTable("community_reward_grants", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const communityRewardGrants = pgTable("community_reward_grants", {
+  id: serial("id").primaryKey(),
   memberId: integer("member_id").notNull().references(() => members.id),
   postId: text("post_id").notNull().references(() => communityPosts.id),
   rewardKey: text("reward_key").notNull(),

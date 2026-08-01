@@ -49,6 +49,17 @@ export async function revokeCurrentMemberSession() {
   await db.prepare("DELETE FROM member_sessions WHERE token_hash = ?").bind(await sha256(token)).run();
 }
 
+export async function revokeOtherMemberSessions(memberId: number) {
+  const token = sessionTokenFromCookie((await headers()).get("cookie") ?? "");
+  const db = await getStoreDb();
+  if (!token) {
+    await db.prepare("DELETE FROM member_sessions WHERE member_id = ?").bind(memberId).run();
+    return;
+  }
+  await db.prepare("DELETE FROM member_sessions WHERE member_id = ? AND token_hash != ?")
+    .bind(memberId, await sha256(token)).run();
+}
+
 export function clearPreviewMemberCookie() {
   return `${PREVIEW_MEMBER_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secureCookie()}`;
 }

@@ -37,7 +37,7 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
   const searchQuery = query.q?.trim().slice(0, 80) || undefined;
   const feed = query.feed === "following" || query.feed === "bookmarks" ? query.feed : "all" as const;
   const sort = query.sort === "latest" || query.sort === "popular" ? query.sort : "featured" as const;
-  const cursor = query.cursor?.includes("|") ? query.cursor.slice(0, 80) : undefined;
+  const cursor = /^[A-Za-z0-9_-]{1,600}$/.test(query.cursor ?? "") ? query.cursor : undefined;
   let posts: CommunityPost[] = [];
   let topics: CommunityTopic[] = [];
   let suggestions: SuggestedMember[] = [];
@@ -93,7 +93,8 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
     if (searchQuery) params.set("q", searchQuery);
     if (feed !== "all") params.set("feed", feed);
     if (sort !== "featured") params.set("sort", sort);
-    params.set("cursor", `${last.published_at || last.created_at}|${last.id}`);
+    if (!last.pagination_cursor) return "";
+    params.set("cursor", last.pagination_cursor);
     return `/community?${params}#feed`;
   })() : "";
   return <PageShell><CommunityNavigation active="home" viewerPublicId={viewerPublicId} unreadCount={unreadCount} /><main className="community-page community-prototype-home">

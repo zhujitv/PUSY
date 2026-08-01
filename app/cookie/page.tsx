@@ -1,5 +1,8 @@
 import { InfoPage } from "../components/InfoPage";
 import { chinaRegion } from "../../lib/china-region";
+import { publicPageMetadata } from "../../lib/site-metadata";
+
+export const metadata = publicPageMetadata("/cookie", "Cookie 政策｜PUSY.CN", "了解 PUSY.CN 对必要 Cookie、分析功能与隐私选择的管理方式。");
 
 export default function CookiePage() { return <InfoPage eyebrow="中国法律信息" title="Cookie 政策" intro="PUSY.CN 将必要 Cookie 与需要你同意的分析、个性化功能分开管理。">
   <h2>必要 Cookie</h2><p>必要 Cookie 或本地存储用于维持购物车、登录状态、支付安全、防止重复提交、保存隐私选择及保障网站运行。此类功能是提供你主动请求的服务所必需的，关闭后购物或账户功能可能无法正常使用。</p>

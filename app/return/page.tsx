@@ -1,4 +1,6 @@
 import { InfoPage } from "../components/InfoPage";
+import { publicPageMetadata } from "../../lib/site-metadata";
+export const metadata = publicPageMetadata("/return", "退换货政策｜PUSY.CN", "查看 PUSY.CN 中国大陆网购商品的七日无理由退货、质量问题与退款流程。");
 export default function ReturnPage() { return <InfoPage eyebrow="中国客户服务" title="退换货政策" intro="本政策依据中国大陆网络购物消费者保护规则制定，不限制消费者依法享有的质量担保和求偿权利。">
   <h2>七日无理由退货</h2><p>符合条件的商品，消费者可自签收次日起七日内发出退货通知，无需说明理由。退回商品应保持完好，商品本身、配件、赠品和标签应一并退回。非商品质量原因的退回运费由消费者承担；我们另有更有利承诺的，从其承诺。</p>
   <h2>化妆品及卫生安全例外</h2><div className="info-callout"><b>请在拆封前确认</b><p>化妆品、护肤品及其他涉及卫生安全的商品，如一次性密封包装被拆除或损坏，可能因影响人身安全、健康或商品品质而不适用七日无理由退货。结账时会要求你显著确认此项规则。仅拆开普通运输包装用于合理查验，不当然影响退货权。</p></div>

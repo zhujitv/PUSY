@@ -14,6 +14,8 @@ export async function GET(request: Request) {
     const sort = requestedSort === "latest" || requestedSort === "popular" ? requestedSort : "featured" as const;
     const query = url.searchParams.get("q")?.trim().slice(0, 80) || undefined;
     const productSlug = url.searchParams.get("product")?.trim().toLowerCase() || undefined;
+    const cursorValue = url.searchParams.get("cursor") ?? "";
+    const cursor = /^[A-Za-z0-9_-]{1,600}$/.test(cursorValue) ? cursorValue : undefined;
     if (publicId && !/^MBR-[A-Z0-9]{12}$/.test(publicId)) return privateJson({ error: "会员主页标识无效" }, { status: 400 });
     if (topicSlug && !/^[a-z0-9-]{2,40}$/.test(topicSlug)) return privateJson({ error: "社区话题标识无效" }, { status: 400 });
     if (productSlug && !/^[a-z0-9][a-z0-9-]{1,119}$/.test(productSlug)) return privateJson({ error: "关联商品标识无效" }, { status: 400 });
@@ -27,6 +29,7 @@ export async function GET(request: Request) {
       query,
       feed,
       sort,
+      cursor,
       limit: Number(url.searchParams.get("limit") ?? 24),
     });
     return privateJson({ posts: posts.map((post) => communityPostDto(post, post.status !== "approved")), viewer: viewer ? { signedIn: true } : null });

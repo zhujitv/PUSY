@@ -35,6 +35,11 @@ export function parseCommunityMedia(value: unknown): CommunityMediaInput[] {
   return media;
 }
 
+export function parseOptionalCommunityMedia(value: unknown): CommunityMediaInput[] {
+  if (!Array.isArray(value) || value.length === 0) return [];
+  return parseCommunityMedia(value);
+}
+
 export function normalizeCommunityPostInput(payload: Record<string, unknown>) {
   const displayName = String(payload.displayName ?? "").trim().replace(/\s+/g, " ").slice(0, 30);
   const title = String(payload.title ?? "").trim().replace(/\s+/g, " ").slice(0, 80);

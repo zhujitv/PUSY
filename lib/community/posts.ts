@@ -3,7 +3,7 @@ import type { CommunityMediaInput } from "./media";
 import { parseCommunityProducts, resolveCommunityProducts, type CommunityLinkedProduct, type CommunityPromotion } from "./commerce";
 import { resolveCommunityTopics, type CommunityTopic } from "./topics";
 
-export type CommunityPostStatus = "pending" | "approved" | "rejected" | "hidden";
+export type CommunityPostStatus = "draft" | "pending" | "approved" | "rejected" | "hidden";
 
 export type CommunityPost = {
   id: string;
@@ -15,8 +15,11 @@ export type CommunityPost = {
   moderation_note: string;
   published_at: string | null;
   created_at: string;
+  updated_at: string;
   author_name: string;
   author_bio: string;
+  author_account_type: "member" | "official";
+  author_official_label: string;
   media_ids: string[];
   topics: Array<Pick<CommunityTopic, "id" | "slug" | "name">>;
   products: CommunityLinkedProduct[];
@@ -36,6 +39,8 @@ export type CommunityMember = {
   public_id: string;
   display_name: string;
   bio: string;
+  account_type: "member" | "official";
+  official_label: string;
   joined_at: string;
   post_count: number;
   follower_count: number;
@@ -77,6 +82,7 @@ function serializePost(row: CommunityPostRow): CommunityPost {
     like_count: Number(row.like_count),
     comment_count: Number(row.comment_count),
     bookmark_count: Number(row.bookmark_count),
+    author_account_type: row.author_account_type === "official" ? "official" : "member",
     viewer_has_liked: Boolean(row.viewer_has_liked),
     viewer_has_bookmarked: Boolean(row.viewer_has_bookmarked),
   };
@@ -96,8 +102,9 @@ export function communityMemberDto(member: CommunityMember) {
 }
 
 const postSelect = `
-  SELECT p.id, p.member_id, p.title, p.body, p.status, p.moderation_note, p.published_at, p.created_at,
+  SELECT p.id, p.member_id, p.title, p.body, p.status, p.moderation_note, p.published_at, p.created_at, p.updated_at,
     cp.public_id AS author_public_id, cp.display_name AS author_name, cp.bio AS author_bio,
+    cp.account_type AS author_account_type, cp.official_label AS author_official_label,
     COALESCE(json_agg(cm.id ORDER BY cm.position) FILTER (WHERE cm.id IS NOT NULL), '[]'::json) AS media_ids,
     COALESCE((SELECT json_agg(json_build_object('id', topic.id, 'slug', topic.slug, 'name', topic.name) ORDER BY topic.name)
       FROM community_post_topics post_topic JOIN community_topics topic ON topic.id = post_topic.topic_id
@@ -138,8 +145,8 @@ const postSelect = `
 `;
 
 const postGroup = `
-  GROUP BY p.id, p.member_id, p.title, p.body, p.status, p.moderation_note, p.published_at, p.created_at,
-    cp.public_id, cp.display_name, cp.bio, promotion.placement, promotion.sort_order
+  GROUP BY p.id, p.member_id, p.title, p.body, p.status, p.moderation_note, p.published_at, p.created_at, p.updated_at,
+    cp.public_id, cp.display_name, cp.bio, cp.account_type, cp.official_label, promotion.placement, promotion.sort_order
 `;
 
 export async function listCommunityPosts(input: { publicId?: string; viewerMemberId?: number; topicSlug?: string; productSlug?: string; query?: string; feed?: "all" | "following" | "bookmarks"; sort?: "featured" | "latest" | "popular"; limit?: number } = {}) {
@@ -225,7 +232,7 @@ export async function getCommunityPost(id: string, viewerMemberId?: number) {
 export async function getCommunityMember(publicId: string, viewerMemberId?: number): Promise<CommunityMember | null> {
   const db = await getStoreDb();
   const member = await db.prepare(`
-    SELECT m.id AS member_id, cp.public_id, cp.display_name, cp.bio, m.joined_at,
+    SELECT m.id AS member_id, cp.public_id, cp.display_name, cp.bio, cp.account_type, cp.official_label, m.joined_at,
       COUNT(DISTINCT p.id) FILTER (WHERE p.status = 'approved')::INTEGER AS post_count,
       (SELECT COUNT(*) FROM community_follows WHERE followed_member_id = m.id)::INTEGER AS follower_count,
       (SELECT COUNT(*) FROM community_follows WHERE follower_member_id = m.id)::INTEGER AS following_count,
@@ -234,7 +241,7 @@ export async function getCommunityMember(publicId: string, viewerMemberId?: numb
     JOIN members m ON m.id = cp.member_id
     LEFT JOIN community_posts p ON p.member_id = m.id
     WHERE cp.public_id = ? AND cp.status = 'active' AND m.status != 'blocked'
-    GROUP BY m.id, cp.public_id, cp.display_name, cp.bio, m.joined_at
+    GROUP BY m.id, cp.public_id, cp.display_name, cp.bio, cp.account_type, cp.official_label, m.joined_at
     LIMIT 1
   `).bind(viewerMemberId ?? 0, publicId).first<CommunityMember>();
   return member ? {
@@ -244,14 +251,15 @@ export async function getCommunityMember(publicId: string, viewerMemberId?: numb
     follower_count: Number(member.follower_count),
     following_count: Number(member.following_count),
     viewer_is_following: Boolean(member.viewer_is_following),
+    account_type: member.account_type === "official" ? "official" : "member",
   } : null;
 }
 
 export async function getCommunityProfileForMember(memberId: number) {
   const db = await getStoreDb();
-  return db.prepare("SELECT member_id, public_id, display_name, bio, status FROM community_profiles WHERE member_id = ? LIMIT 1")
+  return db.prepare("SELECT member_id, public_id, display_name, bio, status, account_type, official_label, creator_status, reward_blocked_at FROM community_profiles WHERE member_id = ? LIMIT 1")
     .bind(memberId)
-    .first<{ member_id: number; public_id: string; display_name: string; bio: string; status: string }>();
+    .first<{ member_id: number; public_id: string; display_name: string; bio: string; status: string; account_type: string; official_label: string; creator_status: string; reward_blocked_at: string | null }>();
 }
 
 export async function ensureCommunityProfile(memberId: number, displayName: string) {
@@ -267,25 +275,46 @@ export async function ensureCommunityProfile(memberId: number, displayName: stri
   return (await getCommunityProfileForMember(memberId))?.public_id ?? publicId;
 }
 
-export async function createCommunityPost(input: { memberId: number; displayName: string; title: string; body: string; media: CommunityMediaInput[]; topicSlugs: string[]; productSlugs: string[]; clientRequestId: string }) {
+async function postFingerprint(title: string, body: string) {
+  const normalized = `${title}\n${body}`.toLowerCase().replace(/\s+/g, " ").replace(/[^\p{L}\p{N} ]/gu, "").trim();
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(normalized));
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+export async function createCommunityPost(input: { memberId: number; displayName: string; title: string; body: string; media: CommunityMediaInput[]; topicSlugs: string[]; productSlugs: string[]; clientRequestId: string; intent?: "draft" | "submit"; campaignSlug?: string }) {
   const db = await getStoreDb();
   const member = await db.prepare("SELECT id, status FROM members WHERE id = ? LIMIT 1").bind(input.memberId).first<{ id: number; status: string }>();
   if (!member || member.status === "blocked") throw new Error("该会员账户不可发布社区内容");
   const publicId = await ensureCommunityProfile(input.memberId, input.displayName);
+  const profile = await getCommunityProfileForMember(input.memberId);
+  if (input.intent !== "draft" && profile?.creator_status === "restricted") throw new Error("该创作者账号暂时无法提交新内容");
   const existing = await db.prepare("SELECT id FROM community_posts WHERE member_id = ? AND client_request_id = ? LIMIT 1").bind(input.memberId, input.clientRequestId).first<{ id: string }>();
   if (existing) return { id: existing.id, publicId, duplicate: true };
   const [topics, linkedProducts] = await Promise.all([
     resolveCommunityTopics(input.topicSlugs),
     resolveCommunityProducts(input.productSlugs),
   ]);
+  const fingerprint = input.body ? await postFingerprint(input.title, input.body) : "";
+  if (input.intent !== "draft" && fingerprint) {
+    const duplicate = await db.prepare("SELECT id FROM community_posts WHERE member_id = ? AND content_fingerprint = ? AND status != 'draft' AND created_at::timestamp >= CURRENT_TIMESTAMP - INTERVAL '30 days' LIMIT 1").bind(input.memberId, fingerprint).first<{ id: string }>();
+    if (duplicate) throw new Error("这篇内容与近 30 天内的投稿重复，请补充新的体验后再提交");
+  }
+  const campaign = input.campaignSlug ? await db.prepare("SELECT id FROM community_campaigns WHERE slug = ? AND status = 'active' AND (starts_at IS NULL OR starts_at::timestamp <= CURRENT_TIMESTAMP) AND (ends_at IS NULL OR ends_at::timestamp >= CURRENT_TIMESTAMP) LIMIT 1").bind(input.campaignSlug).first<{ id: string }>() : null;
+  if (input.campaignSlug && !campaign) throw new Error("所选主题活动当前不可参与");
   const id = `PST-${crypto.randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase()}`;
+  const status = input.intent === "draft" ? "draft" : "pending";
+  const mediaRecords = input.media.map((item, position) => ({ ...item, position, id: `MED-${crypto.randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase()}` }));
   try {
     await db.batch([
-      db.prepare("INSERT INTO community_posts (id, member_id, client_request_id, title, body) VALUES (?, ?, ?, ?, ?)").bind(id, input.memberId, input.clientRequestId, input.title, input.body),
-      ...input.media.map((item, position) => db.prepare("INSERT INTO community_post_media (id, post_id, position, mime_type, byte_size, bytes) VALUES (?, ?, ?, ?, ?, ?)")
-        .bind(`MED-${crypto.randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase()}`, id, position, item.mimeType, item.bytes.length, item.bytes)),
+      db.prepare("INSERT INTO community_posts (id, member_id, client_request_id, title, body, status, content_fingerprint, campaign_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)").bind(id, input.memberId, input.clientRequestId, input.title, input.body, status, fingerprint, campaign?.id ?? null),
+      ...mediaRecords.map((item) => db.prepare("INSERT INTO community_post_media (id, post_id, position, mime_type, byte_size, bytes) VALUES (?, ?, ?, ?, ?, ?)")
+        .bind(item.id, id, item.position, item.mimeType, item.bytes.length, item.bytes)),
       ...topics.map((topic) => db.prepare("INSERT INTO community_post_topics (post_id, topic_id) VALUES (?, ?)").bind(id, topic.id)),
       ...linkedProducts.map((product, position) => db.prepare("INSERT INTO community_post_products (post_id, product_slug, position) VALUES (?, ?, ?)").bind(id, product.slug, position)),
+      db.prepare(`INSERT INTO community_post_versions (post_id, version, title, body, status, topic_slugs_json, product_slugs_json, media_ids_json, change_type, actor_type, actor_id)
+        VALUES (?, 1, ?, ?, ?, ?, ?, ?, ?, 'member', ?)`)
+        .bind(id, input.title, input.body, status, JSON.stringify(topics.map((topic) => topic.slug)), JSON.stringify(linkedProducts.map((product) => product.slug)), JSON.stringify(mediaRecords.map((item) => item.id)), status === "draft" ? "draft_saved" : "submitted", String(input.memberId)),
+      ...(campaign ? [db.prepare("INSERT INTO community_campaign_entries (campaign_id, post_id, member_id) VALUES (?, ?, ?)").bind(campaign.id, id, input.memberId)] : []),
     ]);
   } catch (error) {
     if (typeof error === "object" && error && "code" in error && error.code === "23505") {

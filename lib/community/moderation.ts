@@ -3,12 +3,16 @@ import { getStoreDb } from "../../db/store";
 import type { CommunityPostStatus } from "./posts";
 import { notifyCommunityModeration } from "./social";
 import { parseCommunityProducts, type CommunityLinkedProduct, type CommunityPromotion } from "./commerce";
+import { rewardApprovedCommunityPost } from "./creator";
 
 export type CommunityModerationPost = {
   id: string;
   member_id: number;
   author_public_id: string;
   author_name: string;
+  author_account_type: "member" | "official";
+  author_official_label: string;
+  creator_status: "active" | "restricted";
   title: string;
   body: string;
   status: CommunityPostStatus;
@@ -25,6 +29,8 @@ export type CommunityModerationPost = {
   impression_count: number;
   product_click_count: number;
   add_to_cart_count: number;
+  campaign_title: string;
+  campaign_entry_status: string;
 };
 
 function mediaIds(value: unknown) {
@@ -38,6 +44,7 @@ export async function listCommunityModerationPosts(limit = 300) {
   const db = await getStoreDb();
   const rows = await db.prepare(`
     SELECT p.id, p.member_id, cp.public_id AS author_public_id, cp.display_name AS author_name,
+      cp.account_type AS author_account_type, cp.official_label AS author_official_label, cp.creator_status,
       p.title, p.body, p.status, p.moderation_note, p.moderated_by, p.moderated_at, p.published_at, p.created_at,
       COALESCE(json_agg(cm.id ORDER BY cm.position) FILTER (WHERE cm.id IS NOT NULL), '[]'::json) AS media_ids,
       COALESCE((SELECT json_agg(json_build_object('slug', product.slug, 'name', product.name, 'image', product.image, 'price', product.price, 'verified_purchase', false) ORDER BY cpp.position)
@@ -48,11 +55,14 @@ export async function listCommunityModerationPosts(limit = 300) {
       COALESCE((SELECT note FROM community_post_promotions WHERE post_id = p.id), '') AS promotion_note,
       (SELECT COUNT(*) FROM community_content_events WHERE post_id = p.id AND event_type = 'post_impression')::INTEGER AS impression_count,
       (SELECT COUNT(*) FROM community_content_events WHERE post_id = p.id AND event_type = 'product_click')::INTEGER AS product_click_count,
-      (SELECT COUNT(*) FROM community_content_events WHERE post_id = p.id AND event_type = 'add_to_cart')::INTEGER AS add_to_cart_count
+      (SELECT COUNT(*) FROM community_content_events WHERE post_id = p.id AND event_type = 'add_to_cart')::INTEGER AS add_to_cart_count,
+      COALESCE((SELECT title FROM community_campaigns WHERE id = p.campaign_id), '') AS campaign_title,
+      COALESCE((SELECT status FROM community_campaign_entries WHERE post_id = p.id), '') AS campaign_entry_status
     FROM community_posts p
     JOIN community_profiles cp ON cp.member_id = p.member_id
     LEFT JOIN community_post_media cm ON cm.post_id = p.id
-    GROUP BY p.id, p.member_id, cp.public_id, cp.display_name, p.title, p.body, p.status, p.moderation_note,
+    WHERE p.status != 'draft'
+    GROUP BY p.id, p.member_id, cp.public_id, cp.display_name, cp.account_type, cp.official_label, cp.creator_status, p.title, p.body, p.status, p.moderation_note,
       p.moderated_by, p.moderated_at, p.published_at, p.created_at
     ORDER BY CASE p.status WHEN 'pending' THEN 0 ELSE 1 END, p.created_at::timestamp DESC
     LIMIT ?
@@ -67,6 +77,8 @@ export async function listCommunityModerationPosts(limit = 300) {
     impression_count: Number(row.impression_count),
     product_click_count: Number(row.product_click_count),
     add_to_cart_count: Number(row.add_to_cart_count),
+    author_account_type: row.author_account_type === "official" ? "official" : "member",
+    creator_status: row.creator_status === "restricted" ? "restricted" : "active",
   }));
 }
 
@@ -95,5 +107,6 @@ export async function moderateCommunityPost(input: { postId: string; status: Com
   if (!event) throw new Error("社区内容不存在");
   const post = await db.prepare("SELECT member_id FROM community_posts WHERE id = ? LIMIT 1").bind(postId).first<{ member_id: number }>();
   if (post && status !== "pending") await notifyCommunityModeration({ postId, authorMemberId: Number(post.member_id), status });
+  if (status === "approved") await rewardApprovedCommunityPost(postId);
   return event.post_id;
 }

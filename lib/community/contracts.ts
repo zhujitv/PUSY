@@ -1,5 +1,5 @@
 export const COMMUNITY_API_VERSION = "2026-08-01";
-export const COMMUNITY_FEATURE_PHASE = 4;
+export const COMMUNITY_FEATURE_PHASE = 5;
 export const COMMUNITY_MEDIA_LIMIT = 4;
 export const COMMUNITY_MEDIA_BYTES = 450_000;
 export const COMMUNITY_MEDIA_TOTAL_BYTES = 1_500_000;
@@ -24,9 +24,17 @@ export const communityPhaseFourFeatures = {
   featuredContent: { endpoint: "/api/admin", methods: ["POST"] },
 } as const;
 
+export const communityPhaseFiveFeatures = {
+  creatorWorkspace: { endpoint: "/community/creator", methods: ["GET"] },
+  drafts: { endpoint: "/api/community/posts", methods: ["POST", "PATCH", "DELETE"] },
+  campaigns: { endpoint: "/api/community/campaigns", methods: ["GET"] },
+  creatorGovernance: { endpoint: "/api/admin", methods: ["POST"] },
+} as const;
+
 export type CommunityPhaseTwoFeature = keyof typeof communityPhaseTwoFeatures;
 export type CommunityPhaseThreeFeature = keyof typeof communityPhaseThreeFeatures;
 export type CommunityPhaseFourFeature = keyof typeof communityPhaseFourFeatures;
+export type CommunityPhaseFiveFeature = keyof typeof communityPhaseFiveFeatures;
 
 export function phaseTwoHeaders() {
   return {
@@ -38,3 +46,4 @@ export function phaseTwoHeaders() {
 
 export const phaseThreeHeaders = phaseTwoHeaders;
 export const phaseFourHeaders = phaseThreeHeaders;
+export const phaseFiveHeaders = phaseFourHeaders;

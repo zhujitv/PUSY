@@ -22,6 +22,10 @@ export const products = sqliteTable("products", {
   ingredients: text("ingredients"),
   usage: text("usage"),
   status: text("status").notNull().default("active"),
+  accountType: text("account_type").notNull().default("member"),
+  officialLabel: text("official_label").notNull().default(""),
+  creatorStatus: text("creator_status").notNull().default("active"),
+  rewardBlockedAt: text("reward_blocked_at"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
@@ -410,6 +414,8 @@ export const communityPosts = sqliteTable("community_posts", {
   moderatedBy: text("moderated_by"),
   moderatedAt: text("moderated_at"),
   publishedAt: text("published_at"),
+  contentFingerprint: text("content_fingerprint").notNull().default(""),
+  campaignId: text("campaign_id"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
@@ -548,4 +554,61 @@ export const communityContentEvents = sqliteTable("community_content_events", {
   productSlug: text("product_slug").references(() => products.slug),
   memberId: integer("member_id").references(() => members.id),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const communityCampaigns = sqliteTable("community_campaigns", {
+  id: text("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  description: text("description").notNull().default(""),
+  rules: text("rules").notNull().default(""),
+  topicId: text("topic_id").references(() => communityTopics.id),
+  productSlug: text("product_slug").references(() => products.slug),
+  rewardPoints: integer("reward_points").notNull().default(0),
+  status: text("status").notNull().default("draft"),
+  startsAt: text("starts_at"),
+  endsAt: text("ends_at"),
+  createdBy: text("created_by").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const communityPostVersions = sqliteTable("community_post_versions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  postId: text("post_id").notNull().references(() => communityPosts.id),
+  version: integer("version").notNull(),
+  title: text("title").notNull().default(""),
+  body: text("body").notNull().default(""),
+  status: text("status").notNull(),
+  topicSlugsJson: text("topic_slugs_json").notNull().default("[]"),
+  productSlugsJson: text("product_slugs_json").notNull().default("[]"),
+  mediaIdsJson: text("media_ids_json").notNull().default("[]"),
+  changeType: text("change_type").notNull(),
+  actorType: text("actor_type").notNull(),
+  actorId: text("actor_id").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const communityCampaignEntries = sqliteTable("community_campaign_entries", {
+  campaignId: text("campaign_id").notNull().references(() => communityCampaigns.id),
+  postId: text("post_id").notNull().references(() => communityPosts.id),
+  memberId: integer("member_id").notNull().references(() => members.id),
+  status: text("status").notNull().default("pending"),
+  rewardPoints: integer("reward_points").notNull().default(0),
+  reviewNote: text("review_note").notNull().default(""),
+  reviewedBy: text("reviewed_by"),
+  reviewedAt: text("reviewed_at"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const communityRewardGrants = sqliteTable("community_reward_grants", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  memberId: integer("member_id").notNull().references(() => members.id),
+  postId: text("post_id").notNull().references(() => communityPosts.id),
+  rewardKey: text("reward_key").notNull(),
+  points: integer("points").notNull(),
+  status: text("status").notNull().default("granted"),
+  referenceId: text("reference_id").notNull(),
+  grantedAt: text("granted_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  reversedAt: text("reversed_at"),
 });

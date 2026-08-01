@@ -8,6 +8,7 @@ import { CommunityPostCard } from "./CommunityPostCard";
 import { CommunityNavigation } from "./CommunityNavigation";
 import { CommunityIcon } from "./CommunityIcon";
 import { FollowButton } from "./FollowButton";
+import { listCommunityCampaigns, type CommunityCampaign } from "../../lib/community/creator";
 
 export const metadata: Metadata = {
   title: "PÚSY CLUB 社区｜真实美妆灵感",
@@ -41,15 +42,17 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
   let unreadCount = 0;
   let memberCount = 0;
   let unavailable = false;
+  let campaigns: CommunityCampaign[] = [];
   try {
     viewer = await getPreviewMemberIdentity();
-    const [postRows, topicRows, stats, profile, social, memberRows] = await Promise.all([
+    const [postRows, topicRows, stats, profile, social, memberRows, campaignRows] = await Promise.all([
       listCommunityPosts({ viewerMemberId: viewer?.memberId, topicSlug: selectedTopic, productSlug: selectedProduct, query: searchQuery, feed, sort, limit: 24 }),
       listCommunityTopics(),
       getCommunityStats(),
       viewer ? getCommunityProfileForMember(viewer.memberId) : Promise.resolve(null),
       viewer ? getCommunitySocialSummary(viewer.memberId) : Promise.resolve(null),
       listSuggestedCommunityMembers(viewer?.memberId, 3),
+      listCommunityCampaigns(),
     ]);
     posts = postRows;
     topics = topicRows;
@@ -57,6 +60,7 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
     memberCount = stats.memberCount;
     viewerPublicId = profile?.public_id;
     unreadCount = social?.unreadCount ?? 0;
+    campaigns = campaignRows;
   } catch {
     unavailable = true;
   }
@@ -107,6 +111,7 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
             : <section className="community-empty"><span>{searchQuery || selectedProduct ? "NO MATCHES" : feed === "following" ? "FOLLOWING FEED" : feed === "bookmarks" ? "SAVED POSTS" : "BE THE FIRST"}</span><h2>{searchQuery || selectedProduct ? "没有找到匹配的分享" : feed === "following" ? "关注动态还是空的" : feed === "bookmarks" ? "还没有收藏内容" : activeTopic ? `#${activeTopic.name} 等你分享` : "第一篇分享，等你发布"}</h2><p>{searchQuery || selectedProduct ? "试试更短的关键词，或清除筛选浏览全部内容。" : feed === "following" ? "关注感兴趣的会员，他们审核通过的新分享会显示在这里。" : feed === "bookmarks" ? "在分享卡片中点击收藏，之后可以从这里快速找回。" : "上传你的图片和真实感受，审核通过后会展示在这里。"}</p><a href={searchQuery || selectedProduct || feed === "bookmarks" ? "/community#feed" : publishHref}>{searchQuery || selectedProduct || feed === "bookmarks" ? "浏览全部内容 →" : "开始分享 →"}</a></section>}
       </div>
       <aside className="community-sidebar">
+        {campaigns[0] && <section className="community-weekly-card community-campaign-card"><span>CREATOR CAMPAIGN</span><h3>{campaigns[0].title}</h3><strong>{campaigns[0].topic_name ? `#${campaigns[0].topic_name}` : "PÚSY 主题活动"}</strong><p>{campaigns[0].description}</p><small>入选奖励最高 {campaigns[0].reward_points} 积分</small><a href={viewer ? `/community/publish?${campaigns[0].topic_slug ? `topic=${encodeURIComponent(campaigns[0].topic_slug)}&` : ""}campaign=${encodeURIComponent(campaigns[0].slug)}` : loginUrl}>参与活动</a></section>}
         <section className="community-weekly-card"><span>WEEKLY PROMPT</span><h3>本周话题</h3><strong>#{topics[0]?.name ?? "真实分享"}</strong><p>{topics[0]?.description ?? "记录真实的使用方式和感受，让选择更有依据。"}</p><a href={viewer ? `/community/publish?topic=${encodeURIComponent(topics[0]?.slug ?? "daily-makeup")}` : loginUrl}>参与话题</a></section>
         <section className="community-creators"><header><h3>值得关注</h3><small>真实社区会员</small></header>{suggestions.length ? suggestions.map((member) => <div key={member.public_id}><a href={`/community/members/${member.public_id}`}><i>{member.display_name.slice(0, 1)}</i><span><strong>{member.display_name}</strong><small>{member.bio || `${member.post_count} 篇公开分享`}</small></span></a><FollowButton publicId={member.public_id} initialFollowing={member.viewer_is_following} signedIn={Boolean(viewer)} loginReturnTo="/community" compact /></div>) : <p>会员发布并通过审核后，会出现在这里。</p>}</section>
         <section className="community-rules-card"><CommunityIcon name="shield" /><div><h3>真实、尊重、有帮助</h3><p>不夸大功效，不攻击他人。商业合作需要清晰标注。</p><a href="/oferta">查看社区公约 →</a></div></section>

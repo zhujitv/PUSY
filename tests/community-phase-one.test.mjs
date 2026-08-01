@@ -98,7 +98,7 @@ test("phase two community interfaces activate follows, topics and notifications"
     read("lib/community/moderation.ts"),
   ]);
   assert.match(contracts, /COMMUNITY_API_VERSION/);
-  assert.match(contracts, /COMMUNITY_FEATURE_PHASE = 4/);
+  assert.match(contracts, /COMMUNITY_FEATURE_PHASE = 5/);
   assert.match(follows, /followCommunityMember/);
   assert.match(follows, /unfollowCommunityMember/);
   assert.match(follows, /hasTrustedOrigin/);
@@ -203,4 +203,45 @@ test("community pages complete login return, publishing, public profile and navi
   assert.match(home, /community-hero-gallery/);
   assert.match(home, /community-topic-strip/);
   assert.match(styles, /community-mobile-nav/);
+});
+
+test("phase five closes the creator growth, campaign and governance loop", async () => {
+  const [contracts, migration, creator, postApi, creatorApi, creatorPage, editor, publish, moderation, permissions, adminApi, adminUi, baseline] = await Promise.all([
+    read("lib/community/contracts.ts"),
+    read("db/migrations/2026-08-01-zz-community-phase-five.sql"),
+    read("lib/community/creator.ts"),
+    read("app/api/community/posts/route.ts"),
+    read("app/api/community/posts/[id]/route.ts"),
+    read("app/community/creator/page.tsx"),
+    read("app/community/posts/[id]/edit/CreatorPostEditor.tsx"),
+    read("app/community/publish/PublishCommunityPost.tsx"),
+    read("lib/community/moderation.ts"),
+    read("lib/admin-permissions.ts"),
+    read("app/api/admin/route.ts"),
+    read("app/admin/CommunityAdmin.tsx"),
+    read("db/railway-postgres.sql"),
+  ]);
+  assert.match(contracts, /communityPhaseFiveFeatures/);
+  for (const source of [migration, baseline]) {
+    assert.match(source, /community_post_versions/);
+    assert.match(source, /community_campaigns/);
+    assert.match(source, /community_campaign_entries/);
+    assert.match(source, /community_reward_grants/);
+    assert.match(source, /content_fingerprint/);
+  }
+  assert.match(postApi, /intent === "draft"/);
+  assert.match(creatorApi, /expectedUpdatedAt/);
+  assert.match(creatorApi, /hasTrustedOrigin/);
+  assert.match(creator, /creator_status === "restricted"/);
+  assert.match(creator, /community_post_approved/);
+  assert.match(creator, /community_verified_purchase/);
+  assert.match(creator, /completeMemberTask/);
+  assert.match(creatorPage, /累计曝光/);
+  assert.match(editor, /历史版本仅用于审计/);
+  assert.match(publish, /保存草稿/);
+  assert.match(moderation, /rewardApprovedCommunityPost/);
+  assert.match(permissions, /"create-community-campaign": "community\.manage"/);
+  assert.match(adminApi, /qualifyCampaignEntry/);
+  assert.match(adminUi, /创作者治理/);
+  assert.match(adminUi, /创建并启用活动/);
 });

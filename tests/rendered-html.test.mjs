@@ -223,6 +223,9 @@ test("about page presents an optimized, responsive brand story", async () => {
   assert.match(css, /\.sectionHeading h2 \{[^}]*grid-column: span 10;[^}]*font-size: clamp\(42px, 4\.9vw, 78px\);[^}]*white-space: nowrap;/s);
   assert.match(css, /\.chinaCopy h2 \{[^}]*font-size: clamp\(44px, 5\.2vw, 84px\);[^}]*white-space: nowrap;/s);
   assert.match(css, /\.sectionHeading h2,[^}]*\.mission h2 \{[^}]*white-space: normal;/s);
+  assert.match(css, /\.principles \{\s*padding: clamp\(76px, 8vw, 120px\)/);
+  assert.match(css, /\.china \{[^}]*min-height: 600px;/s);
+  assert.match(css, /\.mission \{[^}]*padding: clamp\(88px, 9vw, 142px\)/s);
   assert.match(css, /@media \(max-width: 760px\)/);
   assert.match(css, /prefers-reduced-motion: reduce/);
   assert.ok(desktopHero.byteLength > 100_000);

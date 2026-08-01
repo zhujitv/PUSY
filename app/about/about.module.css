@@ -65,7 +65,7 @@
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 24px;
   align-items: start;
-  padding: clamp(34px, 4vw, 64px) clamp(24px, 3vw, 52px) clamp(60px, 8vw, 128px);
+  padding: clamp(30px, 3.5vw, 54px) clamp(24px, 3vw, 52px) clamp(42px, 5vw, 78px);
 }
 
 .eyebrow {
@@ -201,7 +201,7 @@
 }
 
 .principles {
-  padding: clamp(120px, 12vw, 190px) clamp(24px, 3vw, 52px);
+  padding: clamp(76px, 8vw, 120px) clamp(24px, 3vw, 52px);
 }
 
 .sectionHeading {
@@ -209,7 +209,7 @@
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 24px;
   align-items: start;
-  margin-bottom: clamp(62px, 7vw, 108px);
+  margin-bottom: clamp(42px, 4.5vw, 68px);
 }
 
 .sectionHeading .eyebrow {
@@ -235,7 +235,7 @@
 }
 
 .principleGrid article {
-  min-height: 290px;
+  min-height: 230px;
   padding: 24px 24px 32px;
   border-right: 1px solid var(--about-line);
 }
@@ -246,7 +246,7 @@
 
 .principleGrid span {
   display: block;
-  margin-bottom: 78px;
+  margin-bottom: 48px;
   color: var(--about-pink);
   font-size: 12px;
 }
@@ -267,7 +267,7 @@
 }
 
 .history {
-  padding: clamp(88px, 9vw, 144px) 0;
+  padding: clamp(64px, 6vw, 96px) 0;
   background: #fff;
 }
 
@@ -275,7 +275,7 @@
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 24px;
-  padding: 0 clamp(24px, 3vw, 52px) clamp(64px, 7vw, 104px);
+  padding: 0 clamp(24px, 3vw, 52px) clamp(44px, 4.5vw, 68px);
 }
 
 .historyHeader .eyebrow {
@@ -304,8 +304,8 @@
 .historyVisual {
   position: sticky;
   top: 24px;
-  height: min(76vh, 820px);
-  min-height: 620px;
+  height: min(68vh, 720px);
+  min-height: 540px;
   overflow: hidden;
   background: #f2e9ec;
 }
@@ -336,7 +336,7 @@
 
 .historyList summary {
   display: grid;
-  min-height: 96px;
+  min-height: 84px;
   grid-template-columns: 90px 1fr 24px;
   gap: 18px;
   align-items: center;
@@ -396,7 +396,7 @@
   grid-column: 2;
   margin: 0;
   max-width: 580px;
-  padding: 0 0 42px;
+  padding: 0 0 32px;
   color: var(--about-muted);
   font-size: 16px;
   line-height: 1.75;
@@ -405,7 +405,7 @@
 .visualBreak {
   position: relative;
   width: 100%;
-  aspect-ratio: 7 / 2;
+  aspect-ratio: 9 / 2;
   overflow: hidden;
   background: #ebe0e3;
 }
@@ -431,13 +431,13 @@
 }
 
 .worlds {
-  padding: clamp(118px, 12vw, 190px) clamp(24px, 3vw, 52px);
+  padding: clamp(78px, 8vw, 122px) clamp(24px, 3vw, 52px);
 }
 
 .worldGrid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: clamp(34px, 5vw, 82px) 18px;
+  gap: clamp(26px, 3.5vw, 56px) 18px;
 }
 
 .worldCard {
@@ -451,7 +451,7 @@
 
 .worldCard:nth-child(2) {
   grid-column: 8 / span 5;
-  padding-top: 16%;
+  padding-top: 8%;
 }
 
 .worldCard:nth-child(3) {
@@ -460,7 +460,7 @@
 
 .worldCard:nth-child(4) {
   grid-column: 5 / span 4;
-  padding-top: 14%;
+  padding-top: 7%;
 }
 
 .worldCard:nth-child(5) {
@@ -520,8 +520,8 @@
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 24px;
-  min-height: 720px;
-  padding: clamp(64px, 6vw, 100px) clamp(24px, 3vw, 52px);
+  min-height: 600px;
+  padding: clamp(52px, 5vw, 78px) clamp(24px, 3vw, 52px);
   background: var(--about-pink);
   color: var(--about-ink);
 }
@@ -570,7 +570,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: clamp(130px, 14vw, 230px) clamp(24px, 5vw, 84px);
+  padding: clamp(88px, 9vw, 142px) clamp(24px, 5vw, 84px);
   text-align: center;
 }
 
@@ -585,7 +585,7 @@
 
 .mission blockquote {
   max-width: 860px;
-  margin: clamp(50px, 6vw, 88px) auto 48px;
+  margin: clamp(36px, 4vw, 58px) auto 36px;
   color: #403a3d;
   font-size: clamp(20px, 2.1vw, 31px);
   letter-spacing: -0.02em;
@@ -594,7 +594,7 @@
 
 .closingMedia {
   width: 100%;
-  aspect-ratio: 2 / 1;
+  aspect-ratio: 12 / 5;
   overflow: hidden;
   background: #e8dcdf;
 }
@@ -720,13 +720,13 @@
 
   .principles,
   .worlds {
-    padding: 104px 16px;
+    padding: 76px 16px;
   }
 
   .sectionHeading,
   .historyHeader {
     display: block;
-    margin-bottom: 54px;
+    margin-bottom: 40px;
   }
 
   .sectionHeading .eyebrow,
@@ -753,7 +753,7 @@
   }
 
   .principleGrid article {
-    min-height: 230px;
+    min-height: 190px;
     padding: 20px 0 28px;
     border-right: 0;
     border-top: 1px solid var(--about-line);
@@ -764,15 +764,15 @@
   }
 
   .principleGrid span {
-    margin-bottom: 58px;
+    margin-bottom: 36px;
   }
 
   .history {
-    padding: 88px 0;
+    padding: 64px 0;
   }
 
   .historyHeader {
-    padding: 0 16px 54px;
+    padding: 0 16px 40px;
   }
 
   .historyGrid {
@@ -822,7 +822,7 @@
   .worldGrid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 56px;
+    gap: 40px;
   }
 
   .worldCard:nth-child(n) {
@@ -843,8 +843,8 @@
     display: flex;
     min-height: auto;
     flex-direction: column;
-    gap: 86px;
-    padding: 78px 16px 86px;
+    gap: 58px;
+    padding: 62px 16px 68px;
   }
 
   .chinaYear {
@@ -858,7 +858,7 @@
   }
 
   .mission {
-    padding: 120px 16px;
+    padding: 82px 16px;
   }
 
   .mission h2 {
@@ -866,12 +866,12 @@
   }
 
   .mission blockquote {
-    margin: 50px auto 42px;
+    margin: 36px auto 32px;
     font-size: 19px;
   }
 
   .closingMedia {
-    aspect-ratio: 3 / 2;
+    aspect-ratio: 16 / 9;
   }
 }
 

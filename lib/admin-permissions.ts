@@ -109,6 +109,8 @@ export const adminActionPermissions: Record<string, AdminPermission> = {
   "publish-content-revision": "content.manage",
   "delete-content-revision": "content.manage",
   "update-community-post-status": "community.manage",
+  "update-community-report-status": "community.manage",
+  "update-community-promotion": "community.manage",
   "create-admin-user": "admins.manage",
   "update-admin-user": "admins.manage",
   "reset-admin-password": "admins.manage",

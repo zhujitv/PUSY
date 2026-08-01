@@ -470,3 +470,82 @@ export const communityNotifications = sqliteTable("community_notifications", {
   readAt: text("read_at"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
+
+export const communityPostLikes = sqliteTable("community_post_likes", {
+  postId: text("post_id").notNull().references(() => communityPosts.id),
+  memberId: integer("member_id").notNull().references(() => members.id),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const communityPostBookmarks = sqliteTable("community_post_bookmarks", {
+  postId: text("post_id").notNull().references(() => communityPosts.id),
+  memberId: integer("member_id").notNull().references(() => members.id),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const communityComments = sqliteTable("community_comments", {
+  id: text("id").primaryKey(),
+  postId: text("post_id").notNull().references(() => communityPosts.id),
+  memberId: integer("member_id").notNull().references(() => members.id),
+  parentCommentId: text("parent_comment_id"),
+  body: text("body").notNull(),
+  status: text("status").notNull().default("visible"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const communityReports = sqliteTable("community_reports", {
+  id: text("id").primaryKey(),
+  reporterMemberId: integer("reporter_member_id").notNull().references(() => members.id),
+  entityType: text("entity_type").notNull(),
+  entityId: text("entity_id").notNull(),
+  postId: text("post_id").notNull().references(() => communityPosts.id),
+  commentId: text("comment_id"),
+  reason: text("reason").notNull(),
+  detail: text("detail").notNull().default(""),
+  status: text("status").notNull().default("pending"),
+  resolutionNote: text("resolution_note").notNull().default(""),
+  reviewedBy: text("reviewed_by"),
+  reviewedAt: text("reviewed_at"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const communityReportEvents = sqliteTable("community_report_events", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  reportId: text("report_id").notNull().references(() => communityReports.id),
+  fromStatus: text("from_status").notNull(),
+  toStatus: text("to_status").notNull(),
+  action: text("action").notNull(),
+  note: text("note").notNull().default(""),
+  adminId: text("admin_id").notNull(),
+  actorEmail: text("actor_email").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const communityPostProducts = sqliteTable("community_post_products", {
+  postId: text("post_id").notNull().references(() => communityPosts.id),
+  productSlug: text("product_slug").notNull().references(() => products.slug),
+  position: integer("position").notNull().default(0),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const communityPostPromotions = sqliteTable("community_post_promotions", {
+  postId: text("post_id").primaryKey().references(() => communityPosts.id),
+  placement: text("placement").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+  note: text("note").notNull().default(""),
+  promotedBy: text("promoted_by").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const communityContentEvents = sqliteTable("community_content_events", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  eventKey: text("event_key").notNull().unique(),
+  eventType: text("event_type").notNull(),
+  postId: text("post_id").notNull().references(() => communityPosts.id),
+  productSlug: text("product_slug").references(() => products.slug),
+  memberId: integer("member_id").references(() => members.id),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});

@@ -15,10 +15,12 @@ test("community rules verify nickname, body, media bytes and public DTO boundari
   assert.match(posts, /delete dto\.moderation_note/);
 });
 
-test("community migration creates phase-one authority tables and phase-two reservations", async () => {
-  const [migration, phaseTwo, baseline] = await Promise.all([
+test("community migrations create phase-one authority and phase-two/three/four relations", async () => {
+  const [migration, phaseTwo, phaseThree, phaseFour, baseline] = await Promise.all([
     read("db/migrations/2026-08-01-community-phase-one.sql"),
     read("db/migrations/2026-08-01-community-phase-two.sql"),
+    read("db/migrations/2026-08-01-community-phase-three.sql"),
+    read("db/migrations/2026-08-01-z-community-phase-four.sql"),
     read("db/railway-postgres.sql"),
   ]);
   for (const source of [migration, baseline]) {
@@ -35,6 +37,20 @@ test("community migration creates phase-one authority tables and phase-two reser
   assert.match(phaseTwo, /INSERT INTO community_topics/);
   assert.match(phaseTwo, /daily-makeup/);
   assert.match(phaseTwo, /community_post_topics_topic_idx/);
+  for (const source of [phaseThree, baseline]) {
+    assert.match(source, /CREATE TABLE IF NOT EXISTS community_post_likes/);
+    assert.match(source, /CREATE TABLE IF NOT EXISTS community_post_bookmarks/);
+    assert.match(source, /CREATE TABLE IF NOT EXISTS community_comments/);
+    assert.match(source, /CREATE TABLE IF NOT EXISTS community_reports/);
+    assert.match(source, /CREATE TABLE IF NOT EXISTS community_report_events/);
+    assert.match(source, /UNIQUE \(reporter_member_id, entity_type, entity_id\)/);
+  }
+  for (const source of [phaseFour, baseline]) {
+    assert.match(source, /CREATE TABLE IF NOT EXISTS community_post_products/);
+    assert.match(source, /CREATE TABLE IF NOT EXISTS community_post_promotions/);
+    assert.match(source, /CREATE TABLE IF NOT EXISTS community_content_events/);
+    assert.match(source, /event_type IN \('post_impression', 'product_click', 'add_to_cart'\)/);
+  }
 });
 
 test("community publication uses existing member sessions with origin checks and double rate limits", async () => {
@@ -82,7 +98,7 @@ test("phase two community interfaces activate follows, topics and notifications"
     read("lib/community/moderation.ts"),
   ]);
   assert.match(contracts, /COMMUNITY_API_VERSION/);
-  assert.match(contracts, /COMMUNITY_FEATURE_PHASE = 2/);
+  assert.match(contracts, /COMMUNITY_FEATURE_PHASE = 4/);
   assert.match(follows, /followCommunityMember/);
   assert.match(follows, /unfollowCommunityMember/);
   assert.match(follows, /hasTrustedOrigin/);
@@ -94,6 +110,73 @@ test("phase two community interfaces activate follows, topics and notifications"
   assert.match(social, /community_notifications/);
   assert.match(social, /following_post/);
   assert.match(moderation, /notifyCommunityModeration/);
+});
+
+test("phase four connects community discovery, products, merchandising and conversion measurement", async () => {
+  const [contracts, posts, commerce, eventApi, home, publish, productPage, productActions, moderation, permissions, adminApi, adminUi] = await Promise.all([
+    read("lib/community/contracts.ts"),
+    read("lib/community/posts.ts"),
+    read("lib/community/commerce.ts"),
+    read("app/api/community/events/route.ts"),
+    read("app/community/page.tsx"),
+    read("app/community/publish/PublishCommunityPost.tsx"),
+    read("app/products/[slug]/page.tsx"),
+    read("app/products/[slug]/ProductActions.tsx"),
+    read("lib/community/moderation.ts"),
+    read("lib/admin-permissions.ts"),
+    read("app/api/admin/route.ts"),
+    read("app/admin/CommunityAdmin.tsx"),
+  ]);
+  assert.match(contracts, /communityPhaseFourFeatures/);
+  assert.match(posts, /community_post_products/);
+  assert.match(posts, /purchase\.status NOT IN/);
+  assert.match(posts, /p\.title ILIKE/);
+  assert.match(posts, /promotion_placement/);
+  assert.match(commerce, /ON CONFLICT\(event_key\) DO NOTHING/);
+  assert.match(commerce, /getCommunityCommerceInsights/);
+  assert.match(eventApi, /hasTrustedOrigin\(request\)/);
+  assert.match(eventApi, /allowRequest\(request, "community-content-event"/);
+  assert.match(home, /community-discovery-tools/);
+  assert.match(publish, /productSlugs/);
+  assert.match(productPage, /product-community-section/);
+  assert.match(productActions, /add_to_cart/);
+  assert.match(moderation, /product_click_count/);
+  assert.match(permissions, /"update-community-promotion": "community\.manage"/);
+  assert.match(adminApi, /setCommunityPromotion/);
+  assert.match(adminUi, /近 30 天曝光/);
+});
+
+test("phase three community engagement is authenticated, rate-limited and auditable", async () => {
+  const [contracts, interactionApi, commentsApi, commentApi, reportsApi, engagement, postCard, discussion, permissions, adminApi, adminUi] = await Promise.all([
+    read("lib/community/contracts.ts"),
+    read("app/api/community/posts/[id]/interactions/route.ts"),
+    read("app/api/community/posts/[id]/comments/route.ts"),
+    read("app/api/community/comments/[id]/route.ts"),
+    read("app/api/community/reports/route.ts"),
+    read("lib/community/engagement.ts"),
+    read("app/community/CommunityPostCard.tsx"),
+    read("app/community/CommunityDiscussion.tsx"),
+    read("lib/admin-permissions.ts"),
+    read("app/api/admin/route.ts"),
+    read("app/admin/CommunityAdmin.tsx"),
+  ]);
+  assert.match(contracts, /communityPhaseThreeFeatures/);
+  for (const source of [interactionApi, commentsApi, reportsApi]) {
+    assert.match(source, /hasTrustedOrigin\(request\)/);
+    assert.match(source, /allowRequestForIdentity/);
+  }
+  assert.match(interactionApi, /setCommunityPostInteraction/);
+  assert.match(commentsApi, /createCommunityComment/);
+  assert.match(commentApi, /deleteCommunityComment/);
+  assert.match(reportsApi, /createCommunityReport/);
+  assert.match(engagement, /ON CONFLICT DO NOTHING/);
+  assert.match(engagement, /INSERT INTO community_report_events/);
+  assert.match(engagement, /FOR UPDATE/);
+  assert.match(postCard, /initialLikeCount/);
+  assert.match(discussion, /评论与回复/);
+  assert.match(permissions, /"update-community-report-status": "community\.manage"/);
+  assert.match(adminApi, /moderateCommunityReport/);
+  assert.match(adminUi, /用户举报/);
 });
 
 test("community pages complete login return, publishing, public profile and navigation paths", async () => {

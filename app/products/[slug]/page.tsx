@@ -7,6 +7,9 @@ import { ProductActions } from "./ProductActions";
 import { ProductGallery } from "./ProductGallery";
 import { ProductReviews } from "./ProductReviews";
 import { getStoreDb, type DbProduct } from "../../../db/store";
+import { getPreviewMemberIdentity } from "../../../lib/preview-member-auth";
+import { listCommunityPosts } from "../../../lib/community/posts";
+import { CommunityPostCard } from "../../community/CommunityPostCard";
 
 const siteUrl = "https://pusy.cn";
 
@@ -66,14 +69,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export default async function ProductPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ fromCommunity?: string }> }) {
+  const [{ slug }, query] = await Promise.all([params, searchParams]);
   if (isGiftCardProductSlug(slug)) redirect("/gift-card");
   const catalogProduct = products.find((item) => item.slug === slug);
   if (!catalogProduct) notFound();
   let product: Product = catalogProduct;
   let related = products.filter((item) => item.slug !== slug && item.category === catalogProduct.category).slice(0, 4);
   let relatedTitle = "你可能也喜欢";
+  const sourceCommunityPostId = /^PST-[A-Z0-9]{12}$/.test(query.fromCommunity ?? "") ? query.fromCommunity : undefined;
+  const communityPromise = getPreviewMemberIdentity().then(async (viewer) => ({ viewer, posts: await listCommunityPosts({ productSlug: slug, viewerMemberId: viewer?.memberId, sort: "featured", limit: 6 }) })).catch(() => ({ viewer: null, posts: [] }));
   try {
     const db = await getStoreDb();
     const row = await db.prepare("SELECT * FROM products WHERE slug = ? LIMIT 1").bind(slug).first<DbProduct>();
@@ -108,6 +113,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   const gallery = Array.from(new Set([product.image, ...(product.images ?? []), product.imageAlt].filter(Boolean))) as string[];
   const inventoryText = product.inventoryVerified && (product.stock ?? 0) > 0 ? `有货 · ${product.stock} 件` : "暂时缺货";
+  const community = await communityPromise;
 
   return <PageShell>
     <main className="product-page">
@@ -120,7 +126,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <p className={`product-inventory ${product.inventoryVerified && (product.stock ?? 0) > 0 ? "available" : ""}`}>{inventoryText}</p>
         {(product.sku || product.volume) && <dl className="product-specs">{product.sku && <><dt>商品编号</dt><dd>{product.sku}</dd></>}{product.volume && <><dt>规格容量</dt><dd>{product.volume}</dd></>}</dl>}
         {product.variants?.map((group) => <section className="product-variants" key={group.name}><h2>{group.name}</h2><div>{group.options.map((option) => option.slug ? <a className={option.slug === product.slug ? "active" : ""} href={`/products/${option.slug}`} key={`${option.label}-${option.slug}`}>{option.color && <i style={{ backgroundColor: option.color }} />}{option.label}</a> : <span key={option.label}>{option.color && <i style={{ backgroundColor: option.color }} />}{option.label}</span>)}</div></section>)}
-        <ProductActions product={product} />
+        <ProductActions product={product} sourceCommunityPostId={sourceCommunityPostId} />
         <div className="product-notes">
           <details open><summary>产品说明</summary><p>{product.description}</p></details>
           <details><summary>成分</summary><p>{product.ingredients || "产品成分以中国实物包装标注为准。敏感肌肤首次使用前请先进行局部测试，如有不适请停止使用。"}</p></details>
@@ -129,6 +135,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         </div>
       </section>
     </main>
+    <section className="product-community-section"><header><div><p>PÚSY CLUB</p><h2>会员真实分享</h2><span>看看社区会员如何使用这件商品。</span></div><a href={`/community/publish?product=${encodeURIComponent(product.slug)}`}>分享我的体验 →</a></header>{community.posts.length ? <div className="community-feed">{community.posts.map((post) => <CommunityPostCard post={post} signedIn={Boolean(community.viewer)} isOwner={community.viewer?.memberId === post.member_id} key={post.id} />)}</div> : <div className="product-community-empty"><h3>还没有关联分享</h3><p>成为第一个记录真实使用感受的会员。</p><a href={`/community/publish?product=${encodeURIComponent(product.slug)}`}>发布社区分享</a></div>}</section>
     <ProductReviews slug={product.slug} />
     {related.length > 0 && <section className="related"><h2>{relatedTitle}</h2><div>{related.map((item) => <a href={`/products/${item.slug}`} key={item.slug}><Image src={item.image} alt={item.name} width={700} height={727} sizes="(max-width: 700px) 50vw, 25vw" /><span>{item.name}</span><b>{formatCnyFromRub(item.price)}</b></a>)}</div></section>}
   </PageShell>;

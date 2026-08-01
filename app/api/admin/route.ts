@@ -15,6 +15,7 @@ import { addShipmentEvent, shipOrder } from "../../../lib/logistics/service";
 import { cancelOrder } from "../../../lib/orders/cancellation";
 import { paymentReconciliation } from "../../../lib/payments/reconciliation";
 import { supportSlaDeadlines, validSupportPriority } from "../../../lib/support/sla";
+import { listCommunityModerationPosts, moderateCommunityPost } from "../../../lib/community/moderation";
 
 const orderStatuses = ["待付款", "支付失败", "待处理", "已确认", "配货中", "已发货", "已完成", "退款中", "部分退款", "已退款", "已取消"];
 const memberStatuses = ["active", "vip", "blocked"];
@@ -38,12 +39,13 @@ export async function GET(request: Request) {
     const supportVisible = can("support.read");
     const financeVisible = can("finance.read");
     const marketingVisible = can("marketing.read") || can("marketing.manage");
+    const communityVisible = can("community.read");
     const requestedView = new URL(request.url).searchParams.get("view") ?? "";
     const view = requestedView || (actor.role === "customer_service" ? "support" : actor.role === "warehouse" ? "orders" : "overview");
     const wants = (...views: string[]) => views.includes(view);
     const rowsIf = (visible: boolean, sql: string) => visible ? db.prepare(sql).all() : Promise.resolve({ results: [] });
     const firstIf = (visible: boolean, sql: string) => visible ? db.prepare(sql).first() : Promise.resolve(null);
-    const [products, productCategories, orders, orderItems, members, subscribers, returns, retailPartnerships, coupons, giftCards, stats, revenueTrend, providers, payments, refunds, paymentEvents, notificationSettings, notificationTemplates, notificationJobs, reviews, content, supportThreads, supportMessages, returnEvents, invoices, cannedReplies, orderStatusAnalytics, topProducts, customerAnalytics, returnAnalytics, adminUsers, auditLogs, shipments, shipmentEvents, reconciliation] = await Promise.all([
+    const [products, productCategories, orders, orderItems, members, subscribers, returns, retailPartnerships, coupons, giftCards, stats, revenueTrend, providers, payments, refunds, paymentEvents, notificationSettings, notificationTemplates, notificationJobs, reviews, communityPosts, content, supportThreads, supportMessages, returnEvents, invoices, cannedReplies, orderStatusAnalytics, topProducts, customerAnalytics, returnAnalytics, adminUsers, auditLogs, shipments, shipmentEvents, reconciliation] = await Promise.all([
       rowsIf(can("products.read") && wants("products"), "SELECT * FROM products ORDER BY id DESC"),
       rowsIf(can("products.read") && wants("products"), "SELECT c.*, parent.name AS parent_name, COUNT(p.id)::INTEGER AS product_count FROM product_categories c LEFT JOIN product_categories parent ON parent.id = c.parent_id LEFT JOIN products p ON p.category_id = c.id GROUP BY c.id, parent.name ORDER BY c.sort_order, c.id"),
       rowsIf(can("orders.read") && wants("overview", "orders", "members"), "SELECT o.*, COUNT(oi.id) AS item_count, COALESCE(BOOL_OR(NOT (oi.product_slug ~ '^gift-card-(1000|3000|5000|10000)(-[0-9]+)?$')), false) AS has_physical_items FROM orders o LEFT JOIN order_items oi ON oi.order_id = o.id GROUP BY o.id ORDER BY o.created_at DESC LIMIT 200"),
@@ -64,6 +66,7 @@ export async function GET(request: Request) {
       rowsIf(can("system.manage") && wants("notifications"), "SELECT * FROM notification_templates ORDER BY key"),
       rowsIf(can("system.manage") && wants("notifications"), "SELECT * FROM notification_jobs ORDER BY created_at DESC LIMIT 500"),
       rowsIf(marketingVisible && wants("reviews"), "SELECT * FROM product_reviews ORDER BY created_at DESC LIMIT 500"),
+      communityVisible && wants("community") ? listCommunityModerationPosts() : Promise.resolve([]),
       can("content.manage") && wants("content") ? getContentWorkspace() : Promise.resolve({ current: {}, revisions: [] }),
       rowsIf(supportVisible && wants("support", "orders"), `SELECT st.*, m.name AS member_name, m.total_orders AS member_total_orders, m.total_spent AS member_total_spent,
         m.points_balance AS member_points_balance, m.lifetime_points AS member_lifetime_points, m.tier AS member_tier, m.status AS member_status,
@@ -134,6 +137,7 @@ export async function GET(request: Request) {
       notificationTemplates: can("system.manage") ? notificationTemplates.results : [],
       notificationJobs: can("system.manage") ? notificationJobs.results : [],
       reviews: marketingVisible ? reviews.results : [],
+      communityPosts: communityVisible ? communityPosts : [],
       content: can("content.manage") ? content.current : {},
       contentRevisions: can("content.manage") ? content.revisions : [],
       supportThreads: supportVisible ? supportThreads.results : [],
@@ -574,6 +578,13 @@ export async function POST(request: Request) {
         const review = await db.prepare("SELECT member_id FROM product_reviews WHERE id = ? LIMIT 1").bind(reviewId).first<{ member_id: number | null }>();
         if (review?.member_id) await (await import("../../../lib/growth/member-program")).syncReviewTasks(review.member_id, reviewId);
       }
+    } else if (action === "update-community-post-status") {
+      await moderateCommunityPost({
+        postId: String(payload.id ?? ""),
+        status: String(payload.status ?? "") as "pending" | "approved" | "rejected" | "hidden",
+        reason: String(payload.reason ?? ""),
+        actor,
+      });
     } else if (action === "update-site-content" || action === "save-content-draft" || action === "schedule-site-content") {
       const content = payload.content && typeof payload.content === "object" ? payload.content as Record<string, unknown> : {};
       await saveContentRevision({ title: String(payload.title ?? "首页内容版本"), content, status: action === "update-site-content" ? "published" : action === "schedule-site-content" ? "scheduled" : "draft", publishAt: String(payload.publishAt ?? ""), actor: actor.email });
@@ -591,7 +602,7 @@ export async function POST(request: Request) {
       auditCompleted = true;
     }
     const conflict = error instanceof Error && /unique/i.test(error.message);
-    const contentValidation = error instanceof Error && /^(定时发布时间必须晚于当前时间|内容版本不存在|只能删除草稿或待发布版本)$/.test(error.message);
+    const contentValidation = error instanceof Error && /^(定时发布时间必须晚于当前时间|内容版本不存在|只能删除草稿或待发布版本|社区内容标识无效|社区审核状态无效|拒绝公开时请填写审核说明|社区内容不存在)$/.test(error.message);
     console.error("[api/admin] action failed", { message: error instanceof Error ? error.message : String(error), code: typeof error === "object" && error && "code" in error ? String(error.code) : undefined });
     return safeServerError(contentValidation ? error.message : conflict ? "相同名称、商品编号或邮箱的数据已经存在" : "后台操作失败，请稍后再试", contentValidation ? 400 : conflict ? 409 : 500);
   } finally {

@@ -4,7 +4,7 @@ import { blogPosts } from "./data/blog";
 import { getPublicProductCategories } from "../db/product-categories";
 
 const baseUrl = "https://pusy.cn";
-const pages = ["", "/catalog", "/catalog/products", "/about", "/blog", "/contact", "/delivery", "/return", "/payment", "/stores-china", "/gift-card", "/gift-card/questions", "/faq", "/privacy", "/details", "/cookie", "/oferta"];
+const pages = ["", "/catalog", "/catalog/products", "/about", "/blog", "/community", "/contact", "/delivery", "/return", "/payment", "/stores-china", "/gift-card", "/gift-card/questions", "/faq", "/privacy", "/details", "/cookie", "/oferta"];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const updated = new Date();

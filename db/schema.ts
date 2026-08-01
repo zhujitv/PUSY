@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { blob, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const products = sqliteTable("products", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -386,5 +386,87 @@ export const notificationDeliveryEvents = sqliteTable("notification_delivery_eve
   id: text("id").primaryKey(),
   providerMessageId: text("provider_message_id").notNull(),
   eventType: text("event_type").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const communityProfiles = sqliteTable("community_profiles", {
+  memberId: integer("member_id").primaryKey().references(() => members.id),
+  publicId: text("public_id").notNull().unique(),
+  displayName: text("display_name").notNull(),
+  bio: text("bio").notNull().default(""),
+  status: text("status").notNull().default("active"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const communityPosts = sqliteTable("community_posts", {
+  id: text("id").primaryKey(),
+  memberId: integer("member_id").notNull().references(() => members.id),
+  clientRequestId: text("client_request_id").notNull(),
+  title: text("title").notNull().default(""),
+  body: text("body").notNull(),
+  status: text("status").notNull().default("pending"),
+  moderationNote: text("moderation_note").notNull().default(""),
+  moderatedBy: text("moderated_by"),
+  moderatedAt: text("moderated_at"),
+  publishedAt: text("published_at"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const communityPostMedia = sqliteTable("community_post_media", {
+  id: text("id").primaryKey(),
+  postId: text("post_id").notNull().references(() => communityPosts.id),
+  position: integer("position").notNull().default(0),
+  mimeType: text("mime_type").notNull(),
+  byteSize: integer("byte_size").notNull(),
+  bytes: blob("bytes").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const communityModerationEvents = sqliteTable("community_moderation_events", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  postId: text("post_id").notNull().references(() => communityPosts.id),
+  fromStatus: text("from_status").notNull(),
+  toStatus: text("to_status").notNull(),
+  reason: text("reason").notNull().default(""),
+  adminId: text("admin_id").notNull(),
+  actorEmail: text("actor_email").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const communityFollows = sqliteTable("community_follows", {
+  followerMemberId: integer("follower_member_id").notNull().references(() => members.id),
+  followedMemberId: integer("followed_member_id").notNull().references(() => members.id),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const communityTopics = sqliteTable("community_topics", {
+  id: text("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  name: text("name").notNull(),
+  description: text("description").notNull().default(""),
+  status: text("status").notNull().default("draft"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const communityPostTopics = sqliteTable("community_post_topics", {
+  postId: text("post_id").notNull().references(() => communityPosts.id),
+  topicId: text("topic_id").notNull().references(() => communityTopics.id),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const communityNotifications = sqliteTable("community_notifications", {
+  id: text("id").primaryKey(),
+  recipientMemberId: integer("recipient_member_id").notNull().references(() => members.id),
+  eventKey: text("event_key").notNull(),
+  eventType: text("event_type").notNull(),
+  actorMemberId: integer("actor_member_id").references(() => members.id),
+  entityType: text("entity_type").notNull().default("post"),
+  entityId: text("entity_id").notNull().default(""),
+  postId: text("post_id").references(() => communityPosts.id),
+  payloadJson: text("payload_json").notNull().default("{}"),
+  readAt: text("read_at"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });

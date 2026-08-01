@@ -19,6 +19,8 @@ export const adminPermissions = [
   "marketing.read",
   "marketing.manage",
   "content.manage",
+  "community.read",
+  "community.manage",
   "system.manage",
   "admins.manage",
   "audit.read",
@@ -35,7 +37,7 @@ export const adminRoleLabels: Record<AdminRole, string> = {
 
 const rolePermissions: Record<AdminRole, readonly AdminPermission[]> = {
   owner: adminPermissions,
-  operations: ["dashboard.read", "analytics.read", "orders.read", "orders.manage", "orders.fulfill", "products.read", "products.manage", "products.inventory.manage", "customers.read", "support.read", "support.manage", "marketing.read", "marketing.manage", "content.manage"],
+  operations: ["dashboard.read", "analytics.read", "orders.read", "orders.manage", "orders.fulfill", "products.read", "products.manage", "products.inventory.manage", "customers.read", "support.read", "support.manage", "marketing.read", "marketing.manage", "content.manage", "community.read", "community.manage"],
   customer_service: ["orders.read", "customers.read", "support.read", "support.manage"],
   finance: ["dashboard.read", "analytics.read", "orders.read", "customers.read", "finance.read", "finance.manage"],
   warehouse: ["orders.read", "orders.fulfill", "products.read", "products.inventory.manage"],
@@ -106,6 +108,7 @@ export const adminActionPermissions: Record<string, AdminPermission> = {
   "schedule-site-content": "content.manage",
   "publish-content-revision": "content.manage",
   "delete-content-revision": "content.manage",
+  "update-community-post-status": "community.manage",
   "create-admin-user": "admins.manage",
   "update-admin-user": "admins.manage",
   "reset-admin-password": "admins.manage",

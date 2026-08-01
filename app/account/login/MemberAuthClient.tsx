@@ -6,7 +6,7 @@ type Mode = "login" | "register";
 type SocialProvider = "wechat" | "alipay";
 type ProviderState = { provider: SocialProvider; label: string; configured: boolean };
 
-export function MemberAuthClient({ referralCode = "", providers, socialStatus = "", socialProvider = "" }: { referralCode?: string; providers: ProviderState[]; socialStatus?: string; socialProvider?: string }) {
+export function MemberAuthClient({ referralCode = "", providers, socialStatus = "", socialProvider = "", returnTo = "/account" }: { referralCode?: string; providers: ProviderState[]; socialStatus?: string; socialProvider?: string; returnTo?: string }) {
   const [mode, setMode] = useState<Mode>("login");
   const [bindingProvider, setBindingProvider] = useState<"none" | SocialProvider>("none");
   const [message, setMessage] = useState("");
@@ -66,9 +66,9 @@ export function MemberAuthClient({ referralCode = "", providers, socialStatus = 
     }
     setMessage(body.message || "操作成功");
     if (mode === "register" && bindingProvider !== "none") {
-      window.location.href = `/api/account/social/${bindingProvider}?mode=bind&returnTo=${encodeURIComponent("/account?welcome=1")}`;
+      window.location.href = `/api/account/social/${bindingProvider}?mode=bind&returnTo=${encodeURIComponent(returnTo === "/account" ? "/account?welcome=1" : returnTo)}`;
     } else {
-      window.location.href = mode === "register" ? "/account?welcome=1" : "/account";
+      window.location.href = mode === "register" && returnTo === "/account" ? "/account?welcome=1" : returnTo;
     }
   }
 
@@ -132,7 +132,7 @@ export function MemberAuthClient({ referralCode = "", providers, socialStatus = 
         {message && <p className="member-auth-message">{message}</p>}
         <button className="member-auth-submit" disabled={submitting || !challengeId}>{submitting ? "正在处理…" : mode === "login" ? "登录" : "注册并登录"}</button>
       </form>
-      {mode === "login" && <div className="member-social-login"><span>或使用已绑定账号登录</span><div>{providers.map((provider) => <button type="button" className={provider.provider} disabled={!provider.configured} onClick={() => { window.location.href = `/api/account/social/${provider.provider}?mode=login`; }} key={provider.provider}><i>{provider.provider === "wechat" ? "微" : "支"}</i>{provider.configured ? `${provider.label}登录` : `${provider.label}待配置`}</button>)}</div></div>}
+      {mode === "login" && <div className="member-social-login"><span>或使用已绑定账号登录</span><div>{providers.map((provider) => <button type="button" className={provider.provider} disabled={!provider.configured} onClick={() => { window.location.href = `/api/account/social/${provider.provider}?mode=login&returnTo=${encodeURIComponent(returnTo)}`; }} key={provider.provider}><i>{provider.provider === "wechat" ? "微" : "支"}</i>{provider.configured ? `${provider.label}登录` : `${provider.label}待配置`}</button>)}</div></div>}
       <button className="member-auth-switch" type="button" onClick={() => switchMode(mode === "login" ? "register" : "login")}>
         {mode === "login" ? "还不是会员？立即注册 →" : "已经是会员？返回登录 →"}
       </button>

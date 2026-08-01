@@ -151,7 +151,7 @@ export default function Home() {
         </div>
       </section>}
 
-      <SiteFooter newsletterTitle={homeContent.newsletter_title} newsletterSuccess={homeContent.newsletter_success} showNewsletter={homeContent.show_newsletter !== "0"} source="homepage" />
+      <SiteFooter newsletterTitle={homeContent.newsletter_title || defaultHomeContent.newsletter_title} newsletterSuccess={homeContent.newsletter_success || defaultHomeContent.newsletter_success} showNewsletter={homeContent.show_newsletter !== "0"} source="homepage" />
     </main>
   );
 }

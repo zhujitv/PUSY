@@ -81,7 +81,7 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
     <section className="community-prototype-hero">
       <div className="community-prototype-hero-copy">
         <div className="community-eyebrow"><span />PÚSY BEAUTY CIRCLE</div>
-        <h1>让每一种美，<br />都有自己的表达。</h1>
+        <h1><span>让每一种美，</span><span>都有自己的表达。</span></h1>
         <p>真实分享、使用心得与灵感日常。来自 PÚSY 会员，也属于每一个正在探索自己的你。</p>
         <div className="community-hero-actions"><a className="community-button dark" href={publishHref}>分享我的此刻 <CommunityIcon name="chevron" size={17} /></a><a className="community-text-link" href="#feed">看看大家在聊什么</a></div>
         <div className="community-hero-proof"><div>{[31, 1, 8, 34].map((asset) => <Image key={asset} src={`/assets/${String(asset).padStart(2, "0")}.webp`} width={38} height={38} alt="PÚSY 社区灵感" />)}</div><p><strong>{memberCount.toLocaleString("zh-CN")}</strong> 位会员已加入分享</p></div>

@@ -7,6 +7,7 @@ import { useStore } from "./components/StoreProvider";
 import { HeaderIcon } from "./components/HeaderIcons";
 import { fallbackNavigationCategories, storefrontNavItems, type NavigationCategory } from "./data/navigation";
 import { FREE_STANDARD_SHIPPING_THRESHOLD } from "../lib/shipping";
+import { SiteFooter } from "./components/SiteChrome";
 
 function availableFirst(items: Product[]) {
   return [...items].sort((a, b) => Number(Boolean(b.inventoryVerified && (b.stock ?? 0) > 0)) - Number(Boolean(a.inventoryVerified && (a.stock ?? 0) > 0)));
@@ -30,8 +31,6 @@ export default function Home() {
   const [scrolled, setScrolled] = useState(false);
   const [heroIndex, setHeroIndex] = useState(0);
   const [heroPaused, setHeroPaused] = useState(false);
-  const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
   const [homeContent, setHomeContent] = useState(defaultHomeContent);
   const [featuredProducts, setFeaturedProducts] = useState(defaultFeaturedProducts);
   const [navItems, setNavItems] = useState(() => storefrontNavItems(fallbackNavigationCategories));
@@ -67,13 +66,6 @@ export default function Home() {
 
   function moveHero(direction: number) {
     setHeroIndex((current) => (current + direction + 2) % 2);
-  }
-
-  async function subscribe(event: React.FormEvent) {
-    event.preventDefault();
-    if (!email.trim()) return;
-    const response = await fetch("/api/newsletter", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, source: "homepage" }) });
-    if (response.ok) setSubscribed(true);
   }
 
   return (
@@ -159,15 +151,7 @@ export default function Home() {
         </div>
       </section>}
 
-      <footer className="pusy-footer">
-        <div className="footer-contact-line"><span>© PÚSY 2026 · <a href="https://pusy.cn">PUSY.CN</a> · 中国</span><div><a href="/contact">客户服务</a><a href="/stores-china#retail-partnership">商务合作</a><a href="/details">经营者信息</a></div></div>
-        <div className="footer-logo">púsy</div>
-        <div className="footer-links">
-          <div><a href="/catalog/products">商品目录</a><a href="/about">关于我们</a><a href="/delivery">配送说明</a><a href="/return">退换货</a><a href="/payment">支付方式</a></div>
-          <div><a href="/stores-china">中国渠道</a><a href="/gift-card/questions">礼品卡问题</a><a href="/faq">常见问题</a><a href="/oferta">用户服务协议</a><a href="/privacy">隐私政策</a><a href="/cookie">Cookie 政策</a><a href="/details">经营者信息</a></div>
-        </div>
-        {homeContent.show_newsletter !== "0" && <div className="footer-subscribe"><p>{homeContent.newsletter_title}</p>{subscribed ? <span>{homeContent.newsletter_success}</span> : <><form onSubmit={subscribe}><label className="sr-only" htmlFor="email">电子邮箱</label><input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="电子邮箱" required /><button type="submit">➤</button></form><small>提交即表示同意我们按照<a href="/privacy">隐私政策</a>发送品牌资讯，可随时退订。</small></>}</div>}
-      </footer>
+      <SiteFooter newsletterTitle={homeContent.newsletter_title} newsletterSuccess={homeContent.newsletter_success} showNewsletter={homeContent.show_newsletter !== "0"} source="homepage" />
     </main>
   );
 }

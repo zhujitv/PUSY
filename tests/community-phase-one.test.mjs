@@ -199,10 +199,11 @@ test("community pages complete login return, publishing, public profile and navi
   assert.match(login, /returnTo/);
   assert.match(navigation, /\["社区", "\/community"\]/);
   assert.match(account, /我的社区主页/);
-  assert.match(home, /让每一种美/);
+  assert.match(home, /<h1><span>让每一种美，<\/span><span>都有自己的表达。<\/span><\/h1>/);
   assert.match(home, /community-hero-gallery/);
   assert.match(home, /community-topic-strip/);
   assert.match(styles, /community-mobile-nav/);
+  assert.match(styles, /community-prototype-hero h1 span \{ display: block; white-space: nowrap; \}/);
 });
 
 test("phase five closes the creator growth, campaign and governance loop", async () => {

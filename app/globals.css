@@ -820,7 +820,8 @@ footer.pusy-footer .footer-links a { font-size: 16px; font-weight: 600; }
 .community-prototype-hero-copy { max-width: 570px; padding-left: 3vw; }
 .community-eyebrow { display: flex; align-items: center; gap: 10px; color: #d8146c; font-size: 9px; font-weight: 800; letter-spacing: .2em; }
 .community-eyebrow > span { width: 24px; height: 1px; background: #f4328a; }
-.community-prototype-hero h1 { margin: 25px 0 23px; font-family: "Songti SC", "STSong", Georgia, serif; font-size: clamp(48px, 4.8vw, 75px); font-weight: 500; line-height: 1.12; letter-spacing: -.055em; }
+.community-prototype-hero h1 { margin: 25px 0 23px; font-family: "Songti SC", "STSong", Georgia, serif; font-size: clamp(48px, 4.5vw, 68px); font-weight: 500; line-height: 1.12; letter-spacing: -.055em; }
+.community-prototype-hero h1 span { display: block; white-space: nowrap; }
 .community-prototype-hero-copy > p { max-width: 505px; margin: 0; color: #615a5c; font-size: 15px; line-height: 1.9; }
 .community-hero-actions { display: flex; align-items: center; gap: 25px; margin-top: 34px; }
 .community-button { min-height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 23px; border-radius: 4px; font-size: 12px; font-weight: 700; }
@@ -1036,7 +1037,7 @@ footer.pusy-footer .footer-links a { font-size: 16px; font-weight: 600; }
   .community-mobile-nav .notification b { position: absolute; top: 1px; left: calc(50% + 5px); min-width: 15px; height: 15px; display: grid; place-items: center; border-radius: 8px; color: #fff; background: #ef398b; font-size: 7px; }
   .community-prototype-home { padding-bottom: 92px; }
   .community-prototype-hero { padding: 42px 17px 52px; gap: 36px; }
-  .community-prototype-hero h1 { font-size: 47px; }
+  .community-prototype-hero h1 { font-size: clamp(36px, 11vw, 47px); }
   .community-prototype-hero-copy > p { font-size: 13px; }
   .community-hero-actions { align-items: stretch; flex-direction: column; gap: 15px; }
   .community-button { width: 100%; }

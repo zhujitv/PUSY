@@ -505,9 +505,8 @@ test("customer service and business cooperation use website forms instead of ema
   ]);
   const customerFacing = [home, chrome, contactPage, contactForm, storesPage, partnershipForm, returnsPage, details, privacy, cookie, payment].join("\n");
   assert.doesNotMatch(customerFacing, /mailto:/i);
-  assert.match(home, /href="\/contact">客户服务/);
-  assert.match(home, /\/stores-china#retail-partnership/);
   assert.match(chrome, /href="\/contact">客户服务/);
+  assert.match(chrome, /\/stores-china#retail-partnership/);
   assert.doesNotMatch(contactPage, /咨询与退换货共用一个入口/);
   assert.match(contactForm, /提交客服工单/);
   assert.match(contactForm, /手机号码/);

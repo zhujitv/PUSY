@@ -12,16 +12,32 @@ export function ProfilePanel({ member, profile, socialAccounts, socialProviders,
   const completion = Math.round((completionValues.filter(Boolean).length / completionValues.length) * 100);
   const tier = tierName(member.tier);
   const initial = (profile.nickname || member.name || "P").slice(0, 1).toUpperCase();
+  const [avatar, setAvatar] = useState(profile.avatar_url || "");
+  const [avatarError, setAvatarError] = useState("");
+  const nextNicknameDate = profile.nickname_updated_at ? new Date(new Date(profile.nickname_updated_at).getTime() + 30 * 86400000) : null;
+  const nicknameLocked = Boolean(nextNicknameDate && nextNicknameDate.getTime() > Date.now());
+
+  function chooseAvatar(file?: File) {
+    setAvatarError("");
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) { setAvatarError("仅支持 JPG、PNG 或 WebP 图片"); return; }
+    if (file.size > 450 * 1024) { setAvatarError("头像图片不能超过 450KB"); return; }
+    const reader = new FileReader();
+    reader.onload = () => setAvatar(String(reader.result ?? ""));
+    reader.onerror = () => setAvatarError("头像读取失败，请重新选择");
+    reader.readAsDataURL(file);
+  }
 
   return <section className="member-section member-profile-section">
     <div className="profile-summary">
-      <div className="profile-avatar" aria-hidden="true">{initial}</div>
+      <div className={`profile-avatar ${avatar ? "has-image" : ""}`} aria-hidden="true">{avatar ? <img src={avatar} alt="" /> : initial}</div>
       <div><p>PÚSY CLUB 会员</p><h2>{profile.nickname || member.name}</h2><span>{tier} · 加入于 {new Date(member.joined_at).toLocaleDateString("zh-CN")}</span></div>
       <div className="profile-completion"><span>资料完整度 <b>{completion}%</b></span><div><i style={{ width: `${completion}%` }} /></div><small>{completion === 100 ? "资料已经完善" : "完善资料，获得更合适的商品推荐"}</small></div>
     </div>
     <form className="profile-form" onSubmit={onSubmit}>
       <fieldset><legend><span>01</span><div><b>基本资料</b><small>用于账户识别、配送联系和会员服务</small></div></legend><div className="member-form">
-        <label>昵称<input name="nickname" maxLength={30} defaultValue={profile.nickname} placeholder="希望我们如何称呼你" /></label>
+        <div className="profile-avatar-editor full"><div className={`profile-avatar-preview ${avatar ? "has-image" : ""}`}>{avatar ? <img src={avatar} alt="头像预览" /> : initial}</div><div><b>个性化头像</b><span>支持 JPG、PNG、WebP，不超过 450KB</span><div><label>选择图片<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => chooseAvatar(event.target.files?.[0])} /></label>{avatar && <button type="button" onClick={() => setAvatar("")}>移除头像</button>}</div>{avatarError && <small role="alert">{avatarError}</small>}</div><input type="hidden" name="avatarUrl" value={avatar} /></div>
+        <label>昵称<input name="nickname" maxLength={30} minLength={2} defaultValue={profile.nickname} disabled={nicknameLocked} placeholder="希望我们如何称呼你" /><small>{nicknameLocked && nextNicknameDate ? `冷却中，下次可于 ${nextNicknameDate.toLocaleDateString("zh-CN")} 修改` : `修改昵称将扣除 500 积分，当前可用 ${member.points_balance} 积分`}</small>{nicknameLocked && <input type="hidden" name="nickname" value={profile.nickname} />}</label>
         <label>真实姓名<input name="name" maxLength={50} autoComplete="name" defaultValue={member.name} required /></label>
         <PhoneVerification member={member} onVerified={onPhoneVerified} />
         <label>性别<select name="gender" defaultValue={profile.gender}><option value="">请选择</option><option value="female">女</option><option value="male">男</option><option value="undisclosed">不愿透露</option></select></label>

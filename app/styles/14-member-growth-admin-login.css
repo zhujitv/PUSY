@@ -64,6 +64,8 @@
 .member-profile-section { padding: 0; overflow: hidden; }
 .profile-summary { min-height: 180px; display: grid; grid-template-columns: auto 1fr minmax(240px, .7fr); gap: 22px; align-items: center; padding: 32px 38px; color: #fff; background: #181818; }
 .profile-avatar { width: 92px; height: 92px; display: grid; place-items: center; border-radius: 50%; color: #111; background: #ff67aa; font-size: 36px; font-weight: 500; }
+.profile-avatar.has-image, .profile-avatar-preview.has-image { overflow: hidden; background: #f3edf0; }
+.profile-avatar img, .profile-avatar-preview img { width: 100%; height: 100%; display: block; object-fit: cover; }
 .profile-summary p { margin: 0 0 8px; color: #999; font-size: 10px; letter-spacing: .08em; }
 .profile-summary h2 { margin: 0 0 8px; font-size: 30px; font-weight: 400; }
 .profile-summary span { color: #ccc; font-size: 12px; }
@@ -79,6 +81,16 @@
 .profile-form legend div { display: grid; gap: 5px; }
 .profile-form legend b { font-size: 19px; font-weight: 500; }
 .profile-form legend small { color: #888; font-size: 11px; }
+.profile-avatar-editor { min-height: 116px; padding: 18px; border: 1px solid #ded6d9; border-radius: 14px; display: flex; align-items: center; gap: 18px; background: #fcfafb; }
+.profile-avatar-preview { width: 80px; height: 80px; flex: 0 0 auto; border-radius: 50%; display: grid; place-items: center; color: #111; background: #ff67aa; font-size: 30px; }
+.profile-avatar-editor > div:nth-child(2) { display: grid; gap: 6px; }
+.profile-avatar-editor b { font-size: 14px; font-weight: 500; }
+.profile-avatar-editor span { color: #888; font-size: 10px; }
+.profile-avatar-editor > div > div { display: flex; gap: 8px; margin-top: 5px; }
+.profile-avatar-editor label, .profile-avatar-editor button { min-height: 35px; padding: 0 13px; border: 1px solid #222; display: grid; place-items: center; color: #fff; background: #222; font-size: 10px; cursor: pointer; }
+.profile-avatar-editor button { color: #333; border-color: #d7cdd1; background: #fff; }
+.profile-avatar-editor input[type="file"] { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.profile-avatar-editor small[role="alert"] { color: #bd2e6e; font-size: 10px; }
 .profile-choice { display: grid; gap: 10px; color: #666; font-size: 12px; }
 .profile-choice > div { display: flex; flex-wrap: wrap; gap: 8px; }
 .profile-choice label { position: relative; display: block; cursor: pointer; }

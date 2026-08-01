@@ -58,13 +58,22 @@
   .membership-card::after { width: 270px; height: 270px; right: -115px; top: -135px; }
   .membership-card > header div { display: grid; gap: 5px; }
   .membership-card > header strong { font-size: 26px; }
-  .membership-card > header span, .membership-card > header small { font-size: 7px; }
-  .membership-card-tier h2 { font-size: 31px; }
+  .membership-card > header span, .membership-card > header small { font-size: 9px; }
+  .membership-card-tier > span, .membership-card-points > span { font-size: 9px; }
+  .membership-card-tier h2 { font-size: 36px; }
+  .membership-card-tier p { font-size: 13px; }
   .membership-card-points { min-width: 108px; padding-left: 16px; }
-  .membership-card-points b { font-size: 41px; }
+  .membership-card-points b { font-size: 46px; }
+  .membership-card-points small, .membership-card footer { font-size: 10px; }
   .membership-card footer > div { align-items: flex-end; }
   .membership-card footer > div span:last-child { max-width: 135px; text-align: right; }
-  .tier-benefit-grid, .member-coupon-grid { grid-template-columns: 1fr; }
+  .tier-benefit-tabs { grid-template-columns: 1fr 1fr; }
+  .tier-benefit-tabs button { min-height: 68px; }
+  .tier-benefit-preview { min-height: 0; padding: 24px 20px; grid-template-columns: 1fr; gap: 25px; }
+  .tier-benefit-intro > div { margin-top: 22px; padding-top: 0; }
+  .tier-benefit-list { grid-template-columns: 1fr; }
+  .tier-benefit-list article { min-height: 94px; }
+  .member-coupon-grid { grid-template-columns: 1fr; }
   .member-growth-hero { min-height: 0; grid-template-columns: 1fr; padding: 28px 20px; }
   .member-growth-hero article { margin-top: 18px; }
   .member-task-grid { grid-template-columns: 1fr; }
@@ -80,6 +89,8 @@
   .member-form label.full { grid-column: auto; }
   .profile-summary { grid-template-columns: auto 1fr; padding: 26px 20px; }
   .profile-avatar { width: 66px; height: 66px; font-size: 26px; }
+  .profile-avatar-editor { align-items: flex-start; }
+  .profile-avatar-preview { width: 66px; height: 66px; }
   .profile-completion { grid-column: 1 / -1; }
   .profile-form { padding: 0 18px 28px; }
   .profile-form fieldset { padding: 28px 0; }

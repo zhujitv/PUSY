@@ -33,7 +33,7 @@ export default async function CommunityMemberPage({ params }: { params: Promise<
   const isOwner = viewer?.memberId === member.member_id;
   return <PageShell><CommunityNavigation active="profile" viewerPublicId={viewerProfile?.public_id} unreadCount={social?.unreadCount ?? 0} /><main className="community-member-page">
     <section className="community-member-hero">
-      <div className="community-profile-avatar" aria-hidden="true">{member.display_name.slice(0, 1).toUpperCase()}</div>
+      <div className={`community-profile-avatar ${member.avatar_url ? "has-image" : ""}`} aria-hidden="true">{member.avatar_url ? <img src={member.avatar_url} alt="" /> : member.display_name.slice(0, 1).toUpperCase()}</div>
       <div><p>PÚSY CLUB · MEMBER {member.public_id.slice(-6)}</p><h1>{member.display_name}</h1><span>{member.bio || "正在用自己的方式，记录每一次美丽灵感。"}</span><small>PÚSY CLUB 会员 · {new Date(member.joined_at).getFullYear()} 年加入</small></div>
       <aside><span>公开分享<b>{member.post_count}</b></span><a href={`/community/members/${member.public_id}/connections?view=followers`}>关注者<b>{member.follower_count}</b></a><a href={`/community/members/${member.public_id}/connections?view=following`}>正在关注<b>{member.following_count}</b></a>{isOwner ? <a href="/community/publish">发布新分享</a> : <FollowButton publicId={member.public_id} initialFollowing={member.viewer_is_following} signedIn={Boolean(viewer)} loginReturnTo={`/community/members/${member.public_id}`} />}</aside>
     </section>

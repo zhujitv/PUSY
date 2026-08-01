@@ -170,16 +170,17 @@ export async function getCommunityPost(id: string, viewerMemberId?: number) {
 export async function getCommunityMember(publicId: string, viewerMemberId?: number): Promise<CommunityMember | null> {
   const db = await getStoreDb();
   const member = await db.prepare(`
-    SELECT m.id AS member_id, cp.public_id, cp.display_name, cp.bio, cp.account_type, cp.official_label, m.joined_at,
+    SELECT m.id AS member_id, cp.public_id, cp.display_name, cp.bio, cp.account_type, cp.official_label, m.joined_at, COALESCE(mp.avatar_url, '') AS avatar_url,
       COUNT(DISTINCT p.id) FILTER (WHERE p.status = 'approved')::INTEGER AS post_count,
       (SELECT COUNT(*) FROM community_follows WHERE followed_member_id = m.id)::INTEGER AS follower_count,
       (SELECT COUNT(*) FROM community_follows WHERE follower_member_id = m.id)::INTEGER AS following_count,
       EXISTS(SELECT 1 FROM community_follows WHERE follower_member_id = ? AND followed_member_id = m.id) AS viewer_is_following
     FROM community_profiles cp
     JOIN members m ON m.id = cp.member_id
+    LEFT JOIN member_profiles mp ON mp.member_id = m.id
     LEFT JOIN community_posts p ON p.member_id = m.id
     WHERE cp.public_id = ? AND cp.status = 'active' AND m.status != 'blocked'
-    GROUP BY m.id, cp.public_id, cp.display_name, cp.bio, cp.account_type, cp.official_label, m.joined_at
+    GROUP BY m.id, cp.public_id, cp.display_name, cp.bio, cp.account_type, cp.official_label, m.joined_at, mp.avatar_url
     LIMIT 1
   `).bind(viewerMemberId ?? 0, publicId).first<CommunityMember>();
   return member ? {

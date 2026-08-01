@@ -103,6 +103,8 @@
 .community-member-page { padding: 34px max(24px, 3vw) 120px; }
 .community-member-hero { min-height: 320px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 32px; align-items: center; padding: 46px 52px; border-radius: 28px; color: #fff; background: radial-gradient(circle at 85% 0, rgba(255,101,172,.3), transparent 25%), linear-gradient(130deg, #21151b, #582139); overflow: hidden; }
 .community-profile-avatar { width: 118px; height: 118px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.28); border-radius: 50%; color: #592039; background: #fff; font: 400 48px/1 Georgia, serif; }
+.community-profile-avatar.has-image { overflow: hidden; }
+.community-profile-avatar img { width: 100%; height: 100%; display: block; object-fit: cover; }
 .community-member-hero > div:nth-child(2) > p { margin: 0 0 14px; color: #ff7eb7; font-size: 9px; letter-spacing: .18em; }
 .community-member-hero h1 { margin: 0 0 14px; font-size: clamp(44px, 5vw, 72px); font-weight: 400; letter-spacing: -.05em; }
 .community-member-hero > div:nth-child(2) > span { max-width: 600px; display: block; color: rgba(255,255,255,.72); line-height: 1.65; }

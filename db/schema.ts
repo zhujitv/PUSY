@@ -100,6 +100,8 @@ export const rateLimits = pgTable("rate_limits", {
 export const memberProfiles = pgTable("member_profiles", {
   memberId: integer("member_id").primaryKey().references(() => members.id),
   nickname: text("nickname").notNull().default(""),
+  avatarUrl: text("avatar_url").notNull().default(""),
+  nicknameUpdatedAt: text("nickname_updated_at"),
   gender: text("gender").notNull().default(""),
   birthday: text("birthday").notNull().default(""),
   wechat: text("wechat").notNull().default(""),

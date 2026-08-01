@@ -20,6 +20,20 @@ function selected(value: unknown, allowed: Set<string>) {
   return Array.isArray(value) ? value.map(String).filter((item) => allowed.has(item)) : [];
 }
 
+function avatarData(value: unknown) {
+  const avatar = String(value ?? "");
+  if (!avatar) return "";
+  const match = /^data:image\/(jpeg|png|webp);base64,([A-Za-z0-9+/]+={0,2})$/.exec(avatar);
+  if (!match) throw new Error("头像仅支持 JPG、PNG 或 WebP 图片");
+  const bytes = Buffer.from(match[2], "base64");
+  if (!bytes.length || bytes.length > 450 * 1024) throw new Error("头像图片不能超过 450KB");
+  const detected = bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff ? "jpeg"
+    : bytes.length >= 8 && bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) ? "png"
+      : bytes.length >= 12 && bytes.subarray(0, 4).toString("ascii") === "RIFF" && bytes.subarray(8, 12).toString("ascii") === "WEBP" ? "webp" : "";
+  if (detected !== match[1]) throw new Error("头像图片内容与格式不一致");
+  return avatar;
+}
+
 function validBirthday(value: string) {
   if (!value) return true;
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value) || value > new Date().toISOString().slice(0, 10)) return false;
@@ -77,6 +91,9 @@ export async function POST(request: Request) {
       const name = text(payload.name, 50);
       if (!name) return Response.json({ error: "请填写姓名" }, { status: 400 });
       const nickname = text(payload.nickname, 30);
+      if (nickname && nickname.length < 2) return Response.json({ error: "昵称需要 2 至 30 个字符" }, { status: 400 });
+      if (/@|\b1[3-9]\d{9}\b/.test(nickname)) return Response.json({ error: "昵称中请勿包含联系方式" }, { status: 400 });
+      const avatarUrl = avatarData(payload.avatarUrl);
       const gender = text(payload.gender, 20);
       const birthday = text(payload.birthday, 10);
       const skinType = text(payload.skinType, 20);
@@ -84,11 +101,44 @@ export async function POST(request: Request) {
       if (!validBirthday(birthday)) return Response.json({ error: "请填写有效的出生日期" }, { status: 400 });
       const skinConcerns = selected(payload.skinConcerns, skinConcernValues);
       const preferredCategories = selected(payload.preferredCategories, categoryValues);
+      const currentProfile = await db.prepare("SELECT nickname, nickname_updated_at FROM member_profiles WHERE member_id = ? LIMIT 1").bind(member.id).first<{ nickname: string; nickname_updated_at: string | null }>();
+      if (currentProfile?.nickname && !nickname) return Response.json({ error: "昵称不能清空" }, { status: 400 });
+      const nicknameChanged = nickname !== (currentProfile?.nickname ?? "");
+      if (nicknameChanged) {
+        const result = await db.prepare(`
+          WITH changed_member AS (
+            UPDATE members SET points_balance = points_balance - 500, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ? AND points_balance >= 500
+              AND NOT EXISTS (
+                SELECT 1 FROM member_profiles p WHERE p.member_id = members.id
+                AND p.nickname_updated_at IS NOT NULL
+                AND p.nickname_updated_at::TIMESTAMPTZ > CURRENT_TIMESTAMP - INTERVAL '30 days'
+              )
+            RETURNING id, points_balance
+          ), changed_profile AS (
+            UPDATE member_profiles p SET nickname = ?, nickname_updated_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+            FROM changed_member m WHERE p.member_id = m.id
+            RETURNING p.member_id
+          )
+          INSERT INTO member_points_ledger (member_id, points, balance_after, reason, reference_type, reference_id)
+          SELECT m.id, -500, m.points_balance, '修改会员昵称', 'profile', 'nickname:' || EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT::TEXT
+          FROM changed_member m JOIN changed_profile p ON p.member_id = m.id
+          RETURNING member_id
+        `).bind(member.id, nickname).all();
+        if (!result.results.length) {
+          const fresh = await db.prepare("SELECT m.points_balance, p.nickname_updated_at FROM members m JOIN member_profiles p ON p.member_id = m.id WHERE m.id = ?").bind(member.id).first<{ points_balance: number; nickname_updated_at: string | null }>();
+          if ((fresh?.points_balance ?? 0) < 500) return Response.json({ error: "可用积分不足 500，暂时无法修改昵称" }, { status: 400 });
+          const nextDate = fresh?.nickname_updated_at ? new Date(new Date(fresh.nickname_updated_at).getTime() + 30 * 86400000).toLocaleDateString("zh-CN", { timeZone: "Asia/Shanghai" }) : "30 天后";
+          return Response.json({ error: `昵称每 30 天只能修改一次，下次可修改日期为 ${nextDate}` }, { status: 429 });
+        }
+      }
       await db.batch([
         db.prepare("UPDATE members SET name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(name, member.id),
-        db.prepare(`UPDATE member_profiles SET nickname = ?, gender = ?, birthday = ?, wechat = ?, province = ?, city = ?, occupation = ?, skin_type = ?, skin_concerns = ?, preferred_categories = ?, bio = ?, email_marketing = ?, sms_marketing = ?, updated_at = CURRENT_TIMESTAMP WHERE member_id = ?`).bind(nickname, gender, birthday, text(payload.wechat, 50), text(payload.province, 30), text(payload.city, 30), text(payload.occupation, 50), skinType, JSON.stringify(skinConcerns), JSON.stringify(preferredCategories), text(payload.bio, 200), payload.emailMarketing ? 1 : 0, payload.smsMarketing ? 1 : 0, member.id),
+        db.prepare(`UPDATE member_profiles SET avatar_url = ?, gender = ?, birthday = ?, wechat = ?, province = ?, city = ?, occupation = ?, skin_type = ?, skin_concerns = ?, preferred_categories = ?, bio = ?, email_marketing = ?, sms_marketing = ?, updated_at = CURRENT_TIMESTAMP WHERE member_id = ?`).bind(avatarUrl, gender, birthday, text(payload.wechat, 50), text(payload.province, 30), text(payload.city, 30), text(payload.occupation, 50), skinType, JSON.stringify(skinConcerns), JSON.stringify(preferredCategories), text(payload.bio, 200), payload.emailMarketing ? 1 : 0, payload.smsMarketing ? 1 : 0, member.id),
       ]);
+      if (nicknameChanged && nickname) await db.prepare("UPDATE community_profiles SET display_name = ?, updated_at = CURRENT_TIMESTAMP WHERE member_id = ?").bind(nickname, member.id).run();
       await syncProfileCompletionTask(member.id);
+      return Response.json({ ok: true, message: nicknameChanged ? "资料已保存，昵称修改已扣除 500 积分" : "资料已保存" });
     } else if (action === "daily-checkin") {
       return Response.json({ ok: true, ...(await dailyCheckin(member.id)) });
     } else if (action === "unlink-social") {
@@ -164,6 +214,7 @@ export async function POST(request: Request) {
     return Response.json({ ok: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
+    if (/头像|昵称/.test(message)) return safeServerError(message, 400);
     if (/订单已经|订单当前|已经发货|没有可退|订单不存在/.test(message)) return safeServerError(message, 409);
     return safeServerError("保存会员资料失败，请稍后再试");
   }

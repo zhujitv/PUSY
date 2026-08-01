@@ -56,8 +56,8 @@ test("uses readable section eyebrows across public and member pages", async () =
   assert.match(css, /\.reviews-heading p \{[^}]*font-size: var\(--section-eyebrow-size\)/);
   assert.match(css, /\.payment-page > section > p \{[^}]*font-size: var\(--section-eyebrow-size\)/);
   assert.match(css, /\.member-auth-heading > p \{[^}]*font-size: var\(--section-eyebrow-size\)/);
-  assert.match(css, /\.membership-card-tier h2 \{[^}]*font-size: 43px;/);
-  assert.match(css, /\.membership-card-tier p \{[^}]*font-size: 12px;/);
+  assert.match(css, /\.membership-card-tier h2 \{[^}]*font-size: 48px;/);
+  assert.match(css, /\.membership-card-tier p \{[^}]*font-size: 15px;/);
 });
 
 test("gift card layout stays compact without title overlap", async () => {

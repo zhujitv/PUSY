@@ -37,6 +37,7 @@ export type CommunityMember = {
   member_id: number;
   public_id: string;
   display_name: string;
+  avatar_url: string;
   bio: string;
   account_type: "member" | "official";
   official_label: string;

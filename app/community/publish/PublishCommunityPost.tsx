@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { COMMUNITY_MEDIA_LIMIT } from "../../../lib/community/contracts";
+import type { CommunityTopic } from "../../../lib/community/social";
 
 async function canvasData(canvas: HTMLCanvasElement, quality: number) {
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", quality));
@@ -34,9 +35,11 @@ async function compressCommunityImage(file: File) {
   });
 }
 
-export function PublishCommunityPost({ displayName }: { displayName: string }) {
+export function PublishCommunityPost({ displayName, topics, defaultTopic }: { displayName: string; topics: CommunityTopic[]; defaultTopic?: string }) {
   const [images, setImages] = useState<string[]>([]);
   const [body, setBody] = useState("");
+  const [title, setTitle] = useState("");
+  const [topicSlug, setTopicSlug] = useState(defaultTopic ?? topics[0]?.slug ?? "");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -64,7 +67,7 @@ export function PublishCommunityPost({ displayName }: { displayName: string }) {
     setBusy(true); setMessage("正在提交审核…");
     const values = Object.fromEntries(new FormData(event.currentTarget).entries());
     try {
-      const response = await fetch("/api/community/posts", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...values, body, images, clientRequestId }) });
+      const response = await fetch("/api/community/posts", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...values, title, body, images, topicSlugs: [topicSlug], clientRequestId }) });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) { setError(result.error || "发布失败，请稍后再试"); setMessage(""); return; }
       setMemberUrl(String(result.memberUrl || "/community/me")); setPublished(true); setMessage(result.message || "内容已提交审核");
@@ -76,10 +79,11 @@ export function PublishCommunityPost({ displayName }: { displayName: string }) {
 
   return <div className="community-publish-layout">
     <form className="community-publish-form" onSubmit={submit}>
-      <header><p>NEW COMMUNITY NOTE</p><h1>发布图文分享</h1><span>以 {displayName} 的会员身份发布 · 提交后进入后台审核</span></header>
+      <header><p>CREATE A POST</p><h1>分享你的此刻</h1><span>真实的体验，比完美的答案更有价值 · 以 {displayName} 的会员身份发布</span></header>
       <label>社区昵称 <small>公开展示，不要填写联系方式</small><input name="displayName" minLength={2} maxLength={30} defaultValue={displayName} required /></label>
-      <label>分享标题 <small>选填，最多 80 字</small><input name="title" maxLength={80} placeholder="一句话写下这次灵感" /></label>
+      <label>分享标题 <small>选填，最多 80 字</small><input name="title" maxLength={80} value={title} onChange={(event) => setTitle(event.target.value)} placeholder="一句话写下这次灵感" /></label>
       <label>正文 <small>{body.length} / 1500</small><textarea name="body" minLength={10} maxLength={1500} required rows={9} value={body} onChange={(event) => setBody(event.target.value)} placeholder="分享妆容、色彩、质地、护理感受或你的真实使用场景…" /></label>
+      <label>选择话题 <small>帮助其他会员找到这篇分享</small><select name="topic" value={topicSlug} onChange={(event) => setTopicSlug(event.target.value)} required>{topics.map((topic) => <option value={topic.slug} key={topic.id}>#{topic.name}</option>)}</select></label>
       <fieldset><legend>分享图片 <small>1–{COMMUNITY_MEDIA_LIMIT} 张</small></legend>
         {images.length > 0 && <div className={`community-upload-preview count-${images.length}`}>{images.map((src, index) => <button type="button" key={index} onClick={() => setImages((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label={`移除第 ${index + 1} 张图片`}><Image src={src} alt={`待发布图片 ${index + 1}`} fill sizes="(max-width: 720px) 50vw, 220px" unoptimized /><i>×</i></button>)}</div>}
         {images.length < COMMUNITY_MEDIA_LIMIT && <label className="community-upload-control"><input type="file" accept="image/jpeg,image/png,image/webp" multiple disabled={busy} onChange={(event) => void chooseImages(event)} /><b>＋ 添加图片</b><span>JPG、PNG、WebP · 系统会自动压缩</span></label>}
@@ -88,6 +92,9 @@ export function PublishCommunityPost({ displayName }: { displayName: string }) {
       {message && <p className="community-form-message" role="status">{message}</p>}
       <button className="community-submit" disabled={busy || body.length < 10 || !images.length}>{busy ? "正在处理…" : "提交社区审核"}</button>
     </form>
-    <aside className="community-publish-rules"><p>COMMUNITY STANDARD</p><h2>分享真实，也保护彼此。</h2><ol><li><b>01</b><span>只上传你有权分享的图片，不包含他人隐私信息。</span></li><li><b>02</b><span>避免医疗功效承诺、虚假宣传和引导站外交易。</span></li><li><b>03</b><span>审核结果会显示在你的社区主页，未通过内容不会公开。</span></li></ol><a href="/oferta">查看用户服务协议 →</a></aside>
+    <aside className="community-publish-side">
+      <section className="community-live-preview"><header><span>实时预览</span><small>社区信息流</small></header><article><div className="preview-author"><i>{displayName.slice(0, 1)}</i><span><b>{displayName}</b><small>刚刚 · 等待审核</small></span></div><div className="preview-media">{images[0] ? <Image src={images[0]} alt="分享预览" fill sizes="320px" unoptimized /> : <Image src="/assets/31.webp" alt="示例预览" fill sizes="320px" />}</div><div className="preview-copy"><span>#{topics.find((topic) => topic.slug === topicSlug)?.name ?? "社区话题"}</span><h3>{title || "你的分享标题"}</h3><p>{body || "你写下的真实体验会显示在这里。"}</p></div></article></section>
+      <section className="community-publish-rules"><p>COMMUNITY STANDARD</p><h2>分享真实，也保护彼此。</h2><ol><li><b>01</b><span>只上传你有权分享的图片，不包含他人隐私信息。</span></li><li><b>02</b><span>避免医疗功效承诺、虚假宣传和引导站外交易。</span></li><li><b>03</b><span>审核结果会通过站内通知同步给你。</span></li></ol><a href="/oferta">查看用户服务协议 →</a></section>
+    </aside>
   </div>;
 }

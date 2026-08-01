@@ -1,6 +1,7 @@
 import type { AdminIdentity } from "../admin-auth";
 import { getStoreDb } from "../../db/store";
 import type { CommunityPostStatus } from "./posts";
+import { notifyCommunityModeration } from "./social";
 
 export type CommunityModerationPost = {
   id: string;
@@ -65,5 +66,7 @@ export async function moderateCommunityPost(input: { postId: string; status: Com
     RETURNING post_id
   `).bind(postId, status, reason, actor.email, status, reason, actor.id, actor.email).first<{ post_id: string }>();
   if (!event) throw new Error("社区内容不存在");
+  const post = await db.prepare("SELECT member_id FROM community_posts WHERE id = ? LIMIT 1").bind(postId).first<{ member_id: number }>();
+  if (post && status !== "pending") await notifyCommunityModeration({ postId, authorMemberId: Number(post.member_id), status });
   return event.post_id;
 }

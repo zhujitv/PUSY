@@ -7,11 +7,16 @@ export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
     const publicId = url.searchParams.get("member")?.trim().toUpperCase() || undefined;
+    const topicSlug = url.searchParams.get("topic")?.trim().toLowerCase() || undefined;
+    const feed = url.searchParams.get("feed") === "following" ? "following" as const : "all" as const;
     if (publicId && !/^MBR-[A-Z0-9]{12}$/.test(publicId)) return privateJson({ error: "会员主页标识无效" }, { status: 400 });
+    if (topicSlug && !/^[a-z0-9-]{2,40}$/.test(topicSlug)) return privateJson({ error: "社区话题标识无效" }, { status: 400 });
     const viewer = await getPreviewMemberIdentity();
     const posts = await listCommunityPosts({
       publicId,
       viewerMemberId: viewer?.memberId,
+      topicSlug,
+      feed,
       limit: Number(url.searchParams.get("limit") ?? 24),
     });
     return privateJson({ posts: posts.map((post) => communityPostDto(post, post.status !== "approved")), viewer: viewer ? { signedIn: true } : null });
@@ -32,7 +37,11 @@ export async function POST(request: Request) {
     const clientRequestId = String(payload.clientRequestId ?? "");
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(clientRequestId)) return privateJson({ error: "发布请求标识无效，请刷新页面后重试" }, { status: 400 });
     const input = normalizeCommunityPostInput(payload);
-    const created = await createCommunityPost({ memberId: viewer.memberId, clientRequestId, ...input });
+    const topicSlugs = Array.isArray(payload.topicSlugs)
+      ? payload.topicSlugs.map(String).map((slug) => slug.trim().toLowerCase()).filter((slug) => /^[a-z0-9-]{2,40}$/.test(slug)).slice(0, 3)
+      : [];
+    if (!topicSlugs.length) return privateJson({ error: "请至少选择 1 个社区话题" }, { status: 400 });
+    const created = await createCommunityPost({ memberId: viewer.memberId, clientRequestId, topicSlugs, ...input });
     return privateJson({
       ok: true,
       id: created.id,
@@ -44,7 +53,7 @@ export async function POST(request: Request) {
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
     if (error instanceof SyntaxError) return privateJson({ error: "请求内容不是有效的 JSON" }, { status: 400 });
-    if (/^(请上传|仅支持|单张图片|图片内容|图片总大小|正文至少|请填写)/.test(message)) return privateJson({ error: message }, { status: 400 });
+    if (/^(请上传|仅支持|单张图片|图片内容|图片总大小|正文至少|请填写|请选择)/.test(message)) return privateJson({ error: message }, { status: 400 });
     if (/会员账户不可发布/.test(message)) return privateJson({ error: message }, { status: 403 });
     console.error("[community/posts] create failed", { message });
     return safeServerError("发布失败，请稍后再试");

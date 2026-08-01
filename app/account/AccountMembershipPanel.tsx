@@ -18,7 +18,7 @@ export function MembershipPanel({ data, onAct }: { data: AccountData; onAct: (pa
       <header><div><strong>PÚSY</strong><span>BEAUTY CLUB</span></div><small>MEMBER SINCE {new Date(data.member.joined_at).getFullYear()}</small></header>
       <div className="membership-card-tier"><span>MEMBERSHIP TIER</span><h2>{tierName(data.member.tier)}</h2><p>{data.member.name}</p></div>
       <div className="membership-card-points"><span>AVAILABLE POINTS</span><b>{data.member.points_balance}</b><small>可用积分</small></div>
-      <footer><div><span>累计积分 {data.member.lifetime_points}</span><span>{next ? `距 ${tierName(next.key)} 还需 ${Math.max(0, next.minimum - data.member.lifetime_points)} 分` : "已达到最高等级"}</span></div><i><em style={{ width: `${progress}%` }} /></i></footer>
+      <div className="membership-card-progress"><div><span>累计积分 {data.member.lifetime_points}</span><span>{next ? `距 ${tierName(next.key)} 还需 ${Math.max(0, next.minimum - data.member.lifetime_points)} 分` : "已达到最高等级"}</span></div><i><em style={{ width: `${progress}%` }} /></i></div>
     </section>
     <section className="member-section tier-benefits-section">
       <div className="member-section-title"><div><p>等级越高，礼遇越丰富</p><h2>等级权益</h2></div><span>点击等级即可预览</span></div>

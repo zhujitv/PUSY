@@ -64,9 +64,9 @@
   .membership-card-tier p { font-size: 13px; }
   .membership-card-points { min-width: 108px; padding-left: 16px; }
   .membership-card-points b { font-size: 46px; }
-  .membership-card-points small, .membership-card footer { font-size: 10px; }
-  .membership-card footer > div { align-items: flex-end; }
-  .membership-card footer > div span:last-child { max-width: 135px; text-align: right; }
+  .membership-card-points small, .membership-card-progress { font-size: 10px; }
+  .membership-card-progress > div { align-items: flex-end; }
+  .membership-card-progress > div span:last-child { max-width: 135px; text-align: right; }
   .tier-benefit-tabs { grid-template-columns: 1fr 1fr; }
   .tier-benefit-tabs button { min-height: 68px; }
   .tier-benefit-preview { min-height: 0; padding: 24px 20px; grid-template-columns: 1fr; gap: 25px; }
@@ -77,9 +77,13 @@
   .member-growth-hero { min-height: 0; grid-template-columns: 1fr; padding: 28px 20px; }
   .member-growth-hero article { margin-top: 18px; }
   .member-task-grid { grid-template-columns: 1fr; }
-  .referral-layout { grid-template-columns: 1fr; padding: 16px; }
-  .referral-qr { max-width: 300px; }
-  .referral-copy > strong { font-size: 29px; }
+  .referral-layout { grid-template-columns: 1fr; gap: 24px; padding: 18px; border-radius: 18px; }
+  .referral-qr-card { width: min(100%, 250px); justify-self: center; }
+  .referral-copy > strong { font-size: 32px; }
+  .referral-rewards { grid-template-columns: 1fr 1fr; }
+  .referral-rewards article { min-height: 74px; padding: 12px; }
+  .referral-rewards article > i { width: 32px; height: 32px; }
+  .referral-copy > div { flex-wrap: wrap; }
   .member-benefit-grid { grid-template-columns: 1fr 1fr; }
   .growth-two-column, .growth-form { grid-template-columns: 1fr; }
   .growth-form.compact { grid-template-columns: 1fr; }

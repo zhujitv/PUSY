@@ -172,6 +172,7 @@ test("homepage videos require manual playback", async () => {
   assert.match(homepage, /runtime\.strm\.yandex\.ru\/player\/video/);
   assert.doesNotMatch(homepage, /allow="[^"]*autoplay/);
   assert.match(homepage, /hero-clean-v2-42a264aa\.webp/);
+  assert.match(homepage, /hero-clean-v2-42a264aa\.webp[^>]*preload unoptimized fetchPriority="high"/);
   assert.match(homepage, /35\.webp/);
   assert.match(homepage, /hero-copy--box/);
   assert.match(homepage, /setInterval\(\(\) => setHeroIndex/);

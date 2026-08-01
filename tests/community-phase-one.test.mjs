@@ -204,6 +204,9 @@ test("community pages complete login return, publishing, public profile and navi
   assert.match(home, /community-topic-strip/);
   assert.match(styles, /community-mobile-nav/);
   assert.match(styles, /community-prototype-hero h1 span \{ display: block; white-space: nowrap; \}/);
+  assert.match(styles, /community-subnav > div a,[^}]*font-size: 12px;/);
+  assert.match(styles, /community-topic-strip small \{[^}]*font-size: 10px;/);
+  assert.match(styles, /community-post-actions button \{[^}]*font-size: 10px;/);
 });
 
 test("phase five closes the creator growth, campaign and governance loop", async () => {

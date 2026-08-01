@@ -84,7 +84,7 @@ export default function Home() {
 
       <section className="hero hero-carousel" id="top" aria-roledescription="轮播图" aria-label="PÚSY 首页活动" onMouseEnter={() => setHeroPaused(true)} onMouseLeave={() => setHeroPaused(false)} onFocus={() => setHeroPaused(true)} onBlur={() => setHeroPaused(false)} onTouchStart={(event) => { heroTouchStart.current = event.touches[0]?.clientX ?? null; }} onTouchEnd={(event) => { if (heroTouchStart.current === null) return; const distance = (event.changedTouches[0]?.clientX ?? heroTouchStart.current) - heroTouchStart.current; if (Math.abs(distance) > 45) moveHero(distance > 0 ? -1 : 1); heroTouchStart.current = null; }}>
         <div className="hero-slides">
-          <div className={`hero-slide ${heroIndex === 0 ? "is-active" : ""}`} aria-hidden={heroIndex !== 0}><Image src="/assets/hero-clean-v2-42a264aa.webp" alt="PÚSY 夏日礼物活动" fill sizes="100vw" priority /></div>
+          <div className={`hero-slide ${heroIndex === 0 ? "is-active" : ""}`} aria-hidden={heroIndex !== 0}><Image src="/assets/hero-clean-v2-42a264aa.webp" alt="PÚSY 夏日礼物活动" fill sizes="100vw" preload unoptimized fetchPriority="high" /></div>
           <div className={`hero-slide hero-slide--box ${heroIndex === 1 ? "is-active" : ""}`} aria-hidden={heroIndex !== 1}><Image src="/assets/35.webp" alt="PÚSY 海滩神秘礼盒" fill sizes="100vw" /></div>
         </div>
         {heroIndex === 0 ? <div className="hero-copy">

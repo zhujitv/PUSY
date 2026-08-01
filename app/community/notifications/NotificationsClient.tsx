@@ -12,13 +12,19 @@ function notificationCopy(item: CommunityNotification) {
   if (item.event_type === "following_post") return { title: `${item.actor_name || "你关注的会员"} 发布了新分享`, detail: "这篇内容已经通过社区审核。" };
   if (item.event_type === "post_comment") return { title: `${item.actor_name || "一位会员"} 评论了你的分享`, detail: "进入分享详情查看这条新评论。" };
   if (item.event_type === "comment_reply") return { title: `${item.actor_name || "一位会员"} 回复了你的评论`, detail: "进入分享详情继续参与讨论。" };
+  if (item.event_type === "post_like") return { title: `${item.actor_name || "一位会员"} 点赞了你的分享`, detail: Number(item.payload.count ?? 1) > 1 ? `已有 ${Number(item.payload.count)} 人点赞这篇分享。` : "你的真实分享正在得到更多回应。" };
+  if (item.event_type === "comment_like") return { title: `${item.actor_name || "一位会员"} 赞了你的评论`, detail: Number(item.payload.count ?? 1) > 1 ? `已有 ${Number(item.payload.count)} 人赞了这条评论。` : "进入讨论继续交流。" };
+  if (item.event_type === "mention") return { title: `${item.actor_name || "一位会员"} 在评论中提到了你`, detail: "进入分享查看提及你的内容。" };
+  if (item.event_type === "topic_post") return { title: "你关注的话题有了新分享", detail: `${item.actor_name || "一位会员"} 发布了相关内容。` };
+  if (item.event_type === "community_broadcast") return { title: String(item.payload.title || "社区新动态"), detail: String(item.payload.body || "PÚSY 社区有一条新消息。") };
   return { title: "社区动态更新", detail: "你的 PÚSY 社区有一条新消息。" };
 }
 
-export function NotificationsClient({ initialNotifications }: { initialNotifications: CommunityNotification[] }) {
+export function NotificationsClient({ initialNotifications, initialPreferences }: { initialNotifications: CommunityNotification[]; initialPreferences: { reactions: boolean; social: boolean; campaigns: boolean } }) {
   const [notifications, setNotifications] = useState(initialNotifications);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [preferences, setPreferences] = useState(initialPreferences);
 
   async function markRead(id?: string) {
     setBusy(true); setMessage("");
@@ -32,14 +38,26 @@ export function NotificationsClient({ initialNotifications }: { initialNotificat
     finally { setBusy(false); }
   }
 
+  async function savePreferences(next: typeof preferences) {
+    setPreferences(next); setBusy(true); setMessage("");
+    try {
+      const response = await fetch("/api/community/notifications", { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ preferences: next }) });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) { setPreferences(preferences); setMessage(result.error || "通知偏好保存失败"); }
+      else setMessage("通知偏好已保存");
+    } catch { setPreferences(preferences); setMessage("网络连接失败，请稍后再试"); }
+    finally { setBusy(false); }
+  }
+
   const unread = notifications.filter((item) => !item.read_at).length;
   return <section className="community-notifications-panel">
     <header><div><span>COMMUNITY UPDATES</span><h1>站内通知</h1><p>审核结果、关注关系和你关心的社区动态会集中显示在这里。</p></div>{unread > 0 && <button disabled={busy} onClick={() => void markRead()}><CommunityIcon name="check" size={17} />全部标为已读</button>}</header>
     {message && <p className="community-form-error" role="alert">{message}</p>}
+    <section className="community-notification-preferences"><h2>通知偏好</h2><label><input type="checkbox" checked={preferences.reactions} onChange={(event) => void savePreferences({ ...preferences, reactions: event.target.checked })} />点赞和评论互动</label><label><input type="checkbox" checked={preferences.social} onChange={(event) => void savePreferences({ ...preferences, social: event.target.checked })} />关注、回复和提及</label><label><input type="checkbox" checked={preferences.campaigns} onChange={(event) => void savePreferences({ ...preferences, campaigns: event.target.checked })} />社区活动与运营消息</label></section>
     {notifications.length ? <div className="community-notification-list">{notifications.map((item) => {
       const copy = notificationCopy(item);
       const href = item.post_id ? `/community/posts/${item.post_id}` : item.actor_public_id ? `/community/members/${item.actor_public_id}` : "/community";
-      return <article className={item.read_at ? "read" : "unread"} key={item.id}><i>{item.event_type === "new_follower" ? <CommunityIcon name="user" /> : ["following_post", "post_comment", "comment_reply"].includes(item.event_type) ? <CommunityIcon name="spark" /> : <CommunityIcon name="shield" />}</i><div><span>{item.read_at ? "已读" : "新通知"}</span><h2><a href={href}>{copy.title}</a></h2><p>{copy.detail}</p><time dateTime={item.created_at}>{new Date(item.created_at).toLocaleString("zh-CN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</time></div>{!item.read_at && <button disabled={busy} onClick={() => void markRead(item.id)} aria-label={`将“${copy.title}”标为已读`}>标为已读</button>}</article>;
+      return <article className={item.read_at ? "read" : "unread"} key={item.id}><i>{item.event_type === "new_follower" ? <CommunityIcon name="user" /> : ["following_post", "topic_post", "post_comment", "comment_reply", "post_like", "comment_like", "mention"].includes(item.event_type) ? <CommunityIcon name="spark" /> : <CommunityIcon name="shield" />}</i><div><span>{item.read_at ? "已读" : "新通知"}</span><h2><a href={href}>{copy.title}</a></h2><p>{copy.detail}</p><time dateTime={item.created_at}>{new Date(item.created_at).toLocaleString("zh-CN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</time></div>{!item.read_at && <button disabled={busy} onClick={() => void markRead(item.id)} aria-label={`将“${copy.title}”标为已读`}>标为已读</button>}</article>;
     })}</div> : <div className="community-empty"><span>ALL CAUGHT UP</span><h2>暂时没有新通知</h2><p>关注会员、发布分享或收到审核结果后，消息会显示在这里。</p><a href="/community">返回社区 →</a></div>}
   </section>;
 }

@@ -12,6 +12,7 @@ import { paymentReconciliation } from "../../../lib/payments/reconciliation";
 import { listCommunityModerationPosts } from "../../../lib/community/moderation";
 import { listCommunityReports } from "../../../lib/community/engagement";
 import { getCommunityCommerceInsights } from "../../../lib/community/commerce";
+import { getCommunityOperationsData } from "../../../lib/community/admin-operations";
 import { handleAdminUserAction } from "../../../lib/admin/actions/01-admin-users";
 import { handleCatalogProductAction } from "../../../lib/admin/actions/02-catalog-products";
 import { handleOrderReturnAction } from "../../../lib/admin/actions/03-orders-returns";
@@ -118,6 +119,7 @@ export async function GET(request: Request) {
       db.prepare("SELECT * FROM growth_automation_runs ORDER BY started_at DESC LIMIT 100").all(),
       db.prepare("SELECT COUNT(*)::INTEGER AS total_members, COUNT(*) FILTER (WHERE tier = 'silver')::INTEGER AS silver_members, COUNT(*) FILTER (WHERE tier = 'gold')::INTEGER AS gold_members, COUNT(*) FILTER (WHERE tier = 'diamond')::INTEGER AS diamond_members, COALESCE(SUM(points_balance), 0)::INTEGER AS points_outstanding FROM members").first(),
     ]) : [{ results: [] }, { results: [] }, { results: [] }, { results: [] }, { results: [] }, {}];
+    const communityOperations = communityVisible && wants("community") ? await getCommunityOperationsData() : { metrics: { dau: 0, wau: 0, mau: 0, interactions30d: 0, returning7d: 0, retention7d: 0 }, comments: [], members: [], topics: [], campaigns: [], broadcasts: [] };
     return Response.json({
       viewer: actor,
       products: can("products.read") ? products.results : [],
@@ -143,6 +145,7 @@ export async function GET(request: Request) {
       communityPosts: communityVisible ? communityPosts : [],
       communityReports: communityVisible ? communityReports : [],
       communityInsights: communityVisible ? communityInsights : { summary: { impressions: 0, productClicks: 0, addToCarts: 0, measuredPosts: 0 }, products: [] },
+      communityOperations,
       content: can("content.manage") ? content.current : {},
       contentRevisions: can("content.manage") ? content.revisions : [],
       supportThreads: supportVisible ? supportThreads.results : [],
@@ -207,7 +210,7 @@ export async function POST(request: Request) {
       auditCompleted = true;
     }
     const conflict = error instanceof Error && /unique/i.test(error.message);
-    const contentValidation = error instanceof Error && /^(定时发布时间必须晚于当前时间|内容版本不存在|只能删除草稿或待发布版本|社区内容标识无效|社区审核状态无效|拒绝公开时请填写审核说明|社区内容不存在|社区推荐位置无效|只有公开内容可以设为社区精选)$/.test(error.message);
+    const contentValidation = error instanceof Error && /^(定时发布时间必须晚于当前时间|内容版本不存在|只能删除草稿或待发布版本|社区内容标识无效|社区审核状态无效|拒绝公开时请填写审核说明|社区内容不存在|社区推荐位置无效|只有公开内容可以设为社区精选|社区评论不存在或已经删除|社区活动不存在|社区会员不存在)$/.test(error.message);
     console.error("[api/admin] action failed", { message: error instanceof Error ? error.message : String(error), code: typeof error === "object" && error && "code" in error ? String(error.code) : undefined });
     return safeServerError(contentValidation ? error.message : conflict ? "相同名称、商品编号或邮箱的数据已经存在" : "后台操作失败，请稍后再试", contentValidation ? 400 : conflict ? 409 : 500);
   } finally {

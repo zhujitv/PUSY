@@ -74,13 +74,13 @@ async function fingerprint(title: string, body: string) {
 
 export async function updateCreatorPost(input: { memberId: number; postId: string; title: string; body: string; topicSlugs: string[]; productSlugs: string[]; intent: "draft" | "submit"; expectedUpdatedAt: string }) {
   const db = await getStoreDb();
-  const post = await db.prepare(`SELECT p.id, p.status, p.updated_at, cp.creator_status
+  const post = await db.prepare(`SELECT p.id, p.status, p.updated_at, cp.creator_status, cp.restricted_until
     FROM community_posts p JOIN community_profiles cp ON cp.member_id = p.member_id
-    WHERE p.id = ? AND p.member_id = ? LIMIT 1`).bind(input.postId, input.memberId).first<{ id: string; status: string; updated_at: string; creator_status: string }>();
+    WHERE p.id = ? AND p.member_id = ? LIMIT 1`).bind(input.postId, input.memberId).first<{ id: string; status: string; updated_at: string; creator_status: string; restricted_until: string | null }>();
   if (!post) throw new Error("分享不存在或不属于当前会员");
   if (post.status === "hidden") throw new Error("已隐藏内容请先恢复后再编辑");
   if (input.expectedUpdatedAt && post.updated_at !== input.expectedUpdatedAt) throw new Error("这篇分享刚刚在其他页面被修改，请刷新后重试");
-  if (input.intent === "submit" && post.creator_status === "restricted") throw new Error("该创作者账号暂时无法提交内容");
+  if (input.intent === "submit" && post.creator_status === "restricted" && (!post.restricted_until || new Date(post.restricted_until).getTime() > Date.now())) throw new Error("该创作者账号暂时无法提交内容");
   const content = normalizeEditable(input);
   const media = await db.prepare("SELECT COUNT(*)::INTEGER AS count FROM community_post_media WHERE post_id = ?").bind(post.id).first<{ count: number }>();
   if (input.intent === "submit" && content.body.length < 10) throw new Error("正文至少需要 10 个字");

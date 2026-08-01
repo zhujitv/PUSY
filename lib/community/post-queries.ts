@@ -49,7 +49,7 @@ const postGroup = `
     cp.public_id, cp.display_name, cp.bio, cp.account_type, cp.official_label, promotion.placement, promotion.sort_order
 `;
 
-export async function listCommunityPosts(input: { publicId?: string; viewerMemberId?: number; topicSlug?: string; productSlug?: string; query?: string; feed?: "all" | "following" | "bookmarks"; sort?: "featured" | "latest" | "popular"; limit?: number } = {}) {
+export async function listCommunityPosts(input: { publicId?: string; viewerMemberId?: number; topicSlug?: string; productSlug?: string; query?: string; feed?: "all" | "following" | "bookmarks"; sort?: "featured" | "latest" | "popular"; cursor?: string; limit?: number } = {}) {
   const db = await getStoreDb();
   const limit = Math.min(48, Math.max(1, Math.round(input.limit ?? 24)));
   let where = "WHERE p.status = 'approved'";
@@ -109,12 +109,24 @@ export async function listCommunityPosts(input: { publicId?: string; viewerMembe
     )`;
     values.push(input.viewerMemberId ?? 0);
   }
+  if (input.cursor) {
+    const [cursorTime, cursorId] = input.cursor.split("|");
+    if (/^\d{4}-\d{2}-\d{2}/.test(cursorTime ?? "") && /^PST-[A-Z0-9]{12}$/.test(cursorId ?? "")) {
+      where += `${where ? " AND" : "WHERE"} (COALESCE(p.published_at, p.created_at)::timestamp, p.id) < (?::timestamp, ?)`;
+      values.push(cursorTime, cursorId);
+    }
+  }
   values.push(limit);
+  const viewerScoreId = Number.isInteger(input.viewerMemberId) && Number(input.viewerMemberId) > 0 ? Number(input.viewerMemberId) : 0;
   const order = input.sort === "latest"
     ? "COALESCE(p.published_at, p.created_at)::timestamp DESC"
     : input.sort === "popular"
       ? "like_count DESC, comment_count DESC, bookmark_count DESC, COALESCE(p.published_at, p.created_at)::timestamp DESC"
-      : "CASE COALESCE(promotion.placement, '') WHEN 'pinned' THEN 0 WHEN 'featured' THEN 1 ELSE 2 END, COALESCE(promotion.sort_order, 0) DESC, COALESCE(p.published_at, p.created_at)::timestamp DESC";
+      : `CASE COALESCE(promotion.placement, '') WHEN 'pinned' THEN 0 WHEN 'featured' THEN 1 ELSE 2 END,
+        CASE WHEN EXISTS(SELECT 1 FROM community_follows score_follow WHERE score_follow.follower_member_id = ${viewerScoreId} AND score_follow.followed_member_id = p.member_id) THEN 0 ELSE 1 END,
+        CASE WHEN EXISTS(SELECT 1 FROM community_post_topics score_pt JOIN community_topic_follows score_tf ON score_tf.topic_id = score_pt.topic_id WHERE score_pt.post_id = p.id AND score_tf.member_id = ${viewerScoreId}) THEN 0 ELSE 1 END,
+        COALESCE(promotion.sort_order, 0) DESC, (like_count * 3 + comment_count * 5 + bookmark_count) DESC,
+        COALESCE(p.published_at, p.created_at)::timestamp DESC`;
   const rows = await db.prepare(`${postSelect} ${where} ${postGroup} ORDER BY ${order} LIMIT ?`)
     .bind(...values)
     .all<CommunityPostRow>();
@@ -157,7 +169,7 @@ export async function getCommunityMember(publicId: string, viewerMemberId?: numb
 
 export async function getCommunityProfileForMember(memberId: number) {
   const db = await getStoreDb();
-  return db.prepare("SELECT member_id, public_id, display_name, bio, status, account_type, official_label, creator_status, reward_blocked_at FROM community_profiles WHERE member_id = ? LIMIT 1")
+  return db.prepare("SELECT member_id, public_id, display_name, bio, status, account_type, official_label, creator_status, restricted_until, reward_blocked_at FROM community_profiles WHERE member_id = ? LIMIT 1")
     .bind(memberId)
-    .first<{ member_id: number; public_id: string; display_name: string; bio: string; status: string; account_type: string; official_label: string; creator_status: string; reward_blocked_at: string | null }>();
+    .first<{ member_id: number; public_id: string; display_name: string; bio: string; status: string; account_type: string; official_label: string; creator_status: string; restricted_until: string | null; reward_blocked_at: string | null }>();
 }

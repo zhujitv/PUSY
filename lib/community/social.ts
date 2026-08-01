@@ -1,5 +1,6 @@
 import { getStoreDb } from "../../db/store";
 import { ensureCommunityProfile } from "./posts";
+import { recordCommunityActivity } from "./activity";
 export { listCommunityTopics } from "./topics";
 export type { CommunityTopic } from "./topics";
 
@@ -104,6 +105,27 @@ export async function listCommunityFollows(memberId: number) {
   return { following: following.results, followers: followers.results, counts };
 }
 
+export async function listCommunityConnections(publicId: string, viewerMemberId?: number) {
+  const db = await getStoreDb();
+  const target = await db.prepare("SELECT member_id, public_id, display_name FROM community_profiles WHERE public_id = ? AND status = 'active' LIMIT 1")
+    .bind(publicId).first<{ member_id: number; public_id: string; display_name: string }>();
+  if (!target) return null;
+  const [followers, following] = await Promise.all([
+    db.prepare(`SELECT cp.public_id, cp.display_name, cp.bio,
+      EXISTS(SELECT 1 FROM community_follows mine WHERE mine.follower_member_id = ? AND mine.followed_member_id = cp.member_id) AS viewer_is_following
+      FROM community_follows f JOIN community_profiles cp ON cp.member_id = f.follower_member_id AND cp.status = 'active'
+      JOIN members m ON m.id = cp.member_id AND m.status != 'blocked' WHERE f.followed_member_id = ? ORDER BY f.created_at::timestamp DESC LIMIT 200`)
+      .bind(viewerMemberId ?? 0, target.member_id).all<{ public_id: string; display_name: string; bio: string; viewer_is_following: boolean }>(),
+    db.prepare(`SELECT cp.public_id, cp.display_name, cp.bio,
+      EXISTS(SELECT 1 FROM community_follows mine WHERE mine.follower_member_id = ? AND mine.followed_member_id = cp.member_id) AS viewer_is_following
+      FROM community_follows f JOIN community_profiles cp ON cp.member_id = f.followed_member_id AND cp.status = 'active'
+      JOIN members m ON m.id = cp.member_id AND m.status != 'blocked' WHERE f.follower_member_id = ? ORDER BY f.created_at::timestamp DESC LIMIT 200`)
+      .bind(viewerMemberId ?? 0, target.member_id).all<{ public_id: string; display_name: string; bio: string; viewer_is_following: boolean }>(),
+  ]);
+  const normalize = (rows: typeof followers.results) => rows.map((row) => ({ ...row, viewer_is_following: Boolean(row.viewer_is_following) }));
+  return { member: target, followers: normalize(followers.results), following: normalize(following.results) };
+}
+
 export async function followCommunityMember(input: { memberId: number; displayName: string; publicId: string }) {
   const db = await getStoreDb();
   const target = await db.prepare(`
@@ -122,12 +144,14 @@ export async function followCommunityMember(input: { memberId: number; displayNa
     await db.prepare(`
       INSERT INTO community_notifications
         (id, recipient_member_id, event_key, event_type, actor_member_id, entity_type, entity_id, payload_json)
-      VALUES (?, ?, ?, 'new_follower', ?, 'member', ?, ?)
+      SELECT ?, ?, ?, 'new_follower', ?, 'member', ?, ?
+      WHERE NOT EXISTS (SELECT 1 FROM community_notification_preferences pref WHERE pref.member_id = ? AND pref.social_enabled = 0)
       ON CONFLICT (recipient_member_id, event_key) DO UPDATE SET read_at = NULL, created_at = CURRENT_TIMESTAMP
     `).bind(
       notificationId(), target.member_id, `follow:${input.memberId}:${target.member_id}`,
-      input.memberId, actorPublicId, JSON.stringify({ actorName: input.displayName.slice(0, 30) }),
+      input.memberId, actorPublicId, JSON.stringify({ actorName: input.displayName.slice(0, 30) }), target.member_id,
     ).run();
+    await recordCommunityActivity({ memberId: input.memberId, type: "follow", eventKey: `follow:${input.memberId}:${target.member_id}`, entityType: "member", entityId: target.public_id });
   }
   return { publicId: target.public_id, displayName: target.display_name, following: true };
 }
@@ -173,11 +197,19 @@ export async function notifyCommunityModeration(input: { postId: string; authorM
   `).bind(notificationId(), input.authorMemberId, `moderation:${input.postId}:${input.status}`, eventType, input.actorMemberId ?? null, input.postId, input.postId).run();
   if (input.status !== "approved") return;
   const followers = await db.prepare("SELECT follower_member_id FROM community_follows WHERE followed_member_id = ?").bind(input.authorMemberId).all<{ follower_member_id: number }>();
-  if (!followers.results.length) return;
-  await db.batch(followers.results.map((follower) => db.prepare(`
+  if (followers.results.length) await db.batch(followers.results.map((follower) => db.prepare(`
     INSERT INTO community_notifications
       (id, recipient_member_id, event_key, event_type, actor_member_id, entity_type, entity_id, post_id)
-    VALUES (?, ?, ?, 'following_post', ?, 'post', ?, ?)
+    SELECT ?, ?, ?, 'following_post', ?, 'post', ?, ?
+    WHERE NOT EXISTS (SELECT 1 FROM community_notification_preferences pref WHERE pref.member_id = ? AND pref.social_enabled = 0)
     ON CONFLICT (recipient_member_id, event_key) DO NOTHING
-  `).bind(notificationId(), follower.follower_member_id, `following-post:${input.postId}`, input.authorMemberId, input.postId, input.postId)));
+  `).bind(notificationId(), follower.follower_member_id, `following-post:${input.postId}`, input.authorMemberId, input.postId, input.postId, follower.follower_member_id)));
+  const topicFollowers = await db.prepare(`SELECT DISTINCT tf.member_id FROM community_topic_follows tf
+    JOIN community_post_topics pt ON pt.topic_id = tf.topic_id WHERE pt.post_id = ? AND tf.member_id != ?`).bind(input.postId, input.authorMemberId).all<{ member_id: number }>();
+  if (topicFollowers.results.length) await db.batch(topicFollowers.results.map((follower) => db.prepare(`
+    INSERT INTO community_notifications (id, recipient_member_id, event_key, event_type, actor_member_id, entity_type, entity_id, post_id)
+    SELECT ?, ?, ?, 'topic_post', ?, 'post', ?, ?
+    WHERE NOT EXISTS (SELECT 1 FROM community_notification_preferences pref WHERE pref.member_id = ? AND pref.social_enabled = 0)
+    ON CONFLICT (recipient_member_id, event_key) DO NOTHING
+  `).bind(notificationId(), follower.member_id, `topic-post:${input.postId}`, input.authorMemberId, input.postId, input.postId, follower.member_id)));
 }

@@ -4,6 +4,7 @@ import { resolveCommunityProducts } from "./commerce";
 import { resolveCommunityTopics } from "./topics";
 import { getCommunityProfileForMember } from "./post-queries";
 import type { CommunityPostStatus } from "./post-types";
+import { recordCommunityActivity } from "./activity";
 
 export async function ensureCommunityProfile(memberId: number, displayName: string) {
   const db = await getStoreDb();
@@ -30,7 +31,7 @@ export async function createCommunityPost(input: { memberId: number; displayName
   if (!member || member.status === "blocked") throw new Error("该会员账户不可发布社区内容");
   const publicId = await ensureCommunityProfile(input.memberId, input.displayName);
   const profile = await getCommunityProfileForMember(input.memberId);
-  if (input.intent !== "draft" && profile?.creator_status === "restricted") throw new Error("该创作者账号暂时无法提交新内容");
+  if (input.intent !== "draft" && profile?.creator_status === "restricted" && (!profile.restricted_until || new Date(profile.restricted_until).getTime() > Date.now())) throw new Error("该创作者账号暂时无法提交新内容");
   const existing = await db.prepare("SELECT id FROM community_posts WHERE member_id = ? AND client_request_id = ? LIMIT 1").bind(input.memberId, input.clientRequestId).first<{ id: string }>();
   if (existing) return { id: existing.id, publicId, duplicate: true };
   const [topics, linkedProducts] = await Promise.all([
@@ -66,6 +67,7 @@ export async function createCommunityPost(input: { memberId: number; displayName
     }
     throw error;
   }
+  await recordCommunityActivity({ memberId: input.memberId, type: "post_created", eventKey: `post-created:${id}`, entityType: "post", entityId: id });
   return { id, publicId, duplicate: false };
 }
 

@@ -1,6 +1,7 @@
 import { phaseTwoHeaders } from "../../../../lib/community/contracts";
 import { getCommunitySocialSummary, listCommunityNotifications, markCommunityNotificationsRead } from "../../../../lib/community/social";
 import { getPreviewMemberIdentity } from "../../../../lib/preview-member-auth";
+import { updateCommunityNotificationPreferences } from "../../../../lib/community/activity";
 import { hasTrustedOrigin, privateJson, safeServerError } from "../../../../lib/request-security";
 
 export async function GET() {
@@ -21,6 +22,11 @@ export async function PATCH(request: Request) {
     const viewer = await getPreviewMemberIdentity();
     if (!viewer) return privateJson({ error: "请先登录会员账户" }, { status: 401, headers: phaseTwoHeaders() });
     const payload = await request.json() as Record<string, unknown>;
+    if (payload.preferences && typeof payload.preferences === "object") {
+      const preferences = payload.preferences as Record<string, unknown>;
+      const result = await updateCommunityNotificationPreferences(viewer.memberId, { reactions: preferences.reactions !== false, social: preferences.social !== false, campaigns: preferences.campaigns !== false });
+      return privateJson({ ok: true, preferences: result }, { headers: phaseTwoHeaders() });
+    }
     const id = payload.id ? String(payload.id).trim().toUpperCase() : undefined;
     if (id && !/^NTF-[A-Z0-9]{12}$/.test(id)) return privateJson({ error: "通知标识无效" }, { status: 400, headers: phaseTwoHeaders() });
     const updated = await markCommunityNotificationsRead(viewer.memberId, id);

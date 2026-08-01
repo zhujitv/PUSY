@@ -6,6 +6,7 @@ import { getCommunitySocialSummary, listCommunityNotifications } from "../../../
 import { getPreviewMemberIdentity } from "../../../lib/preview-member-auth";
 import { CommunityNavigation } from "../CommunityNavigation";
 import { NotificationsClient } from "./NotificationsClient";
+import { getCommunityNotificationPreferences } from "../../../lib/community/activity";
 
 export const metadata: Metadata = { title: "站内通知｜PÚSY CLUB", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -13,10 +14,11 @@ export const dynamic = "force-dynamic";
 export default async function CommunityNotificationsPage() {
   const viewer = await getPreviewMemberIdentity();
   if (!viewer) redirect(`/account/login?returnTo=${encodeURIComponent("/community/notifications")}`);
-  const [notifications, profile, social] = await Promise.all([
+  const [notifications, profile, social, preferences] = await Promise.all([
     listCommunityNotifications(viewer.memberId),
     getCommunityProfileForMember(viewer.memberId),
     getCommunitySocialSummary(viewer.memberId),
+    getCommunityNotificationPreferences(viewer.memberId),
   ]);
-  return <PageShell><CommunityNavigation active="notifications" viewerPublicId={profile?.public_id} unreadCount={social.unreadCount} /><main className="community-notifications-page"><NotificationsClient initialNotifications={notifications} /></main></PageShell>;
+  return <PageShell><CommunityNavigation active="notifications" viewerPublicId={profile?.public_id} unreadCount={social.unreadCount} /><main className="community-notifications-page"><NotificationsClient initialNotifications={notifications} initialPreferences={preferences} /></main></PageShell>;
 }

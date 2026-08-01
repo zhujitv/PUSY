@@ -7,6 +7,8 @@ export type CommunityComment = {
   author_name: string;
   created_at: string;
   viewer_is_author: boolean;
+  like_count: number;
+  viewer_has_liked: boolean;
 };
 
 export type CommunityReport = {

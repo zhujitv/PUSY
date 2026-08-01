@@ -125,7 +125,7 @@ export async function listCommunityPosts(input: { publicId?: string; viewerMembe
       : `CASE COALESCE(promotion.placement, '') WHEN 'pinned' THEN 0 WHEN 'featured' THEN 1 ELSE 2 END,
         CASE WHEN EXISTS(SELECT 1 FROM community_follows score_follow WHERE score_follow.follower_member_id = ${viewerScoreId} AND score_follow.followed_member_id = p.member_id) THEN 0 ELSE 1 END,
         CASE WHEN EXISTS(SELECT 1 FROM community_post_topics score_pt JOIN community_topic_follows score_tf ON score_tf.topic_id = score_pt.topic_id WHERE score_pt.post_id = p.id AND score_tf.member_id = ${viewerScoreId}) THEN 0 ELSE 1 END,
-        COALESCE(promotion.sort_order, 0) DESC, (like_count * 3 + comment_count * 5 + bookmark_count) DESC,
+        COALESCE(promotion.sort_order, 0) DESC, comment_count DESC, like_count DESC, bookmark_count DESC,
         COALESCE(p.published_at, p.created_at)::timestamp DESC`;
   const rows = await db.prepare(`${postSelect} ${where} ${postGroup} ORDER BY ${order} LIMIT ?`)
     .bind(...values)

@@ -7,8 +7,8 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "vercel-build": "npm run db:migrate && next build",
+    "build": "next build --webpack",
+    "vercel-build": "npm run db:migrate && next build --webpack",
     "start": "next start",
     "test": "npm run build && node --test tests/*.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",

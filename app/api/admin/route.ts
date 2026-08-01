@@ -120,6 +120,11 @@ export async function GET(request: Request) {
       db.prepare("SELECT COUNT(*)::INTEGER AS total_members, COUNT(*) FILTER (WHERE tier = 'silver')::INTEGER AS silver_members, COUNT(*) FILTER (WHERE tier = 'gold')::INTEGER AS gold_members, COUNT(*) FILTER (WHERE tier = 'diamond')::INTEGER AS diamond_members, COALESCE(SUM(points_balance), 0)::INTEGER AS points_outstanding FROM members").first(),
     ]) : [{ results: [] }, { results: [] }, { results: [] }, { results: [] }, { results: [] }, {}];
     const communityOperations = communityVisible && wants("community") ? await getCommunityOperationsData() : { metrics: { dau: 0, wau: 0, mau: 0, interactions30d: 0, returning7d: 0, retention7d: 0 }, comments: [], members: [], topics: [], campaigns: [], broadcasts: [] };
+    const wallets = financeVisible && wants("payments") ? await db.prepare(`SELECT m.id AS member_id, m.name, m.email,
+      COALESCE(w.available_balance_fen, 0) AS available_balance_fen, COALESCE(w.frozen_balance_fen, 0) AS frozen_balance_fen,
+      COALESCE(w.status, 'active') AS status, w.payment_password_hash IS NOT NULL AS payment_password_set
+      FROM members m LEFT JOIN member_wallets w ON w.member_id = m.id
+      ORDER BY COALESCE(w.available_balance_fen, 0) DESC, m.id DESC LIMIT 500`).all() : { results: [] };
     return Response.json({
       viewer: actor,
       products: can("products.read") ? products.results : [],
@@ -138,6 +143,7 @@ export async function GET(request: Request) {
       payments: financeVisible ? payments.results : [],
       refunds: financeVisible ? refunds.results : [],
       paymentEvents: financeVisible ? paymentEvents.results : [],
+      wallets: financeVisible ? wallets.results : [],
       notificationSettings: can("system.manage") ? notificationSettings : [],
       notificationTemplates: can("system.manage") ? notificationTemplates.results : [],
       notificationJobs: can("system.manage") ? notificationJobs.results : [],

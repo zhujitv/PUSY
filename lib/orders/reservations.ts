@@ -1,4 +1,5 @@
 import { getStoreDb } from "../../db/store";
+import { releaseWalletPayment } from "../wallet/payment-allocation";
 
 export async function releaseExpiredOrderReservations(limit = 50) {
   const db = await getStoreDb();
@@ -21,7 +22,11 @@ export async function releaseExpiredOrderReservations(limit = 50) {
 export async function releaseOrderReservation(orderId: string) {
   const db = await getStoreDb();
   const order = await db.prepare("SELECT id, coupon_code, discount, resources_committed, resources_released FROM orders WHERE id = ? LIMIT 1").bind(orderId).first<{ id: string; coupon_code: string | null; discount: number; resources_committed: number; resources_released: number }>();
-  if (!order || order.resources_committed || order.resources_released) return false;
+  if (!order || order.resources_committed) return false;
+  if (order.resources_released) {
+    await releaseWalletPayment(orderId, "订单已取消，余额冻结退回");
+    return true;
+  }
   const statements = [
     db.prepare("UPDATE orders SET resources_released = 1, status = '已取消', cancelled_at = COALESCE(cancelled_at, CURRENT_TIMESTAMP), updated_at = CURRENT_TIMESTAMP WHERE id = ? AND resources_committed = 0 AND resources_released = 0").bind(order.id).requireChanges("订单资源已经释放"),
     db.prepare("UPDATE products p SET stock = p.stock + oi.quantity, updated_at = CURRENT_TIMESTAMP FROM order_items oi WHERE oi.order_id = ? AND oi.product_slug = p.slug").bind(order.id),
@@ -37,6 +42,7 @@ export async function releaseOrderReservation(orderId: string) {
     statements.push(db.prepare("UPDATE gift_cards SET balance = balance + ?, status = 'active' WHERE code = ? AND order_id != ?").bind(order.discount, order.coupon_code, order.id));
   }
   await db.batch(statements);
+  await releaseWalletPayment(orderId, "订单取消或支付超时，余额冻结退回");
   return true;
 }
 

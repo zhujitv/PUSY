@@ -98,6 +98,7 @@ export const adminActionPermissions: Record<string, AdminPermission> = {
   "create-refund": "finance.manage",
   "retry-refund": "finance.manage",
   "sync-refund": "finance.manage",
+  "adjust-member-wallet": "finance.manage",
   "update-notification-setting": "system.manage",
   "update-notification-template": "system.manage",
   "retry-notification": "system.manage",

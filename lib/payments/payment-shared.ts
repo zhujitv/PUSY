@@ -2,8 +2,9 @@ import { getStoreDb } from "../../db/store";
 import { paymentAdapter } from "./index";
 import type { PaymentProviderName, PaymentStatus, ProviderConfig, RefundStatus } from "./types";
 
-export type DbPayment = { id: string; order_id: string; provider: PaymentProviderName; merchant_trade_no: string; provider_transaction_id: string | null; amount_fen: number; status: PaymentStatus; checkout_url: string | null; code_url: string | null; attempts: number };
-export type DbRefund = { id: string; payment_id: string; order_id: string; provider: PaymentProviderName; merchant_refund_no: string; provider_refund_id: string | null; amount_fen: number; reason: string; status: RefundStatus; attempts: number };
+export type WalletPaymentStatus = "none" | "held" | "captured" | "released" | "refunded";
+export type DbPayment = { id: string; order_id: string; provider: PaymentProviderName; merchant_trade_no: string; provider_transaction_id: string | null; amount_fen: number; wallet_amount_fen: number; external_amount_fen: number; wallet_status: WalletPaymentStatus; status: PaymentStatus; checkout_url: string | null; code_url: string | null; attempts: number };
+export type DbRefund = { id: string; payment_id: string; order_id: string; provider: PaymentProviderName; merchant_refund_no: string; provider_refund_id: string | null; amount_fen: number; wallet_amount_fen: number; external_amount_fen: number; wallet_credited: number; reason: string; status: RefundStatus; attempts: number };
 
 export async function providerConfig(provider: PaymentProviderName) {
   const db = await getStoreDb();

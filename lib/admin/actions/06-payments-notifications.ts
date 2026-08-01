@@ -2,9 +2,10 @@ import { processDueNotifications, processNotificationJob } from "../../notificat
 import { createPayment, createRefund, retryRefund, syncPayment, syncRefund } from "../../payments/service";
 import type { PaymentProviderName } from "../../payments/types";
 import type { AdminActionContext, AdminActionResult } from "./action-context";
+import { adjustMemberWallet } from "../../wallet/service";
 
 export async function handlePaymentNotificationAction(context: AdminActionContext): Promise<AdminActionResult> {
-  const { action, payload, db, request } = context;
+  const { action, payload, db, request, actor } = context;
   if (action === "update-payment-provider") {
       const provider = String(payload.provider ?? "") as PaymentProviderName;
       if (!["wechat", "alipay"].includes(provider)) return Response.json({ error: "支付渠道无效" }, { status: 400 });
@@ -25,6 +26,12 @@ export async function handlePaymentNotificationAction(context: AdminActionContex
       await retryRefund(String(payload.id ?? ""), new URL(request.url).origin);
     } else if (action === "sync-refund") {
       await syncRefund(String(payload.id ?? ""));
+    } else if (action === "adjust-member-wallet") {
+      const memberId = Number(payload.memberId);
+      const amountFen = Math.round(Number(payload.amountYuan) * 100);
+      const reason = String(payload.reason ?? "").trim();
+      if (!Number.isInteger(memberId) || memberId <= 0 || !Number.isInteger(amountFen) || amountFen === 0 || !reason) return Response.json({ error: "请填写有效会员、调整金额和原因" }, { status: 400 });
+      await adjustMemberWallet({ memberId, amountFen, reason, actor: actor.email, referenceId: `ADMIN-${crypto.randomUUID()}` });
     } else if (action === "update-notification-setting") {
       const channel = String(payload.channel ?? "");
       if (!["email", "sms"].includes(channel)) return Response.json({ error: "通知渠道无效" }, { status: 400 });

@@ -7,29 +7,46 @@ import { sha256 } from "./crypto";
 import { paymentAdapter } from "./index";
 import { paymentId, providerConfig, retryAt, tradeNo, type DbPayment } from "./payment-shared";
 import type { PaymentProviderName, PaymentStatus } from "./types";
+import { captureWalletPayment, createPaymentAllocation, releaseWalletPayment } from "../wallet/payment-allocation";
 
-export async function createPayment(orderId: string, provider: PaymentProviderName, origin: string) {
+export async function createPayment(orderId: string, provider: PaymentProviderName, origin: string, options: { memberId?: number; paymentPassword?: string } = {}) {
   await releaseExpiredOrderReservations();
   const db = await getStoreDb();
-  const order = await db.prepare("SELECT id, total, status, reservation_expires_at, resources_released FROM orders WHERE id = ?").bind(orderId).first<{ id: string; total: number; status: string; reservation_expires_at: string | null; resources_released: number }>();
+  const order = await db.prepare("SELECT id, member_id, total, status, reservation_expires_at, resources_released FROM orders WHERE id = ?").bind(orderId).first<{ id: string; member_id: number | null; total: number; status: string; reservation_expires_at: string | null; resources_released: number }>();
   if (!order) throw new Error("订单不存在");
   if (["已取消", "已退款"].includes(order.status) || order.resources_released || (order.reservation_expires_at && new Date(order.reservation_expires_at).getTime() <= Date.now())) throw new Error("订单支付时限已过，请重新下单");
+  const totalFen = Math.round(order.total * 12);
+  const merchantTradeNo = tradeNo(order.id, provider);
+  let payment = await db.prepare("SELECT * FROM payments WHERE merchant_trade_no = ? AND provider = ? ORDER BY created_at DESC LIMIT 1").bind(merchantTradeNo, provider).first<DbPayment>();
+  if (payment?.status === "paid") {
+    await applyPaymentStatus(payment, "paid", payment.provider_transaction_id ?? undefined);
+    return db.prepare("SELECT * FROM payments WHERE id = ?").bind(payment.id).first<DbPayment>();
+  }
+  const walletPreview = !payment && order.member_id ? await db.prepare("SELECT available_balance_fen FROM member_wallets WHERE member_id = ? AND status = 'active' LIMIT 1").bind(order.member_id).first<{ available_balance_fen: number }>() : null;
+  if (!payment && Number(walletPreview?.available_balance_fen ?? 0) < totalFen) {
+    const previewConfig = await providerConfig(provider);
+    const previewAdapter = paymentAdapter(provider);
+    if (!previewConfig.enabled) throw new Error(`${provider === "wechat" ? "微信支付" : "支付宝"}尚未启用`);
+    if (!previewAdapter.configured(previewConfig)) throw new Error(`${provider === "wechat" ? "微信支付" : "支付宝"}商户参数或服务器密钥未配置完整`);
+  }
+  const competing = await db.prepare("SELECT provider FROM payments WHERE order_id = ? AND provider != ? AND status IN ('created','pending','failed') LIMIT 1").bind(order.id, provider).first<{ provider: PaymentProviderName }>();
+  if (!payment && competing) throw new Error("该订单已有其他渠道支付处理中，请先完成或取消原支付");
+  if (!payment) {
+    const id = paymentId();
+    payment = await createPaymentAllocation({ paymentId: id, order: { id: order.id, member_id: order.member_id, totalFen }, provider, merchantTradeNo, memberId: options.memberId, paymentPassword: options.paymentPassword });
+  }
+  if (!payment) throw new Error("支付记录创建失败");
+  if (payment.external_amount_fen === 0) {
+    await applyPaymentStatus(payment, "paid", `WALLET-${payment.id}`);
+    return db.prepare("SELECT * FROM payments WHERE id = ?").bind(payment.id).first<DbPayment>();
+  }
   const config = await providerConfig(provider);
   const adapter = paymentAdapter(provider);
   if (!config.enabled) throw new Error(`${provider === "wechat" ? "微信支付" : "支付宝"}尚未启用`);
   if (!adapter.configured(config)) throw new Error(`${provider === "wechat" ? "微信支付" : "支付宝"}商户参数或服务器密钥未配置完整`);
-  const merchantTradeNo = tradeNo(order.id, provider);
-  let payment = await db.prepare("SELECT * FROM payments WHERE merchant_trade_no = ? AND provider = ? ORDER BY created_at DESC LIMIT 1").bind(merchantTradeNo, provider).first<DbPayment>();
-  if (payment?.status === "paid") return payment;
-  if (!payment) {
-    const id = paymentId();
-    await db.prepare("INSERT INTO payments (id, order_id, provider, merchant_trade_no, amount_fen, status) VALUES (?, ?, ?, ?, ?, 'created')").bind(id, order.id, provider, merchantTradeNo, Math.round(order.total * 12)).run();
-    payment = await db.prepare("SELECT * FROM payments WHERE id = ?").bind(id).first<DbPayment>();
-  }
-  if (!payment) throw new Error("支付记录创建失败");
   try {
     const returnParams = new URLSearchParams({ orderId: order.id, provider });
-    const result = await adapter.create(config, { orderId: order.id, tradeNo: payment.merchant_trade_no, amountFen: payment.amount_fen, description: `PUSY.CN 订单 ${order.id}`, notifyUrl: `${origin}/api/payments/webhooks/${provider}`, returnUrl: `${origin}/checkout/payment?${returnParams.toString()}` });
+    const result = await adapter.create(config, { orderId: order.id, tradeNo: payment.merchant_trade_no, amountFen: payment.external_amount_fen, description: `PUSY.CN 订单 ${order.id}`, notifyUrl: `${origin}/api/payments/webhooks/${provider}`, returnUrl: `${origin}/checkout/payment?${returnParams.toString()}` });
     await db.batch([
       db.prepare("UPDATE payments SET status = ?, checkout_url = ?, code_url = ?, attempts = attempts + 1, last_error = NULL, next_retry_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(result.status, result.checkoutUrl ?? null, result.codeUrl ?? null, payment.id),
       db.prepare("UPDATE orders SET status = '待付款', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status NOT IN ('已确认','已完成')").bind(order.id),
@@ -46,6 +63,10 @@ export async function syncPayment(paymentIdValue: string) {
   const db = await getStoreDb();
   const payment = await db.prepare("SELECT * FROM payments WHERE id = ?").bind(paymentIdValue).first<DbPayment>();
   if (!payment) throw new Error("支付记录不存在");
+  if (payment.external_amount_fen === 0) {
+    if (payment.status !== "paid") await applyPaymentStatus(payment, "paid", `WALLET-${payment.id}`);
+    return db.prepare("SELECT * FROM payments WHERE id = ?").bind(payment.id).first<DbPayment>();
+  }
   const config = await providerConfig(payment.provider);
   const result = await paymentAdapter(payment.provider).query(config, payment.merchant_trade_no);
   await applyPaymentStatus(payment, result.status, result.providerTransactionId, result.paidAt, result.message);
@@ -68,12 +89,14 @@ export async function applyPaymentStatus(payment: DbPayment, status: PaymentStat
     resolvedStatus === "refunding" ? "退款中" :
     resolvedStatus === "refunded" ? "已退款" :
     order?.status === "已取消" ? "已取消" : "待付款";
+  if (resolvedStatus === "paid" && payment.wallet_status === "held") await captureWalletPayment(payment.id);
+  if (resolvedStatus === "closed" && payment.wallet_status === "held") await releaseWalletPayment(payment.order_id, "第三方支付关闭，余额冻结退回");
   await db.batch([
     db.prepare("UPDATE payments SET status = ?, provider_transaction_id = COALESCE(?, provider_transaction_id), paid_at = COALESCE(?, paid_at), last_error = ?, next_retry_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(resolvedStatus, providerTransactionId ?? null, paidAt ?? (resolvedStatus === "paid" ? new Date().toISOString() : null), message ?? null, payment.id),
     db.prepare("UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(orderStatus, payment.order_id),
   ]);
+  if (resolvedStatus === "paid") await commitPaidOrder(payment.order_id);
   if (resolvedStatus === "paid" && payment.status !== "paid") {
-    await commitPaidOrder(payment.order_id);
     await Promise.all([notifyOrderConfirmed(payment.order_id), notifyGiftCards(payment.order_id), syncOrderPoints(payment.order_id), syncPaidOrderGrowth(payment.order_id)]).catch(() => undefined);
   }
   await refreshOrderMemberTotals(payment.order_id);
@@ -94,7 +117,7 @@ export async function processPaymentWebhook(provider: PaymentProviderName, event
   const config = await providerConfig(provider);
   const amountFen = provider === "wechat" ? Number((event.resource.amount as Record<string, unknown> | undefined)?.total) : Math.round(Number(event.resource.total_amount) * 100);
   const appMatches = provider === "wechat" ? String(event.resource.appid) === config.app_id && String(event.resource.mchid) === config.merchant_id : String(event.resource.app_id) === config.app_id && (!config.merchant_id || String(event.resource.seller_id) === config.merchant_id);
-  if (amountFen !== payment.amount_fen || !appMatches) {
+  if (amountFen !== payment.external_amount_fen || !appMatches) {
     await db.prepare("INSERT INTO payment_events (id, payment_id, provider, event_type, payload_digest, verified, result, message) VALUES (?, ?, ?, ?, ?, 1, 'rejected', '订单金额或商户身份不匹配')").bind(event.eventId, payment.id, provider, event.eventType, digest).run();
     throw new Error("通知业务数据校验失败");
   }

@@ -15,6 +15,7 @@ export function MemberAuthClient({ referralCode = "", providers, socialStatus = 
   const [requestingCode, setRequestingCode] = useState(false);
   const [challengeId, setChallengeId] = useState("");
   const [prefillEmail, setPrefillEmail] = useState("");
+  const [loginMethod, setLoginMethod] = useState<"password" | "code">("password");
 
   async function requestCode(event: React.MouseEvent<HTMLButtonElement>) {
     const form = event.currentTarget.form;
@@ -53,10 +54,11 @@ export function MemberAuthClient({ referralCode = "", providers, socialStatus = 
     setError("");
     setMessage("");
     const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+    const passwordLogin = mode === "login" && loginMethod === "password";
     const response = await fetch("/api/account/auth", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ action: mode, challengeId, ...payload }),
+      body: JSON.stringify({ action: passwordLogin ? "password-login" : mode, challengeId, ...payload }),
     });
     const body = await response.json();
     if (!response.ok) {
@@ -106,7 +108,7 @@ export function MemberAuthClient({ referralCode = "", providers, socialStatus = 
       <div className="member-auth-heading">
         <p>{mode === "login" ? "欢迎回来" : "加入 PÚSY CLUB"}</p>
         <h2>{mode === "login" ? "登录会员账户" : "创建会员账户"}</h2>
-        <span>{mode === "login" ? "使用已验证的邮箱登录，也可使用已经绑定的微信或支付宝。" : "使用邮箱验证码完成注册，手机号无需填写。"}</span>
+        <span>{mode === "login" ? "使用账户密码或邮箱验证码登录，也可使用已经绑定的微信或支付宝。" : "使用邮箱验证码完成注册，并设置独立账户密码。"}</span>
       </div>
       {socialNotice && <p className="member-auth-social-notice" role="status">{socialNotice}</p>}
       <form className="member-auth-form" onSubmit={submit}>
@@ -115,14 +117,16 @@ export function MemberAuthClient({ referralCode = "", providers, socialStatus = 
           <label>电子邮箱<input name="email" type="email" autoComplete="email" placeholder="name@example.com" defaultValue={prefillEmail} required /></label>
           <label>手机号码（选填）<input name="phone" type="tel" inputMode="numeric" autoComplete="tel" placeholder="可在会员中心稍后绑定" /></label>
           <label>邀请码（选填）<input name="referralCode" defaultValue={referralCode} maxLength={20} placeholder="好友分享链接会自动填写" /></label>
+          <label>账户密码<input name="accountPassword" type="password" autoComplete="new-password" minLength={10} maxLength={72} pattern="(?=.*[A-Za-z])(?=.*[0-9]).{10,72}" title="10 至 72 位，并同时包含字母和数字" required /></label>
+          <label>确认账户密码<input name="accountPasswordConfirm" type="password" autoComplete="new-password" minLength={10} maxLength={72} required /></label>
         </>}
-        {mode === "login" && <label>邮箱地址<input name="identifier" type="email" autoComplete="username" placeholder="请输入注册邮箱" required /></label>}
-        <label>验证码
+        {mode === "login" && <><div className="member-login-method"><button type="button" className={loginMethod === "password" ? "active" : ""} onClick={() => setLoginMethod("password")}>密码登录</button><button type="button" className={loginMethod === "code" ? "active" : ""} onClick={() => setLoginMethod("code")}>验证码登录</button></div><label>邮箱地址<input name="identifier" type="email" autoComplete="username" placeholder="请输入注册邮箱" required /></label></>}
+        {mode === "login" && loginMethod === "password" ? <label>账户密码<input name="accountPassword" type="password" autoComplete="current-password" required /></label> : <label>验证码
           <div className="member-code-field">
             <input name="code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="6 位验证码" required />
             <button type="button" disabled={requestingCode} onClick={requestCode}>{requestingCode ? "正在发送…" : "获取验证码"}</button>
           </div>
-        </label>
+        </label>}
         {mode === "register" && <fieldset className="member-auth-bind-choice"><legend>注册后绑定（选填）</legend><p>绑定后可使用对应账号快捷登录；也可以跳过，稍后在会员中心设置。</p><div>
           <label className={bindingProvider === "none" ? "active" : ""}><input type="radio" name="bindingProvider" value="none" checked={bindingProvider === "none"} onChange={() => setBindingProvider("none")} /><span><i>✓</i><b>暂不绑定</b><small>仅使用邮箱登录</small></span></label>
           {providers.map((provider) => <label className={bindingProvider === provider.provider ? `active ${provider.provider}` : provider.provider} key={provider.provider}><input type="radio" name="bindingProvider" value={provider.provider} disabled={!provider.configured} checked={bindingProvider === provider.provider} onChange={() => setBindingProvider(provider.provider)} /><span><i>{provider.provider === "wechat" ? "微" : "支"}</i><b>绑定{provider.label}</b><small>{provider.configured ? "注册后前往安全授权" : "等待平台配置"}</small></span></label>)}
@@ -130,7 +134,7 @@ export function MemberAuthClient({ referralCode = "", providers, socialStatus = 
         {mode === "register" && <label className="member-auth-consent"><input name="consent" type="checkbox" required /> <span>我已阅读并同意<a href="/oferta">用户服务协议</a>和<a href="/privacy">隐私政策</a>。</span></label>}
         {error && <p className="member-auth-error" role="alert">{error}</p>}
         {message && <p className="member-auth-message">{message}</p>}
-        <button className="member-auth-submit" disabled={submitting || !challengeId}>{submitting ? "正在处理…" : mode === "login" ? "登录" : "注册并登录"}</button>
+        <button className="member-auth-submit" disabled={submitting || (mode === "register" || loginMethod === "code") && !challengeId}>{submitting ? "正在处理…" : mode === "login" ? "登录" : "注册并登录"}</button>
       </form>
       {mode === "login" && <div className="member-social-login"><span>或使用已绑定账号登录</span><div>{providers.map((provider) => <button type="button" className={provider.provider} disabled={!provider.configured} onClick={() => { window.location.href = `/api/account/social/${provider.provider}?mode=login&returnTo=${encodeURIComponent(returnTo)}`; }} key={provider.provider}><i>{provider.provider === "wechat" ? "微" : "支"}</i>{provider.configured ? `${provider.label}登录` : `${provider.label}待配置`}</button>)}</div></div>}
       <button className="member-auth-switch" type="button" onClick={() => switchMode(mode === "login" ? "register" : "login")}>

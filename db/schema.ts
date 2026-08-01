@@ -72,6 +72,27 @@ export const memberSessions = sqliteTable("member_sessions", {
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
+export const memberCredentials = sqliteTable("member_credentials", {
+  memberId: integer("member_id").primaryKey().references(() => members.id),
+  loginPasswordHash: text("login_password_hash").notNull(),
+  loginPasswordSalt: text("login_password_salt").notNull(),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const memberWallets = sqliteTable("member_wallets", {
+  memberId: integer("member_id").primaryKey().references(() => members.id),
+  availableBalanceFen: integer("available_balance_fen").notNull().default(0),
+  frozenBalanceFen: integer("frozen_balance_fen").notNull().default(0),
+  status: text("status").notNull().default("active"),
+  paymentPasswordHash: text("payment_password_hash"),
+  paymentPasswordSalt: text("payment_password_salt"),
+  passwordFailedAttempts: integer("password_failed_attempts").notNull().default(0),
+  passwordLockedUntil: text("password_locked_until"),
+  passwordUpdatedAt: text("password_updated_at"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
 export const rateLimits = sqliteTable("rate_limits", {
   key: text("key").primaryKey(),
   requestCount: integer("request_count").notNull().default(0),
@@ -306,6 +327,9 @@ export const payments = sqliteTable("payments", {
   merchantTradeNo: text("merchant_trade_no").notNull().unique(),
   providerTransactionId: text("provider_transaction_id"),
   amountFen: integer("amount_fen").notNull(),
+  walletAmountFen: integer("wallet_amount_fen").notNull().default(0),
+  externalAmountFen: integer("external_amount_fen").notNull().default(0),
+  walletStatus: text("wallet_status").notNull().default("none"),
   status: text("status").notNull().default("created"),
   checkoutUrl: text("checkout_url"),
   codeUrl: text("code_url"),
@@ -337,6 +361,9 @@ export const refunds = sqliteTable("refunds", {
   merchantRefundNo: text("merchant_refund_no").notNull().unique(),
   providerRefundId: text("provider_refund_id"),
   amountFen: integer("amount_fen").notNull(),
+  walletAmountFen: integer("wallet_amount_fen").notNull().default(0),
+  externalAmountFen: integer("external_amount_fen").notNull().default(0),
+  walletCredited: integer("wallet_credited", { mode: "boolean" }).notNull().default(false),
   reason: text("reason").notNull(),
   status: text("status").notNull().default("pending"),
   attempts: integer("attempts").notNull().default(0),
@@ -344,6 +371,22 @@ export const refunds = sqliteTable("refunds", {
   lastError: text("last_error"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const memberWalletLedger = sqliteTable("member_wallet_ledger", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  memberId: integer("member_id").notNull().references(() => members.id),
+  paymentId: text("payment_id").references(() => payments.id),
+  orderId: text("order_id").references(() => orders.id),
+  entryType: text("entry_type").notNull(),
+  amountFen: integer("amount_fen").notNull(),
+  availableBalanceAfterFen: integer("available_balance_after_fen").notNull(),
+  frozenBalanceAfterFen: integer("frozen_balance_after_fen").notNull(),
+  referenceId: text("reference_id").notNull(),
+  idempotencyKey: text("idempotency_key").notNull().unique(),
+  note: text("note").notNull().default(""),
+  actor: text("actor").notNull().default("system"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const notificationSettings = sqliteTable("notification_settings", {

@@ -6,6 +6,8 @@ import { sendSms, smsConfigured } from "../../../../lib/notifications/sms";
 import type { NotificationSetting } from "../../../../lib/notifications/types";
 import { allowRequest, allowRequestForIdentity, hasTrustedOrigin, privateJson, rateLimitResponse, safeServerError } from "../../../../lib/request-security";
 import { registerReferral } from "../../../../lib/growth/member-program";
+import { setMemberLoginPassword, verifyMemberLoginPassword } from "../../../../lib/wallet/security";
+import { validLoginPassword } from "../../../../lib/auth/member-secrets";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phonePattern = /^1[3-9]\d{9}$/;
@@ -96,17 +98,33 @@ async function verify(payload: Record<string, unknown>) {
     const email = String(payload.email ?? "").trim().toLowerCase();
     const phone = normalizedPhone(payload.phone);
     const consent = payload.consent === "on";
+    const accountPassword = String(payload.accountPassword ?? "");
+    const accountPasswordConfirm = String(payload.accountPasswordConfirm ?? "");
     if (name.length < 2 || !emailPattern.test(email) || (phone && !phonePattern.test(phone)) || !consent || email !== challenge.target) return Response.json({ error: "注册资料无效，请重新获取验证码" }, { status: 400 });
+    if (!validLoginPassword(accountPassword) || accountPassword !== accountPasswordConfirm) return Response.json({ error: "账户密码需为 10 至 72 位并包含字母和数字，且两次输入一致" }, { status: 400 });
     await db.prepare("UPDATE member_verification_codes SET consumed_at = CURRENT_TIMESTAMP WHERE id = ? AND consumed_at IS NULL").bind(id).requireChanges("验证码已经使用").run();
     await db.prepare("INSERT INTO members (name, email, phone, email_verified, phone_verified) VALUES (?, ?, ?, 1, 0) ON CONFLICT(email) DO UPDATE SET name = excluded.name, phone = excluded.phone, email_verified = 1, phone_verified = 0, updated_at = CURRENT_TIMESTAMP").bind(name, email, phone).run();
     member = await db.prepare("SELECT id, name, email, status FROM members WHERE email = ? LIMIT 1").bind(email).first<AuthMember>();
-    if (member) await registerReferral(member.id, String(payload.referralCode ?? "")).catch(() => undefined);
+    if (member) {
+      await setMemberLoginPassword({ memberId: member.id, newPassword: accountPassword });
+      await registerReferral(member.id, String(payload.referralCode ?? "")).catch(() => undefined);
+    }
   } else {
     await db.prepare("UPDATE member_verification_codes SET consumed_at = CURRENT_TIMESTAMP WHERE id = ? AND consumed_at IS NULL").bind(id).requireChanges("验证码已经使用").run();
     member = await db.prepare("SELECT id, name, email, status FROM members WHERE lower(email) = ? LIMIT 1").bind(challenge.target).first<AuthMember>();
   }
   if (!member || member.status === "blocked") return Response.json({ error: "账户不可用" }, { status: 403 });
   return Response.json({ ok: true, message: mode === "register" ? "注册成功，正在进入会员中心" : `欢迎回来，${member.name}` }, { headers: { "set-cookie": await createMemberSession(member.id), "cache-control": "no-store" } });
+}
+
+async function passwordLogin(payload: Record<string, unknown>) {
+  const email = String(payload.identifier ?? "").trim().toLowerCase();
+  const password = String(payload.accountPassword ?? "");
+  if (!emailPattern.test(email) || !password) return privateJson({ error: "请输入有效邮箱和账户密码" }, { status: 400 });
+  if (!await allowRequestForIdentity("member-password-login", email, 8, 15 * 60)) return rateLimitResponse();
+  const member = await verifyMemberLoginPassword(email, password);
+  if (!member || member.status === "blocked") return privateJson({ error: "邮箱或账户密码不正确" }, { status: 401 });
+  return privateJson({ ok: true, message: `欢迎回来，${member.name}` }, { headers: { "set-cookie": await createMemberSession(member.id) } });
 }
 
 async function requestPhoneCode(payload: Record<string, unknown>) {
@@ -156,6 +174,7 @@ export async function POST(request: Request) {
     const payload = await request.json() as Record<string, unknown>;
     const action = String(payload.action ?? "");
     const response = action === "request-code" ? await requestCode(payload)
+      : action === "password-login" ? await passwordLogin(payload)
       : action === "request-phone-code" ? await requestPhoneCode(payload)
         : action === "verify-phone" ? await verifyPhone(payload)
           : await verify(payload);

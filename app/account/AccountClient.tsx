@@ -10,10 +10,11 @@ import { MembershipPanel } from "./AccountMembershipPanel";
 import { InvoicePanel, OrderList } from "./AccountOrderInvoiceComponents";
 import { ProfilePanel } from "./AccountProfilePanel";
 import { MemberGrowthPanel, SocialBindingPrompt } from "./AccountSocialGrowth";
+import { AccountFinancePanel } from "./AccountFinancePanel";
 
-export function AccountClient({ viewer, email, showWelcome = false, socialStatus = "", socialProvider = "" }: { viewer: string; email: string; showWelcome?: boolean; socialStatus?: string; socialProvider?: string }) {
+export function AccountClient({ viewer, email, showWelcome = false, socialStatus = "", socialProvider = "", initialTab = "overview" }: { viewer: string; email: string; showWelcome?: boolean; socialStatus?: string; socialProvider?: string; initialTab?: string }) {
   const { wishlist, toggleWishlist, addToCart } = useStore();
-  const [tab, setTab] = useState("overview");
+  const [tab, setTab] = useState(initialTab);
   const [data, setData] = useState<AccountData | null>(null);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
   const [creatingAddress, setCreatingAddress] = useState(false);
@@ -60,6 +61,7 @@ export function AccountClient({ viewer, email, showWelcome = false, socialStatus
     { key: "wishlist", label: "我的收藏", icon: "♡" },
     { key: "orders", label: "我的订单", icon: "▤" },
     { key: "invoices", label: "发票管理", icon: "票" },
+    { key: "finance", label: "财务中心", icon: "¥" },
     { key: "returns", label: "售后进度", icon: "↺" },
   ];
   const socialLabel = socialProvider === "wechat" ? "微信" : socialProvider === "alipay" ? "支付宝" : "第三方账号";
@@ -82,6 +84,7 @@ export function AccountClient({ viewer, email, showWelcome = false, socialStatus
         {tab === "wishlist" && <section className="member-section"><div className="member-section-title"><div><p>{savedProducts.length} 件商品</p><h2>我的收藏</h2></div><a href="/catalog/products">继续发现</a></div>{savedProducts.length ? <div className="member-wishlist-grid">{savedProducts.map((product) => <article key={product.slug}><a href={`/products/${product.slug}`}><Image src={product.image} alt={product.name} width={700} height={727} sizes="(max-width: 700px) 50vw, 25vw" /><h3>{product.name}</h3></a><p>{formatCnyFromRub(product.price)}</p><div><button disabled={!product.inventoryVerified || (product.stock ?? 0) < 1} onClick={() => addToCart(product)}>加入购物袋</button><button onClick={() => toggleWishlist(product.slug)}>移除</button></div></article>)}</div> : <Empty title="还没有收藏商品" copy="在商品卡片或详情页点击心形按钮，商品会保存在这里。" href="/catalog/products" link="浏览商品" />}</section>}
         {tab === "orders" && <section className="member-section"><div className="member-section-title"><div><p>{data.orders.length} 笔订单</p><h2>我的订单</h2></div></div>{data.orders.length ? <OrderList orders={data.orders} items={data.orderItems} shipments={data.shipments} shipmentEvents={data.shipmentEvents} onAct={act} /> : <Empty title="还没有订单" copy="你的线上订单会安全保存在这里。" href="/catalog/products" link="开始购物" />}</section>}
         {tab === "invoices" && <InvoicePanel invoices={data.invoices} orders={data.orders} email={data.member.email} name={data.member.name} onAct={act} />}
+        {tab === "finance" && <AccountFinancePanel />}
         {tab === "returns" && <section className="member-section"><div className="member-section-title"><div><p>{data.returns.length} 条记录</p><h2>售后进度</h2></div><a href="/contact?category=售后问题">申请退换货</a></div>{data.returns.length ? <div className="return-progress">{data.returns.map((item) => <article key={item.id}><div><b>{item.id}</b><span className={`return-status status-${item.status}`}>{item.status}</span></div><h3>{item.request_type === "exchange" ? "换货" : item.request_type === "reship" ? "补寄" : "退货退款"} · {item.reason}</h3><p>关联订单：{item.order_id}</p>{item.details && <p>{item.details}</p>}{item.resolution && <p>处理说明：{item.resolution}</p>}{item.refund_id && <p>关联退款单：{item.refund_id}</p>}{item.return_tracking_number ? <p>退回物流：{item.return_carrier} · {item.return_tracking_number}</p> : ["待审核","已批准"].includes(item.status) && <form className="member-return-logistics" onSubmit={(event) => { event.preventDefault(); const values = Object.fromEntries(new FormData(event.currentTarget).entries()); void act({ action: "update-return-logistics", returnId: item.id, carrier: values.carrier, trackingNumber: values.trackingNumber }); }}><input name="carrier" placeholder="退回物流公司" required /><input name="trackingNumber" placeholder="退回物流单号" required /><button>保存物流</button></form>}<small>申请于 {new Date(item.created_at).toLocaleString("zh-CN")}</small></article>)}</div> : <Empty title="暂无售后记录" copy="如果商品需要处理，可通过在线客服选择交易订单。" href="/contact?category=售后问题" link="申请退换货" />}</section>}
       </>}
     </section></div>

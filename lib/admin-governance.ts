@@ -26,7 +26,7 @@ export async function completeAdminAudit(id: number, outcome: "succeeded" | "fai
 
 export function auditEntityId(payload: Record<string, unknown>) {
   if (Array.isArray(payload.ids)) return payload.ids.map((id) => String(id)).slice(0, 20).join(",");
-  return String(payload.id ?? payload.orderId ?? payload.paymentId ?? payload.code ?? payload.key ?? "").trim();
+  return String(payload.id ?? payload.orderId ?? payload.paymentId ?? payload.memberId ?? payload.code ?? payload.key ?? "").trim();
 }
 
 export function auditSummary(action: string, payload: Record<string, unknown>) {
@@ -35,6 +35,7 @@ export function auditSummary(action: string, payload: Record<string, unknown>) {
   if (action === "bulk-update-order-status") return `批量更新 ${count} 个订单为${status}`;
   if (status) return `更新状态为${status}`;
   if (action === "create-refund") return "发起订单退款";
+  if (action === "adjust-member-wallet") return `调整会员余额 ${String(payload.amountYuan ?? "")} 元：${String(payload.reason ?? "")}`;
   if (action === "create-admin-user") return "创建后台管理员";
   if (action === "reset-admin-password") return "重置后台管理员密码";
   if (action === "manage-support-threads") return `客服工单批量操作：${String(payload.operation ?? "")}`;

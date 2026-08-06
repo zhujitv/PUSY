@@ -104,10 +104,12 @@ async function upsertPost(post, memberId) {
 async function applySeed() {
   await assertDatabaseDependencies();
   await assertOwnedSeedRows();
-  const existing = await client.query(`SELECT COUNT(*)::int AS count FROM community_posts
+  const existing = await client.query(`SELECT id, content_fingerprint FROM community_posts
     WHERE id = ANY($1::text[]) AND status = 'approved' AND moderated_by = $2`, [editorialPosts.map((post) => post.id), editorialSeedActor]);
-  if (existing.rows[0].count === editorialPosts.length) {
-    console.log(`官方示例内容已存在：${existing.rows[0].count} 篇，跳过重复写入。`);
+  const fingerprints = new Map(existing.rows.map((row) => [row.id, row.content_fingerprint]));
+  const isCurrent = editorialPosts.every((post) => fingerprints.get(post.id) === contentFingerprint(post));
+  if (isCurrent) {
+    console.log(`官方示例内容已存在：${existing.rowCount} 篇，跳过重复写入。`);
     return;
   }
   const memberIds = await upsertProfiles();

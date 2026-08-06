@@ -4,6 +4,10 @@ import { fileURLToPath } from "node:url";
 import { editorialPosts, editorialProfiles } from "./community-editorial-seed-data.mjs";
 
 const allowedTopics = new Set(["daily-makeup", "lip-diary", "real-empties", "body-care", "hair-inspiration"]);
+const allowedSkinTypes = new Set(["normal", "dry", "oily", "combination", "sensitive"]);
+const allowedUsagePeriods = new Set(["first-use", "one-week", "one-month", "three-months-plus"]);
+const allowedScenes = new Set(["daily", "work", "date", "travel", "special-occasion"]);
+const allowedHighlights = new Set(["显色", "持妆", "质地", "保湿", "香气", "便携", "温和", "性价比"]);
 
 export async function validateEditorialSeed(projectRoot) {
   const profileKeys = new Set(editorialProfiles.map((profile) => profile.key));
@@ -29,6 +33,10 @@ export async function validateEditorialSeed(projectRoot) {
     if (!allowedTopics.has(post.topicSlug)) errors.push(`${post.id} 的话题不受支持`);
     if (!post.title.startsWith("官方示例｜") || !post.body.startsWith("【官方示例内容】")) errors.push(`${post.id} 未清晰披露示例身份`);
     if (!Array.isArray(post.highlights) || post.highlights.length < 2 || post.highlights.length > 5) errors.push(`${post.id} 的体验亮点数量无效`);
+    if (!allowedSkinTypes.has(post.skinType)) errors.push(`${post.id} 的肤质标识无效`);
+    if (!allowedUsagePeriods.has(post.usagePeriod)) errors.push(`${post.id} 的使用周期标识无效`);
+    if (!allowedScenes.has(post.scene)) errors.push(`${post.id} 的使用场景标识无效`);
+    if (post.highlights.some((item) => !allowedHighlights.has(item))) errors.push(`${post.id} 的体验亮点标识无效`);
     if (!Number.isInteger(post.rating) || post.rating < 1 || post.rating > 5) errors.push(`${post.id} 的评分无效`);
     const absolutePath = fileURLToPath(new URL(`public${post.mediaPath}`, projectRoot));
     try {
@@ -53,5 +61,7 @@ export async function mediaRecord(projectRoot, post) {
 export function contentFingerprint(post) {
   return `official-seed-v1:${createHash("sha256").update(JSON.stringify({
     title: post.title, body: post.body, topicSlug: post.topicSlug, productSlug: post.productSlug,
+    skinType: post.skinType, usagePeriod: post.usagePeriod, scene: post.scene,
+    rating: post.rating, highlights: post.highlights, cautions: post.cautions,
   })).digest("hex")}`;
 }

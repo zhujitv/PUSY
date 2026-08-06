@@ -7,6 +7,8 @@ const migration = await readFile(new URL("../db/migrations/2026-08-01-zzz-commun
 const interactionSource = await readSource("lib/community/engagement-comments.ts");
 const topicSource = await readSource("app/api/community/topics/route.ts");
 const communityPageSource = await readSource("app/community/page.tsx");
+const habitCardSource = await readSource("app/community/CommunityHabitCard.tsx");
+const phaseSixCss = await readFile(new URL("../app/styles/22-community-phase-six.css", import.meta.url), "utf8");
 const adminSource = await readSource("app/admin/AdminClient.tsx");
 const adminRouteSource = await readSource("app/api/admin/route.ts");
 
@@ -31,6 +33,13 @@ test("phase six closes the foreground interaction and return loop", () => {
   assert.match(communityPageSource, /community-load-more/);
   assert.match(communityPageSource, /viewer_has_followed_topic/);
   assert.match(communityPageSource, /pagination_cursor/);
+});
+
+test("community habit badges do not inherit the global storefront footer", () => {
+  assert.doesNotMatch(habitCardSource, /<footer/);
+  assert.match(habitCardSource, /community-habit-badges/);
+  assert.match(phaseSixCss, /\.community-habit-badges \{/);
+  assert.doesNotMatch(phaseSixCss, /\.community-habit-card footer/);
 });
 
 test("phase six gives administrators an audited community operations center", () => {

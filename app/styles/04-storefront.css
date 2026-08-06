@@ -121,7 +121,7 @@ footer.pusy-footer .footer-links a { font-size: 16px; font-weight: 600; }
   .reel-product em { font-size: 12px; }
   .newsletter { min-height: 430px; padding: 48px 22px; grid-template-columns: 1fr; align-content: space-between; }
   .newsletter h2 { font-size: 50px; }
-  footer { grid-template-columns: 1fr; gap: 42px; padding: 46px 22px 30px; }
+  footer.pusy-footer { grid-template-columns: 1fr; gap: 42px; padding: 46px 22px 30px; }
   .footer-logo { font-size: 100px; }
   .footer-contact span { margin-top: 25px; }
   .catalog-page { padding: 35px 8px 65px; }

@@ -8,14 +8,14 @@
 .community-habit-card header span { grid-column: 1 / -1; color: #ad5278; font-size: 8px; letter-spacing: .15em; }
 .community-habit-card header strong { font-size: 16px; }
 .community-habit-card header small { color: #8e7580; font-size: 9px; }
-.community-habit-card > div { display: grid; gap: 7px; }
-.community-habit-card p { display: flex; gap: 9px; align-items: center; margin: 0; padding: 9px 10px; border-radius: 10px; background: rgba(255,255,255,.76); }
-.community-habit-card p.done { opacity: .62; }
-.community-habit-card p i { color: #dd4584; font-style: normal; }
-.community-habit-card p span { display: flex; justify-content: space-between; width: 100%; font-size: 10px; }
-.community-habit-card p small { color: #ad5278; }
-.community-habit-card footer { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 13px; }
-.community-habit-card footer em { padding: 5px 8px; border-radius: 999px; color: #8d3158; background: #f8dce8; font-size: 8px; font-style: normal; }
+.community-habit-tasks { display: grid; gap: 7px; }
+.community-habit-tasks p { display: flex; gap: 9px; align-items: center; margin: 0; padding: 9px 10px; border-radius: 10px; background: rgba(255,255,255,.76); }
+.community-habit-tasks p.done { opacity: .62; }
+.community-habit-tasks p i { color: #dd4584; font-style: normal; }
+.community-habit-tasks p span { display: flex; justify-content: space-between; width: 100%; font-size: 10px; }
+.community-habit-tasks p small { color: #ad5278; }
+.community-habit-badges { display: flex; flex-wrap: wrap; gap: 6px; min-height: 0; margin: 14px 0 0; padding: 13px 0 0; border-top: 1px solid rgba(173,82,120,.14); list-style: none; }
+.community-habit-badges li { padding: 5px 9px; border: 1px solid rgba(173,82,120,.12); border-radius: 999px; color: #8d3158; background: #f8dce8; font-size: 8px; }
 .community-comment-list article footer button.active { color: #d82e78; }
 .community-discussion > header nav { display: flex; gap: 4px; }
 .community-discussion > header nav button { padding: 6px 9px; border: 1px solid #dccfd5; border-radius: 999px; color: #806a75; background: #fff; font-size: 8px; }

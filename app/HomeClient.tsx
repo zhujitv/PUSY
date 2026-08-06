@@ -8,6 +8,7 @@ import { HeaderIcon } from "./components/HeaderIcons";
 import { storefrontNavItems, type NavigationCategory } from "./data/navigation";
 import type { SiteContentSnapshot } from "../db/commerce-features";
 import { SiteFooter } from "./components/SiteChrome";
+import { ProductCardMedia } from "./components/ProductCardMedia";
 
 
 const reels = [
@@ -91,10 +92,10 @@ export default function HomeClient({ homeContent, featuredProducts, navigationCa
         </div>
         <div className="product-grid">
           {featuredProducts.map((product) => (
-            <article className="product-card" key={product.slug}>
+            <article className="product-card product-hover-trigger" key={product.slug}>
               <div className="product-image-wrap">
                 <span className="badge">{product.badge}</span>
-                <a href={`/products/${product.slug}`}><Image src={product.image} alt={product.name} width={700} height={727} sizes="(max-width: 700px) 50vw, 25vw" /></a>
+                <a className="product-card-image-link" href={`/products/${product.slug}`}><ProductCardMedia product={product} sizes="(max-width: 700px) 50vw, 25vw" /></a>
                 {product.inventoryVerified && (product.stock ?? 0) > 0 ? <button onClick={() => addToCart(product)}>加入购物袋</button> : <a className="home-restock-link" href={`/products/${product.slug}`}>到货提醒</a>}
               </div>
               <h3><a href={`/products/${product.slug}`}>{product.name}</a></h3>

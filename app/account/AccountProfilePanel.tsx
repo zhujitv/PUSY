@@ -14,8 +14,9 @@ export function ProfilePanel({ member, profile, socialAccounts, socialProviders,
   const initial = (profile.nickname || member.name || "P").slice(0, 1).toUpperCase();
   const [avatar, setAvatar] = useState(profile.avatar_url || "");
   const [avatarError, setAvatarError] = useState("");
+  const [profileLoadedAt] = useState(() => Date.now());
   const nextNicknameDate = profile.nickname_updated_at ? new Date(new Date(profile.nickname_updated_at).getTime() + 30 * 86400000) : null;
-  const nicknameLocked = Boolean(nextNicknameDate && nextNicknameDate.getTime() > Date.now());
+  const nicknameLocked = Boolean(nextNicknameDate && nextNicknameDate.getTime() > profileLoadedAt);
 
   function chooseAvatar(file?: File) {
     setAvatarError("");
@@ -41,7 +42,7 @@ export function ProfilePanel({ member, profile, socialAccounts, socialProviders,
         <label>真实姓名<input name="name" maxLength={50} autoComplete="name" defaultValue={member.name} required /></label>
         <PhoneVerification member={member} onVerified={onPhoneVerified} />
         <label>性别<select name="gender" defaultValue={profile.gender}><option value="">请选择</option><option value="female">女</option><option value="male">男</option><option value="undisclosed">不愿透露</option></select></label>
-        <label>出生日期<input name="birthday" type="date" max={new Date().toISOString().slice(0, 10)} defaultValue={profile.birthday} /></label>
+        <label>出生日期<input name="birthday" type="date" max={new Date(profileLoadedAt).toISOString().slice(0, 10)} defaultValue={profile.birthday} /></label>
         <label className="full">登录邮箱<input value={member.email} disabled /><small>登录邮箱已完成验证。如需更换，请联系客户服务进行身份核验。</small></label>
       </div></fieldset>
 

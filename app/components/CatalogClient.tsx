@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import type { Product } from "../data/products";
 import { formatCnyFromRub, productDetailHref } from "../data/products";
 import { useStore } from "./StoreProvider";
+import { ProductCardMedia } from "./ProductCardMedia";
 
 export function CatalogClient({ initialProducts, categoryFilter, slugFilter, searchQuery }: { initialProducts: Product[]; categoryFilter?: string; slugFilter?: string[]; searchQuery?: string }) {
   const [sourceProducts, setSourceProducts] = useState(initialProducts);
@@ -78,8 +78,8 @@ export function CatalogClient({ initialProducts, categoryFilter, slugFilter, sea
     {activeFilterLabels.length > 0 && <div className="active-filter-chips" aria-label="当前筛选条件">{activeFilterLabels.map((label) => <span key={label}>{label}</span>)}<button type="button" onClick={resetFilters}>全部清除</button></div>}
     <div className="catalog-tools"><span>找到 {filtered.length} 件商品</span><small>{filtersActive ? "已按当前条件筛选" : "可组合使用多个筛选条件"}</small></div>
     {visible.length ? <div className="catalog-grid">
-      {visible.map((product) => <article className="catalog-card" key={product.slug}>
-        <a href={productDetailHref(product)} className="catalog-image">{product.badge && <span className="badge">{product.badge}</span>}<Image src={product.image} alt={product.name} width={700} height={727} sizes="(max-width: 700px) 50vw, 25vw" /></a><button className={`wishlist-button ${isWishlisted(product.slug) ? "active" : ""}`} onClick={() => toggleWishlist(product.slug)} aria-label={isWishlisted(product.slug) ? "取消收藏" : "收藏商品"}>♡</button>
+      {visible.map((product) => <article className="catalog-card product-hover-trigger" key={product.slug}>
+        <a href={productDetailHref(product)} className="catalog-image">{product.badge && <span className="badge">{product.badge}</span>}<ProductCardMedia product={product} sizes="(max-width: 700px) 50vw, 25vw" /></a><button className={`wishlist-button ${isWishlisted(product.slug) ? "active" : ""}`} onClick={() => toggleWishlist(product.slug)} aria-label={isWishlisted(product.slug) ? "取消收藏" : "收藏商品"}>♡</button>
         <div className="catalog-card-copy"><a href={productDetailHref(product)}>{product.name}</a><p>{formatCnyFromRub(product.price)} {product.oldPrice && <del>{formatCnyFromRub(product.oldPrice)}</del>}</p>{product.inventoryVerified && (product.stock ?? 0) > 0 ? <><small className="inventory-label available">有货 · {product.stock} 件</small><button onClick={() => addToCart(product)}>加入购物袋</button></> : <a className="restock-link" href={productDetailHref(product)}>到货提醒</a>}</div>
       </article>)}
     </div> : <section className="large-empty"><h2>没有找到相关商品</h2><p>请减少筛选条件，或尝试其他关键词。</p><button className="primary-link" onClick={resetFilters}>清除全部筛选</button></section>}

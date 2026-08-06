@@ -12,7 +12,9 @@
     "start": "next start",
     "test": "npm run build && node --test tests/*.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
-    "db:migrate": "node scripts/migrate-db.mjs"
+    "db:migrate": "node scripts/migrate-db.mjs",
+    "community:editorial:check": "node scripts/seed-community-editorial.mjs",
+    "community:editorial:apply": "node scripts/seed-community-editorial.mjs --apply"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",

@@ -139,7 +139,7 @@ footer.pusy-footer .footer-links a { font-size: 16px; font-weight: 600; }
   .product-actions { grid-template-columns: 105px 1fr; }
   .related { padding: 0 8px 65px; }
   .related > div { grid-template-columns: repeat(2, 1fr); }
-  .related img { height: 64vw; }
+  .related .product-card-media { height: 64vw; }
   .info-page { padding: 46px 20px 75px; }
   .info-page > header { grid-template-columns: 1fr; gap: 20px; padding-bottom: 45px; }
   .info-page h1, .stores-page h1, .blog-page h1 { font-size: 50px; line-height: 1; }

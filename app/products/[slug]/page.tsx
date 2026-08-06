@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
+import { ProductCardMedia } from "../../components/ProductCardMedia";
 import { PageShell } from "../../components/SiteChrome";
 import { formatCnyFromRub, isGiftCardProductSlug, products, type Product, type ProductVariantGroup } from "../../data/products";
 import { ProductActions } from "./ProductActions";
@@ -137,6 +137,6 @@ export default async function ProductPage({ params, searchParams }: { params: Pr
     </main>
     <section className="product-community-section"><header><div><p>PÚSY CLUB</p><h2>会员真实分享</h2><span>看看社区会员如何使用这件商品。</span></div><a href={`/community/publish?product=${encodeURIComponent(product.slug)}`}>分享我的体验 →</a></header>{community.posts.length ? <div className="community-feed">{community.posts.map((post) => <CommunityPostCard post={post} signedIn={Boolean(community.viewer)} isOwner={community.viewer?.memberId === post.member_id} key={post.id} />)}</div> : <div className="product-community-empty"><h3>还没有关联分享</h3><p>成为第一个记录真实使用感受的会员。</p><a href={`/community/publish?product=${encodeURIComponent(product.slug)}`}>发布社区分享</a></div>}</section>
     <ProductReviews slug={product.slug} />
-    {related.length > 0 && <section className="related"><h2>{relatedTitle}</h2><div>{related.map((item) => <a href={`/products/${item.slug}`} key={item.slug}><Image src={item.image} alt={item.name} width={700} height={727} sizes="(max-width: 700px) 50vw, 25vw" /><span>{item.name}</span><b>{formatCnyFromRub(item.price)}</b></a>)}</div></section>}
+    {related.length > 0 && <section className="related"><h2>{relatedTitle}</h2><div>{related.map((item) => <a className="product-hover-trigger" href={`/products/${item.slug}`} key={item.slug}><ProductCardMedia product={item} sizes="(max-width: 700px) 50vw, 25vw" /><span>{item.name}</span><b>{formatCnyFromRub(item.price)}</b></a>)}</div></section>}
   </PageShell>;
 }

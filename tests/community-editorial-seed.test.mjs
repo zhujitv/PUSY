@@ -19,6 +19,7 @@ test("official editorial seed is explicit, complete and locally valid", async ()
 
 test("editorial seeder is idempotent and does not fabricate engagement or commerce", async () => {
   const source = await readFile(new URL("../scripts/seed-community-editorial.mjs", import.meta.url), "utf8");
+  const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
   assert.match(source, /ON CONFLICT \(id\) DO UPDATE/);
   assert.match(source, /ON CONFLICT \(member_id\) DO UPDATE/);
   assert.match(source, /--rollback/);
@@ -27,6 +28,8 @@ test("editorial seeder is idempotent and does not fabricate engagement or commer
   assert.match(source, /ROLLBACK/);
   assert.equal(editorialSeedActor, "system:community-editorial-seed-v1");
   assert.match(source, /moderated_by = \$2/);
+  assert.match(source, /跳过重复写入/);
+  assert.equal(packageJson.scripts["vercel-build"], "npm run db:migrate && npm run community:editorial:apply && next build --webpack");
   for (const forbiddenTable of [
     "community_post_likes", "community_comments", "community_follows", "community_reward_grants",
     "community_content_events", "community_order_attributions", "community_purchase_share_tasks",

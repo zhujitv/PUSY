@@ -18,3 +18,5 @@ DATABASE_URL=... node scripts/seed-community-editorial.mjs --rollback --confirm
 ```
 
 默认命令只校验本地清单和图片，不连接数据库。回滚仅删除固定 ID 且由本工具持有的帖子；系统账号只有在不存在其他帖子时才会删除。
+
+Vercel 生产构建会在数据库迁移完成后执行幂等写入；检测到 18 篇内容均已存在时会直接跳过，不覆盖后续后台编辑。

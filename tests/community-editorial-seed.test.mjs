@@ -13,8 +13,10 @@ test("official editorial seed is explicit, complete and locally valid", async ()
   assert.equal(new Set(editorialPosts.map((post) => post.topicSlug)).size, 5);
   assert.ok(editorialProfiles.every((profile) => profile.officialLabel === "官方示例"));
   assert.ok(editorialProfiles.every((profile) => profile.email.endsWith(".invalid")));
-  assert.ok(editorialPosts.every((post) => post.title.startsWith("官方示例｜")));
-  assert.ok(editorialPosts.every((post) => post.body.startsWith("【官方示例内容】")));
+  assert.ok(editorialPosts.every((post) => !post.title.startsWith("官方示例｜")));
+  assert.ok(editorialPosts.every((post) => !post.body.startsWith("【官方示例内容】")));
+  assert.ok(editorialPosts.every((post) => post.body.length >= 60));
+  assert.equal(new Set(editorialPosts.map((post) => post.title)).size, 18);
 });
 
 test("editorial seeder is idempotent and does not fabricate engagement or commerce", async () => {

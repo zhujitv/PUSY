@@ -31,7 +31,8 @@ export async function validateEditorialSeed(projectRoot) {
     ids.add(post.id); requestIds.add(post.clientRequestId); mediaIds.add(post.mediaId);
     if (!profileKeys.has(post.profileKey)) errors.push(`${post.id} 的账号不存在`);
     if (!allowedTopics.has(post.topicSlug)) errors.push(`${post.id} 的话题不受支持`);
-    if (!post.title.startsWith("官方示例｜") || !post.body.startsWith("【官方示例内容】")) errors.push(`${post.id} 未清晰披露示例身份`);
+    if (post.title.length < 8 || post.body.length < 60) errors.push(`${post.id} 的分享内容过短`);
+    if (post.title.startsWith("官方示例｜") || post.body.startsWith("【官方示例内容】")) errors.push(`${post.id} 仍使用生硬的统一示例前缀`);
     if (!Array.isArray(post.highlights) || post.highlights.length < 2 || post.highlights.length > 5) errors.push(`${post.id} 的体验亮点数量无效`);
     if (!allowedSkinTypes.has(post.skinType)) errors.push(`${post.id} 的肤质标识无效`);
     if (!allowedUsagePeriods.has(post.usagePeriod)) errors.push(`${post.id} 的使用周期标识无效`);

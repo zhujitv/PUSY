@@ -45,6 +45,7 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
   let viewerPublicId: string | undefined;
   let unreadCount = 0;
   let memberCount = 0;
+  let approvedPostCount = 0;
   let unavailable = false;
   let campaigns: CommunityCampaign[] = [];
   let habitSummary: Awaited<ReturnType<typeof getCommunityHabitSummary>> | null = null;
@@ -64,6 +65,7 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
     topics = topicRows;
     suggestions = memberRows;
     memberCount = stats.memberCount;
+    approvedPostCount = stats.postCount;
     viewerPublicId = profile?.public_id;
     unreadCount = social?.unreadCount ?? 0;
     campaigns = campaignRows;
@@ -74,6 +76,7 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
 
   const loginUrl = `/account/login?returnTo=${encodeURIComponent("/community/publish")}`;
   const publishHref = viewer ? "/community/publish" : loginUrl;
+  const showCommunityCounts = memberCount >= 12 && approvedPostCount >= 12;
   const activeTopic = topics.find((topic) => topic.slug === selectedTopic);
   const discoveryHref = (nextSort: "featured" | "latest" | "popular") => {
     const params = new URLSearchParams();
@@ -104,7 +107,7 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
         <h1><span>让每一种美，</span><span>都有自己的表达。</span></h1>
         <p>真实分享、使用心得与灵感日常。来自 PÚSY 会员，也属于每一个正在探索自己的你。</p>
         <div className="community-hero-actions"><a className="community-button dark" href={publishHref}>分享我的此刻 <CommunityIcon name="chevron" size={17} /></a><a className="community-text-link" href="#feed">看看大家在聊什么</a></div>
-        <div className="community-hero-proof"><div>{[31, 1, 8, 34].map((asset) => <Image key={asset} src={`/assets/${String(asset).padStart(2, "0")}.webp`} width={38} height={38} alt="PÚSY 社区灵感" />)}</div><p><strong>{memberCount.toLocaleString("zh-CN")}</strong> 位会员已加入分享</p></div>
+        <div className="community-hero-proof"><div>{[31, 1, 8, 34].map((asset) => <Image key={asset} src={`/assets/${String(asset).padStart(2, "0")}.webp`} width={38} height={38} alt="" />)}</div><p>{showCommunityCounts ? <><strong>{memberCount.toLocaleString("zh-CN")}</strong> 位会员已加入分享</> : <>真实分享 <strong>·</strong> 审核公开 <strong>·</strong> 尊重体验</>}</p></div>
       </div>
       <div className="community-hero-gallery" aria-label="PÚSY 社区精选内容">
         <figure className="tall"><Image src="/assets/31.webp" alt="自然光感妆容灵感" fill priority sizes="(max-width: 900px) 65vw, 34vw" /><figcaption><span>本周精选</span>自然光感，不必用力</figcaption></figure>
@@ -115,7 +118,7 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
 
     <section className="community-topic-section" id="topics">
       <header><div><span>DISCOVER</span><h2>今天想聊什么？</h2></div>{selectedTopic && <a href="/community#feed">查看全部话题内容 →</a>}</header>
-      <div className="community-topic-strip">{topics.map((topic) => <a className={selectedTopic === topic.slug ? "active" : ""} href={`/community?topic=${encodeURIComponent(topic.slug)}#feed`} key={topic.id}><Image src={topicImages[topic.slug] ?? "/assets/31.webp"} alt="" fill sizes="(max-width: 720px) 44vw, 20vw" /><span><strong>#{topic.name}</strong><small>{topic.post_count} 篇分享</small></span></a>)}</div>
+      <div className="community-topic-strip">{topics.map((topic) => <a className={selectedTopic === topic.slug ? "active" : ""} href={`/community?topic=${encodeURIComponent(topic.slug)}#feed`} key={topic.id}><Image src={topicImages[topic.slug] ?? "/assets/31.webp"} alt="" fill sizes="(max-width: 720px) 44vw, 20vw" /><span><strong>#{topic.name}</strong><small>{topic.post_count > 0 ? `${topic.post_count} 篇分享` : "写下你的灵感"}</small></span></a>)}</div>
       {activeTopic && <TopicFollowButton slug={activeTopic.slug} initialFollowing={activeTopic.viewer_is_following} initialCount={activeTopic.follower_count} signedIn={Boolean(viewer)} returnTo={`/community?topic=${activeTopic.slug}#topics`} />}
     </section>
 
@@ -129,7 +132,7 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
         </section>
         {unavailable ? <section className="community-empty"><span>COMMUNITY SERVICE</span><h2>社区正在准备中</h2><p>数据库迁移完成后，这里会展示会员的最新分享。</p></section>
           : posts.length ? <><div className="community-feed community-prototype-feed" aria-label="社区公开内容">{posts.map((post) => <CommunityPostCard post={post} signedIn={Boolean(viewer)} isOwner={viewer?.memberId === post.member_id} key={post.id} />)}</div>{nextCursorHref && <a className="community-load-more" href={nextCursorHref}>继续浏览更早的分享 →</a>}</>
-            : <section className="community-empty"><span>{searchQuery || selectedProduct ? "NO MATCHES" : feed === "following" ? "FOLLOWING FEED" : feed === "bookmarks" ? "SAVED POSTS" : "BE THE FIRST"}</span><h2>{searchQuery || selectedProduct ? "没有找到匹配的分享" : feed === "following" ? "关注动态还是空的" : feed === "bookmarks" ? "还没有收藏内容" : activeTopic ? `#${activeTopic.name} 等你分享` : "第一篇分享，等你发布"}</h2><p>{searchQuery || selectedProduct ? "试试更短的关键词，或清除筛选浏览全部内容。" : feed === "following" ? "关注感兴趣的会员，他们审核通过的新分享会显示在这里。" : feed === "bookmarks" ? "在分享卡片中点击收藏，之后可以从这里快速找回。" : "上传你的图片和真实感受，审核通过后会展示在这里。"}</p><a href={searchQuery || selectedProduct || feed === "bookmarks" ? "/community#feed" : publishHref}>{searchQuery || selectedProduct || feed === "bookmarks" ? "浏览全部内容 →" : "开始分享 →"}</a></section>}
+            : <section className="community-empty"><span>{searchQuery || selectedProduct ? "NO MATCHES" : feed === "following" ? "FOLLOWING FEED" : feed === "bookmarks" ? "SAVED POSTS" : "COMMUNITY JOURNAL"}</span><h2>{searchQuery || selectedProduct ? "没有找到匹配的分享" : feed === "following" ? "关注动态还是空的" : feed === "bookmarks" ? "还没有收藏内容" : activeTopic ? `写下你的 #${activeTopic.name} 灵感` : "从一次真实体验开始"}</h2><p>{searchQuery || selectedProduct ? "试试更短的关键词，或清除筛选浏览全部内容。" : feed === "following" ? "关注感兴趣的会员，他们审核通过的新分享会显示在这里。" : feed === "bookmarks" ? "在分享卡片中点击收藏，之后可以从这里快速找回。" : "记录颜色、质地、用法和真实感受。内容审核通过后，会帮助更多人做出选择。"}</p><a href={searchQuery || selectedProduct || feed === "bookmarks" ? "/community#feed" : publishHref}>{searchQuery || selectedProduct || feed === "bookmarks" ? "浏览全部内容 →" : "写下我的体验 →"}</a></section>}
       </div>
       <aside className="community-sidebar">
         {habitSummary && <CommunityHabitCard initialSummary={habitSummary} />}

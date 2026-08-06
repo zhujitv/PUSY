@@ -70,6 +70,7 @@ export async function listSuggestedCommunityMembers(viewerMemberId?: number, lim
     LEFT JOIN community_follows follower ON follower.followed_member_id = cp.member_id
     WHERE cp.status = 'active' AND cp.member_id != ?
     GROUP BY cp.member_id, cp.public_id, cp.display_name, cp.bio
+    HAVING COUNT(DISTINCT p.id) FILTER (WHERE p.status = 'approved') > 0
     ORDER BY follower_count DESC, post_count DESC, cp.created_at::timestamp ASC
     LIMIT ?
   `).bind(viewerMemberId ?? 0, viewerMemberId ?? 0, Math.min(12, Math.max(1, limit))).all<{

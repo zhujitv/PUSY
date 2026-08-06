@@ -34,7 +34,7 @@ test("public payment guidance matches wallet-first split payments", async () => 
   assert.match(terms, /不能与账户登录密码相同/);
 });
 
-test("homepage defers the Russian third-party video player behind Chinese controls", async () => {
+test("homepage shows the paused video player before manual playback", async () => {
   const [home, localizedVideo, css] = await Promise.all([
     readFile(new URL("../app/HomeClient.tsx", import.meta.url), "utf8"),
     read("app/components/LocalizedReelVideo.tsx"),
@@ -43,11 +43,11 @@ test("homepage defers the Russian third-party video player behind Chinese contro
 
   assert.match(home, /LocalizedReelVideo/);
   assert.doesNotMatch(home, /<iframe/);
-  assert.match(localizedVideo, /playing \?/);
-  assert.match(localizedVideo, /播放短片/);
-  assert.match(localizedVideo, /点击后加载视频/);
+  assert.match(localizedVideo, /<iframe/);
+  assert.match(localizedVideo, /loading="lazy"/);
   assert.match(localizedVideo, /runtime\.strm\.yandex\.ru\/player\/video/);
-  assert.match(localizedVideo, /nativeui=true&share=false/);
-  assert.doesNotMatch(localizedVideo, /autoplay/);
-  assert.match(css, /\.reel-video-trigger/);
+  assert.match(localizedVideo, /autoplay=0&nativeui=true&share=false/);
+  assert.doesNotMatch(localizedVideo, /autoplay=1/);
+  assert.doesNotMatch(localizedVideo, /useState|reel-video-trigger|reel-video-close/);
+  assert.doesNotMatch(css, /\.reel-video-trigger|\.reel-video-close/);
 });

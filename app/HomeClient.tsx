@@ -125,7 +125,7 @@ export default function HomeClient({ homeContent, featuredProducts, navigationCa
         <div className="reels-heading"><h2 id="reels-title">{homeContent.reels_title}</h2><p>{homeContent.reels_subtitle}</p></div>
         <div className="reels-grid">
           {reels.map((reel) => <article className="reel-card" key={reel.player}>
-            <LocalizedReelVideo player={reel.player} title={reel.title} poster={reel.product?.image ?? "/assets/31.webp"} />
+            <LocalizedReelVideo player={reel.player} title={reel.title} />
             <a className="reel-product" href={`/products/${reel.slug}`}>
               {reel.product && <Image src={reel.product.image} alt="" width={700} height={727} sizes="(max-width: 700px) 80vw, 20vw" />}
               <span><b>{reel.title}</b><em>{reel.product ? formatCnyFromRub(reel.product.price) : "查看商品"}</em></span>

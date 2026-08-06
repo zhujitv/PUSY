@@ -2,6 +2,7 @@ import { communityPostDto, createCommunityPost, listCommunityPosts } from "../..
 import { normalizeCommunityPostInput, parseOptionalCommunityMedia } from "../../../../lib/community/media";
 import { getPreviewMemberIdentity } from "../../../../lib/preview-member-auth";
 import { allowRequest, allowRequestForIdentity, hasTrustedOrigin, privateJson, rateLimitResponse, safeServerError } from "../../../../lib/request-security";
+import { normalizeCommunityExperience } from "../../../../lib/community/experience";
 
 export async function GET(request: Request) {
   try {
@@ -9,7 +10,7 @@ export async function GET(request: Request) {
     const publicId = url.searchParams.get("member")?.trim().toUpperCase() || undefined;
     const topicSlug = url.searchParams.get("topic")?.trim().toLowerCase() || undefined;
     const requestedFeed = url.searchParams.get("feed");
-    const feed = requestedFeed === "following" || requestedFeed === "bookmarks" ? requestedFeed : "all" as const;
+    const feed = requestedFeed === "for-you" || requestedFeed === "following" || requestedFeed === "bookmarks" ? requestedFeed : "all" as const;
     const requestedSort = url.searchParams.get("sort");
     const sort = requestedSort === "latest" || requestedSort === "popular" ? requestedSort : "featured" as const;
     const query = url.searchParams.get("q")?.trim().slice(0, 80) || undefined;
@@ -67,7 +68,10 @@ export async function POST(request: Request) {
     if (intent === "submit" && !topicSlugs.length) return privateJson({ error: "请至少选择 1 个社区话题" }, { status: 400 });
     const campaignSlug = String(payload.campaignSlug ?? "").trim().toLowerCase();
     if (campaignSlug && !/^[a-z0-9-]{2,80}$/.test(campaignSlug)) return privateJson({ error: "主题活动标识无效" }, { status: 400 });
-    const created = await createCommunityPost({ memberId: viewer.memberId, clientRequestId, topicSlugs, productSlugs, campaignSlug: campaignSlug || undefined, intent, ...input });
+    const purchaseTaskValue = Number(payload.purchaseTaskId);
+    const purchaseTaskId = Number.isSafeInteger(purchaseTaskValue) && purchaseTaskValue > 0 ? purchaseTaskValue : null;
+    const experience = normalizeCommunityExperience(payload);
+    const created = await createCommunityPost({ memberId: viewer.memberId, clientRequestId, topicSlugs, productSlugs, campaignSlug: campaignSlug || undefined, purchaseTaskId, experience, intent, ...input });
     return privateJson({
       ok: true,
       id: created.id,
@@ -79,7 +83,7 @@ export async function POST(request: Request) {
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
     if (error instanceof SyntaxError) return privateJson({ error: "请求内容不是有效的 JSON" }, { status: 400 });
-    if (/^(请上传|仅支持|单张图片|图片内容|图片总大小|正文至少|请填写|请选择|关联商品|草稿至少|这篇内容|所选主题)/.test(message)) return privateJson({ error: message }, { status: 400 });
+    if (/^(请上传|仅支持|单张图片|图片内容|图片总大小|正文至少|请填写|请选择|关联商品|草稿至少|这篇内容|所选主题|已购分享)/.test(message)) return privateJson({ error: message }, { status: 400 });
     if (/会员账户不可发布|创作者账号/.test(message)) return privateJson({ error: message }, { status: 403 });
     console.error("[community/posts] create failed", { message });
     return safeServerError("发布失败，请稍后再试");

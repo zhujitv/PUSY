@@ -1,11 +1,22 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { PageShell } from "../components/SiteChrome";
 import { useStore } from "../components/StoreProvider";
 import { formatCnyFromRub, getProduct } from "../data/products";
 import { calculateShippingFee, ELECTRONIC_DELIVERY, FREE_STANDARD_SHIPPING_THRESHOLD, SF_DELIVERY, STANDARD_DELIVERY } from "../../lib/shipping";
 import type { WalletSummary } from "../../lib/wallet/types";
+import { recordCommunityEvent } from "../community/community-client-events";
+
+type CommunityAttribution = { postId: string; source: "wechat" | "copy_link" | "community"; expiresAt: number };
+
+function readCommunityAttribution(): CommunityAttribution | null {
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem("pusy-community-attribution") ?? "null") as CommunityAttribution | null;
+    if (!parsed || !/^PST-[A-Z0-9]{12}$/.test(parsed.postId) || !["wechat", "copy_link", "community"].includes(parsed.source) || parsed.expiresAt <= Date.now()) return null;
+    return parsed;
+  } catch { return null; }
+}
 
 export default function CheckoutPage() {
   const { cart, subtotal, physicalSubtotal, requiresShipping, clearCart } = useStore();
@@ -19,13 +30,19 @@ export default function CheckoutPage() {
   const [couponMessage, setCouponMessage] = useState("");
   const [wallet, setWallet] = useState<WalletSummary | null>(null);
   const [paymentPassword, setPaymentPassword] = useState("");
+  const communityAttributionRef = useRef<CommunityAttribution | null>(null);
   const actualDelivery = requiresShipping ? delivery : ELECTRONIC_DELIVERY;
   const shipping = calculateShippingFee(actualDelivery, physicalSubtotal);
   const finalTotal = Math.max(0, subtotal + shipping - discount);
   const totalFen = Math.round(finalTotal * 12);
   const walletAmountFen = Math.min(totalFen, wallet?.status === "active" ? wallet.availableBalanceFen : 0);
   const externalAmountFen = totalFen - walletAmountFen;
-  useEffect(() => { fetch("/api/account/wallet", { cache: "no-store" }).then((response) => response.ok ? response.json() : null).then((body) => setWallet(body?.summary ?? null)).catch(() => {}); }, []);
+  useEffect(() => {
+    fetch("/api/account/wallet", { cache: "no-store" }).then((response) => response.ok ? response.json() : null).then((body) => setWallet(body?.summary ?? null)).catch(() => {});
+    const attribution = readCommunityAttribution();
+    communityAttributionRef.current = attribution;
+    if (attribution) recordCommunityEvent("checkout_started", attribution.postId, undefined, `checkout:${attribution.postId}`, attribution.source);
+  }, []);
   async function applyCoupon() { setCouponMessage("正在验证…"); const response = await fetch("/api/promotions/validate", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ code: couponCode, subtotal }) }); const body = await response.json(); if (response.ok && body.valid) { setAppliedCoupon(body.code); setDiscount(body.discount); setCouponMessage(`${body.message}，已优惠 ${formatCnyFromRub(body.discount)}`); } else { setAppliedCoupon(""); setDiscount(0); setCouponMessage(body.message || body.error || "优惠码不可用"); } }
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -36,10 +53,12 @@ export default function CheckoutPage() {
     setSubmitError("");
     const form = new FormData(event.currentTarget);
     const order = { id: "", createdAt: new Date().toISOString(), total: finalTotal, items: cart, customer: String(form.get("name") ?? ""), delivery: actualDelivery };
-    const payload = { ...order, email: String(form.get("email") ?? ""), phone: String(form.get("phone") ?? ""), address: requiresShipping ? [form.get("province"), form.get("city"), form.get("address"), form.get("postcode")].filter(Boolean).join(" ") : "", payment, couponCode: appliedCoupon };
+    const communityAttribution = communityAttributionRef.current;
+    const payload = { ...order, email: String(form.get("email") ?? ""), phone: String(form.get("phone") ?? ""), address: requiresShipping ? [form.get("province"), form.get("city"), form.get("address"), form.get("postcode")].filter(Boolean).join(" ") : "", payment, couponCode: appliedCoupon, communityAttribution };
     const response = await fetch("/api/orders", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
     if (!response.ok) { const body = await response.json().catch(() => ({})); setSubmitError(body.error || "订单创建失败，请稍后再试"); setSubmitting(false); return; }
     const result = await response.json();
+    if (communityAttribution) { try { window.localStorage.removeItem("pusy-community-attribution"); } catch {} }
     const createdOrderId = String(result.orderId ?? "");
     const savedOrder = { ...order, id: createdOrderId, total: Number(result.total ?? order.total) };
     window.localStorage.setItem("pusy-cn-last-order", JSON.stringify(savedOrder));

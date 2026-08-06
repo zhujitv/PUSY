@@ -13,7 +13,7 @@ test("phase two community interfaces activate follows, topics and notifications"
     read("lib/community/moderation.ts"),
   ]);
   assert.match(contracts, /COMMUNITY_API_VERSION/);
-  assert.match(contracts, /COMMUNITY_FEATURE_PHASE = 6/);
+  assert.match(contracts, /COMMUNITY_FEATURE_PHASE = 7/);
   assert.match(follows, /followCommunityMember/);
   assert.match(follows, /unfollowCommunityMember/);
   assert.match(follows, /hasTrustedOrigin/);

@@ -4,6 +4,7 @@ import type { CommunityPostStatus } from "./posts";
 import { notifyCommunityModeration } from "./social";
 import { parseCommunityProducts, type CommunityLinkedProduct, type CommunityPromotion } from "./commerce";
 import { rewardApprovedCommunityPost } from "./creator";
+import { completePurchaseShareTask } from "./experience";
 
 export type CommunityModerationPost = {
   id: string;
@@ -29,6 +30,8 @@ export type CommunityModerationPost = {
   impression_count: number;
   product_click_count: number;
   add_to_cart_count: number;
+  paid_order_count: number;
+  attributed_revenue_fen: number;
   campaign_title: string;
   campaign_entry_status: string;
 };
@@ -56,6 +59,8 @@ export async function listCommunityModerationPosts(limit = 300) {
       (SELECT COUNT(*) FROM community_content_events WHERE post_id = p.id AND event_type = 'post_impression')::INTEGER AS impression_count,
       (SELECT COUNT(*) FROM community_content_events WHERE post_id = p.id AND event_type = 'product_click')::INTEGER AS product_click_count,
       (SELECT COUNT(*) FROM community_content_events WHERE post_id = p.id AND event_type = 'add_to_cart')::INTEGER AS add_to_cart_count,
+      (SELECT COUNT(*) FROM community_order_attributions WHERE post_id = p.id AND status = 'paid')::INTEGER AS paid_order_count,
+      COALESCE((SELECT SUM(revenue_fen) FROM community_order_attributions WHERE post_id = p.id AND status = 'paid'), 0)::INTEGER AS attributed_revenue_fen,
       COALESCE((SELECT title FROM community_campaigns WHERE id = p.campaign_id), '') AS campaign_title,
       COALESCE((SELECT status FROM community_campaign_entries WHERE post_id = p.id), '') AS campaign_entry_status
     FROM community_posts p
@@ -77,6 +82,8 @@ export async function listCommunityModerationPosts(limit = 300) {
     impression_count: Number(row.impression_count),
     product_click_count: Number(row.product_click_count),
     add_to_cart_count: Number(row.add_to_cart_count),
+    paid_order_count: Number(row.paid_order_count),
+    attributed_revenue_fen: Number(row.attributed_revenue_fen),
     author_account_type: row.author_account_type === "official" ? "official" : "member",
     creator_status: row.creator_status === "restricted" ? "restricted" : "active",
   }));
@@ -107,6 +114,6 @@ export async function moderateCommunityPost(input: { postId: string; status: Com
   if (!event) throw new Error("社区内容不存在");
   const post = await db.prepare("SELECT member_id FROM community_posts WHERE id = ? LIMIT 1").bind(postId).first<{ member_id: number }>();
   if (post && status !== "pending") await notifyCommunityModeration({ postId, authorMemberId: Number(post.member_id), status });
-  if (status === "approved") await rewardApprovedCommunityPost(postId);
+  if (status === "approved") await Promise.all([rewardApprovedCommunityPost(postId), completePurchaseShareTask(postId)]);
   return event.post_id;
 }

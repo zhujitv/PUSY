@@ -5,6 +5,7 @@ import { resolveCommunityTopics } from "./topics";
 import { getCommunityProfileForMember } from "./post-queries";
 import type { CommunityPostStatus } from "./post-types";
 import { recordCommunityActivity } from "./activity";
+import { normalizeCommunityExperience, validatePurchaseShareTask, type CommunityExperience } from "./experience";
 
 export async function ensureCommunityProfile(memberId: number, displayName: string) {
   const db = await getStoreDb();
@@ -25,7 +26,7 @@ async function postFingerprint(title: string, body: string) {
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-export async function createCommunityPost(input: { memberId: number; displayName: string; title: string; body: string; media: CommunityMediaInput[]; topicSlugs: string[]; productSlugs: string[]; clientRequestId: string; intent?: "draft" | "submit"; campaignSlug?: string }) {
+export async function createCommunityPost(input: { memberId: number; displayName: string; title: string; body: string; media: CommunityMediaInput[]; topicSlugs: string[]; productSlugs: string[]; clientRequestId: string; intent?: "draft" | "submit"; campaignSlug?: string; purchaseTaskId?: number | null; experience?: CommunityExperience }) {
   const db = await getStoreDb();
   const member = await db.prepare("SELECT id, status FROM members WHERE id = ? LIMIT 1").bind(input.memberId).first<{ id: number; status: string }>();
   if (!member || member.status === "blocked") throw new Error("该会员账户不可发布社区内容");
@@ -38,6 +39,9 @@ export async function createCommunityPost(input: { memberId: number; displayName
     resolveCommunityTopics(input.topicSlugs),
     resolveCommunityProducts(input.productSlugs),
   ]);
+  const experience = input.experience ?? normalizeCommunityExperience({});
+  const purchaseTask = await validatePurchaseShareTask(input.memberId, input.purchaseTaskId ?? null, linkedProducts.map((product) => product.slug));
+  if (purchaseTask && input.intent !== "draft" && (!experience.usagePeriod || !experience.rating)) throw new Error("已购分享请补充使用周期和总体评分");
   const fingerprint = input.body ? await postFingerprint(input.title, input.body) : "";
   if (input.intent !== "draft" && fingerprint) {
     const duplicate = await db.prepare("SELECT id FROM community_posts WHERE member_id = ? AND content_fingerprint = ? AND status != 'draft' AND created_at::timestamp >= CURRENT_TIMESTAMP - INTERVAL '30 days' LIMIT 1").bind(input.memberId, fingerprint).first<{ id: string }>();
@@ -50,7 +54,10 @@ export async function createCommunityPost(input: { memberId: number; displayName
   const mediaRecords = input.media.map((item, position) => ({ ...item, position, id: `MED-${crypto.randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase()}` }));
   try {
     await db.batch([
-      db.prepare("INSERT INTO community_posts (id, member_id, client_request_id, title, body, status, content_fingerprint, campaign_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)").bind(id, input.memberId, input.clientRequestId, input.title, input.body, status, fingerprint, campaign?.id ?? null),
+      db.prepare(`INSERT INTO community_posts (id, member_id, client_request_id, title, body, status, content_fingerprint, campaign_id,
+        experience_skin_type, experience_usage_period, experience_scene, experience_rating, experience_highlights_json, experience_cautions)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+        .bind(id, input.memberId, input.clientRequestId, input.title, input.body, status, fingerprint, campaign?.id ?? null, experience.skinType, experience.usagePeriod, experience.scene, experience.rating, JSON.stringify(experience.highlights), experience.cautions),
       ...mediaRecords.map((item) => db.prepare("INSERT INTO community_post_media (id, post_id, position, mime_type, byte_size, bytes) VALUES (?, ?, ?, ?, ?, ?)")
         .bind(item.id, id, item.position, item.mimeType, item.bytes.length, item.bytes)),
       ...topics.map((topic) => db.prepare("INSERT INTO community_post_topics (post_id, topic_id) VALUES (?, ?)").bind(id, topic.id)),
@@ -59,6 +66,7 @@ export async function createCommunityPost(input: { memberId: number; displayName
         VALUES (?, 1, ?, ?, ?, ?, ?, ?, ?, 'member', ?)`)
         .bind(id, input.title, input.body, status, JSON.stringify(topics.map((topic) => topic.slug)), JSON.stringify(linkedProducts.map((product) => product.slug)), JSON.stringify(mediaRecords.map((item) => item.id)), status === "draft" ? "draft_saved" : "submitted", String(input.memberId)),
       ...(campaign ? [db.prepare("INSERT INTO community_campaign_entries (campaign_id, post_id, member_id) VALUES (?, ?, ?)").bind(campaign.id, id, input.memberId)] : []),
+      ...(purchaseTask ? [db.prepare("UPDATE community_purchase_share_tasks SET post_id = ?, status = 'submitted', submitted_at = CURRENT_TIMESTAMP WHERE id = ? AND member_id = ? AND status = 'available'").bind(id, purchaseTask.id, input.memberId).requireChanges("已购分享任务已被提交，请刷新页面")] : []),
     ]);
   } catch (error) {
     if (typeof error === "object" && error && "code" in error && error.code === "23505") {

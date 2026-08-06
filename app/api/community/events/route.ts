@@ -15,6 +15,7 @@ export async function POST(request: Request) {
       postId: String(payload.postId ?? "").toUpperCase(),
       productSlug: String(payload.productSlug ?? ""),
       memberId: viewer?.memberId,
+      source: String(payload.source ?? ""),
     });
     return privateJson({ ok: true }, { status: 201, headers: phaseFourHeaders() });
   } catch (error) {

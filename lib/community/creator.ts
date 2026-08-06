@@ -2,6 +2,7 @@ import { getStoreDb } from "../../db/store";
 import { completeMemberTask } from "../growth/member-program";
 import { resolveCommunityProducts } from "./commerce";
 import { resolveCommunityTopics } from "./topics";
+import type { CommunityExperience } from "./experience-contracts";
 
 export type CommunityCampaign = {
   id: string;
@@ -72,7 +73,7 @@ async function fingerprint(title: string, body: string) {
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-export async function updateCreatorPost(input: { memberId: number; postId: string; title: string; body: string; topicSlugs: string[]; productSlugs: string[]; intent: "draft" | "submit"; expectedUpdatedAt: string }) {
+export async function updateCreatorPost(input: { memberId: number; postId: string; title: string; body: string; topicSlugs: string[]; productSlugs: string[]; experience: CommunityExperience; intent: "draft" | "submit"; expectedUpdatedAt: string }) {
   const db = await getStoreDb();
   const post = await db.prepare(`SELECT p.id, p.status, p.updated_at, cp.creator_status, cp.restricted_until
     FROM community_posts p JOIN community_profiles cp ON cp.member_id = p.member_id
@@ -87,13 +88,18 @@ export async function updateCreatorPost(input: { memberId: number; postId: strin
   if (input.intent === "submit" && !Number(media?.count)) throw new Error("提交审核前请至少上传 1 张图片");
   const [topics, products] = await Promise.all([resolveCommunityTopics(input.topicSlugs), resolveCommunityProducts(input.productSlugs)]);
   if (input.intent === "submit" && !topics.length) throw new Error("请至少选择 1 个社区话题");
+  const purchaseTask = await db.prepare("SELECT id FROM community_purchase_share_tasks WHERE post_id = ? LIMIT 1").bind(post.id).first();
+  if (input.intent === "submit" && purchaseTask && (!input.experience.usagePeriod || !input.experience.rating)) throw new Error("已购分享请补充使用周期和总体评分");
   const nextStatus = input.intent === "draft" ? "draft" : "pending";
   const hash = content.body ? await fingerprint(content.title, content.body) : "";
   if (nextStatus === "pending" && hash) {
     const duplicate = await db.prepare("SELECT id FROM community_posts WHERE member_id = ? AND id != ? AND content_fingerprint = ? AND status != 'draft' AND created_at::timestamp >= CURRENT_TIMESTAMP - INTERVAL '30 days' LIMIT 1").bind(input.memberId, post.id, hash).first();
     if (duplicate) throw new Error("这篇内容与近 30 天内的投稿重复，请补充新的体验后再提交");
   }
-  const result = await db.prepare("UPDATE community_posts SET title = ?, body = ?, status = ?, content_fingerprint = ?, moderation_note = '', moderated_by = NULL, moderated_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND member_id = ? AND updated_at = ? RETURNING updated_at").bind(content.title, content.body, nextStatus, hash, post.id, input.memberId, post.updated_at).first<{ updated_at: string }>();
+  const result = await db.prepare(`UPDATE community_posts SET title = ?, body = ?, status = ?, content_fingerprint = ?, moderation_note = '', moderated_by = NULL, moderated_at = NULL,
+    experience_skin_type = ?, experience_usage_period = ?, experience_scene = ?, experience_rating = ?, experience_highlights_json = ?, experience_cautions = ?, updated_at = CURRENT_TIMESTAMP
+    WHERE id = ? AND member_id = ? AND updated_at = ? RETURNING updated_at`)
+    .bind(content.title, content.body, nextStatus, hash, input.experience.skinType, input.experience.usagePeriod, input.experience.scene, input.experience.rating, JSON.stringify(input.experience.highlights), input.experience.cautions, post.id, input.memberId, post.updated_at).first<{ updated_at: string }>();
   if (!result) throw new Error("内容已变化，请刷新后重试");
   await db.batch([
     db.prepare("DELETE FROM community_post_topics WHERE post_id = ?").bind(post.id),

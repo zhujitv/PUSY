@@ -3,6 +3,7 @@ import type { CommunityPost } from "../../lib/community/posts";
 import { FollowButton } from "./FollowButton";
 import { CommunityPostActions } from "./CommunityPostActions";
 import { CommunityPostTracker, CommunityProductLinks } from "./CommunityCommerce";
+import { CommunityExperienceSummary } from "./CommunityExperienceSummary";
 
 const statusLabels = {
   pending: "审核中",
@@ -30,6 +31,7 @@ export function CommunityPostCard({ post, showStatus = false, signedIn = false, 
       <div>{showStatus && <em className={`community-status status-${post.status}`}>{statusLabels[post.status]}</em>}{post.promotion_placement && <em className={`community-promotion-badge promotion-${post.promotion_placement}`}>{post.promotion_placement === "pinned" ? "置顶" : "精选"}</em>}<span className="community-card-topics">{post.topics.map((topic) => <a href={`/community?topic=${encodeURIComponent(topic.slug)}#feed`} key={topic.id}>#{topic.name}</a>)}</span></div>
       {post.title && <h2><a href={postUrl}>{post.title}</a></h2>}
       <p>{post.body}</p>
+      <CommunityExperienceSummary experience={post.experience} />
       {showStatus && post.status === "rejected" && post.moderation_note && <aside>审核说明：{post.moderation_note}</aside>}
       <CommunityProductLinks postId={post.id} products={post.products} />
       <CommunityPostActions

@@ -11,7 +11,7 @@ export type CommunityLinkedProduct = {
 
 export type CommunityProductOption = Omit<CommunityLinkedProduct, "verified_purchase">;
 export type CommunityPromotion = "featured" | "pinned";
-export type CommunityContentEventType = "post_impression" | "product_click" | "add_to_cart";
+export type CommunityContentEventType = "post_impression" | "product_click" | "add_to_cart" | "share_poster" | "share_open" | "checkout_started";
 
 export function parseCommunityProducts(value: unknown): CommunityLinkedProduct[] {
   const parsed = typeof value === "string" ? (() => { try { return JSON.parse(value); } catch { return []; } })() : value;
@@ -60,18 +60,20 @@ export async function recordCommunityContentEvent(input: {
   postId: string;
   productSlug?: string;
   memberId?: number;
+  source?: string;
 }) {
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(input.eventKey)) throw new Error("社区统计事件标识无效");
   if (!/^PST-[A-Z0-9]{12}$/.test(input.postId)) throw new Error("社区内容标识无效");
-  if (!(["post_impression", "product_click", "add_to_cart"] as string[]).includes(input.eventType)) throw new Error("社区统计事件类型无效");
+  if (!(["post_impression", "product_click", "add_to_cart", "share_poster", "share_open", "checkout_started"] as string[]).includes(input.eventType)) throw new Error("社区统计事件类型无效");
   const productSlug = String(input.productSlug ?? "").trim().toLowerCase();
-  if (input.eventType !== "post_impression" && !/^[a-z0-9][a-z0-9-]{1,119}$/.test(productSlug)) throw new Error("关联商品标识无效");
+  if (["product_click", "add_to_cart"].includes(input.eventType) && !/^[a-z0-9][a-z0-9-]{1,119}$/.test(productSlug)) throw new Error("关联商品标识无效");
+  const source = ["wechat", "copy_link", "community"].includes(String(input.source)) ? String(input.source) : "";
   const db = await getStoreDb();
   const target = await db.prepare(`
     SELECT p.id
     FROM community_posts p
     WHERE p.id = ? AND p.status = 'approved'
-      AND (? = 'post_impression' OR EXISTS (
+      AND (? NOT IN ('product_click', 'add_to_cart') OR EXISTS (
         SELECT 1 FROM community_post_products cpp
         WHERE cpp.post_id = p.id AND cpp.product_slug = ?
       ))
@@ -79,10 +81,10 @@ export async function recordCommunityContentEvent(input: {
   `).bind(input.postId, input.eventType, productSlug || null).first<{ id: string }>();
   if (!target) throw new Error("社区内容或关联商品不存在");
   await db.prepare(`
-    INSERT INTO community_content_events (event_key, event_type, post_id, product_slug, member_id)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO community_content_events (event_key, event_type, post_id, product_slug, member_id, source)
+    VALUES (?, ?, ?, ?, ?, ?)
     ON CONFLICT(event_key) DO NOTHING
-  `).bind(input.eventKey, input.eventType, input.postId, input.eventType === "post_impression" ? null : productSlug, input.memberId ?? null).run();
+  `).bind(input.eventKey, input.eventType, input.postId, ["product_click", "add_to_cart"].includes(input.eventType) ? productSlug : null, input.memberId ?? null, source).run();
 }
 
 export async function setCommunityPromotion(input: {
@@ -117,16 +119,19 @@ export async function setCommunityPromotion(input: {
 
 export async function getCommunityCommerceInsights() {
   const db = await getStoreDb();
-  const [summary, products] = await Promise.all([
+  const [summary, products, sources] = await Promise.all([
     db.prepare(`
       SELECT
         COUNT(*) FILTER (WHERE event_type = 'post_impression')::INTEGER AS impressions,
+        COUNT(*) FILTER (WHERE event_type = 'share_poster')::INTEGER AS share_posters,
+        COUNT(*) FILTER (WHERE event_type = 'share_open')::INTEGER AS share_opens,
         COUNT(*) FILTER (WHERE event_type = 'product_click')::INTEGER AS product_clicks,
         COUNT(*) FILTER (WHERE event_type = 'add_to_cart')::INTEGER AS add_to_carts,
+        COUNT(*) FILTER (WHERE event_type = 'checkout_started')::INTEGER AS checkouts,
         COUNT(DISTINCT post_id)::INTEGER AS measured_posts
       FROM community_content_events
       WHERE created_at::timestamp >= CURRENT_TIMESTAMP - INTERVAL '30 days'
-    `).first<{ impressions: number; product_clicks: number; add_to_carts: number; measured_posts: number }>(),
+    `).first<{ impressions: number; share_posters: number; share_opens: number; product_clicks: number; add_to_carts: number; checkouts: number; measured_posts: number }>(),
     db.prepare(`
       SELECT e.product_slug, p.name AS product_name,
         COUNT(*) FILTER (WHERE e.event_type = 'product_click')::INTEGER AS product_clicks,
@@ -138,13 +143,27 @@ export async function getCommunityCommerceInsights() {
       ORDER BY add_to_carts DESC, product_clicks DESC
       LIMIT 10
     `).all<{ product_slug: string; product_name: string; product_clicks: number; add_to_carts: number }>(),
+    db.prepare(`SELECT source, COUNT(*)::INTEGER AS orders,
+      COUNT(*) FILTER (WHERE status = 'paid')::INTEGER AS paid_orders,
+      COALESCE(SUM(revenue_fen) FILTER (WHERE status = 'paid'), 0)::INTEGER AS revenue_fen
+      FROM community_order_attributions WHERE created_at::timestamp >= CURRENT_TIMESTAMP - INTERVAL '30 days'
+      GROUP BY source ORDER BY paid_orders DESC, orders DESC`).all<{ source: string; orders: number; paid_orders: number; revenue_fen: number }>(),
   ]);
-  const values = summary ?? { impressions: 0, product_clicks: 0, add_to_carts: 0, measured_posts: 0 };
+  const conversions = await db.prepare(`SELECT COUNT(*)::INTEGER AS orders, COUNT(*) FILTER (WHERE status = 'paid')::INTEGER AS paid_orders,
+    COALESCE(SUM(revenue_fen) FILTER (WHERE status = 'paid'), 0)::INTEGER AS revenue_fen
+    FROM community_order_attributions WHERE created_at::timestamp >= CURRENT_TIMESTAMP - INTERVAL '30 days'`).first<{ orders: number; paid_orders: number; revenue_fen: number }>();
+  const values = summary ?? { impressions: 0, share_posters: 0, share_opens: 0, product_clicks: 0, add_to_carts: 0, checkouts: 0, measured_posts: 0 };
   return {
     summary: {
       impressions: Number(values.impressions),
+      sharePosters: Number(values.share_posters),
+      shareOpens: Number(values.share_opens),
       productClicks: Number(values.product_clicks),
       addToCarts: Number(values.add_to_carts),
+      checkouts: Number(values.checkouts),
+      orders: Number(conversions?.orders ?? 0),
+      paidOrders: Number(conversions?.paid_orders ?? 0),
+      revenueFen: Number(conversions?.revenue_fen ?? 0),
       measuredPosts: Number(values.measured_posts),
     },
     products: products.results.map((product) => ({
@@ -153,5 +172,6 @@ export async function getCommunityCommerceInsights() {
       productClicks: Number(product.product_clicks),
       addToCarts: Number(product.add_to_carts),
     })),
+    sources: sources.results.map((source) => ({ source: source.source, orders: Number(source.orders), paidOrders: Number(source.paid_orders), revenueFen: Number(source.revenue_fen) })),
   };
 }

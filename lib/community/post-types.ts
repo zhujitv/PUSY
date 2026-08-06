@@ -1,5 +1,7 @@
 import { parseCommunityProducts, type CommunityLinkedProduct, type CommunityPromotion } from "./commerce";
 import type { CommunityTopic } from "./topics";
+import { parseCommunityExperience } from "./experience";
+import type { CommunityExperience } from "./experience-contracts";
 
 export type CommunityPostStatus = "draft" | "pending" | "approved" | "rejected" | "hidden";
 
@@ -30,6 +32,7 @@ export type CommunityPost = {
   bookmark_count: number;
   viewer_has_liked: boolean;
   viewer_has_bookmarked: boolean;
+  experience: CommunityExperience;
   pagination_cursor?: string;
 };
 
@@ -48,13 +51,20 @@ export type CommunityMember = {
   viewer_is_following: boolean;
 };
 
-export type CommunityPostRow = Omit<CommunityPost, "media_ids" | "topics" | "products" | "pagination_cursor"> & {
+export type CommunityPostRow = Omit<CommunityPost, "media_ids" | "topics" | "products" | "experience" | "pagination_cursor"> & {
   media_ids: unknown;
   topics: unknown;
   products: unknown;
   sort_placement: number;
   sort_time: string | Date;
   viewer_has_followed_topic: boolean;
+  viewer_interest_score: number;
+  experience_skin_type: string;
+  experience_usage_period: string;
+  experience_scene: string;
+  experience_rating: number | null;
+  experience_highlights_json: unknown;
+  experience_cautions: string;
 };
 
 export function mediaIds(value: unknown) {
@@ -69,7 +79,7 @@ export function mediaIds(value: unknown) {
 }
 
 export function serializePost(row: CommunityPostRow): CommunityPost {
-  const post = Object.fromEntries(Object.entries(row).filter(([key]) => !["sort_placement", "sort_time", "viewer_has_followed_topic"].includes(key))) as Omit<CommunityPostRow, "sort_placement" | "sort_time" | "viewer_has_followed_topic">;
+  const post = Object.fromEntries(Object.entries(row).filter(([key]) => !["sort_placement", "sort_time", "viewer_has_followed_topic", "viewer_interest_score", "experience_skin_type", "experience_usage_period", "experience_scene", "experience_rating", "experience_highlights_json", "experience_cautions"].includes(key))) as Omit<CommunityPostRow, "sort_placement" | "sort_time" | "viewer_has_followed_topic" | "viewer_interest_score" | "experience_skin_type" | "experience_usage_period" | "experience_scene" | "experience_rating" | "experience_highlights_json" | "experience_cautions">;
   let topics: CommunityPost["topics"] = [];
   const value = typeof row.topics === "string" ? (() => { try { return JSON.parse(row.topics); } catch { return []; } })() : row.topics;
   if (Array.isArray(value)) topics = value.filter((item) => item && typeof item === "object").map((item) => ({
@@ -93,6 +103,7 @@ export function serializePost(row: CommunityPostRow): CommunityPost {
     author_account_type: row.author_account_type === "official" ? "official" : "member",
     viewer_has_liked: Boolean(row.viewer_has_liked),
     viewer_has_bookmarked: Boolean(row.viewer_has_bookmarked),
+    experience: parseCommunityExperience(row as unknown as Record<string, unknown>),
   };
 }
 

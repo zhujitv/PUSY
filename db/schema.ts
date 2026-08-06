@@ -466,6 +466,12 @@ export const communityPosts = pgTable("community_posts", {
   publishedAt: text("published_at"),
   contentFingerprint: text("content_fingerprint").notNull().default(""),
   campaignId: text("campaign_id"),
+  experienceSkinType: text("experience_skin_type").notNull().default(""),
+  experienceUsagePeriod: text("experience_usage_period").notNull().default(""),
+  experienceScene: text("experience_scene").notNull().default(""),
+  experienceRating: integer("experience_rating"),
+  experienceHighlightsJson: text("experience_highlights_json").notNull().default("[]"),
+  experienceCautions: text("experience_cautions").notNull().default(""),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
@@ -605,7 +611,42 @@ export const communityContentEvents = pgTable("community_content_events", {
   postId: text("post_id").notNull().references(() => communityPosts.id),
   productSlug: text("product_slug").references(() => products.slug),
   memberId: integer("member_id").references(() => members.id),
+  source: text("source").notNull().default(""),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const communityMemberInterests = pgTable("community_member_interests", {
+  memberId: integer("member_id").notNull().references(() => members.id),
+  interestType: text("interest_type").notNull(),
+  interestKey: text("interest_key").notNull(),
+  weight: integer("weight").notNull().default(5),
+  source: text("source").notNull().default("onboarding"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const communityPurchaseShareTasks = pgTable("community_purchase_share_tasks", {
+  id: serial("id").primaryKey(),
+  memberId: integer("member_id").notNull().references(() => members.id),
+  orderId: text("order_id").notNull().references(() => orders.id),
+  productSlug: text("product_slug").notNull().references(() => products.slug),
+  postId: text("post_id").references(() => communityPosts.id),
+  status: text("status").notNull().default("available"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  submittedAt: text("submitted_at"),
+  completedAt: text("completed_at"),
+});
+
+export const communityOrderAttributions = pgTable("community_order_attributions", {
+  orderId: text("order_id").primaryKey().references(() => orders.id),
+  postId: text("post_id").notNull().references(() => communityPosts.id),
+  memberId: integer("member_id").references(() => members.id),
+  source: text("source").notNull(),
+  status: text("status").notNull().default("created"),
+  revenueFen: integer("revenue_fen").notNull().default(0),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  paidAt: text("paid_at"),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const communityCampaigns = pgTable("community_campaigns", {

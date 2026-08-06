@@ -6,6 +6,7 @@ export type CommunityPostCursor = {
   placement: number;
   followsAuthor: number;
   followsTopic: number;
+  interestScore?: number;
   promotionRank: number;
   commentCount: number;
   likeCount: number;
@@ -28,6 +29,7 @@ function validCursor(value: unknown): value is CommunityPostCursor {
     && integer(cursor.placement)
     && integer(cursor.followsAuthor)
     && integer(cursor.followsTopic)
+    && (cursor.interestScore === undefined || integer(cursor.interestScore))
     && integer(cursor.promotionRank)
     && integer(cursor.commentCount)
     && integer(cursor.likeCount)

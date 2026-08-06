@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CommunityIcon } from "./CommunityIcon";
 import { CommunityReportButton } from "./CommunityReportButton";
+import { CommunityShareActions } from "./CommunityShareActions";
 
 export function CommunityPostActions({ postId, postUrl, signedIn, isOwner, initialLikeCount, initialCommentCount, initialBookmarkCount, initialLiked, initialBookmarked }: {
   postId: string;
@@ -42,17 +43,11 @@ export function CommunityPostActions({ postId, postUrl, signedIn, isOwner, initi
     } catch { setMessage("网络连接失败，请稍后再试"); }
     finally { setBusy(""); }
   }
-  async function share() {
-    const url = new URL(postUrl, window.location.origin).toString();
-    try { await navigator.clipboard.writeText(url); setMessage("分享链接已复制"); }
-    catch { setMessage("请复制浏览器地址分享"); }
-    window.setTimeout(() => setMessage(""), 1800);
-  }
   return <div className="community-post-actions">
     <div>
       <button type="button" className={liked ? "active" : ""} aria-pressed={liked} disabled={busy === "like"} onClick={() => void mutate("like")}><CommunityIcon name="heart" />{likeCount || "点赞"}</button>
       <a href={`${postUrl}#comments`}><CommunityIcon name="comment" />{initialCommentCount || "评论"}</a>
-      <button type="button" onClick={() => void share()}><CommunityIcon name="share" />分享</button>
+      <CommunityShareActions postId={postId} postUrl={postUrl} />
     </div>
     <div className="community-post-secondary-actions"><button type="button" className={bookmarked ? "active" : ""} aria-pressed={bookmarked} disabled={busy === "bookmark"} onClick={() => void mutate("bookmark")}><CommunityIcon name="bookmark" />{bookmarkCount || "收藏"}</button>{!isOwner && <CommunityReportButton entityType="post" entityId={postId} signedIn={signedIn} loginReturnTo={postUrl} compact />}</div>
     {message && <span role="status">{message}</span>}

@@ -7,6 +7,8 @@ import type { CommunityTopic } from "../../../lib/community/social";
 import type { CommunityProductOption } from "../../../lib/community/commerce";
 import { formatCnyFromRub } from "../../data/products";
 import type { CommunityCampaign } from "../../../lib/community/creator";
+import type { CommunityExperience, CommunityPurchaseShareTask } from "../../../lib/community/experience-contracts";
+import { PurchaseExperienceTemplate } from "./PurchaseExperienceTemplate";
 
 async function canvasData(canvas: HTMLCanvasElement, quality: number) {
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", quality));
@@ -38,13 +40,17 @@ async function compressCommunityImage(file: File) {
   });
 }
 
-export function PublishCommunityPost({ displayName, topics, products, campaigns, defaultTopic, defaultProduct, defaultCampaign }: { displayName: string; topics: CommunityTopic[]; products: CommunityProductOption[]; campaigns: CommunityCampaign[]; defaultTopic?: string; defaultProduct?: string; defaultCampaign?: string }) {
+const emptyExperience: CommunityExperience = { skinType: "", usagePeriod: "", scene: "", rating: null, highlights: [], cautions: "" };
+
+export function PublishCommunityPost({ displayName, topics, products, campaigns, purchaseTasks, defaultTopic, defaultProduct, defaultCampaign }: { displayName: string; topics: CommunityTopic[]; products: CommunityProductOption[]; campaigns: CommunityCampaign[]; purchaseTasks: CommunityPurchaseShareTask[]; defaultTopic?: string; defaultProduct?: string; defaultCampaign?: string }) {
   const [images, setImages] = useState<string[]>([]);
   const [body, setBody] = useState("");
   const [title, setTitle] = useState("");
   const [topicSlug, setTopicSlug] = useState(defaultTopic ?? topics[0]?.slug ?? "");
   const [productSlugs, setProductSlugs] = useState<string[]>(defaultProduct ? [defaultProduct] : []);
   const [campaignSlug, setCampaignSlug] = useState(defaultCampaign ?? "");
+  const [purchaseTaskId, setPurchaseTaskId] = useState<number | null>(null);
+  const [experience, setExperience] = useState<CommunityExperience>(emptyExperience);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -74,7 +80,7 @@ export function PublishCommunityPost({ displayName, topics, products, campaigns,
     setBusy(true); setMessage(intent === "draft" ? "正在保存草稿…" : "正在提交审核…");
     const values = Object.fromEntries(new FormData(form).entries());
     try {
-      const response = await fetch("/api/community/posts", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...values, title, body, images, topicSlugs: topicSlug ? [topicSlug] : [], productSlugs, campaignSlug, clientRequestId, intent }) });
+      const response = await fetch("/api/community/posts", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...values, title, body, images, topicSlugs: topicSlug ? [topicSlug] : [], productSlugs, campaignSlug, purchaseTaskId, experienceSkinType: experience.skinType, experienceUsagePeriod: experience.usagePeriod, experienceScene: experience.scene, experienceRating: experience.rating, experienceHighlights: experience.highlights, experienceCautions: experience.cautions, clientRequestId, intent }) });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) { setError(result.error || "发布失败，请稍后再试"); setMessage(""); return; }
       setMemberUrl(String(result.memberUrl || "/community/me")); setSavedAsDraft(intent === "draft"); setPublished(true); setMessage(result.message || (intent === "draft" ? "草稿已保存" : "内容已提交审核"));
@@ -92,6 +98,7 @@ export function PublishCommunityPost({ displayName, topics, products, campaigns,
       <label>正文 <small>{body.length} / 1500</small><textarea name="body" minLength={10} maxLength={1500} required rows={9} value={body} onChange={(event) => setBody(event.target.value)} placeholder="分享妆容、色彩、质地、护理感受或你的真实使用场景…" /></label>
       <label>选择话题 <small>帮助其他会员找到这篇分享</small><select name="topic" value={topicSlug} onChange={(event) => setTopicSlug(event.target.value)} required>{topics.map((topic) => <option value={topic.slug} key={topic.id}>#{topic.name}</option>)}</select></label>
       {campaigns.length > 0 && <label>主题活动 <small>选填，入选后可获得额外积分</small><select value={campaignSlug} onChange={(event) => setCampaignSlug(event.target.value)}><option value="">不参加活动</option>{campaigns.map((campaign) => <option value={campaign.slug} key={campaign.id}>{campaign.title} · 最高 {campaign.reward_points} 积分</option>)}</select></label>}
+      <PurchaseExperienceTemplate tasks={purchaseTasks} selectedTaskId={purchaseTaskId} experience={experience} onExperience={setExperience} onTask={(task) => { setPurchaseTaskId(task?.id ?? null); if (task) setProductSlugs((current) => [task.productSlug, ...current.filter((slug) => slug !== task.productSlug)].slice(0, 3)); }} />
       <fieldset className="community-product-selector"><legend>关联商品 <small>选填，最多 3 件；已购状态由真实订单自动判断</small></legend>
         <div>{products.map((product) => {
           const selected = productSlugs.includes(product.slug);

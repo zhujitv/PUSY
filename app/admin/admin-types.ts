@@ -56,12 +56,15 @@ export type CommunityModerationPost = {
   impression_count: number;
   product_click_count: number;
   add_to_cart_count: number;
+  paid_order_count: number;
+  attributed_revenue_fen: number;
   campaign_title: string;
   campaign_entry_status: string;
 };
 export type CommunityInsights = {
-  summary: { impressions: number; productClicks: number; addToCarts: number; measuredPosts: number };
+  summary: { impressions: number; sharePosters: number; shareOpens: number; productClicks: number; addToCarts: number; checkouts: number; orders: number; paidOrders: number; revenueFen: number; measuredPosts: number };
   products: Array<{ productSlug: string; productName: string; productClicks: number; addToCarts: number }>;
+  sources: Array<{ source: string; orders: number; paidOrders: number; revenueFen: number }>;
 };
 export type CommunityReport = {
   id: string;

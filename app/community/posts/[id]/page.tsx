@@ -8,12 +8,13 @@ import { listCommunityComments } from "../../../../lib/community/engagement";
 import { CommunityPostCard } from "../../CommunityPostCard";
 import { CommunityNavigation } from "../../CommunityNavigation";
 import { CommunityDiscussion } from "../../CommunityDiscussion";
+import { CommunityShareArrival } from "../../CommunityShareActions";
 
 export const metadata: Metadata = { title: "社区分享｜PÚSY CLUB" };
 export const dynamic = "force-dynamic";
 
-export default async function CommunityPostPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function CommunityPostPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ source?: string }> }) {
+  const [{ id }, query] = await Promise.all([params, searchParams]);
   if (!/^PST-[A-Z0-9]{12}$/.test(id)) notFound();
   const viewer = await getPreviewMemberIdentity();
   const [post, viewerProfile, social, comments] = await Promise.all([
@@ -24,5 +25,6 @@ export default async function CommunityPostPage({ params }: { params: Promise<{ 
   ]);
   if (!post) notFound();
   const isOwner = viewer?.memberId === post.member_id;
-  return <PageShell><CommunityNavigation active="home" viewerPublicId={viewerProfile?.public_id} unreadCount={social?.unreadCount ?? 0} /><main className="community-post-page"><nav><a href="/community">← 返回社区</a><a href={`/community/members/${post.author_public_id}`}>查看会员主页 →</a></nav>{isOwner && post.status !== "approved" && <p className={`community-detail-status status-${post.status}`}>{post.status === "pending" ? "这篇分享正在审核中，仅你和内容管理员可以查看。" : `这篇分享未公开${post.moderation_note ? `：${post.moderation_note}` : "。"}`}</p>}<CommunityPostCard post={post} showStatus={isOwner} signedIn={Boolean(viewer)} isOwner={isOwner} />{post.status === "approved" && <CommunityDiscussion postId={post.id} initialComments={comments} signedIn={Boolean(viewer)} />}</main></PageShell>;
+  const source = query.source === "wechat" || query.source === "copy_link" ? query.source : null;
+  return <PageShell>{source && post.status === "approved" && <CommunityShareArrival postId={post.id} source={source} />}<CommunityNavigation active="home" viewerPublicId={viewerProfile?.public_id} unreadCount={social?.unreadCount ?? 0} /><main className="community-post-page"><nav><a href="/community">← 返回社区</a><a href={`/community/members/${post.author_public_id}`}>查看会员主页 →</a></nav>{isOwner && post.status !== "approved" && <p className={`community-detail-status status-${post.status}`}>{post.status === "pending" ? "这篇分享正在审核中，仅你和内容管理员可以查看。" : `这篇分享未公开${post.moderation_note ? `：${post.moderation_note}` : "。"}`}</p>}<CommunityPostCard post={post} showStatus={isOwner} signedIn={Boolean(viewer)} isOwner={isOwner} />{post.status === "approved" && <CommunityDiscussion postId={post.id} initialComments={comments} signedIn={Boolean(viewer)} />}</main></PageShell>;
 }

@@ -4,6 +4,7 @@ import { decodeCommunityPostCursor, encodeCommunityPostCursor, type CommunityPos
 
 const postSelect = `
   SELECT p.id, p.member_id, p.title, p.body, p.status, p.moderation_note, p.published_at, p.created_at, p.updated_at,
+    p.experience_skin_type, p.experience_usage_period, p.experience_scene, p.experience_rating, p.experience_highlights_json, p.experience_cautions,
     cp.public_id AS author_public_id, cp.display_name AS author_name, cp.bio AS author_bio,
     cp.account_type AS author_account_type, cp.official_label AS author_official_label,
     COALESCE(json_agg(cm.id ORDER BY cm.position) FILTER (WHERE cm.id IS NOT NULL), '[]'::json) AS media_ids,
@@ -43,6 +44,10 @@ const postSelect = `
     EXISTS(SELECT 1 FROM community_post_topics viewer_post_topic
       JOIN community_topic_follows viewer_topic_follow ON viewer_topic_follow.topic_id = viewer_post_topic.topic_id
       WHERE viewer_post_topic.post_id = p.id AND viewer_topic_follow.member_id = ?) AS viewer_has_followed_topic
+    , COALESCE((SELECT SUM(interest.weight) FROM community_post_topics interest_post_topic
+      JOIN community_topics interest_topic ON interest_topic.id = interest_post_topic.topic_id
+      JOIN community_member_interests interest ON interest.interest_type = 'topic' AND interest.interest_key = interest_topic.slug
+      WHERE interest_post_topic.post_id = p.id AND interest.member_id = ?), 0)::INTEGER AS viewer_interest_score
   FROM community_posts p
   JOIN members m ON m.id = p.member_id AND m.status != 'blocked'
   JOIN community_profiles cp ON cp.member_id = m.id AND cp.status = 'active'
@@ -55,12 +60,12 @@ const postGroup = `
     cp.public_id, cp.display_name, cp.bio, cp.account_type, cp.official_label, promotion.placement, promotion.sort_order
 `;
 
-export async function listCommunityPosts(input: { publicId?: string; viewerMemberId?: number; topicSlug?: string; productSlug?: string; query?: string; feed?: "all" | "following" | "bookmarks"; sort?: "featured" | "latest" | "popular"; cursor?: string; limit?: number } = {}) {
+export async function listCommunityPosts(input: { publicId?: string; viewerMemberId?: number; topicSlug?: string; productSlug?: string; query?: string; feed?: "all" | "for-you" | "following" | "bookmarks"; sort?: "featured" | "latest" | "popular"; cursor?: string; limit?: number } = {}) {
   const db = await getStoreDb();
   const limit = Math.min(48, Math.max(1, Math.round(input.limit ?? 24)));
   const sort: CommunityPostSort = input.sort === "latest" || input.sort === "popular" ? input.sort : "featured";
   let where = "WHERE p.status = 'approved'";
-  const values: unknown[] = [input.viewerMemberId ?? 0, input.viewerMemberId ?? 0, input.viewerMemberId ?? 0, input.viewerMemberId ?? 0];
+  const values: unknown[] = [input.viewerMemberId ?? 0, input.viewerMemberId ?? 0, input.viewerMemberId ?? 0, input.viewerMemberId ?? 0, input.viewerMemberId ?? 0];
   if (input.publicId) {
     const profile = await getCommunityMember(input.publicId);
     if (!profile) return [];
@@ -121,13 +126,18 @@ export async function listCommunityPosts(input: { publicId?: string; viewerMembe
     ? "WHERE (ranked.sort_time, ranked.id) < (?::timestamp, ?)"
     : sort === "popular"
       ? "WHERE (ranked.like_count, ranked.comment_count, ranked.bookmark_count, ranked.sort_time, ranked.id) < (?, ?, ?, ?::timestamp, ?)"
-      : `WHERE (ranked.sort_placement, ranked.viewer_is_following::integer, ranked.viewer_has_followed_topic::integer,
-          ranked.promotion_rank, ranked.comment_count, ranked.like_count, ranked.bookmark_count, ranked.sort_time, ranked.id)
-        < (?, ?, ?, ?, ?, ?, ?, ?::timestamp, ?)`
+      : input.feed === "for-you"
+        ? `WHERE (ranked.sort_placement, ranked.viewer_interest_score, ranked.viewer_is_following::integer, ranked.viewer_has_followed_topic::integer,
+            ranked.promotion_rank, ranked.comment_count, ranked.like_count, ranked.bookmark_count, ranked.sort_time, ranked.id)
+          < (?, ?, ?, ?, ?, ?, ?, ?, ?::timestamp, ?)`
+        : `WHERE (ranked.sort_placement, ranked.viewer_is_following::integer, ranked.viewer_has_followed_topic::integer,
+            ranked.promotion_rank, ranked.comment_count, ranked.like_count, ranked.bookmark_count, ranked.sort_time, ranked.id)
+          < (?, ?, ?, ?, ?, ?, ?, ?::timestamp, ?)`
     : "";
   if (cursor) {
     if (sort === "latest") values.push(cursor.time, cursor.id);
     else if (sort === "popular") values.push(cursor.likeCount, cursor.commentCount, cursor.bookmarkCount, cursor.time, cursor.id);
+    else if (input.feed === "for-you") values.push(cursor.placement, cursor.interestScore ?? 0, cursor.followsAuthor, cursor.followsTopic, cursor.promotionRank, cursor.commentCount, cursor.likeCount, cursor.bookmarkCount, cursor.time, cursor.id);
     else values.push(cursor.placement, cursor.followsAuthor, cursor.followsTopic, cursor.promotionRank, cursor.commentCount, cursor.likeCount, cursor.bookmarkCount, cursor.time, cursor.id);
   }
   values.push(limit);
@@ -135,7 +145,7 @@ export async function listCommunityPosts(input: { publicId?: string; viewerMembe
     ? "ranked.sort_time DESC, ranked.id DESC"
     : sort === "popular"
       ? "ranked.like_count DESC, ranked.comment_count DESC, ranked.bookmark_count DESC, ranked.sort_time DESC, ranked.id DESC"
-      : `ranked.sort_placement DESC, ranked.viewer_is_following DESC, ranked.viewer_has_followed_topic DESC,
+      : `ranked.sort_placement DESC, ${input.feed === "for-you" ? "ranked.viewer_interest_score DESC," : ""} ranked.viewer_is_following DESC, ranked.viewer_has_followed_topic DESC,
         ranked.promotion_rank DESC, ranked.comment_count DESC, ranked.like_count DESC, ranked.bookmark_count DESC,
         ranked.sort_time DESC, ranked.id DESC`;
   const rows = await db.prepare(`SELECT ranked.* FROM (${postSelect} ${where} ${postGroup}) ranked ${cursorWhere} ORDER BY ${order} LIMIT ?`)
@@ -147,6 +157,7 @@ export async function listCommunityPosts(input: { publicId?: string; viewerMembe
       version: 1,
       sort,
       placement: Number(row.sort_placement),
+      interestScore: Number(row.viewer_interest_score),
       followsAuthor: row.viewer_is_following ? 1 : 0,
       followsTopic: row.viewer_has_followed_topic ? 1 : 0,
       promotionRank: Number(row.promotion_rank),
@@ -162,7 +173,7 @@ export async function listCommunityPosts(input: { publicId?: string; viewerMembe
 export async function getCommunityPost(id: string, viewerMemberId?: number) {
   const db = await getStoreDb();
   const row = await db.prepare(`${postSelect} WHERE p.id = ? AND (p.status = 'approved' OR p.member_id = ?) AND p.status != 'hidden' ${postGroup} LIMIT 1`)
-    .bind(viewerMemberId ?? 0, viewerMemberId ?? 0, viewerMemberId ?? 0, viewerMemberId ?? 0, id, viewerMemberId ?? 0)
+    .bind(viewerMemberId ?? 0, viewerMemberId ?? 0, viewerMemberId ?? 0, viewerMemberId ?? 0, viewerMemberId ?? 0, id, viewerMemberId ?? 0)
     .first<CommunityPostRow>();
   return row ? serializePost(row) : null;
 }

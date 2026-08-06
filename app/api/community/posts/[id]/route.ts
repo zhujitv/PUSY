@@ -1,6 +1,7 @@
 import { getPreviewMemberIdentity } from "../../../../../lib/preview-member-auth";
 import { hasTrustedOrigin, privateJson, safeServerError } from "../../../../../lib/request-security";
 import { setCreatorPostHidden, updateCreatorPost } from "../../../../../lib/community/creator";
+import { normalizeCommunityExperience } from "../../../../../lib/community/experience";
 
 function slugs(value: unknown, limit: number) {
   return Array.isArray(value) ? Array.from(new Set(value.map(String).map((item) => item.trim().toLowerCase()).filter((item) => /^[a-z0-9-]{2,119}$/.test(item)))).slice(0, limit) : [];
@@ -26,13 +27,14 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       body: String(payload.body ?? ""),
       topicSlugs: slugs(payload.topicSlugs, 3),
       productSlugs: slugs(payload.productSlugs, 3),
+      experience: normalizeCommunityExperience(payload),
       expectedUpdatedAt: String(payload.expectedUpdatedAt ?? ""),
       intent,
     });
     return privateJson({ ok: true, ...result, message: intent === "draft" ? "草稿已更新" : "修改已提交审核" });
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
-    if (/分享不存在|已隐藏|正文至少|提交审核|社区话题|内容已变化|刚刚在其他页面|这篇内容/.test(message)) return privateJson({ error: message }, { status: /不存在/.test(message) ? 404 : 409 });
+    if (/分享不存在|已隐藏|正文至少|提交审核|社区话题|内容已变化|刚刚在其他页面|这篇内容|已购分享/.test(message)) return privateJson({ error: message }, { status: /不存在/.test(message) ? 404 : 409 });
     if (/创作者账号/.test(message)) return privateJson({ error: message }, { status: 403 });
     console.error("[community/creator-post] update failed", { message });
     return safeServerError("保存失败，请稍后再试");

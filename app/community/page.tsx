@@ -12,6 +12,8 @@ import { listCommunityCampaigns, type CommunityCampaign } from "../../lib/commun
 import { getCommunityHabitSummary } from "../../lib/community/activity";
 import { CommunityHabitCard } from "./CommunityHabitCard";
 import { TopicFollowButton } from "./TopicFollowButton";
+import { getCommunityInterestProfile, type CommunityInterestProfile } from "../../lib/community/personalization";
+import { InterestInitializer } from "./InterestInitializer";
 
 export const metadata: Metadata = {
   title: "PÚSY CLUB 社区｜真实美妆灵感",
@@ -35,7 +37,7 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
   const selectedTopic = /^[a-z0-9-]{2,40}$/.test(query.topic ?? "") ? query.topic : undefined;
   const selectedProduct = /^[a-z0-9][a-z0-9-]{1,119}$/.test(query.product ?? "") ? query.product : undefined;
   const searchQuery = query.q?.trim().slice(0, 80) || undefined;
-  const feed = query.feed === "following" || query.feed === "bookmarks" ? query.feed : "all" as const;
+  let feed: "all" | "for-you" | "following" | "bookmarks" = query.feed === "for-you" || query.feed === "following" || query.feed === "bookmarks" ? query.feed : "all";
   const sort = query.sort === "latest" || query.sort === "popular" ? query.sort : "featured" as const;
   const cursor = /^[A-Za-z0-9_-]{1,600}$/.test(query.cursor ?? "") ? query.cursor : undefined;
   let posts: CommunityPost[] = [];
@@ -49,9 +51,11 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
   let unavailable = false;
   let campaigns: CommunityCampaign[] = [];
   let habitSummary: Awaited<ReturnType<typeof getCommunityHabitSummary>> | null = null;
+  let interestProfile: CommunityInterestProfile | null = null;
   try {
     viewer = await getPreviewMemberIdentity();
-    const [postRows, topicRows, stats, profile, social, memberRows, campaignRows, habit] = await Promise.all([
+    if (viewer && !query.feed && !selectedTopic && !selectedProduct && !searchQuery) feed = "for-you";
+    const [postRows, topicRows, stats, profile, social, memberRows, campaignRows, habit, interests] = await Promise.all([
       listCommunityPosts({ viewerMemberId: viewer?.memberId, topicSlug: selectedTopic, productSlug: selectedProduct, query: searchQuery, feed, sort, cursor, limit: 24 }),
       listCommunityTopics(viewer?.memberId),
       getCommunityStats(),
@@ -60,6 +64,7 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
       listSuggestedCommunityMembers(viewer?.memberId, 3),
       listCommunityCampaigns(),
       viewer ? getCommunityHabitSummary(viewer.memberId) : Promise.resolve(null),
+      viewer ? getCommunityInterestProfile(viewer.memberId) : Promise.resolve(null),
     ]);
     posts = postRows;
     topics = topicRows;
@@ -70,6 +75,7 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
     unreadCount = social?.unreadCount ?? 0;
     campaigns = campaignRows;
     habitSummary = habit;
+    interestProfile = interests;
   } catch {
     unavailable = true;
   }
@@ -124,7 +130,8 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
 
     <section className="community-feed-layout" id="feed">
       <div className="community-feed-main">
-        <header className="community-feed-toolbar"><nav aria-label="社区内容范围"><a className={feed === "all" ? "active" : ""} href={selectedTopic ? `/community?topic=${selectedTopic}#feed` : "/community#feed"}>全部</a><a className={feed === "following" ? "active" : ""} href={viewer ? `/community?feed=following${selectedTopic ? `&topic=${selectedTopic}` : ""}#feed` : `/account/login?returnTo=${encodeURIComponent("/community?feed=following#feed")}`}>关注</a><a className={feed === "bookmarks" ? "active" : ""} href={viewer ? `/community?feed=bookmarks${selectedTopic ? `&topic=${selectedTopic}` : ""}#feed` : `/account/login?returnTo=${encodeURIComponent("/community?feed=bookmarks#feed")}`}>收藏</a></nav><span>{activeTopic ? `正在浏览 #${activeTopic.name}` : feed === "following" ? "只看我关注的会员" : feed === "bookmarks" ? "仅你可见的收藏内容" : "每篇分享都经过社区审核"}</span></header>
+        {viewer && interestProfile && <InterestInitializer topics={topics} initialSlugs={interestProfile.topicSlugs} />}
+        <header className="community-feed-toolbar"><nav aria-label="社区内容范围"><a className={feed === "for-you" ? "active" : ""} href={viewer ? "/community?feed=for-you#feed" : `/account/login?returnTo=${encodeURIComponent("/community?feed=for-you#feed")}`}>为你推荐</a><a className={feed === "all" ? "active" : ""} href={selectedTopic ? `/community?feed=all&topic=${selectedTopic}#feed` : "/community?feed=all#feed"}>全部</a><a className={feed === "following" ? "active" : ""} href={viewer ? `/community?feed=following${selectedTopic ? `&topic=${selectedTopic}` : ""}#feed` : `/account/login?returnTo=${encodeURIComponent("/community?feed=following#feed")}`}>关注</a><a className={feed === "bookmarks" ? "active" : ""} href={viewer ? `/community?feed=bookmarks${selectedTopic ? `&topic=${selectedTopic}` : ""}#feed` : `/account/login?returnTo=${encodeURIComponent("/community?feed=bookmarks#feed")}`}>收藏</a></nav><span>{activeTopic ? `正在浏览 #${activeTopic.name}` : feed === "for-you" ? "根据你的兴趣与站内互动排序" : feed === "following" ? "只看我关注的会员" : feed === "bookmarks" ? "仅你可见的收藏内容" : "每篇分享都经过社区审核"}</span></header>
         <section className="community-discovery-tools">
           <form action="/community" method="get"><label><span>搜索社区</span><input type="search" name="q" defaultValue={searchQuery} maxLength={80} placeholder="搜索分享、话题、会员或商品" /></label>{selectedTopic && <input type="hidden" name="topic" value={selectedTopic} />}{selectedProduct && <input type="hidden" name="product" value={selectedProduct} />}{feed !== "all" && <input type="hidden" name="feed" value={feed} />}<button>搜索</button></form>
           <nav aria-label="社区内容排序"><a className={sort === "featured" ? "active" : ""} href={discoveryHref("featured")}>精选优先</a><a className={sort === "latest" ? "active" : ""} href={discoveryHref("latest")}>最新发布</a><a className={sort === "popular" ? "active" : ""} href={discoveryHref("popular")}>互动热门</a></nav>

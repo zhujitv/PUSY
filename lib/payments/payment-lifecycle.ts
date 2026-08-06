@@ -8,6 +8,7 @@ import { paymentAdapter } from "./index";
 import { paymentId, providerConfig, retryAt, tradeNo, type DbPayment } from "./payment-shared";
 import type { PaymentProviderName, PaymentStatus } from "./types";
 import { captureWalletPayment, createPaymentAllocation, releaseWalletPayment } from "../wallet/payment-allocation";
+import { markCommunityOrderPaid } from "../community/attribution";
 
 export async function createPayment(orderId: string, provider: PaymentProviderName, origin: string, options: { memberId?: number; paymentPassword?: string } = {}) {
   await releaseExpiredOrderReservations();
@@ -95,7 +96,7 @@ export async function applyPaymentStatus(payment: DbPayment, status: PaymentStat
     db.prepare("UPDATE payments SET status = ?, provider_transaction_id = COALESCE(?, provider_transaction_id), paid_at = COALESCE(?, paid_at), last_error = ?, next_retry_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(resolvedStatus, providerTransactionId ?? null, paidAt ?? (resolvedStatus === "paid" ? new Date().toISOString() : null), message ?? null, payment.id),
     db.prepare("UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(orderStatus, payment.order_id),
   ]);
-  if (resolvedStatus === "paid") await commitPaidOrder(payment.order_id);
+  if (resolvedStatus === "paid") await Promise.all([commitPaidOrder(payment.order_id), markCommunityOrderPaid(payment.order_id).catch(() => undefined)]);
   if (resolvedStatus === "paid" && payment.status !== "paid") {
     await Promise.all([notifyOrderConfirmed(payment.order_id), notifyGiftCards(payment.order_id), syncOrderPoints(payment.order_id), syncPaidOrderGrowth(payment.order_id)]).catch(() => undefined);
   }

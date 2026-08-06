@@ -3,6 +3,7 @@ import { ensureCommunityProfile } from "./posts";
 import { publicId } from "./engagement-shared";
 import type { CommunityComment } from "./engagement-types";
 import { recordCommunityActivity } from "./activity";
+import { learnCommunityTopicInterest } from "./personalization";
 
 function normalizeCommentBody(value: string) {
   const body = value.trim().replace(/\r\n?/g, "\n");
@@ -72,6 +73,7 @@ export async function setCommunityPostInteraction(input: { postId: string; membe
         .bind(`NTF-${crypto.randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase()}`, post.member_id, `post-like:${input.postId}`, input.memberId, input.postId, input.postId, input.postId, post.member_id).run();
       await recordCommunityActivity({ memberId: input.memberId, type: "like", eventKey: `like:${input.postId}:${input.memberId}`, entityType: "post", entityId: input.postId });
     }
+    await learnCommunityTopicInterest(input.memberId, input.postId, input.kind === "bookmark" ? 2 : 1);
   } else {
     await db.prepare(`DELETE FROM ${table} WHERE post_id = ? AND member_id = ?`).bind(input.postId, input.memberId).run();
     if (input.kind === "like") {

@@ -55,9 +55,9 @@ export const editorialPosts = [
     skinType: "normal", usagePeriod: "first-use", scene: "work", rating: 4,
     highlights: ["显色", "质地", "持妆"], cautions: "示例不构成真实试用结论，显色因肤色与底妆而异。",
   }),
-  post(7, "color", "lip-diary", "karandash-dlya-gub-pusy-strawberry-100464", "/products/yandex/cgc5lrm25r8xhvbc9mfhp8mkwds9p68k-2d69895734.webp", "2026-07-28T18:50:00+08:00", {
+  post(7, "color", "lip-diary", "karandash-dlya-gub-pusy-cream-100460", "/products/yandex/67q2sh7v7cfxfxt9h67s5pv2mf95xpb7-1a2b8c5b00.webp", "2026-07-28T18:50:00+08:00", {
     title: "最近画唇线只修嘴角，不再整圈描",
-    body: "以前我会把整圈唇线都描得很完整，近看总觉得有点刻意。现在只用 Strawberry 修一下唇峰和嘴角，再往里面轻轻带两下，轮廓会干净很多。单用是雾面的，想柔和一点就叠透明唇油。笔尖偏细，第一次画别太用力。",
+    body: "以前我会把整圈唇线都描得很完整，近看总觉得有点刻意。现在只用 Cream 修一下唇峰和嘴角，再往里面轻轻带两下，轮廓会干净很多。单用是雾面的，想柔和一点就叠透明唇油。笔尖偏细，第一次画别太用力。",
     skinType: "normal", usagePeriod: "first-use", scene: "special-occasion", rating: 4,
     highlights: ["显色", "便携", "持妆"], cautions: "请勿过度外扩唇线；本帖为发布格式示例。",
   }),
@@ -73,7 +73,7 @@ export const editorialPosts = [
     skinType: "dry", usagePeriod: "one-week", scene: "work", rating: 4,
     highlights: ["质地", "香气", "便携"], cautions: "香气偏好因人而异；破损皮肤请谨慎使用。",
   }),
-  post(10, "care", "hair-inspiration", "kondicioner-dlya-volos-pusy-base-hair-750-ml-1-1-100579", "/products/yandex/k8z7jqr222dm986pb7p9gm8jrhlpr5mm-edad3ae99b.webp", "2026-07-31T20:10:00+08:00", {
+  post(10, "care", "hair-inspiration", "kondicioner-dlya-volos-pusy-prime-hair-400-ml-100173", "/products/yandex/qwjtzhzb49jkmdccn7mlg7drvmf5f28g-3a8a01f743.webp", "2026-07-31T20:10:00+08:00", {
     title: "护发素涂到发根，第二天真的很容易塌",
     body: "这瓶我第一次用得太豪迈，连靠近头皮的位置都带到了，第二天发根直接没精神。后来改成从耳朵下面开始涂，停两三分钟再冲，发尾顺滑度够了，头顶也还能保持蓬松。长发用量会比较快，短发一次不用挤太多。",
     skinType: "normal", usagePeriod: "one-week", scene: "daily", rating: 4,

@@ -97,6 +97,7 @@ test("matches the catalog scope while keeping inventory independently managed", 
     }
   }
   for (const product of products) assert.match(catalogMigration, new RegExp(`'${product.slug}'`));
+  assert.doesNotMatch(catalogMigration, /\b(?:TRUE|FALSE)\b/, "PostgreSQL inventory flags must use integer 0/1 values");
   const conflictUpdate = catalogMigration.split("ON CONFLICT (slug) DO UPDATE SET")[1];
   assert.doesNotMatch(conflictUpdate, /\b(?:stock|inventory_verified)\s*=/);
   const berryTint = bySlug.get("glyancevyiy-tint-dlya-gub-berry-glaze-vinnyiy-100844");

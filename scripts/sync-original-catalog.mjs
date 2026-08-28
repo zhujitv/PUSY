@@ -1,6 +1,8 @@
 import { readFile, writeFile } from "node:fs/promises";
 import {
   applyProductTranslationOverrides,
+  getProductTranslationAlias,
+  getProductTranslationOverride,
   translateVariantGroup,
   translateVariantLabel,
 } from "./catalog-translation-overrides.mjs";
@@ -9,6 +11,8 @@ const SOURCE = "https://pusy.beauty";
 const OUTPUT = new URL("../app/data/products.generated.json", import.meta.url);
 const CACHE = "/tmp/pusy-cn-translation-cache.json";
 const concurrency = 6;
+const existingProducts = JSON.parse(await readFile(OUTPUT, "utf8").catch(() => "[]"));
+const existingBySlug = new Map(existingProducts.map((product) => [product.slug, product]));
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -135,10 +139,12 @@ const rawProducts = await mapLimit(urls, async (url, index) => {
   if (!entry) throw new Error(`Product extractor missing: ${url}`);
   const model = entry[1].payload;
   const variant = model.mainVariant;
-  const description = await translate(variant.description || "");
-  const usage = await translate(characteristic(variant, "sposob-primeneniya"));
-  const name = await translate(variant.name);
   const slug = new URL(url).pathname.split("/").pop();
+  const existing = existingBySlug.get(slug) || existingBySlug.get(getProductTranslationAlias(slug));
+  const override = getProductTranslationOverride(slug);
+  const description = override.description || existing?.description || await translate(variant.description || "");
+  const usage = override.usage || existing?.usage || await translate(characteristic(variant, "sposob-primeneniya"));
+  const name = override.name || existing?.name || await translate(variant.name);
   const images = (variant.mediaItems || []).filter((item) => item.type === "IMAGE" && item.payload?.filePath).sort((a, b) => a.displaySequence - b.displaySequence).map((item) => item.payload.filePath);
   console.log(`[${index + 1}/${urls.length}] ${variant.slug}`);
   return applyProductTranslationOverrides({
@@ -149,12 +155,12 @@ const rawProducts = await mapLimit(urls, async (url, index) => {
     image: images[0] || "",
     imageAlt: images[1] || images[0] || "",
     images,
-    badge: variant.badges?.[0]?.label === "Хит" ? "畅销" : variant.badges?.[0]?.label === "Новинка" ? "新品" : undefined,
+    badge: variant.badges?.some((badge) => badge.label === "Новинка") ? "新品" : variant.badges?.some((badge) => badge.label === "Хит") ? "畅销" : variant.badges?.some((badge) => badge.label === "Акция") ? "优惠" : undefined,
     category: categoryName(variant.categoryName, variant.slug),
     description,
     sku: variant.sku || undefined,
     volume: characteristic(variant, "obieem").replace(/мл/gi, "毫升").replace(/\bг\b/gi, "克") || undefined,
-    ingredients: characteristic(variant, "sostav") || undefined,
+    ingredients: existing?.ingredients || characteristic(variant, "sostav") || undefined,
     usage: usage || undefined,
     inventoryVerified: false,
     stock: 0,

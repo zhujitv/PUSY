@@ -23,7 +23,9 @@
 .nav-row a { font-size: 16px; }
 
 .hero { height: min(50vw, 760px); min-height: 0; max-height: 760px; margin: 0 0 55px; background: #dbeafe; }
+.hero-slide > a { position: absolute; inset: 0; display: block; }
 .hero-slide img { object-position: center; }
+.hero-media--mobile { display: none; }
 .hero-slide--box img { object-position: right center; }
 .hero-copy { left: 6.2vw; top: 23%; transform: none; color: #354359; }
 .campaign-mark { margin-bottom: 24px; color: #eb2f83; font-size: clamp(26px, 3vw, 46px); font-weight: 600; letter-spacing: -.05em; }
@@ -94,8 +96,9 @@ footer.pusy-footer .footer-links a { font-size: 16px; font-weight: 600; }
   .bag-button::before { content: "购物袋"; font-size: 11px; }
   .nav-row { position: absolute; z-index: 20; top: 98px; left: 0; right: 0; display: none; padding: 24px 20px 32px; background: #fff; flex-direction: column; align-items: flex-start; gap: 19px; white-space: normal; }
   .nav-row.is-open { display: flex; }
-  .hero { height: 78vh; min-height: 600px; margin: 0 0 46px; }
-  .hero-slide img { object-position: 55% center; }
+  .hero { height: auto; min-height: 0; aspect-ratio: 4 / 3; margin: 0 0 46px; }
+  .hero-media--desktop { display: none; }
+  .hero-media--mobile { display: block; object-position: center; }
   .hero-shade { background: linear-gradient(0deg, rgba(0,0,0,.34), transparent 65%); }
   .hero-copy { left: 22px; right: 18px; top: auto; bottom: 35px; transform: none; }
   .hero h1 { font-size: 48px; }

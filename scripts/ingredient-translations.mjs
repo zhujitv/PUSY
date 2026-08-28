@@ -4,7 +4,7 @@ import mapMZ from "./ingredient-maps/m-z.json" with { type: "json" };
 const ingredientMap = { ...mapAL, ...mapMZ };
 
 const protectedCompounds = [
-  [/1\s*,\s*2-Hexanediol/gi, "1,2-己二醇"],
+  [/1\s*,\s*2\s*-\s*Hexanediol/gi, "1,2-己二醇"],
   [/Propylene\s*,\s*Glycol/gi, "丙二醇"],
   [/VP\/VA\s*,\s*Copolymer/gi, "VP/VA 共聚物"],
   [/Acrylates\/C10-30 Alkyl\s+(?:Methacrylate|\n\s*Methacrylate)\s*,\s*Copolymer/gi, "丙烯酸（酯）类/C10-30 烷醇丙烯酸酯交联聚合物"],

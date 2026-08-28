@@ -1,0 +1,140 @@
+{
+  "reviewedAt": "2026-08-29",
+  "variantGroups": {
+    "Назначение": "款式"
+  },
+  "variantLabels": {
+    "Винный": "酒红色",
+    "Коричневый": "棕色",
+    "Розовый": "粉色",
+    "Light Brown": "浅棕色",
+    "Medium Brown": "中棕色",
+    "Diamond": "Diamond 钻光",
+    "Secret Garden": "Secret Garden 秘境花园",
+    "Все включено": "一应俱全",
+    "Отпуск для себя": "给自己放个假",
+    "Сияй без спроса": "尽情闪耀"
+    ,"Светло-коричневый": "浅棕色"
+    ,"Темно - коричневый": "深棕色"
+    ,"Черный": "黑色"
+    ,"Абрикосовый": "杏桃色"
+    ,"Красный": "红色"
+    ,"Прозрачный": "透明"
+    ,"Светло-розовый": "浅粉色"
+    ,"Шоколадный": "巧克力色"
+    ,"Персиковый": "蜜桃色"
+  },
+  "aliases": {
+    "gel-dlya-jestkih-broveiy-100799": "rebrending-prozrachnyiy-gel-fiksator-dlya-jestkih-broveiy-pusy-5-ml-6-100345",
+    "prozrachnyiy-gel-fiksator-dlya-broveiy-100801": "rebrending-prozrachnyiy-gel-fiksator-dlya-broveiy-pusy-5ml-1-100347",
+    "super-gel-dlya-broveiy-100800": "rebrending-prozrachnyiy-super-gel-fiksator-dlya-broveiy-super-fix-brow-gel-pusy-5-ml-10-100344",
+    "vosstanavlivayshchiiy-gel-fiksator-dlya-broveiy-100798": "rebrending-vosstanavlivayshchiiy-gel-fiksator-dlya-broveiy-pusy-5-ml-13-100346",
+    "sekretnyiy-boks-otpusk-dlya-sebya-2-100794": "sekretnyiy-boks-siyaiy-bez-sprosa-3-100738",
+    "sekretnyiy-boks-otpusk-dlya-sebya-100796": "sekretnyiy-boks-vsye-vklycheno-m-100729",
+    "sekretnyiy-boks-vsye-vklycheno-1-100795": "sekretnyiy-boks-vsye-vklycheno-m-100729"
+  },
+  "products": {
+    "gel-dlya-jestkih-broveiy-100799": {
+      "name": "粗硬眉毛强力定型啫喱",
+      "category": "眉妆",
+      "volume": "5毫升"
+    },
+    "glyancevyiy-tint-dlya-gub-berry-glaze-vinnyiy-100844": {
+      "name": "Berry Glaze 镜面唇釉",
+      "category": "彩妆",
+      "volume": "4.5毫升",
+      "description": "镜面唇釉，经历风、三杯咖啡和一场热烈约会，依然能留在唇上。\n\n轻盈啫喱质地触唇即融，呈现液态玻璃般的通透光泽，不黏腻、无膜感。色彩最长可维持18小时，可自由叠涂：一层轻柔透色，三层鲜明显色。不令双唇紧绷，全天舒适。\n\nBerry Glaze 是冷调莓果酒红色，带树莓与野草莓的果香。",
+      "usage": "在双唇上均匀薄涂一层，待其吸收。可按需叠涂，达到理想的显色度。"
+    },
+    "glyancevyiy-tint-dlya-gub-cold-brew-korichnevyiy-100843": {
+      "name": "Cold Brew 镜面唇釉",
+      "category": "彩妆",
+      "volume": "4.5毫升",
+      "description": "镜面唇釉，经历风、三杯咖啡和一场热烈约会，依然能留在唇上。\n\n轻盈啫喱质地触唇即融，呈现液态玻璃般的通透光泽，不黏腻、无膜感。色彩最长可维持18小时，可自由叠涂：一层轻柔透色，三层鲜明显色。不令双唇紧绷，全天舒适。\n\nCold Brew 是中性梅子棕色，带柔和咖啡与少许奶油香气。",
+      "usage": "在双唇上均匀薄涂一层，待其吸收。可按需叠涂，达到理想的显色度。"
+    },
+    "glyancevyiy-tint-dlya-gub-pink-jam-rozovyiy-100842": {
+      "name": "Pink Jam 镜面唇釉",
+      "category": "彩妆",
+      "volume": "4.5毫升",
+      "description": "镜面唇釉，经历风、三杯咖啡和一场热烈约会，依然能留在唇上。\n\n轻盈啫喱质地触唇即融，呈现液态玻璃般的通透光泽，不黏腻、无膜感。色彩最长可维持18小时，可自由叠涂：一层轻柔透色，三层鲜明显色。不令双唇紧绷，全天舒适。\n\nPink Jam 是中性覆盆子粉色，带微凉的草莓雪葩香气。",
+      "usage": "在双唇上均匀薄涂一层，待其吸收。可按需叠涂，达到理想的显色度。"
+    },
+    "glyancevyiy-tint-dlya-gub-sugar-plum-1-100841": {
+      "name": "Sugar Plum 镜面唇釉",
+      "category": "彩妆",
+      "volume": "4.5毫升",
+      "description": "镜面唇釉，经历风、三杯咖啡和一场热烈约会，依然能留在唇上。\n\n轻盈啫喱质地触唇即融，呈现液态玻璃般的通透光泽，不黏腻、无膜感。色彩最长可维持18小时，可自由叠涂：一层轻柔透色，三层鲜明显色。不令双唇紧绷，全天舒适。\n\nSugar Plum 是暖调樱桃勃艮第红，带香草与焦糖甜香。",
+      "usage": "在双唇上均匀薄涂一层，待其吸收。可按需叠涂，达到理想的显色度。"
+    },
+    "karandash-dlya-broveiy-s-refilom-light-brown-light-brown-100804": {
+      "name": "Light Brown 可替换芯眉笔",
+      "category": "眉妆",
+      "description": "这是一支让画眉变得更简单的眉笔。\n\n0.8毫米超细笔芯可逐根勾勒眉毛，填补稀疏部位，画出自然利落的眉形。笔芯无需削笔，柔软眉刷可快速晕开笔触并梳理眉毛，新手也容易上手。\n\nLight Brown 是冷调浅棕色，适合金发及浅棕发色。配方持妆最长24小时。笔芯用完后无需更换整支眉笔，只需更换替换芯。",
+      "usage": "沿眉毛生长方向，用短而轻的笔触填补稀疏部位，再用眉刷梳理。\n\n更换笔芯：逆时针旋下用完的笔芯，插入新笔芯，再顺时针轻轻旋紧固定。"
+    },
+    "karandash-dlya-broveiy-s-refilom-medium-brown-medium-brown-100805": {
+      "name": "Medium Brown 可替换芯眉笔",
+      "category": "眉妆",
+      "description": "这是一支让画眉变得更简单的眉笔。\n\n0.8毫米超细笔芯可逐根勾勒眉毛，填补稀疏部位，画出自然利落的眉形。笔芯无需削笔，柔软眉刷可快速晕开笔触并梳理眉毛，新手也容易上手。\n\nMedium Brown 是通用的冷调中棕色，可搭配浅棕到深色发色。配方持妆最长24小时。笔芯用完后无需更换整支眉笔，只需更换替换芯。",
+      "usage": "沿眉毛生长方向，用短而轻的笔触填补稀疏部位，再用眉刷梳理。\n\n更换笔芯：逆时针旋下用完的笔芯，插入新笔芯，再顺时针轻轻旋紧固定。"
+    },
+    "mercayshchie-teni-sparkly-dlya-vek-pusy-diamond-100470": {
+      "name": "Diamond 钻光闪耀眼影",
+      "category": "彩妆",
+      "description": "PÚSY Diamond 闪耀眼影，像把钻石星尘撒在眼睑上，让眼神从远处也能被看见。\n\n轻透底色如无形的连结层，不会压重眼皮；中等颗粒的闪片提供充足反光面积，呈现饱满、水润的液态银光，如钻石碎光覆在眼睑。\n\n柔软质地易于均匀延展，不易结块或飞粉；持妆配方让光泽从上妆一直陪伴到最后一支舞。",
+      "usage": "用指腹、化妆刷或眼影棒将眼影涂于眼皮。"
+    },
+    "mercayshchie-teni-sparkly-dlya-vek-pusy-secret-garden-100468": {
+      "name": "Secret Garden 秘境花园闪耀眼影",
+      "category": "彩妆",
+      "description": "PÚSY Secret Garden 不是普通粉色，更像牡丹花瓣上捕捉到的清晨露水蓝光：轻柔、若隐若现，又带一点冰凉的内里闪光。\n\n轻透底色不会压重眼皮，粉色与蓝色中等颗粒闪片则尽可能捕捉光线。它呈现会随角度变化的色彩，像晶莹水滴在花瓣边缘流动，光泽仿佛从眼皮内部透出。\n\n柔软质地易于均匀延展，不易结块或飞粉；持妆配方让光泽从上妆一直陪伴到最后一支舞。",
+      "usage": "用指腹、化妆刷或眼影棒将眼影涂于眼皮。"
+    },
+    "prozrachnyiy-gel-fiksator-dlya-broveiy-100801": {
+      "name": "透明眉毛定型啫喱",
+      "category": "眉妆",
+      "volume": "5毫升",
+      "usage": "取少量啫喱涂于眉毛并梳理成所需形状，待其完全干燥。可用清水或专用卸妆产品清洁，适合每日使用。"
+    },
+    "rebrending-prozrachnyiy-gel-fiksator-dlya-broveiy-pusy-5-ml-100797": {
+      "name": "透明眉毛定型啫喱（新包装）",
+      "category": "眉妆",
+      "volume": "5毫升",
+      "description": "经典 Brow Fix Gel 透明眉毛定型啫喱，现已换上新包装。\n\n它能梳理难以驾驭的眉毛，并将眉形固定一整天。含维生素B5的配方在可靠定型的同时，帮助滋养、强韧眉毛，使其看起来更健康精致。\n\n适合日常使用，不易粘结或留下白屑。透明质地适配各种眉色，超细刷头可均匀梳理每根眉毛，呈现如沙龙整理后的利落效果。",
+      "usage": "取少量啫喱涂于眉毛，梳理出所需形状，待其完全干燥。可用清水或专用卸妆产品清洁。"
+    },
+    "sekretnyiy-boks-otpusk-dlya-sebya-2-100794": {
+      "name": "S号“尽情闪耀”神秘礼盒",
+      "category": "神秘礼盒"
+    },
+    "sekretnyiy-boks-otpusk-dlya-sebya-100796": {
+      "name": "M号“一应俱全”神秘礼盒",
+      "category": "神秘礼盒"
+    },
+    "sekretnyiy-boks-vsye-vklycheno-1-100795": {
+      "name": "L号“一应俱全”神秘礼盒",
+      "category": "神秘礼盒"
+    },
+    "silikonovaya-kosmetichka-pusy-silicase-1-1-100549": {
+      "name": "PÚSY SILICASE 硅胶化妆包",
+      "category": "配件",
+      "description": "为日常携带 PÚSY 罐瓶而设计的收纳包。\n\n触感平滑舒适，造型简洁，尺寸刚好适合收纳化妆品和日常小物。结实拉链与防潮材质帮助保护包内物品。\n\n清洁也很简单，用湿布或湿巾轻轻擦拭即可。可携往健身房、泳池，也可日常放入手袋。\n\n尺寸：18.5 × 9.1 × 7厘米。"
+    },
+    "super-gel-dlya-broveiy-100800": {
+      "name": "Super Fix 眉毛强力定型啫喱",
+      "category": "眉妆",
+      "volume": "5毫升",
+      "usage": "用刷头取少量啫喱，沿眉毛生长方向梳理成所需形状，待其完全干燥。"
+    },
+    "vosstanavlivayshchiiy-gel-fiksator-dlya-broveiy-100798": {
+      "name": "修护型眉毛定型啫喱",
+      "category": "眉妆",
+      "volume": "5毫升",
+      "usage": "用刷头取少量啫喱，沿眉毛生长方向梳理成所需形状，待其完全干燥。"
+    },
+    "haiylaiyter-sufle-pusy-ice-baby-4-g-1-100693": {
+      "volume": "4克"
+    }
+  }
+}

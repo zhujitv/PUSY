@@ -1,10 +1,11 @@
 import translations from "./catalog-translations.zh-CN.json" with { type: "json" };
+import updateTranslations from "./catalog-translations.2026-08-29.zh-CN.json" with { type: "json" };
 import { localizeProductIngredients } from "./ingredient-translations.mjs";
 
 const allowedProductFields = ["name", "category", "description", "usage", "volume"];
 
 export function applyProductTranslationOverrides(product) {
-  const override = translations.products?.[product.slug] || {};
+  const override = getProductTranslationOverride(product.slug);
   const curated = { ...product };
   for (const field of allowedProductFields) {
     if (Object.prototype.hasOwnProperty.call(override, field)) curated[field] = override[field] || undefined;
@@ -13,16 +14,33 @@ export function applyProductTranslationOverrides(product) {
   curated.description = cleanCatalogCopy(curated.description);
   curated.usage = cleanCatalogCopy(curated.usage) || undefined;
   curated.volume = normalizeVolume(curated.volume);
-  curated.ingredients = localizeProductIngredients(curated).ingredients;
+  curated.ingredients = /[\u3400-\u9fff]/.test(String(curated.ingredients || ""))
+    ? curated.ingredients
+    : localizeProductIngredients(curated).ingredients;
   return curated;
 }
 
+export function getProductTranslationOverride(slug) {
+  const alias = getProductTranslationAlias(slug);
+  return {
+    ...(alias ? translations.products?.[alias] : {}),
+    ...translations.products?.[slug],
+    ...updateTranslations.products?.[slug],
+  };
+}
+
+export function getProductTranslationAlias(slug) {
+  return updateTranslations.aliases?.[slug];
+}
+
 export function translateVariantGroup(source, fallback) {
-  return translations.variantGroups?.[String(source || "").trim()] || fallback;
+  const key = String(source || "").trim();
+  return updateTranslations.variantGroups?.[key] || translations.variantGroups?.[key] || fallback;
 }
 
 export function translateVariantLabel(source, fallback) {
-  return translations.variantLabels?.[String(source || "").trim()] || fallback;
+  const key = String(source || "").trim();
+  return updateTranslations.variantLabels?.[key] || translations.variantLabels?.[key] || fallback;
 }
 
 export function applyLegacyVariantTranslationOverrides(variants = []) {

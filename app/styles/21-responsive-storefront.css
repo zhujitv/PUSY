@@ -10,8 +10,8 @@
   .bag-button { width: 26px; height: 26px; }
   .bag-button::before { content: none; }
   .nav-row { top: 102px; padding: 28px 22px; }
-  .hero { height: 430px; min-height: 430px; margin-bottom: 40px; }
-  .hero-slide img { object-position: 61% center; }
+  .hero { height: auto; min-height: 0; aspect-ratio: 4 / 3; margin-bottom: 40px; }
+  .hero-slide img { object-position: center; }
   .hero-copy { left: 56px; right: 18px; top: 92px; bottom: auto; color: #354359; }
   .campaign-mark { margin-bottom: 18px; font-size: 27px; }
   .hero h1 { max-width: 320px; font-size: 42px; }

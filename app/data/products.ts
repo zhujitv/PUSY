@@ -1,4 +1,5 @@
 import catalog from "./products.generated.json";
+import currentCollections from "./collections.2026-08-29.json";
 import { giftCardAmountFromSlug, isGiftCardProductSlug as isGiftCardSlug } from "../../lib/shipping";
 
 export type ProductVariantOption = {
@@ -120,6 +121,7 @@ export const collectionNames: Record<string, string> = {
   "tush-burgundi": "酒红色睫毛膏",
   "tush-seraya": "灰色睫毛膏",
   "uvlajnyayshchie-maski-dlya-lica-v-domashnih-usloviyah": "居家保湿面膜",
+  ...Object.fromEntries(Object.entries(currentCollections).map(([slug, collection]) => [slug, collection.name])),
 };
 
 const collectionMatchers: Record<string, RegExp> = {
@@ -160,6 +162,11 @@ const collectionMatchers: Record<string, RegExp> = {
 };
 
 export function productsForCollection(slug: string) {
+  const currentCollection = currentCollections[slug as keyof typeof currentCollections];
+  if (currentCollection) {
+    const productSlugs = new Set(currentCollection.products);
+    return products.filter((product) => productSlugs.has(product.slug));
+  }
   if (slug === "vse-tovary") return products;
   if (slug === "hits") return products.filter((product) => product.badge === "畅销");
   if (slug === "novinki") return products.filter((product) => product.badge === "新品");

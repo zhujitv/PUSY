@@ -21,6 +21,27 @@ const reels = [
   { player: "vplvtyznzou7usg76z5w", slug: "kremovye-rumyana-pusy-flower-25-gr-9-100359", title: "FLOWER 奶油腮红" },
 ].map((reel) => ({ ...reel, product: products.find((product) => product.slug === reel.slug) }));
 
+const heroSlides = [
+  {
+    desktop: "/assets/hero-2026-08-lip-tint-desktop.webp",
+    mobile: "/assets/hero-2026-08-lip-tint-mobile.webp",
+    alt: "PÚSY 新品镜面唇釉",
+    href: "/catalog/products",
+  },
+  {
+    desktop: "/assets/hero-2026-08-school-desktop.webp",
+    mobile: "/assets/hero-2026-08-school-mobile.webp",
+    alt: "PÚSY 返校季限时活动",
+    href: "/collections/back-to-school",
+  },
+  {
+    desktop: "/assets/hero-2026-08-blush-desktop.webp",
+    mobile: "/assets/hero-2026-08-blush-mobile.webp",
+    alt: "PÚSY 新品液体腮红",
+    href: "/collections/novinki",
+  },
+] as const;
+
 export default function HomeClient({ homeContent, featuredProducts, navigationCategories }: {
   homeContent: SiteContentSnapshot;
   featuredProducts: Product[];
@@ -43,12 +64,12 @@ export default function HomeClient({ homeContent, featuredProducts, navigationCa
 
   useEffect(() => {
     if (heroPaused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const timer = window.setInterval(() => setHeroIndex((current) => (current + 1) % 2), 6000);
+    const timer = window.setInterval(() => setHeroIndex((current) => (current + 1) % heroSlides.length), 6000);
     return () => window.clearInterval(timer);
   }, [heroPaused]);
 
   function moveHero(direction: number) {
-    setHeroIndex((current) => (current + direction + 2) % 2);
+    setHeroIndex((current) => (current + direction + heroSlides.length) % heroSlides.length);
   }
 
   return (
@@ -67,23 +88,19 @@ export default function HomeClient({ homeContent, featuredProducts, navigationCa
 
       <section className="hero hero-carousel" id="top" aria-roledescription="轮播图" aria-label="PÚSY 首页活动" onMouseEnter={() => setHeroPaused(true)} onMouseLeave={() => setHeroPaused(false)} onFocus={() => setHeroPaused(true)} onBlur={() => setHeroPaused(false)} onTouchStart={(event) => { heroTouchStart.current = event.touches[0]?.clientX ?? null; }} onTouchEnd={(event) => { if (heroTouchStart.current === null) return; const distance = (event.changedTouches[0]?.clientX ?? heroTouchStart.current) - heroTouchStart.current; if (Math.abs(distance) > 45) moveHero(distance > 0 ? -1 : 1); heroTouchStart.current = null; }}>
         <div className="hero-slides">
-          <div className={`hero-slide ${heroIndex === 0 ? "is-active" : ""}`} aria-hidden={heroIndex !== 0}><Image src="/assets/hero-clean-v2-42a264aa.webp" alt="PÚSY 夏日礼物活动" fill sizes="100vw" preload unoptimized fetchPriority="high" /></div>
-          <div className={`hero-slide hero-slide--box ${heroIndex === 1 ? "is-active" : ""}`} aria-hidden={heroIndex !== 1}><Image src="/assets/35.webp" alt="PÚSY 海滩神秘礼盒" fill sizes="100vw" /></div>
+          {heroSlides.map((slide, index) => {
+            const href = index === 0 ? homeContent.hero_cta_url : index === 1 ? homeContent.hero2_cta_url : slide.href;
+            const label = index === 0 ? `${slide.alt}，${homeContent.hero_cta_label}` : index === 1 ? `${homeContent.hero2_title.replace("\n", "")}，${homeContent.hero2_cta_label}` : slide.alt;
+            return <div className={`hero-slide ${heroIndex === index ? "is-active" : ""}`} aria-hidden={heroIndex !== index} key={slide.desktop}>
+            <a href={href} aria-label={label} tabIndex={heroIndex === index ? 0 : -1}>
+              <Image className="hero-media hero-media--desktop" src={slide.desktop} alt={slide.alt} fill sizes="100vw" preload={index === 0} fetchPriority={index === 0 ? "high" : "auto"} />
+              <Image className="hero-media hero-media--mobile" src={slide.mobile} alt="" fill sizes="100vw" />
+            </a>
+          </div>})}
         </div>
-        {heroIndex === 0 ? <div className="hero-copy">
-          <div className="campaign-mark">{homeContent.hero_eyebrow}</div>
-          <h1 className="multiline-title">{homeContent.hero_title}</h1>
-          <p>{homeContent.hero_subtitle}</p>
-          <a className="hero-primary-cta" href={homeContent.hero_cta_url}>{homeContent.hero_cta_label} →</a>
-          <div className="prize-panel"><div><small>随机赢取</small><b>9 款礼物<br />中的 1 款</b></div><div><small>重磅好礼</small><b>Dyson、Paper Shoot、<br />Apple 等惊喜</b></div></div>
-        </div> : <div className="hero-copy hero-copy--box">
-          <p>{homeContent.hero2_eyebrow}</p>
-          <h1 className="multiline-title">{homeContent.hero2_title}</h1>
-          <a className="outline-button" href={homeContent.hero2_cta_url}>{homeContent.hero2_cta_label}</a>
-        </div>}
         <button className="hero-arrow hero-arrow--prev" type="button" aria-label="上一张" onClick={() => moveHero(-1)}>‹</button>
         <button className="hero-arrow hero-arrow--next" type="button" aria-label="下一张" onClick={() => moveHero(1)}>›</button>
-        <div className="hero-dots" aria-label="选择轮播图">{[0, 1].map((index) => <button key={index} type="button" className={heroIndex === index ? "active" : ""} aria-label={`第 ${index + 1} 张`} aria-current={heroIndex === index ? "true" : undefined} onClick={() => setHeroIndex(index)} />)}</div>
+        <div className="hero-dots" aria-label="选择轮播图">{heroSlides.map((slide, index) => <button key={slide.desktop} type="button" className={heroIndex === index ? "active" : ""} aria-label={`第 ${index + 1} 张`} aria-current={heroIndex === index ? "true" : undefined} onClick={() => setHeroIndex(index)} />)}</div>
       </section>
 
       {homeContent.show_featured !== "0" && <section className="product-section" id="products">
@@ -108,15 +125,15 @@ export default function HomeClient({ homeContent, featuredProducts, navigationCa
 
       {homeContent.show_categories !== "0" && <section className="category-section" aria-label="热门分类"><div className="section-heading"><h2>{homeContent.categories_title}</h2></div><div className="category-grid">
         <a className="category-card" href={homeContent.category_1_url}>
-          <Image src="/assets/04.webp" alt="彩妆" width={960} height={1280} sizes="(max-width: 700px) 100vw, 33vw" />
+          <Image src="/assets/category-2026-08-makeup.webp" alt="彩妆" width={1200} height={1200} sizes="(max-width: 700px) 100vw, 33vw" />
           <span>{homeContent.category_1_label}</span>
         </a>
         <a className="category-card" href={homeContent.category_2_url}>
-          <Image src="/assets/01.webp" alt="护肤" width={960} height={1439} sizes="(max-width: 700px) 100vw, 33vw" />
+          <Image src="/assets/category-2026-08-skincare.webp" alt="护肤" width={1440} height={2159} sizes="(max-width: 700px) 100vw, 33vw" />
           <span>{homeContent.category_2_label}</span>
         </a>
         <a className="category-card" href={homeContent.category_3_url}>
-          <Image src="/assets/13.webp" alt="家居护理" width={960} height={960} sizes="(max-width: 700px) 100vw, 33vw" />
+          <Image src="/assets/category-2026-08-home.webp" alt="家居护理" width={1200} height={1200} sizes="(max-width: 700px) 100vw, 33vw" />
           <span>{homeContent.category_3_label}</span>
         </a>
       </div></section>}

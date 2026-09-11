@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { StoreProvider } from "./components/StoreProvider";
 import { CookieConsent } from "./components/CookieConsent";
+import { NewsletterPopup } from "./components/NewsletterPopup";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://pusy.cn"),
@@ -23,5 +24,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="zh-CN"><body><StoreProvider>{children}<CookieConsent /></StoreProvider></body></html>;
+  return <html lang="zh-CN"><body><StoreProvider>{children}<CookieConsent /><NewsletterPopup /></StoreProvider></body></html>;
 }

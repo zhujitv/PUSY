@@ -214,8 +214,13 @@ CREATE TABLE IF NOT EXISTS subscribers (
   email TEXT NOT NULL UNIQUE,
   source TEXT NOT NULL DEFAULT 'website',
   status TEXT NOT NULL DEFAULT 'active',
+  privacy_consented_at TEXT,
+  marketing_consented_at TEXT,
+  welcome_coupon_code TEXT,
   subscribed_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP::TEXT)
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS subscribers_welcome_coupon_idx ON subscribers (welcome_coupon_code) WHERE welcome_coupon_code IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS retail_partnerships (
   id TEXT PRIMARY KEY,
@@ -798,6 +803,7 @@ CREATE INDEX IF NOT EXISTS admin_audit_logs_created_idx ON admin_audit_logs (cre
 CREATE INDEX IF NOT EXISTS admin_audit_logs_actor_idx ON admin_audit_logs (actor_email, created_at DESC);
 
 INSERT INTO notification_templates (key, name, email_subject, email_body, sms_body, enabled) VALUES
+  ('newsletter_welcome', '订阅见面礼', '欢迎加入 PUSY.CN：您的新客 9 折优惠码', '感谢订阅 PUSY.CN。您的专属新客 9 折优惠码为 {{couponCode}}，有效期至 {{endsAt}}，仅可使用一次。', '', 1),
   ('order_confirmed', '支付成功通知', '订单 {{orderId}} 支付成功', '你好 {{customer}}，订单 {{orderId}} 已支付成功，实付 {{amount}}。我们正在为你准备商品。', 'PUSY.CN：订单 {{orderId}} 已支付成功。', 1),
   ('order_shipped', '发货通知', '订单 {{orderId}} 已发货', '你好 {{customer}}，订单 {{orderId}} 已通过 {{carrier}} 发出，物流单号 {{trackingNumber}}。查询物流：{{trackingUrl}}', 'PUSY.CN：订单 {{orderId}} 已发货，{{carrier}} {{trackingNumber}}。', 1),
   ('refund_completed', '退款完成通知', '订单 {{orderId}} 退款已完成', '你好 {{customer}}，订单 {{orderId}} 的 {{refundStatus}} 已完成，退款金额 {{refundAmount}}。到账时间以支付渠道为准。', 'PUSY.CN：订单 {{orderId}} 退款 {{refundAmount}} 已完成。', 1),

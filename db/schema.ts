@@ -168,6 +168,9 @@ export const subscribers = pgTable("subscribers", {
   email: text("email").notNull().unique(),
   source: text("source").notNull().default("website"),
   status: text("status").notNull().default("active"),
+  privacyConsentedAt: text("privacy_consented_at"),
+  marketingConsentedAt: text("marketing_consented_at"),
+  welcomeCouponCode: text("welcome_coupon_code"),
   subscribedAt: text("subscribed_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 

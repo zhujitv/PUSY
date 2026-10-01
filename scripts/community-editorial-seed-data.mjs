@@ -25,9 +25,9 @@ export const editorialPosts = [
     skinType: "normal", usagePeriod: "first-use", scene: "work", rating: 4,
     highlights: ["显色", "质地", "便携"], cautions: "示例评分不代表真实用户评价；请按个人肤色和妆效调整用量。",
   }),
-  post(2, "color", "lip-diary", "maslo-dlya-gub-purple-rozovyiy-100781", "/assets/34.webp", "2026-07-23T19:10:00+08:00", {
+  post(2, "color", "lip-diary", "maslo-dlya-gub-crystal-pink-svetlo-rozovyiy-100783", "/assets/34.webp", "2026-07-23T19:10:00+08:00", {
     title: "这支粉色唇油比我想象中更日常",
-    body: "本来以为 Purple 会是很挑人的冷粉色，实际薄涂只是在原本唇色上加了一层透亮感。白天我通常只涂一遍，嘴唇看起来会比较饱满；叠两三遍颜色更明显，但头发也更容易黏到唇上。自然光下的粉调最好看。",
+    body: "本来以为 Crystal Pink 会是很挑人的粉色，实际薄涂只是在原本唇色上加了一层透亮感。白天我通常只涂一遍，嘴唇看起来会比较饱满；叠两三遍颜色更明显，但头发也更容易黏到唇上。自然光下的粉调最好看。",
     skinType: "normal", usagePeriod: "first-use", scene: "daily", rating: 4,
     highlights: ["显色", "质地", "保湿"], cautions: "图片与文字为官方创作范例，实际显色会受原生唇色和光线影响。",
   }),
@@ -73,9 +73,9 @@ export const editorialPosts = [
     skinType: "dry", usagePeriod: "one-week", scene: "work", rating: 4,
     highlights: ["质地", "香气", "便携"], cautions: "香气偏好因人而异；破损皮肤请谨慎使用。",
   }),
-  post(10, "care", "hair-inspiration", "kondicioner-dlya-volos-pusy-prime-hair-400-ml-100173", "/products/yandex/qwjtzhzb49jkmdccn7mlg7drvmf5f28g-3a8a01f743.webp", "2026-07-31T20:10:00+08:00", {
-    title: "护发素涂到发根，第二天真的很容易塌",
-    body: "这瓶我第一次用得太豪迈，连靠近头皮的位置都带到了，第二天发根直接没精神。后来改成从耳朵下面开始涂，停两三分钟再冲，发尾顺滑度够了，头顶也还能保持蓬松。长发用量会比较快，短发一次不用挤太多。",
+  post(10, "care", "hair-inspiration", "maska-dlya-volos-pusy-prime-hair-250-ml-100178", "/products/yandex/dbjtgtmq5chgpdcj5d9klj5wqdck5zxg-d95034dfca.webp", "2026-07-31T20:10:00+08:00", {
+    title: "发膜避开发根，第二天更容易保持蓬松",
+    body: "这罐我第一次用得太豪迈，连靠近头皮的位置都带到了，第二天发根直接没精神。后来改成从耳朵下面开始涂，重点照顾发尾，停留后再冲洗，发尾顺滑度够了，头顶也还能保持蓬松。长发用量会比较快，短发一次不用挖太多。",
     skinType: "normal", usagePeriod: "one-week", scene: "daily", rating: 4,
     highlights: ["质地", "温和", "性价比"], cautions: "用量过多可能影响蓬松感，请按发量调整。",
   }),

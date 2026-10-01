@@ -56,7 +56,7 @@ test("matches the catalog scope while keeping inventory independently managed", 
     read("app/data/products.generated.json"),
     read("scripts/catalog-translations.zh-CN.json"),
     read("scripts/catalog-translations.2026-08-29.zh-CN.json"),
-    read("db/migrations/2026-08-29-catalog-sync.sql"),
+    read("db/migrations/2026-09-30-catalog-sync.sql"),
     read("app/products/[slug]/page.tsx"),
     read("app/products/[slug]/ProductActions.tsx"),
     read("app/components/CatalogClient.tsx"),
@@ -70,8 +70,8 @@ test("matches the catalog scope while keeping inventory independently managed", 
   const translations = JSON.parse(translationsJson);
   const currentTranslations = JSON.parse(currentTranslationsJson);
   const bySlug = new Map(products.map((product) => [product.slug, product]));
-  assert.equal(products.length, 88);
-  assert.equal(new Set(products.map((product) => product.slug)).size, 88);
+  assert.equal(products.length, 87);
+  assert.equal(new Set(products.map((product) => product.slug)).size, 87);
   assert.ok(products.every((product) => product.stock === 0 && product.inventoryVerified === false));
   assert.ok(products.filter((product) => product.variants?.length).length >= 39);
   assert.ok(products.every((product) => product.images?.length >= 1));

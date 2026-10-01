@@ -4,12 +4,15 @@ import { readFile } from "node:fs/promises";
 
 const catalog = JSON.parse(await readFile(new URL("../app/data/products.generated.json", import.meta.url), "utf8"));
 const audit = JSON.parse(await readFile(new URL("../scripts/catalog-ingredients.zh-CN.json", import.meta.url), "utf8"));
-const migration = await readFile(new URL("../db/migrations/2026-08-29-product-ingredients-zh-cn.sql", import.meta.url), "utf8");
+const migration = [
+  await readFile(new URL("../db/migrations/2026-08-29-product-ingredients-zh-cn.sql", import.meta.url), "utf8"),
+  await readFile(new URL("../db/migrations/2026-09-30-catalog-sync.sql", import.meta.url), "utf8"),
+].join("\n");
 
 test("全部商品都有已审计的中文成分或缺失来源说明", () => {
-  assert.equal(catalog.length, 88);
+  assert.equal(catalog.length, 87);
   assert.equal(Object.keys(audit.products).length, catalog.length);
-  assert.equal(Object.keys(audit.archivedProducts).length, 24);
+  assert.equal(Object.keys(audit.archivedProducts).length, 33);
   for (const product of catalog) {
     const entry = audit.products[product.slug];
     assert.ok(entry, `${product.slug} 缺少成分审计记录`);
@@ -24,7 +27,7 @@ test("原站有配方的商品全部完成翻译，缺失配方不被编造", ()
   assert.equal(entries.filter((entry) => entry.status === "已翻译").length, 75);
   assert.equal(entries.filter((entry) => entry.status === "套装说明").length, 5);
   assert.equal(entries.filter((entry) => entry.status === "礼盒说明").length, 3);
-  assert.equal(entries.filter((entry) => entry.status === "材质说明").length, 3);
+  assert.equal(entries.filter((entry) => entry.status === "材质说明").length, 2);
   assert.equal(entries.filter((entry) => entry.status === "待品牌确认").length, 2);
   for (const entry of entries.filter((item) => item.status !== "已翻译")) assert.equal(entry.source, null);
 });
@@ -47,6 +50,6 @@ test("数据库迁移逐商品同步成分且不修改价格库存", () => {
   assert.match(migration, /SET ingredients = t\.ingredients_zh/);
   assert.doesNotMatch(migration, /SET[\s\S]{0,200}\b(?:price|stock|inventory_verified)\s*=/i);
   const allSlugs = [...Object.keys(audit.products), ...Object.keys(audit.archivedProducts)];
-  assert.equal(allSlugs.length, 112);
+  assert.equal(allSlugs.length, 120);
   for (const slug of allSlugs) assert.match(migration, new RegExp(`'${slug.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}'`));
 });

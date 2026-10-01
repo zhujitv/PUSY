@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-28T18:12:07.173Z",
+  "generatedAt": "2026-09-30T09:48:40.611Z",
   "sources": [
     "app/data/products.generated.json",
     "app/data/blog.ts"
@@ -218,15 +218,40 @@
       "sourceBytes": 0,
       "outputBytes": 63180
     },
+    "/products/yandex/75skjdmbfz5mdngrmw65hf2lch7hvz8p-46fb2aa64b.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/18764786/75skjdmbfz5mdngrmw65hf2lch7hvz8p/orig",
+      "sourceBytes": 1414161,
+      "outputBytes": 29320
+    },
     "/products/yandex/zbs2g62h9ld67f89lbs26xntwp4qbz5x-8c8a133f37.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/18104899/zbs2g62h9ld67f89lbs26xntwp4qbz5x/orig",
       "sourceBytes": 0,
       "outputBytes": 110830
     },
+    "/products/yandex/slfrh8wxcgk4l69lxw9m9gtm9559p4dc-3735eb0eb2.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/18780052/slfrh8wxcgk4l69lxw9m9gtm9559p4dc/orig",
+      "sourceBytes": 2300595,
+      "outputBytes": 104226
+    },
+    "/products/yandex/4xkxb4rmg54v6kh4l9vxwth2zm88gb5x-9aec6effe4.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/18793859/4xkxb4rmg54v6kh4l9vxwth2zm88gb5x/orig",
+      "sourceBytes": 1600581,
+      "outputBytes": 55052
+    },
     "/products/yandex/5gzpnr6rknczvt9n2s5n8mhzd6mjbgd2-78b767eb39.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/18793859/5gzpnr6rknczvt9n2s5n8mhzd6mjbgd2/orig",
       "sourceBytes": 464900,
       "outputBytes": 15778
+    },
+    "/products/yandex/fcr8xcpr5z7rs9ngppmp5m8f2q2mqjqb-a729428a40.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/18793859/fcr8xcpr5z7rs9ngppmp5m8f2q2mqjqb/orig",
+      "sourceBytes": 3153980,
+      "outputBytes": 98232
+    },
+    "/products/yandex/fddtr6f5rmk2pw6krz75fdv48vkv7bzx-09909dca4e.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/18793859/fddtr6f5rmk2pw6krz75fdv48vkv7bzx/orig",
+      "sourceBytes": 3087457,
+      "outputBytes": 123332
     },
     "/products/yandex/qzqx8ws4886sqjk94bhjh97s9fdlvlcp-004b4b2289.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/18793859/qzqx8ws4886sqjk94bhjh97s9fdlvlcp/orig",
@@ -238,30 +263,35 @@
       "sourceBytes": 0,
       "outputBytes": 167340
     },
+    "/products/yandex/wzhnddwzddrqphqknpf9rnmpzczzv9t8-dbe2c51735.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/17761178/wzhnddwzddrqphqknpf9rnmpzczzv9t8/orig",
+      "sourceBytes": 424352,
+      "outputBytes": 8124
+    },
     "/products/yandex/qdsbwrqdtcmpdbr6pxkk9ltv92cltq7r-1ef949d04e.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/18919159/qdsbwrqdtcmpdbr6pxkk9ltv92cltq7r/orig",
       "sourceBytes": 479221,
       "outputBytes": 47326
     },
-    "/products/yandex/75skjdmbfz5mdngrmw65hf2lch7hvz8p-46fb2aa64b.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/18764786/75skjdmbfz5mdngrmw65hf2lch7hvz8p/orig",
-      "sourceBytes": 1414161,
-      "outputBytes": 29320
+    "/products/yandex/wxvmkptpvckqwkjqhlqp9t5cmzlh2c7m-0391d84ad6.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/18919159/wxvmkptpvckqwkjqhlqp9t5cmzlh2c7m/orig",
+      "sourceBytes": 3109407,
+      "outputBytes": 102014
     },
-    "/products/yandex/4xkxb4rmg54v6kh4l9vxwth2zm88gb5x-9aec6effe4.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/18793859/4xkxb4rmg54v6kh4l9vxwth2zm88gb5x/orig",
-      "sourceBytes": 1600581,
-      "outputBytes": 55052
+    "/products/yandex/x2x2tbwjss9qfq5d82xxgrvllcbxz7vj-417e887949.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/18919159/x2x2tbwjss9qfq5d82xxgrvllcbxz7vj/orig",
+      "sourceBytes": 3199560,
+      "outputBytes": 82766
     },
     "/products/yandex/v45ntlxwnlbqrrf9bt4lpbm7g6k62pwq-278d456bab.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/18989993/v45ntlxwnlbqrrf9bt4lpbm7g6k62pwq/orig",
       "sourceBytes": 0,
       "outputBytes": 18332
     },
-    "/products/yandex/slfrh8wxcgk4l69lxw9m9gtm9559p4dc-3735eb0eb2.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/18780052/slfrh8wxcgk4l69lxw9m9gtm9559p4dc/orig",
-      "sourceBytes": 2300595,
-      "outputBytes": 104226
+    "/products/yandex/d2kwfl4wh7jcr4mxlf8cdvwf5lfzntn2-36be0eecab.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19034732/d2kwfl4wh7jcr4mxlf8cdvwf5lfzntn2/orig",
+      "sourceBytes": 2899701,
+      "outputBytes": 77872
     },
     "/products/yandex/gtwr44jr7bc2jxfpz5qgf22xz95d2j28-b08dac0271.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19034732/gtwr44jr7bc2jxfpz5qgf22xz95d2j28/orig",
@@ -273,30 +303,30 @@
       "sourceBytes": 140111,
       "outputBytes": 9380
     },
-    "/products/yandex/wxvmkptpvckqwkjqhlqp9t5cmzlh2c7m-0391d84ad6.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/18919159/wxvmkptpvckqwkjqhlqp9t5cmzlh2c7m/orig",
-      "sourceBytes": 3109407,
-      "outputBytes": 102014
-    },
     "/products/yandex/vljv4dgqnjs7kdf5d79j8g4mcm6729kp-6fd9a05efd.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19034732/vljv4dgqnjs7kdf5d79j8g4mcm6729kp/orig",
       "sourceBytes": 143896,
       "outputBytes": 9400
     },
-    "/products/yandex/fddtr6f5rmk2pw6krz75fdv48vkv7bzx-09909dca4e.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/18793859/fddtr6f5rmk2pw6krz75fdv48vkv7bzx/orig",
-      "sourceBytes": 3087457,
-      "outputBytes": 123332
+    "/products/yandex/xkdxzcp6rgnhpf2z5vbv2cwdnmq7fwld-7b915f4d20.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19034732/xkdxzcp6rgnhpf2z5vbv2cwdnmq7fwld/orig",
+      "sourceBytes": 1878879,
+      "outputBytes": 89404
     },
-    "/products/yandex/fcr8xcpr5z7rs9ngppmp5m8f2q2mqjqb-a729428a40.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/18793859/fcr8xcpr5z7rs9ngppmp5m8f2q2mqjqb/orig",
-      "sourceBytes": 3153980,
-      "outputBytes": 98232
+    "/products/yandex/7cjpmg46jfsdtg8rskqj57xmlpv7mr4p-b95d452e93.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19196982/7cjpmg46jfsdtg8rskqj57xmlpv7mr4p/orig",
+      "sourceBytes": 216305,
+      "outputBytes": 8242
     },
-    "/products/yandex/x2x2tbwjss9qfq5d82xxgrvllcbxz7vj-417e887949.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/18919159/x2x2tbwjss9qfq5d82xxgrvllcbxz7vj/orig",
-      "sourceBytes": 3199560,
-      "outputBytes": 82766
+    "/products/yandex/bqdrtdvh9snb72w4tpxkb2qvkx6nk84t-0ab899b03c.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19196982/bqdrtdvh9snb72w4tpxkb2qvkx6nk84t/orig",
+      "sourceBytes": 1247076,
+      "outputBytes": 28076
+    },
+    "/products/yandex/vp5qkjxwqm2w9wdxq6mr277jl7jgbfj4-4d1a69b6f5.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19196982/vp5qkjxwqm2w9wdxq6mr277jl7jgbfj4/orig",
+      "sourceBytes": 716023,
+      "outputBytes": 28480
     },
     "/products/yandex/f2zkx5ts6kkrjhgpnd2w7m7z8t7fl8rc-fba5349b18.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19260921/f2zkx5ts6kkrjhgpnd2w7m7z8t7fl8rc/orig",
@@ -358,10 +388,10 @@
       "sourceBytes": 0,
       "outputBytes": 93936
     },
-    "/products/yandex/7cjpmg46jfsdtg8rskqj57xmlpv7mr4p-b95d452e93.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19196982/7cjpmg46jfsdtg8rskqj57xmlpv7mr4p/orig",
-      "sourceBytes": 216305,
-      "outputBytes": 8242
+    "/products/yandex/mqflt9cm72wpwv4jk9mrzkcqrsg764f5-0828f8cdf8.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19297885/mqflt9cm72wpwv4jk9mrzkcqrsg764f5/orig",
+      "sourceBytes": 644411,
+      "outputBytes": 37790
     },
     "/products/yandex/n6qwr48l6kl4psct6kj888qr56wnmnwk-aa4a5757b5.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19297885/n6qwr48l6kl4psct6kj888qr56wnmnwk/orig",
@@ -373,6 +403,11 @@
       "sourceBytes": 0,
       "outputBytes": 287916
     },
+    "/products/yandex/wk2bd2nh442nqbhcb69qmmnx6fj7dzvk-012f069c4f.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19297885/wk2bd2nh442nqbhcb69qmmnx6fj7dzvk/orig",
+      "sourceBytes": 393813,
+      "outputBytes": 6634
+    },
     "/products/yandex/xvklcwb464mzm7p6jh7gn4tsnpdmvc29-506c430c7f.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19297885/xvklcwb464mzm7p6jh7gn4tsnpdmvc29/orig",
       "sourceBytes": 0,
@@ -383,25 +418,25 @@
       "sourceBytes": 0,
       "outputBytes": 225340
     },
-    "/products/yandex/d2kwfl4wh7jcr4mxlf8cdvwf5lfzntn2-36be0eecab.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19034732/d2kwfl4wh7jcr4mxlf8cdvwf5lfzntn2/orig",
-      "sourceBytes": 2899701,
-      "outputBytes": 77872
+    "/products/yandex/gm82pt42bl62kl5j7mxxq2j5qltmfsqd-b3ef76ba5d.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19396857/gm82pt42bl62kl5j7mxxq2j5qltmfsqd/orig",
+      "sourceBytes": 2309836,
+      "outputBytes": 83588
     },
-    "/products/yandex/mqflt9cm72wpwv4jk9mrzkcqrsg764f5-0828f8cdf8.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19297885/mqflt9cm72wpwv4jk9mrzkcqrsg764f5/orig",
-      "sourceBytes": 644411,
-      "outputBytes": 37790
+    "/products/yandex/kh2ttfk2htghxcls9g67gp7rttl2s458-7c5c1136cd.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19396857/kh2ttfk2htghxcls9g67gp7rttl2s458/orig",
+      "sourceBytes": 2885288,
+      "outputBytes": 122228
     },
-    "/products/yandex/xkdxzcp6rgnhpf2z5vbv2cwdnmq7fwld-7b915f4d20.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19034732/xkdxzcp6rgnhpf2z5vbv2cwdnmq7fwld/orig",
-      "sourceBytes": 1878879,
-      "outputBytes": 89404
+    "/products/yandex/r7vtnpmwrkrrdw2p5p4dhk6s7xrxh7sz-6141af4a01.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19782553/r7vtnpmwrkrrdw2p5p4dhk6s7xrxh7sz/orig",
+      "sourceBytes": 2800802,
+      "outputBytes": 26444
     },
-    "/products/yandex/bqdrtdvh9snb72w4tpxkb2qvkx6nk84t-0ab899b03c.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19196982/bqdrtdvh9snb72w4tpxkb2qvkx6nk84t/orig",
-      "sourceBytes": 1247076,
-      "outputBytes": 28076
+    "/products/yandex/w4m5llv89wbnspd4444kgk7m9pn45cqm-f1d724edcc.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19782553/w4m5llv89wbnspd4444kgk7m9pn45cqm/orig",
+      "sourceBytes": 3342108,
+      "outputBytes": 112532
     },
     "/products/yandex/2zt9m4rs9bwb49d97p9c4f2xdtgpvp5c-ab64e0b798.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19825297/2zt9m4rs9bwb49d97p9c4f2xdtgpvp5c/orig",
@@ -428,10 +463,10 @@
       "sourceBytes": 0,
       "outputBytes": 203182
     },
-    "/products/yandex/vp5qkjxwqm2w9wdxq6mr277jl7jgbfj4-4d1a69b6f5.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19196982/vp5qkjxwqm2w9wdxq6mr277jl7jgbfj4/orig",
-      "sourceBytes": 716023,
-      "outputBytes": 28480
+    "/products/yandex/6cmb96sqcqqnzshqsdxrvbdxq2sp869f-adeb31757e.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19825297/6cmb96sqcqqnzshqsdxrvbdxq2sp869f/orig",
+      "sourceBytes": 6072133,
+      "outputBytes": 250574
     },
     "/products/yandex/6dnm24s7dppwcchsn5nkq7ssqcr7952f-51d957d753.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19825297/6dnm24s7dppwcchsn5nkq7ssqcr7952f/orig",
@@ -488,10 +523,10 @@
       "sourceBytes": 0,
       "outputBytes": 94738
     },
-    "/products/yandex/gm82pt42bl62kl5j7mxxq2j5qltmfsqd-b3ef76ba5d.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19396857/gm82pt42bl62kl5j7mxxq2j5qltmfsqd/orig",
-      "sourceBytes": 2309836,
-      "outputBytes": 83588
+    "/products/yandex/8bks2bm49sd8hjpr77nnrscgqfm7jts5-f354448556.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19825297/8bks2bm49sd8hjpr77nnrscgqfm7jts5/orig",
+      "sourceBytes": 4065226,
+      "outputBytes": 213256
     },
     "/products/yandex/92l27vfrr2njxf57fb7gxbmx6kw76brg-f80e35936d.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19825297/92l27vfrr2njxf57fb7gxbmx6kw76brg/orig",
@@ -568,10 +603,10 @@
       "sourceBytes": 0,
       "outputBytes": 368194
     },
-    "/products/yandex/r7vtnpmwrkrrdw2p5p4dhk6s7xrxh7sz-6141af4a01.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19782553/r7vtnpmwrkrrdw2p5p4dhk6s7xrxh7sz/orig",
-      "sourceBytes": 2800802,
-      "outputBytes": 26444
+    "/products/yandex/dr28fk47dcz96dpkxj4mzbcwt97g9gh2-484c1e9e91.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19825297/dr28fk47dcz96dpkxj4mzbcwt97g9gh2/orig",
+      "sourceBytes": 2501406,
+      "outputBytes": 119586
     },
     "/products/yandex/dzs8kt7kcpz56nmgzp6dqq6kjn98j2sx-4a81dcdab0.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19825297/dzs8kt7kcpz56nmgzp6dqq6kjn98j2sx/orig",
@@ -828,6 +863,11 @@
       "sourceBytes": 0,
       "outputBytes": 187572
     },
+    "/products/yandex/8p4wbjfsfdbgs7g5wx5l8zglfbkc5p7f-e8c2d7ad97.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/17761178/8p4wbjfsfdbgs7g5wx5l8zglfbkc5p7f/orig",
+      "sourceBytes": 4915531,
+      "outputBytes": 135432
+    },
     "/products/yandex/245pzwqxzgfklpnxqz5bm9ccf8k9kp6p-02b3b9c7b2.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/245pzwqxzgfklpnxqz5bm9ccf8k9kp6p/orig",
       "sourceBytes": 0,
@@ -868,20 +908,30 @@
       "sourceBytes": 0,
       "outputBytes": 6978
     },
+    "/products/yandex/jdt74jftzjtpzfbbrbgs6wmqrldwd9hb-9ae8055030.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/17761178/jdt74jftzjtpzfbbrbgs6wmqrldwd9hb/orig",
+      "sourceBytes": 4365003,
+      "outputBytes": 193576
+    },
     "/products/yandex/46zhk7fxwh9rqdxfkvsxr9pfdtst65ct-bad2bbe107.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/46zhk7fxwh9rqdxfkvsxr9pfdtst65ct/orig",
       "sourceBytes": 0,
       "outputBytes": 84300
     },
-    "/products/yandex/kh2ttfk2htghxcls9g67gp7rttl2s458-7c5c1136cd.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19396857/kh2ttfk2htghxcls9g67gp7rttl2s458/orig",
-      "sourceBytes": 2885288,
-      "outputBytes": 122228
+    "/products/yandex/48xbwqzjn5qjbnwfddkbnpn7bdwj69rr-a4eb9f7bdd.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/48xbwqzjn5qjbnwfddkbnpn7bdwj69rr/orig",
+      "sourceBytes": 3471576,
+      "outputBytes": 30392
     },
     "/products/yandex/49rlqt9j59v6nwq7qp9pqzqhwjxwgvqb-f070da103e.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/49rlqt9j59v6nwq7qp9pqzqhwjxwgvqb/orig",
       "sourceBytes": 0,
       "outputBytes": 5328
+    },
+    "/products/yandex/zg69zvwlb96l9xk6rqpfbxzxmrwpt82t-4455f075ac.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19825297/zg69zvwlb96l9xk6rqpfbxzxmrwpt82t/orig",
+      "sourceBytes": 3215749,
+      "outputBytes": 176478
     },
     "/products/yandex/4vn8k2nkqw5tvqrgb45z5d8cxwr4vdbk-23431f589b.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/4vn8k2nkqw5tvqrgb45z5d8cxwr4vdbk/orig",
@@ -893,10 +943,20 @@
       "sourceBytes": 0,
       "outputBytes": 32320
     },
+    "/products/yandex/pcrnml2296cwzhw6qrrhpmsbwfgvfrcs-3aab6525ea.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/18919159/pcrnml2296cwzhw6qrrhpmsbwfgvfrcs/orig",
+      "sourceBytes": 2552120,
+      "outputBytes": 13880
+    },
     "/products/yandex/5mr9c8wzs6lnmjxnf96bvkmb5bttqz98-20c0b90a02.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/5mr9c8wzs6lnmjxnf96bvkmb5bttqz98/orig",
       "sourceBytes": 0,
       "outputBytes": 132042
+    },
+    "/products/yandex/2q2b9ghwnkbndttc22z6bxdpjqp2kvpw-431e01aa2d.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/2q2b9ghwnkbndttc22z6bxdpjqp2kvpw/orig",
+      "sourceBytes": 3170457,
+      "outputBytes": 188978
     },
     "/products/yandex/5rg9b5whtk7574jmrw5d7rbs2kbr7t8k-db86701ce8.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/5rg9b5whtk7574jmrw5d7rbs2kbr7t8k/orig",
@@ -907,6 +967,11 @@
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/5snvq82rh2hmqnfmzmftpgz67kb6t5kr/orig",
       "sourceBytes": 0,
       "outputBytes": 148872
+    },
+    "/products/yandex/pl5rpk86rlzdnzg49pnxrqvc24kh662s-2e27e2b234.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/18764786/pl5rpk86rlzdnzg49pnxrqvc24kh662s/orig",
+      "sourceBytes": 5112887,
+      "outputBytes": 85742
     },
     "/products/yandex/6g65dkrjdfgc7xgxsqngm8vnqtc8j2mt-94e286be02.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/6g65dkrjdfgc7xgxsqngm8vnqtc8j2mt/orig",
@@ -948,20 +1013,20 @@
       "sourceBytes": 0,
       "outputBytes": 12564
     },
-    "/products/yandex/w4m5llv89wbnspd4444kgk7m9pn45cqm-f1d724edcc.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19782553/w4m5llv89wbnspd4444kgk7m9pn45cqm/orig",
-      "sourceBytes": 3342108,
-      "outputBytes": 112532
+    "/products/yandex/brnrl892txbllt67zntvh78w4pbsgx9d-0147192b0f.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/brnrl892txbllt67zntvh78w4pbsgx9d/orig",
+      "sourceBytes": 2870529,
+      "outputBytes": 120520
     },
     "/products/yandex/btk99rtv8vznpn9dw4rh4pdzkl4ffzj5-407b9d9993.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/btk99rtv8vznpn9dw4rh4pdzkl4ffzj5/orig",
       "sourceBytes": 0,
       "outputBytes": 208314
     },
-    "/products/yandex/dr28fk47dcz96dpkxj4mzbcwt97g9gh2-484c1e9e91.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19825297/dr28fk47dcz96dpkxj4mzbcwt97g9gh2/orig",
-      "sourceBytes": 2501406,
-      "outputBytes": 119586
+    "/products/yandex/bvkzb5p2jkvr4zk26kfpk7mltr2pwn8k-72677acd3d.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/bvkzb5p2jkvr4zk26kfpk7mltr2pwn8k/orig",
+      "sourceBytes": 3973366,
+      "outputBytes": 204292
     },
     "/products/yandex/bzhp9plnbxkbxhwcwtl9qvrxk4c6p62w-b257c8ca6f.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/bzhp9plnbxkbxhwcwtl9qvrxk4c6p62w/orig",
@@ -998,10 +1063,20 @@
       "sourceBytes": 0,
       "outputBytes": 87304
     },
+    "/products/yandex/7fzh9fzdhk6t84c2zhd9r5dn88wrgqvt-690d0c28bd.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/17761178/7fzh9fzdhk6t84c2zhd9r5dn88wrgqvt/orig",
+      "sourceBytes": 2607538,
+      "outputBytes": 225516
+    },
     "/products/yandex/fd6b586h5grkvzdwsk78x9pnmvrrlh65-885be8d57f.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/fd6b586h5grkvzdwsk78x9pnmvrrlh65/orig",
       "sourceBytes": 0,
       "outputBytes": 88482
+    },
+    "/products/yandex/5mct6x5vwjpzdtbq2j2xdkthjvzjvsg4-05b64a4ef9.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/5mct6x5vwjpzdtbq2j2xdkthjvzjvsg4/orig",
+      "sourceBytes": 3537083,
+      "outputBytes": 203130
     },
     "/products/yandex/g47vzwlqw7qppqsfgwlbkspwbvn9hbw6-6d6a89a33e.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/g47vzwlqw7qppqsfgwlbkspwbvn9hbw6/orig",
@@ -1023,10 +1098,10 @@
       "sourceBytes": 0,
       "outputBytes": 99426
     },
-    "/products/yandex/8bks2bm49sd8hjpr77nnrscgqfm7jts5-f354448556.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19825297/8bks2bm49sd8hjpr77nnrscgqfm7jts5/orig",
-      "sourceBytes": 4065226,
-      "outputBytes": 213256
+    "/products/yandex/h89w8b9md4gplbf2mxfc4x7lhxgdvxhx-31d79ed55a.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/h89w8b9md4gplbf2mxfc4x7lhxgdvxhx/orig",
+      "sourceBytes": 3372115,
+      "outputBytes": 169582
     },
     "/products/yandex/hnqjzrv7xgvhb5kzd4z4jfmmdb8f8lfx-78da127a32.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/hnqjzrv7xgvhb5kzd4z4jfmmdb8f8lfx/orig",
@@ -1063,6 +1138,11 @@
       "sourceBytes": 0,
       "outputBytes": 11404
     },
+    "/products/yandex/4c4zt8dpjqq8zzqdvskbcvn8tf57pqbg-291b8044de.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/4c4zt8dpjqq8zzqdvskbcvn8tf57pqbg/orig",
+      "sourceBytes": 374896,
+      "outputBytes": 5404
+    },
     "/products/yandex/jsw5jbpz69bv9jkb4bwk2bxvvjvlt6v4-453f1fd185.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/jsw5jbpz69bv9jkb4bwk2bxvvjvlt6v4/orig",
       "sourceBytes": 0,
@@ -1072,6 +1152,11 @@
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/k47zztw2p5qjpkmxh6g4jqgvq9s5szvt/orig",
       "sourceBytes": 0,
       "outputBytes": 10882
+    },
+    "/products/yandex/5p66fr8zdbzdfmr5z9wx9gq6xd979m85-77b5db90da.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/5p66fr8zdbzdfmr5z9wx9gq6xd979m85/orig",
+      "sourceBytes": 3243246,
+      "outputBytes": 221212
     },
     "/products/yandex/klbbvm9l6k2xqxfrfw4cxjmc9lmczbtq-e13e5a569c.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/klbbvm9l6k2xqxfrfw4cxjmc9lmczbtq/orig",
@@ -1178,6 +1263,11 @@
       "sourceBytes": 0,
       "outputBytes": 18446
     },
+    "/products/yandex/fsjpjlnh47wxswknllt9pdrd94nlw92z-7acbc78b2a.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/fsjpjlnh47wxswknllt9pdrd94nlw92z/orig",
+      "sourceBytes": 4191408,
+      "outputBytes": 211990
+    },
     "/products/yandex/rdhmdmfs6vvvh7nl9b5mct4jxmdv4sbp-be21519a78.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/rdhmdmfs6vvvh7nl9b5mct4jxmdv4sbp/orig",
       "sourceBytes": 0,
@@ -1193,6 +1283,11 @@
       "sourceBytes": 0,
       "outputBytes": 58892
     },
+    "/products/yandex/69j5slw8sm92xtlkr924qnrfkb5z4vrj-d847ab53eb.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/69j5slw8sm92xtlkr924qnrfkb5z4vrj/orig",
+      "sourceBytes": 374376,
+      "outputBytes": 5378
+    },
     "/products/yandex/shc7hblrx99dqln7lxzrmm8ltdt5jnhv-b21e759f96.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/shc7hblrx99dqln7lxzrmm8ltdt5jnhv/orig",
       "sourceBytes": 0,
@@ -1202,6 +1297,11 @@
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/skj2n2c79rt4gp2l8p62ftfwpbn8ptfv/orig",
       "sourceBytes": 0,
       "outputBytes": 14934
+    },
+    "/products/yandex/smdrr7vhntnknxkb94sl8x69dvl9xgws-127584e288.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/smdrr7vhntnknxkb94sl8x69dvl9xgws/orig",
+      "sourceBytes": 382236,
+      "outputBytes": 6462
     },
     "/products/yandex/srq87g8lxmqvpdj7hgs59vbsdcqqg6z6-99b0a3e683.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/srq87g8lxmqvpdj7hgs59vbsdcqqg6z6/orig",
@@ -1217,6 +1317,11 @@
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/tvmlcww9wsk6ksp7q7jprlgv444kbncc/orig",
       "sourceBytes": 0,
       "outputBytes": 114998
+    },
+    "/products/yandex/rxkrdkzjvjlclqr42hdbft65tkdsc7xc-8d78d85cfb.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/rxkrdkzjvjlclqr42hdbft65tkdsc7xc/orig",
+      "sourceBytes": 5067254,
+      "outputBytes": 330768
     },
     "/products/yandex/vrqpgs4rrg4r44nmn8dkmpbxf9tdt6b6-0ff1d725f2.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/vrqpgs4rrg4r44nmn8dkmpbxf9tdt6b6/orig",
@@ -1328,15 +1433,10 @@
       "sourceBytes": 0,
       "outputBytes": 58810
     },
-    "/products/yandex/brnrl892txbllt67zntvh78w4pbsgx9d-0147192b0f.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/brnrl892txbllt67zntvh78w4pbsgx9d/orig",
-      "sourceBytes": 2870529,
-      "outputBytes": 120520
-    },
-    "/products/yandex/48xbwqzjn5qjbnwfddkbnpn7bdwj69rr-a4eb9f7bdd.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/48xbwqzjn5qjbnwfddkbnpn7bdwj69rr/orig",
-      "sourceBytes": 3471576,
-      "outputBytes": 30392
+    "/products/yandex/p7x424bktstf245gxdzxnjqbwjdmmphf-fb715872f7.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20493671/p7x424bktstf245gxdzxnjqbwjdmmphf/orig",
+      "sourceBytes": 1680164,
+      "outputBytes": 34898
     },
     "/products/yandex/5nqtgn94gkjf4r4cgvmfpghlzc2r8457-d646ed5f1b.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20575719/5nqtgn94gkjf4r4cgvmfpghlzc2r8457/orig",
@@ -1348,15 +1448,20 @@
       "sourceBytes": 161111,
       "outputBytes": 9490
     },
-    "/products/yandex/6cmb96sqcqqnzshqsdxrvbdxq2sp869f-adeb31757e.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/19825297/6cmb96sqcqqnzshqsdxrvbdxq2sp869f/orig",
-      "sourceBytes": 6072133,
-      "outputBytes": 250574
+    "/products/yandex/gf44snkk7ffnbwdz9g99zwtfq8bkksm7-deba4c45c5.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20575719/gf44snkk7ffnbwdz9g99zwtfq8bkksm7/orig",
+      "sourceBytes": 3103027,
+      "outputBytes": 88884
     },
-    "/products/yandex/h89w8b9md4gplbf2mxfc4x7lhxgdvxhx-31d79ed55a.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/h89w8b9md4gplbf2mxfc4x7lhxgdvxhx/orig",
-      "sourceBytes": 3372115,
-      "outputBytes": 169582
+    "/products/yandex/j6mbfx9hltqhsl2hhlc2fgt84p28ttp6-0610933a52.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20575719/j6mbfx9hltqhsl2hhlc2fgt84p28ttp6/orig",
+      "sourceBytes": 317134,
+      "outputBytes": 30438
+    },
+    "/products/yandex/x5psxg7v8crp4bpvh5q5qkvd6wwp2kdg-3037d18233.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20575719/x5psxg7v8crp4bpvh5q5qkvd6wwp2kdg/orig",
+      "sourceBytes": 1909282,
+      "outputBytes": 77320
     },
     "/products/yandex/jb9rf6w242gcnfmnl2rw78dg5q89vmth-880cef155c.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20760651/jb9rf6w242gcnfmnl2rw78dg5q89vmth/orig",
@@ -1388,25 +1493,20 @@
       "sourceBytes": 0,
       "outputBytes": 7906
     },
-    "/products/yandex/j6mbfx9hltqhsl2hhlc2fgt84p28ttp6-0610933a52.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20575719/j6mbfx9hltqhsl2hhlc2fgt84p28ttp6/orig",
-      "sourceBytes": 317134,
-      "outputBytes": 30438
-    },
-    "/products/yandex/bvkzb5p2jkvr4zk26kfpk7mltr2pwn8k-72677acd3d.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/bvkzb5p2jkvr4zk26kfpk7mltr2pwn8k/orig",
-      "sourceBytes": 3973366,
-      "outputBytes": 204292
-    },
-    "/products/yandex/p7x424bktstf245gxdzxnjqbwjdmmphf-fb715872f7.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20493671/p7x424bktstf245gxdzxnjqbwjdmmphf/orig",
-      "sourceBytes": 1680164,
-      "outputBytes": 34898
-    },
     "/products/yandex/hp42sz5xqvzmjfn7md4dpmsxddfwckwd-cd738a95f1.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20776375/hp42sz5xqvzmjfn7md4dpmsxddfwckwd/orig",
       "sourceBytes": 130455,
       "outputBytes": 8962
+    },
+    "/products/yandex/m5xsgcddmgh59zd5d7n9xkwllqz7mxvk-a265037878.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20776375/m5xsgcddmgh59zd5d7n9xkwllqz7mxvk/orig",
+      "sourceBytes": 2277632,
+      "outputBytes": 89730
+    },
+    "/products/yandex/zlt4mmq6s6m5sbh5w77n4m6g2wnt7qww-9cbede3f9b.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20776375/zlt4mmq6s6m5sbh5w77n4m6g2wnt7qww/orig",
+      "sourceBytes": 3094395,
+      "outputBytes": 105884
     },
     "/products/yandex/fcvf7pvjdgm44jz4lbn7cq7q9w92fn8t-ef807ed2a4.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20811730/fcvf7pvjdgm44jz4lbn7cq7q9w92fn8t/orig",
@@ -1417,6 +1517,11 @@
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20811730/fhqmnttln8nw7gg568sv6chk7l578d4m/orig",
       "sourceBytes": 1512448,
       "outputBytes": 54244
+    },
+    "/products/yandex/npwbw96kdtsnf78z6795s9xz6m52nx59-87ebf69493.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20811730/npwbw96kdtsnf78z6795s9xz6m52nx59/orig",
+      "sourceBytes": 1652258,
+      "outputBytes": 69628
     },
     "/products/yandex/hkjkxzctswg7bvktjs7kfw6tf848fnz7-6ca20e0fc3.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20896824/hkjkxzctswg7bvktjs7kfw6tf848fnz7/orig",
@@ -1583,25 +1688,25 @@
       "sourceBytes": 0,
       "outputBytes": 8530
     },
-    "/products/yandex/m5xsgcddmgh59zd5d7n9xkwllqz7mxvk-a265037878.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20776375/m5xsgcddmgh59zd5d7n9xkwllqz7mxvk/orig",
-      "sourceBytes": 2277632,
-      "outputBytes": 89730
+    "/products/yandex/b4w7b5jlhcjvblxlzcgscgpnhnt4927f-90f3b4c0c9.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21069123/b4w7b5jlhcjvblxlzcgscgpnhnt4927f/orig",
+      "sourceBytes": 4012493,
+      "outputBytes": 337062
     },
     "/products/yandex/jpmt6qbw84xqrvfkkcdtvqg5p2c6qqq8-81315c417f.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21069123/jpmt6qbw84xqrvfkkcdtvqg5p2c6qqq8/orig",
       "sourceBytes": 2857273,
       "outputBytes": 132872
     },
-    "/products/yandex/x5psxg7v8crp4bpvh5q5qkvd6wwp2kdg-3037d18233.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20575719/x5psxg7v8crp4bpvh5q5qkvd6wwp2kdg/orig",
-      "sourceBytes": 1909282,
-      "outputBytes": 77320
+    "/products/yandex/v4bfq6l584dlk8lbhxch7p5pdcmq7jjs-c981580919.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21069123/v4bfq6l584dlk8lbhxch7p5pdcmq7jjs/orig",
+      "sourceBytes": 4578503,
+      "outputBytes": 440348
     },
-    "/products/yandex/gf44snkk7ffnbwdz9g99zwtfq8bkksm7-deba4c45c5.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20575719/gf44snkk7ffnbwdz9g99zwtfq8bkksm7/orig",
-      "sourceBytes": 3103027,
-      "outputBytes": 88884
+    "/products/yandex/x4qxbrvb68ks7l2cmbzgfzq2klnll44w-605bfa62f9.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21069123/x4qxbrvb68ks7l2cmbzgfzq2klnll44w/orig",
+      "sourceBytes": 4597270,
+      "outputBytes": 350520
     },
     "/products/yandex/2rw7cdnrsgk2dmxwqnzc7nzzj7htgrh8-9feb67dee8.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21104660/2rw7cdnrsgk2dmxwqnzc7nzzj7htgrh8/orig",
@@ -1613,30 +1718,30 @@
       "sourceBytes": 3651442,
       "outputBytes": 181570
     },
-    "/products/yandex/zlt4mmq6s6m5sbh5w77n4m6g2wnt7qww-9cbede3f9b.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20776375/zlt4mmq6s6m5sbh5w77n4m6g2wnt7qww/orig",
-      "sourceBytes": 3094395,
-      "outputBytes": 105884
+    "/products/yandex/7xthlqhf26l6v92bvfwhspxm8jjc6c7v-63652af893.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21104660/7xthlqhf26l6v92bvfwhspxm8jjc6c7v/orig",
+      "sourceBytes": 4224695,
+      "outputBytes": 249288
     },
     "/products/yandex/bdc7bwzbrnfbwx8bp6w5tfqp7vm4zqfq-eab1f5f422.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21104660/bdc7bwzbrnfbwx8bp6w5tfqp7vm4zqfq/orig",
       "sourceBytes": 3713776,
       "outputBytes": 191634
     },
-    "/products/yandex/npwbw96kdtsnf78z6795s9xz6m52nx59-87ebf69493.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20811730/npwbw96kdtsnf78z6795s9xz6m52nx59/orig",
-      "sourceBytes": 1652258,
-      "outputBytes": 69628
+    "/products/yandex/dszkv548dr29262vs2mdnwf2gsq2hgjg-ebdb7c1440.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21104660/dszkv548dr29262vs2mdnwf2gsq2hgjg/orig",
+      "sourceBytes": 3191252,
+      "outputBytes": 201420
     },
     "/products/yandex/l84w5xv7thm5bjnvlgsw8prr9blxzjwp-08d348c3ac.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21104660/l84w5xv7thm5bjnvlgsw8prr9blxzjwp/orig",
       "sourceBytes": 4086718,
       "outputBytes": 229108
     },
-    "/products/yandex/b4w7b5jlhcjvblxlzcgscgpnhnt4927f-90f3b4c0c9.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21069123/b4w7b5jlhcjvblxlzcgscgpnhnt4927f/orig",
-      "sourceBytes": 4012493,
-      "outputBytes": 337062
+    "/products/yandex/njw4bp79q49bp5rdzzwjx2t2tz9kr5w8-4afb49ad20.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21104660/njw4bp79q49bp5rdzzwjx2t2tz9kr5w8/orig",
+      "sourceBytes": 4335749,
+      "outputBytes": 252266
     },
     "/products/yandex/pqqd8k9j9jx8ww2vf5dqd7g7r7pkw4bv-a311e692ba.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21104660/pqqd8k9j9jx8ww2vf5dqd7g7r7pkw4bv/orig",
@@ -1653,100 +1758,105 @@
       "sourceBytes": 189285,
       "outputBytes": 18256
     },
-    "/products/yandex/dszkv548dr29262vs2mdnwf2gsq2hgjg-ebdb7c1440.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21104660/dszkv548dr29262vs2mdnwf2gsq2hgjg/orig",
-      "sourceBytes": 3191252,
-      "outputBytes": 201420
-    },
-    "/products/yandex/v4bfq6l584dlk8lbhxch7p5pdcmq7jjs-c981580919.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21069123/v4bfq6l584dlk8lbhxch7p5pdcmq7jjs/orig",
-      "sourceBytes": 4578503,
-      "outputBytes": 440348
+    "/products/yandex/27jt25plqm77h8lmb5276mg6c7gj957v-95b6aee0fc.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21497181/27jt25plqm77h8lmb5276mg6c7gj957v/orig",
+      "sourceBytes": 1818954,
+      "outputBytes": 76938
     },
     "/products/yandex/8dd4ctdxcxgsdpncrf4fp7fv4wmtppm5-e15fbe9313.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21497181/8dd4ctdxcxgsdpncrf4fp7fv4wmtppm5/orig",
       "sourceBytes": 581453,
       "outputBytes": 53670
     },
+    "/products/yandex/t7nfn5kj78b7sjf6glscmw2lztw9qjh4-e1eee7f478.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21497181/t7nfn5kj78b7sjf6glscmw2lztw9qjh4/orig",
+      "sourceBytes": 2573305,
+      "outputBytes": 83028
+    },
     "/products/yandex/wcw9sgttr8v2c9qrk2ljtz7q8w2d2swh-d169e5d059.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21497181/wcw9sgttr8v2c9qrk2ljtz7q8w2d2swh/orig",
       "sourceBytes": 273740,
       "outputBytes": 13638
-    },
-    "/products/yandex/7xthlqhf26l6v92bvfwhspxm8jjc6c7v-63652af893.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21104660/7xthlqhf26l6v92bvfwhspxm8jjc6c7v/orig",
-      "sourceBytes": 4224695,
-      "outputBytes": 249288
-    },
-    "/products/yandex/7wl6th7rrkkxk9djwh7b8vxxmkjcgtlb-13160c5f2d.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21553739/7wl6th7rrkkxk9djwh7b8vxxmkjcgtlb/orig",
-      "sourceBytes": 150852,
-      "outputBytes": 9176
-    },
-    "/products/yandex/x4qxbrvb68ks7l2cmbzgfzq2klnll44w-605bfa62f9.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21069123/x4qxbrvb68ks7l2cmbzgfzq2klnll44w/orig",
-      "sourceBytes": 4597270,
-      "outputBytes": 350520
-    },
-    "/products/yandex/27jt25plqm77h8lmb5276mg6c7gj957v-95b6aee0fc.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21497181/27jt25plqm77h8lmb5276mg6c7gj957v/orig",
-      "sourceBytes": 1818954,
-      "outputBytes": 76938
-    },
-    "/products/yandex/pp8k2sktvhmxszbbm4kr7k9mzzw5j7p7-1407736b0c.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21553739/pp8k2sktvhmxszbbm4kr7k9mzzw5j7p7/orig",
-      "sourceBytes": 163919,
-      "outputBytes": 9544
-    },
-    "/products/yandex/hdp959bd2hs4rxdlsvb4nd7bvb7j2ss6-fb2d409038.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21553739/hdp959bd2hs4rxdlsvb4nd7bvb7j2ss6/orig",
-      "sourceBytes": 763191,
-      "outputBytes": 29102
     },
     "/products/yandex/55r9hkxtbkvmrcrwmtqhdtmp9bhhkzjm-7155eed645.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21553739/55r9hkxtbkvmrcrwmtqhdtmp9bhhkzjm/orig",
       "sourceBytes": 756661,
       "outputBytes": 27504
     },
-    "/products/yandex/njw4bp79q49bp5rdzzwjx2t2tz9kr5w8-4afb49ad20.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21104660/njw4bp79q49bp5rdzzwjx2t2tz9kr5w8/orig",
-      "sourceBytes": 4335749,
-      "outputBytes": 252266
+    "/products/yandex/7wl6th7rrkkxk9djwh7b8vxxmkjcgtlb-13160c5f2d.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21553739/7wl6th7rrkkxk9djwh7b8vxxmkjcgtlb/orig",
+      "sourceBytes": 150852,
+      "outputBytes": 9176
     },
-    "/products/yandex/l46mv4fhdq5smb77cr9qnlmx5mc2gfll-731fba18f4.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21598990/l46mv4fhdq5smb77cr9qnlmx5mc2gfll/orig",
-      "sourceBytes": 208221,
-      "outputBytes": 18036
+    "/products/yandex/hdp959bd2hs4rxdlsvb4nd7bvb7j2ss6-fb2d409038.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21553739/hdp959bd2hs4rxdlsvb4nd7bvb7j2ss6/orig",
+      "sourceBytes": 763191,
+      "outputBytes": 29102
     },
     "/products/yandex/mr9dctpt4ph5qfq2xwzwt2plk96nhplt-9897ab8dd3.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21553739/mr9dctpt4ph5qfq2xwzwt2plk96nhplt/orig",
       "sourceBytes": 807865,
       "outputBytes": 29412
     },
+    "/products/yandex/pp8k2sktvhmxszbbm4kr7k9mzzw5j7p7-1407736b0c.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21553739/pp8k2sktvhmxszbbm4kr7k9mzzw5j7p7/orig",
+      "sourceBytes": 163919,
+      "outputBytes": 9544
+    },
     "/products/yandex/6gk76hdh8jtl22f8bsqhvn9b4lzjtrcw-79b7524f38.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21580234/6gk76hdh8jtl22f8bsqhvn9b4lzjtrcw/orig",
       "sourceBytes": 494330,
       "outputBytes": 24704
-    },
-    "/products/yandex/t7nfn5kj78b7sjf6glscmw2lztw9qjh4-e1eee7f478.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21497181/t7nfn5kj78b7sjf6glscmw2lztw9qjh4/orig",
-      "sourceBytes": 2573305,
-      "outputBytes": 83028
-    },
-    "/products/yandex/9jg9cnqjlsxswhbbv7vmzk57n224bqxs-ff52437801.webp": {
-      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21696355/9jg9cnqjlsxswhbbv7vmzk57n224bqxs/orig",
-      "sourceBytes": 783303,
-      "outputBytes": 23888
     },
     "/products/yandex/6frgcbgd7xhqb9bsr7klbpll25h45l8v-5e7bd1ba06.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21598990/6frgcbgd7xhqb9bsr7klbpll25h45l8v/orig",
       "sourceBytes": 4120811,
       "outputBytes": 234326
     },
+    "/products/yandex/v4j5spc9z5qwqdwlh46g4hs8jx8vd95m-c291bc2c8c.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/v4j5spc9z5qwqdwlh46g4hs8jx8vd95m/orig",
+      "sourceBytes": 417868,
+      "outputBytes": 7944
+    },
+    "/products/yandex/l46mv4fhdq5smb77cr9qnlmx5mc2gfll-731fba18f4.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21598990/l46mv4fhdq5smb77cr9qnlmx5mc2gfll/orig",
+      "sourceBytes": 208221,
+      "outputBytes": 18036
+    },
+    "/products/yandex/9jg9cnqjlsxswhbbv7vmzk57n224bqxs-ff52437801.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21696355/9jg9cnqjlsxswhbbv7vmzk57n224bqxs/orig",
+      "sourceBytes": 783303,
+      "outputBytes": 23888
+    },
     "/products/yandex/qr29mvlp4bt5dl4pcdrd2p576ldzq28m-f63c760c33.webp": {
       "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21696355/qr29mvlp4bt5dl4pcdrd2p576ldzq28m/orig",
       "sourceBytes": 3776643,
       "outputBytes": 150238
+    },
+    "/products/yandex/r9gqqtglzbmjd6nwsvbd9rwj2psl489g-30a4013305.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/r9gqqtglzbmjd6nwsvbd9rwj2psl489g/orig",
+      "sourceBytes": 3657953,
+      "outputBytes": 102946
+    },
+    "/products/yandex/dzz2dmpjqkvjvn8jvln7vssq6g9dhfnr-41c571159e.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/dzz2dmpjqkvjvn8jvln7vssq6g9dhfnr/orig",
+      "sourceBytes": 2150382,
+      "outputBytes": 181902
+    },
+    "/products/yandex/jnnsl85hw959fhcrzjqpkmrhl8lk6gnz-87775c6e70.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/jnnsl85hw959fhcrzjqpkmrhl8lk6gnz/orig",
+      "sourceBytes": 2472766,
+      "outputBytes": 153034
+    },
+    "/products/yandex/kgr4jqhsvnkn82fcbhml9x8rdk9kmtnk-92a464aa9b.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/20244883/kgr4jqhsvnkn82fcbhml9x8rdk9kmtnk/orig",
+      "sourceBytes": 4451964,
+      "outputBytes": 112124
+    },
+    "/products/yandex/7zvgsnxvjqdn9tz6qxz9lv9qpllvj9j4-bd21467173.webp": {
+      "sourceUrl": "https://avatars.mds.yandex.net/get-yastore/21598990/7zvgsnxvjqdn9tz6qxz9lv9qpllvj9j4/orig",
+      "sourceBytes": 5113371,
+      "outputBytes": 94166
     }
   }
 }

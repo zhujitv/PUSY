@@ -1,5 +1,5 @@
 {
-  "reviewedAt": "2026-08-29",
+  "reviewedAt": "2026-09-30",
   "variantGroups": {
     "Назначение": "款式"
   },
@@ -28,12 +28,61 @@
     "gel-dlya-jestkih-broveiy-100799": "rebrending-prozrachnyiy-gel-fiksator-dlya-jestkih-broveiy-pusy-5-ml-6-100345",
     "prozrachnyiy-gel-fiksator-dlya-broveiy-100801": "rebrending-prozrachnyiy-gel-fiksator-dlya-broveiy-pusy-5ml-1-100347",
     "super-gel-dlya-broveiy-100800": "rebrending-prozrachnyiy-super-gel-fiksator-dlya-broveiy-super-fix-brow-gel-pusy-5-ml-10-100344",
-    "vosstanavlivayshchiiy-gel-fiksator-dlya-broveiy-100798": "rebrending-vosstanavlivayshchiiy-gel-fiksator-dlya-broveiy-pusy-5-ml-13-100346",
     "sekretnyiy-boks-otpusk-dlya-sebya-2-100794": "sekretnyiy-boks-siyaiy-bez-sprosa-3-100738",
     "sekretnyiy-boks-otpusk-dlya-sebya-100796": "sekretnyiy-boks-vsye-vklycheno-m-100729",
     "sekretnyiy-boks-vsye-vklycheno-1-100795": "sekretnyiy-boks-vsye-vklycheno-m-100729"
   },
   "products": {
+    "cvetnaya-tush-dlya-broveiy-pusy-dark-brown-3-100552": {
+      "name": "Dark Brown 染色眉膏",
+      "category": "眉妆",
+      "description": "让眉毛更丰盈、更有存在感，同时保持自然、不厚重。\n\nDark Brown 是饱和冷调深棕色，适合深色发色。配方均匀包裹并丰盈眉毛，增加自然色泽与立体感，不易粘结。",
+      "usage": "取少量眉膏沿眉毛生长方向梳理并塑形，待其完全干燥。可用清水或专用卸妆产品清洁，适合每日使用。"
+    },
+    "cvetnaya-tush-dlya-broveiy-pusy-light-brown-3-100544": {
+      "name": "Light Brown 染色眉膏",
+      "category": "眉妆",
+      "description": "轻松强调眉形，为眉毛增加自然色泽与视觉丰盈感。\n\nLight Brown 是柔和浅棕色，适合金发及浅棕发色。配方均匀包裹并丰盈眉毛，不易带来厚重或粘结感。",
+      "usage": "取少量眉膏沿眉毛生长方向梳理并塑形，待其完全干燥。可用清水或专用卸妆产品清洁，适合每日使用。"
+    },
+    "cvetnoiy-laiyner-dlya-broveiy-s-tonkim-applikatorom-pusy-grey-black-3-100597": {
+      "name": "Grey Black 极细眉毛液笔",
+      "category": "眉妆",
+      "description": "极细刷头可描绘仿真毛流，填补眉毛空隙，呈现自然清晰的眉形。\n\nGrey Black 是浓郁深巧克力色，适合深色发色。持妆配方帮助眉形保持精致一整天，新手也能轻松画出自然效果。",
+      "usage": "沿眉毛自然生长方向，由下向上用短线填补空隙，待其完全干燥。可用清水或专用卸妆产品清洁。"
+    },
+    "cvetnoiy-laiyner-dlya-broveiy-s-tonkim-applikatorom-pusy-grey-brown-2-100523": {
+      "name": "Grey Brown 极细眉毛液笔",
+      "category": "眉妆",
+      "description": "极细刷头可描绘仿真毛流，填补眉毛空隙，呈现自然清晰的眉形。\n\nGrey Brown 是灰棕色，适合金发及浅棕发色。持妆配方帮助眉形保持精致一整天，新手也能轻松画出自然效果。",
+      "usage": "沿眉毛自然生长方向，由下向上用短线填补空隙，待其完全干燥。可用清水或专用卸妆产品清洁。"
+    },
+    "karandash-plamper-dlya-gub-pusy-caramel-100457": {
+      "name": "Caramel 丰唇唇线笔",
+      "category": "彩妆",
+      "description": "为裸色唇妆打造清晰轮廓，并带来轻微视觉丰唇效果。\n\nCaramel 是百搭暖调裸色。柔滑笔芯易于勾勒和晕染，可打造自然渐层或更鲜明的唇形。温热微麻感让双唇看起来更饱满，持妆配方不易结块。自动旋转笔身无需削笔，适合随身补妆。",
+      "usage": "取少量产品勾勒唇部轮廓，也可向内轻轻晕染。使用后如有明显不适，请停止使用。"
+    },
+    "karandash-plamper-dlya-gub-pusy-flowers-100456": {
+      "name": "Flowers 丰唇唇线笔",
+      "category": "彩妆",
+      "description": "突出双唇自然色泽，打造柔和而清晰的唇部轮廓。\n\nFlowers 是温柔百搭色。奶油质地均匀顺滑、易于晕染，可用于轻柔修饰或勾勒利落唇形。温热微麻感让双唇看起来更平滑饱满，自动旋转笔身无需削笔，适合随身补妆。",
+      "usage": "取少量产品勾勒唇部轮廓，也可向内轻轻晕染。使用后如有明显不适，请停止使用。"
+    },
+    "uhajivayshchaya-tush-dlya-resnic-black-100863": {
+      "name": "Black 养护型睫毛膏",
+      "category": "彩妆",
+      "volume": "10毫升",
+      "description": "兼顾妆效与日常养护的浓密睫毛膏。\n\n纤细齿状硅胶刷头从根部包裹每根睫毛，帮助拉长、分明并卷翘，不易粘结结块，可按需叠涂。配方含肽、生物素与人参根提取物，帮助维持睫毛柔韧与精致状态。Black 呈现饱和黑色，晚间可用温水卸除。",
+      "usage": "用于洁净干燥的睫毛，从根部向梢部刷涂，可按需叠加。避免接触眼睛；如不慎入眼，请用清水充分冲洗。出现不适时停止使用。"
+    },
+    "uhajivayshchaya-tush-dlya-resnic-dark-brown-tyemno-korichnevaya-100864": {
+      "name": "Dark Brown 养护型睫毛膏",
+      "category": "彩妆",
+      "volume": "10毫升",
+      "description": "兼顾妆效与日常养护的浓密睫毛膏。\n\n纤细齿状硅胶刷头从根部包裹每根睫毛，帮助拉长、分明并卷翘，不易粘结结块，可按需叠涂。配方含肽、生物素与人参根提取物，帮助维持睫毛柔韧与精致状态。Dark Brown 呈现柔和深棕色，晚间可用温水卸除。",
+      "usage": "用于洁净干燥的睫毛，从根部向梢部刷涂，可按需叠加。避免接触眼睛；如不慎入眼，请用清水充分冲洗。出现不适时停止使用。"
+    },
     "gel-dlya-jestkih-broveiy-100799": {
       "name": "粗硬眉毛强力定型啫喱",
       "category": "眉妆",
@@ -123,12 +172,6 @@
     },
     "super-gel-dlya-broveiy-100800": {
       "name": "Super Fix 眉毛强力定型啫喱",
-      "category": "眉妆",
-      "volume": "5毫升",
-      "usage": "用刷头取少量啫喱，沿眉毛生长方向梳理成所需形状，待其完全干燥。"
-    },
-    "vosstanavlivayshchiiy-gel-fiksator-dlya-broveiy-100798": {
-      "name": "修护型眉毛定型啫喱",
       "category": "眉妆",
       "volume": "5毫升",
       "usage": "用刷头取少量啫喱，沿眉毛生长方向梳理成所需形状，待其完全干燥。"
